@@ -144,7 +144,7 @@ Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic T
 "Other","2026-05-06 19:11:17","false","Sauna","0,00","45.0","00:18:54","66","128","0,1","1.484375","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:18:54","00:18:54","--","--"
 `;
 
-const TODAY = "2026-05-08";
+const TODAY = "2026-05-07";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
