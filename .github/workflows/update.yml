@@ -30,7 +30,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install garth garminconnect
+        run: pip install "garth==0.4.47" "garminconnect==0.2.8"
 
       - name: Restore Garmin tokens
         run: |
