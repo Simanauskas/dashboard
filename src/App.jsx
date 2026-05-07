@@ -105,6 +105,7 @@ function parseSheetBf(csvText) {
 
 const CSV_DATA = `
 Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Tennis V2","2026-05-07 13:46:18","false","Tennis","0,24","696","01:11:40","126","185","2,8","12","--","297:37","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:01","01:11:40","--","--"
 "Cycling","2026-04-18 12:38:04","false","VLN - 100km","36,61","1.339","03:41:36","104","155","2,2","--","--","9,9","38,2","782","983","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-9","No","03:41:36","1","24","12","37","--","--","03:15:32","04:52:45","81","221"
 "Trail Running","2026-04-19 09:05:48","false","VLN - 100km","9,18","713","01:05:10","127","160","2,6","169","249","7:06","3:34","292","279","0,83","7,8","6,5","306","49,8% L / 50,3% R","6:16","292","0,0","272","460","10.844","--","--","-15","No","00:01:17,0","10","31","13","39","--","--","01:04:33","01:09:55","91","186"
 "Cycling","2026-04-19 10:32:08","false","VLN - 100km","36,86","1.133","02:30:03","118","155","2,6","--","--","14,7","45,5","662","717","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-17","No","02:30:03","1","26","14","36","--","--","02:24:40","02:39:09","100","182"
@@ -143,7 +144,7 @@ Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic T
 "Other","2026-05-06 19:11:17","false","Sauna","0,00","45.0","00:18:54","66","128","0,1","1.484375","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:18:54","00:18:54","--","--"
 `;
 
-const TODAY = "2026-05-07";
+const TODAY = "2026-05-08";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -725,9 +726,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 23 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 22 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Thu May 7 · updated with May 6 Garmin data</div>
+          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Fri May 8 · updated with May 7 Garmin data</div>
         </div>
         <button onClick={() => fileRef.current?.click()} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
           ↑ Upload CSV
