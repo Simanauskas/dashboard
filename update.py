@@ -78,28 +78,22 @@ def _read_rec(data, pos, defn):
 # ── Garmin API ────────────────────────────────────────────────────────────────
 
 def get_client():
-    """
-    Auth via garth directly — bypasses garminconnect's login flow entirely.
-    garth.resume() loads the saved OAuth tokens and handles refresh automatically.
-    All API calls go through garth.client.get() / garth.connectapi().
-    """
+    """Auth via garth tokens + garminconnect 0.2.8."""
     import garth
+    from garminconnect import Garmin
     garth.resume(str(Path.home() / ".garth"))
+    client = Garmin()
+    client.garth = garth
     print(f"Auth OK (garth {garth.__version__})")
-    return garth   # return garth module itself as the "client"
-
-def connectapi(garth, path, **kwargs):
-    """Call Garmin connectapi via garth directly."""
-    return garth.client.get("connectapi", path, **kwargs).json()
+    return client
 
 def fetch_wellness(client, date_str):
     """HRV, sleep, RHR, SpO2, resp via JSON APIs."""
-    garth = client  # client is the garth module
     result = {}
 
     # HRV
     try:
-        data = connectapi(garth, f"/hrv-service/hrv/{date_str}")
+        data = client.connectapi(f"/hrv-service/hrv/{date_str}")
         s = data.get('hrvSummary', {})
         if s.get('lastNightAvg'): result['hrv']        = round(s['lastNightAvg'])
         if s.get('weeklyAvg'):    result['hrv_weekly'] = round(s['weeklyAvg'])
@@ -109,7 +103,7 @@ def fetch_wellness(client, date_str):
 
     # Sleep
     try:
-        data = connectapi(garth, "/sleep-service/sleep/dailySleepData",
+        data = client.connectapi("/sleep-service/sleep/dailySleepData",
                                   params={"date": date_str, "nonSleepBufferMinutes": 60})
         dto = data.get('dailySleepDTO', {})
         def mins(k): return round((dto.get(k) or 0) / 60)
@@ -139,8 +133,7 @@ def fetch_activities(client, date_str):
     """Return properly quoted CSV rows for the given date."""
     garth = client
     try:
-        acts = connectapi(garth, "/activitylist-service/activities/search/activities",
-                          params={"start": 0, "limit": 30})
+        acts = client.get_activities(0, 30)
     except Exception as e:
         print(f"Activities failed: {e}"); return []
 
