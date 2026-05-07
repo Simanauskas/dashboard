@@ -131,11 +131,18 @@ def fetch_wellness(client, date_str):
 
 def fetch_activities(client, date_str):
     """Return properly quoted CSV rows for the given date."""
-    garth = client
     try:
         acts = client.get_activities(0, 30)
     except Exception as e:
         print(f"Activities failed: {e}"); return []
+    
+    # Debug: print what dates Garmin returns so we can verify filtering
+    dates_seen = set()
+    for a in acts:
+        d = (a.get('startTimeLocal') or '')[:10]
+        if d: dates_seen.add(d)
+    print(f"  Garmin returned activities for dates: {sorted(dates_seen)}")
+    print(f"  Filtering for: {date_str}")
 
     TYPE_MAP = {
         'running':'Running','treadmill_running':'Treadmill Running',
