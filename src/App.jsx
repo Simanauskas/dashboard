@@ -103,7 +103,8 @@ function parseSheetBf(csvText) {
   }
 }
 
-const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+const CSV_DATA = `
+Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
 "Other","2026-05-06 19:11:17","false","Sauna","0,00","45.0","00:18:54","66.0","128.0","0,1","1.484375","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:18:54","00:18:54","--","--"
 "Tennis V2","2026-05-06 17:33:00","false","Padel","0,48","486.0","01:26:44","97.0","170.0","1,3","19.875","--","181:09","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:16","01:26:44","--","--"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201.0","00:33:48","94.0","139.0","1,0","--","--","7:02","--","--","--","10.439999997615814","11.389999985694885","--","--","--","--","--","--","--","--","--","--","--","--","No","--","5","--","--","--","--","--","00:27:51","01:48:18","--","--"
@@ -140,10 +141,7 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Indoor Running","2026-05-05 18:50:28","false","Hyrox group","2,97","439","01:02:47","103","169","2,0","50","250","21:07","4:42","--","--","1,05","7,9","8,1","257","--","--","223","0,0","79","374","3.768","-5","--","No","00:01:25,5","5","--","--","--","--","00:17:51","01:02:47","--","--"
 "Inline Skating","2026-05-05 17:41:05","false","Klaipeda Inline Skating","7,17","308","00:41:40","93","135","0,4","--","--","10,3","25,2","19","17","--","--","--","--","--","--","--","0,0","--","--","1.660","--","--","No","00:41:40","1","--","--","--","--","00:36:06","00:42:46","5","17"
 "Tennis","2026-05-05 08:03:05","false","Tennis","0,43","699","01:19:30","122","162","2,4","17","231","0,3","11,0","--","--","0,32","--","--","--","--","--","--","0,0","--","--","4.568","-15","--","No","01:19:30","1","--","--","--","--","00:05:35","01:19:30","--","--"
-"Other","2026-05-06 19:11:17","false","Sauna","0,00","45","00:18:54","66","128","0,1","1","141","--","--","--","--","0,00","--","--","--","--","--","--","0,0","--","--","122","-1","27,0","No","00:18:54","1","38,0","--","--","--","00:00:00","00:18:54","--","--"
-"Tennis","2026-05-06 17:33:00","false","Padel","0,48","486","01:26:44","97","170","1,3","20","200","0,3","9,9","--","--","0,28","--","--","--","--","--","--","0,0","--","--","3.872","-6","--","No","01:26:44","1","--","--","--","--","00:08:16","01:26:44","--","--"
-"Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
-"Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
+`;
 
 const TODAY = "2026-05-07";
 

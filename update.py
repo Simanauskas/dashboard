@@ -294,10 +294,11 @@ if __name__ == '__main__':
         csv_rows = fetch_activities(client, target)
         patch(target, wellness, csv_rows)
     else:
-        # Activities-only: only fetch TODAY's activities (yesterday already in dashboard)
-        # Deduplication in patch() prevents re-insertion of already-present activities
+        # Activities-only: fetch today's activities (new workouts since morning)
+        # Use today as the patch date so the TODAY pointer stays current
         today    = datetime.date.today().isoformat()
         csv_rows = fetch_activities(client, today)
-        patch(target, {}, csv_rows)
+        # patch with today as date_str so new rows are inserted correctly
+        patch(today, {}, csv_rows)
 
     print("Done.")
