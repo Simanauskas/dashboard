@@ -1,0 +1,44 @@
+name: Daily Garmin Update
+
+on:
+  schedule:
+    - cron: '0 5 * * *'   # 05:00 UTC = 08:00 Lithuania (UTC+3)
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write           # needed to commit the updated App.jsx
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}   # PAT with repo+workflow scope for push
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install garth garminconnect
+
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+
+      - name: Run daily update
+        run: python update.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name  "garmin-bot"
+          git config user.email "bot@simanauskas.github.io"
+          git add src/App.jsx
+          git diff --staged --quiet || git commit -m "chore: daily update $(date +%Y-%m-%d)"
+          git push
