@@ -726,9 +726,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 22 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 23 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Fri May 8 · updated with May 7 Garmin data</div>
+          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Thu May 7 · updated with May 6 Garmin data</div>
         </div>
         <button onClick={() => fileRef.current?.click()} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
           ↑ Upload CSV

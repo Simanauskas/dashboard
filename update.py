@@ -265,16 +265,18 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
             if to_add:
                 code = code[:ins] + '\n'.join(to_add) + '\n' + code[ins:]
 
-    # 5. Countdown
-    code = re.sub(r'HYROX RIGA · MAY 30 · \d+ DAYS',
-                  f'HYROX RIGA · MAY 30 · {days_to} DAYS', code)
+    # 5. Countdown (only update on full morning run)
+    if advance_today:
+        code = re.sub(r'HYROX RIGA · MAY 30 · \d+ DAYS',
+                      f'HYROX RIGA · MAY 30 · {days_to} DAYS', code)
 
-    # 6. Header subtitle
-    code = re.sub(
-        r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \w+ \d+ · updated with \w+ \d+ Garmin data',
-        f'{tomorrow.strftime("%a %b %-d")} · updated with {today.strftime("%b %-d")} Garmin data',
-        code
-    )
+    # 6. Header subtitle (only update on full morning run)
+    if advance_today:
+        code = re.sub(
+            r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \w+ \d+ · updated with \w+ \d+ Garmin data',
+            f'{tomorrow.strftime("%a %b %-d")} · updated with {today.strftime("%b %-d")} Garmin data',
+            code
+        )
 
     # 7. HRV baseline (full mode only)
     if has_wellness and weekly:
