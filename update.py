@@ -198,7 +198,7 @@ def fetch_activities(client, date_str):
 
 # ── Patch App.jsx ─────────────────────────────────────────────────────────────
 
-def patch(date_str, wellness, csv_rows):
+def patch(date_str, wellness, csv_rows, advance_today=True):
     code     = DASHBOARD.read_text(encoding='utf-8')
     today    = datetime.date.fromisoformat(date_str)
     tomorrow = today + datetime.timedelta(days=1)
@@ -213,9 +213,10 @@ def patch(date_str, wellness, csv_rows):
     resp_val = wellness.get('resp', 12.0)
     has_wellness = bool(wellness)   # False in activities-only mode
 
-    # 1. TODAY
-    code = re.sub(r'const TODAY = "[^"]+";',
-                  f'const TODAY = "{tomorrow.isoformat()}";', code)
+    # 1. TODAY — only advance when processing yesterday's data, not today's activities
+    if advance_today:
+        code = re.sub(r'const TODAY = "[^"]+";',
+                      f'const TODAY = "{tomorrow.isoformat()}";', code)
 
     # 2. Daily HRV row (full mode only)
     if has_wellness and f'date:"{date_str}",hrv:' not in code:
@@ -306,10 +307,10 @@ if __name__ == '__main__':
         csv_rows_today     = fetch_activities(client, today)
         patch(target, wellness, csv_rows_yesterday)
         if csv_rows_today:
-            patch(today, {}, csv_rows_today)
+            patch(today, {}, csv_rows_today, advance_today=False)
     else:
         # Activities-only: fetch today's new workouts
         csv_rows = fetch_activities(client, today)
-        patch(today, {}, csv_rows)
+        patch(today, {}, csv_rows, advance_today=False)
 
     print("Done.")
