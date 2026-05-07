@@ -78,21 +78,28 @@ def _read_rec(data, pos, defn):
 # ── Garmin API ────────────────────────────────────────────────────────────────
 
 def get_client():
+    """
+    Auth via garth directly — bypasses garminconnect's login flow entirely.
+    garth.resume() loads the saved OAuth tokens and handles refresh automatically.
+    All API calls go through garth.client.get() / garth.connectapi().
+    """
     import garth
-    from garminconnect import Garmin
-    garth.resume(str(Path.home() / '.garth'))
-    client = Garmin()
-    client.garth = garth
-    print("Auth OK")
-    return client
+    garth.resume(str(Path.home() / ".garth"))
+    print(f"Auth OK (garth {garth.__version__})")
+    return garth   # return garth module itself as the "client"
+
+def connectapi(garth, path, **kwargs):
+    """Call Garmin connectapi via garth directly."""
+    return garth.client.get("connectapi", path, **kwargs).json()
 
 def fetch_wellness(client, date_str):
     """HRV, sleep, RHR, SpO2, resp via JSON APIs."""
+    garth = client  # client is the garth module
     result = {}
 
     # HRV
     try:
-        data = client.connectapi(f"/hrv-service/hrv/{date_str}")
+        data = connectapi(garth, f"/hrv-service/hrv/{date_str}")
         s = data.get('hrvSummary', {})
         if s.get('lastNightAvg'): result['hrv']        = round(s['lastNightAvg'])
         if s.get('weeklyAvg'):    result['hrv_weekly'] = round(s['weeklyAvg'])
@@ -102,7 +109,7 @@ def fetch_wellness(client, date_str):
 
     # Sleep
     try:
-        data = client.connectapi("/sleep-service/sleep/dailySleepData",
+        data = connectapi(garth, "/sleep-service/sleep/dailySleepData",
                                   params={"date": date_str, "nonSleepBufferMinutes": 60})
         dto = data.get('dailySleepDTO', {})
         def mins(k): return round((dto.get(k) or 0) / 60)
@@ -130,8 +137,10 @@ def fetch_wellness(client, date_str):
 
 def fetch_activities(client, date_str):
     """Return properly quoted CSV rows for the given date."""
+    garth = client
     try:
-        acts = client.get_activities(0, 30)
+        acts = connectapi(garth, "/activitylist-service/activities/search/activities",
+                          params={"start": 0, "limit": 30})
     except Exception as e:
         print(f"Activities failed: {e}"); return []
 
@@ -225,12 +234,31 @@ def patch(date_str, wellness, csv_rows):
             code, count=1
         )
 
-    # 4. CSV activity rows
+    # 4. CSV activity rows — deduplicate by startTime (field 1, first 19 chars)
     if csv_rows:
+        import csv as _csv
+        # Extract all startTimes already in the dashboard
+        existing_times = set()
+        for line in code.split('\n'):
+            try:
+                fields = list(_csv.reader([line]))[0]
+                if len(fields) > 1 and re.match(r'\d{4}-\d{2}-\d{2}', fields[1]):
+                    existing_times.add(fields[1][:19])
+            except: pass
+
         idx = code.find('Min Elevation,Max Elevation\n')
         if idx >= 0:
             ins = idx + len('Min Elevation,Max Elevation\n')
-            to_add = [l for l in csv_rows if l.strip() and l not in code]
+            to_add = []
+            for l in csv_rows:
+                if not l.strip(): continue
+                try:
+                    fields = list(_csv.reader([l]))[0]
+                    start = fields[1][:19] if len(fields) > 1 else ''
+                    if start and start not in existing_times:
+                        to_add.append(l)
+                        existing_times.add(start)
+                except: pass
             if to_add:
                 code = code[:ins] + '\n'.join(to_add) + '\n' + code[ins:]
 
@@ -273,11 +301,10 @@ if __name__ == '__main__':
         csv_rows = fetch_activities(client, target)
         patch(target, wellness, csv_rows)
     else:
-        # Activities-only: fetch today's activities too (workout just finished)
+        # Activities-only: only fetch TODAY's activities (yesterday already in dashboard)
+        # Deduplication in patch() prevents re-insertion of already-present activities
         today    = datetime.date.today().isoformat()
-        rows_yesterday = fetch_activities(client, target)
-        rows_today     = fetch_activities(client, today)
-        # Pass empty wellness so only CSV rows + TODAY pointer update
-        patch(target, {}, rows_yesterday + rows_today)
+        csv_rows = fetch_activities(client, today)
+        patch(target, {}, csv_rows)
 
     print("Done.")
