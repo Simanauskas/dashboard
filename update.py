@@ -200,13 +200,14 @@ def patch(date_str, wellness, csv_rows):
     rhr_val  = wellness.get('rhr', 40)
     spo2_val = wellness.get('spo2', 98)
     resp_val = wellness.get('resp', 12.0)
+    has_wellness = bool(wellness)   # False in activities-only mode
 
     # 1. TODAY
     code = re.sub(r'const TODAY = "[^"]+";',
                   f'const TODAY = "{tomorrow.isoformat()}";', code)
 
-    # 2. Daily HRV row
-    if f'date:"{date_str}",hrv:' not in code:
+    # 2. Daily HRV row (full mode only)
+    if has_wellness and f'date:"{date_str}",hrv:' not in code:
         new_daily = f'    {{date:"{date_str}",hrv:{hrv_ms},rhr:{rhr_val},spo2:{spo2_val},resp:{resp_val}}},'
         code = re.sub(
             r'(    \{date:"[\d-]+",hrv:\d+[^}]+\},)(\n  \],)',
@@ -214,8 +215,8 @@ def patch(date_str, wellness, csv_rows):
             code, count=1
         )
 
-    # 3. Sleep row
-    if f'date:"{date_str}",deep:' not in code:
+    # 3. Sleep row (full mode only)
+    if has_wellness and f'date:"{date_str}",deep:' not in code:
         d,rm,li,aw = (stages.get(k,0) for k in ('deep','rem','light','awake'))
         new_sleep = f'    {{date:"{date_str}",deep:{d},rem:{rm},light:{li},awake:{aw}}},'
         code = re.sub(
@@ -244,8 +245,8 @@ def patch(date_str, wellness, csv_rows):
         code
     )
 
-    # 7. HRV baseline
-    if weekly:
+    # 7. HRV baseline (full mode only)
+    if has_wellness and weekly:
         code = re.sub(r'const hrvBaseline = \d+;[^\n]*',
                       f'const hrvBaseline = {weekly}; // updated {date_str}', code)
 
@@ -255,14 +256,28 @@ def patch(date_str, wellness, csv_rows):
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    target = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
-    if len(sys.argv) > 1:
-        target = sys.argv[1]
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument('--mode',   default='full', choices=['full','activities'])
+    p.add_argument('--date',   default=None)
+    args = p.parse_args()
 
-    print(f"Target date: {target}")
+    target = args.date or (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
+    print(f"Mode: {args.mode}  |  Target: {target}")
 
-    client   = get_client()
-    wellness = fetch_wellness(client, target)
-    csv_rows = fetch_activities(client, target)
-    patch(target, wellness, csv_rows)
+    client = get_client()
+
+    if args.mode == 'full':
+        # Full update: HRV + sleep + RHR + activities
+        wellness = fetch_wellness(client, target)
+        csv_rows = fetch_activities(client, target)
+        patch(target, wellness, csv_rows)
+    else:
+        # Activities-only: fetch today's activities too (workout just finished)
+        today    = datetime.date.today().isoformat()
+        rows_yesterday = fetch_activities(client, target)
+        rows_today     = fetch_activities(client, today)
+        # Pass empty wellness so only CSV rows + TODAY pointer update
+        patch(target, {}, rows_yesterday + rows_today)
+
     print("Done.")

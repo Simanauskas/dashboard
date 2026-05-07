@@ -2,8 +2,14 @@ name: Daily Garmin Update
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # 05:00 UTC = 08:00 Lithuania (UTC+3)
-  workflow_dispatch:        # allow manual trigger from GitHub UI
+    - cron: '0 5 * * *'       # 05:00 UTC = 08:00 LT — full update (HRV+sleep+activities)
+    - cron: '0 6-20 * * *'    # hourly 06-20 UTC (09-23 LT) — activities only
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'full or activities'
+        required: false
+        default: 'full'
 
 permissions:
   contents: write           # needed to commit the updated App.jsx
@@ -32,8 +38,22 @@ jobs:
           echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
           echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
 
-      - name: Run daily update
-        run: python update.py
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" = "05" ]; then
+              echo "mode=full" >> $GITHUB_OUTPUT
+            else
+              echo "mode=activities" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "mode=${{ inputs.mode || 'full' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run update
+        run: python update.py --mode ${{ steps.mode.outputs.mode }}
 
       - name: Commit and push if changed
         run: |
