@@ -152,8 +152,10 @@ def fetch_activities(client, date_str):
         return f"{m/1000:.2f}".replace('.',',') if m else '0,00'
     def _f(v, dec=None):
         if v is None: return '--'
-        if dec is not None and isinstance(v,float):
+        if dec is not None and isinstance(v, float):
             return f"{v:.{dec}f}".replace('.',',')
+        if isinstance(v, float):
+            return str(round(v))  # 111.0->"111" not "111.0" (parseNum strips dots!)
         return str(v)
     def _pace(mps):
         if not mps or mps<=0: return '--'
