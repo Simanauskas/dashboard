@@ -297,17 +297,19 @@ if __name__ == '__main__':
 
     client = get_client()
 
+    today = datetime.date.today().isoformat()
+
     if args.mode == 'full':
-        # Full update: HRV + sleep + RHR + activities
+        # Full update: HRV + sleep + RHR for yesterday + activities for both days
         wellness = fetch_wellness(client, target)
-        csv_rows = fetch_activities(client, target)
-        patch(target, wellness, csv_rows)
+        csv_rows_yesterday = fetch_activities(client, target)
+        csv_rows_today     = fetch_activities(client, today)
+        patch(target, wellness, csv_rows_yesterday)
+        if csv_rows_today:
+            patch(today, {}, csv_rows_today)
     else:
-        # Activities-only: fetch today's activities (new workouts since morning)
-        # Use today as the patch date so the TODAY pointer stays current
-        today    = datetime.date.today().isoformat()
+        # Activities-only: fetch today's new workouts
         csv_rows = fetch_activities(client, today)
-        # patch with today as date_str so new rows are inserted correctly
         patch(today, {}, csv_rows)
 
     print("Done.")
