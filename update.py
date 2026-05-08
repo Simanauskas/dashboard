@@ -131,16 +131,26 @@ def fetch_wellness(client, date_str):
 
 def fetch_activities(client, date_str):
     """Return properly quoted CSV rows for the given date."""
-    try:
-        acts = client.get_activities(0, 30)
-    except Exception as e:
-        print(f"Activities failed: {e}"); return []
-    
-    # Debug: print what dates Garmin returns so we can verify filtering
-    dates_seen = set()
-    for a in acts:
-        d = (a.get('startTimeLocal') or '')[:10]
-        if d: dates_seen.add(d)
+    import time as _time
+    acts = None
+    for attempt in range(3):
+        try:
+            result = client.get_activities(0, 30)
+            if result:  # non-empty list
+                acts = result
+                break
+            print(f"  Empty activities response (attempt {attempt+1}/3)")
+        except ValueError as e:
+            # JSON decode error — API returned empty/HTML body, retry
+            print(f"  Activities JSON error attempt {attempt+1}: {e}")
+        except Exception as e:
+            print(f"  Activities attempt {attempt+1} failed: {e}")
+        if attempt < 2:
+            _time.sleep(5)
+    if not acts:
+        print("Activities: no data after 3 attempts — skipping"); return []
+
+    dates_seen = set((a.get('startTimeLocal') or '')[:10] for a in acts if a.get('startTimeLocal'))
     print(f"  Garmin returned activities for dates: {sorted(dates_seen)}")
     print(f"  Filtering for: {date_str}")
 
