@@ -78,13 +78,39 @@ def _read_rec(data, pos, defn):
 # ── Garmin API ────────────────────────────────────────────────────────────────
 
 def get_client():
-    """Auth via garth tokens + garminconnect 0.2.8."""
+    """
+    Auth via garth tokens + garminconnect 0.2.8.
+    garminconnect 0.2.8 uses garth internally — we just need to call
+    Garmin() with dummy credentials then replace the garth session,
+    OR use garth.resume() before Garmin() so garth auto-patches it.
+    The key: garth must be resumed BEFORE Garmin() is instantiated.
+    """
     import garth
     from garminconnect import Garmin
+
+    # Resume garth tokens first — garminconnect 0.2.8 uses garth's
+    # module-level client, so resume() patches it before Garmin() starts
     garth.resume(str(Path.home() / ".garth"))
+
+    # Instantiate without credentials — garth is already authenticated
     client = Garmin()
-    client.garth = garth
-    print(f"Auth OK (garth {garth.__version__})")
+    client.garth = garth  # explicit assignment as belt-and-suspenders
+
+    # Verify auth actually works by calling a lightweight endpoint
+    try:
+        client.connectapi("/userprofile-service/userprofile/personal-information")
+        print(f"Auth OK (garth {garth.__version__})")
+    except Exception as e:
+        # Token may have expired — try token refresh
+        print(f"Auth verify failed ({e}), attempting token refresh...")
+        try:
+            garth.client.refresh_oauth2()
+            garth.save(str(Path.home() / ".garth"))
+            print(f"Auth OK after refresh (garth {garth.__version__})")
+        except Exception as e2:
+            print(f"Auth refresh also failed: {e2}")
+            # Continue anyway — individual calls will log their own errors
+
     return client
 
 def fetch_wellness(client, date_str):
