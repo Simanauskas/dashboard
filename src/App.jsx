@@ -38,6 +38,7 @@ const HEALTH_DATA = {
     {date:"2026-05-04",hrv:113,rhr:41,spo2:91, resp:8.6, sleep_score:91},
     {date:"2026-05-05",hrv:99, rhr:41,spo2:93, resp:8.7, sleep_score:93},
     {date:"2026-05-06",hrv:99, rhr:41,spo2:98, resp:12.7,sleep_score:86},
+    {date:"2026-05-07",hrv:118,rhr:44,spo2:96,resp:14.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94, light:259,awake:0},
@@ -63,6 +64,7 @@ const HEALTH_DATA = {
     {date:"2026-05-04",deep:109,rem:81, light:228,awake:35},
     {date:"2026-05-05",deep:44, rem:117,light:273,awake:10},
     {date:"2026-05-06",deep:62, rem:199,light:146,awake:0},
+    {date:"2026-05-07",deep:109,rem:95,light:284,awake:3},
   ],
 };
 
@@ -104,6 +106,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Tennis V2","2026-05-07 13:46:18","false","Tennis","0,24","696","01:11:40","126","185","2,8","12","--","297:37","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:01","01:11:40","--","--"
 Running,2026-04-28 19:31:20,false,"Z2-3","9,33","645","00:47:42","140","154","3,2","182","187","5:07","4:17","48","42","1,07","5,8","6,4","269","50,6% L / 49,4% R","5:07","334","0,0","329","460","8.630","--","--","-11","No","00:47:42","1","29","25","40","--","--","00:47:41","00:47:42","84","112"
 Cycling,2026-04-28 11:05:00,false,"Vilnius Cycling","6,72","194","00:24:02","106","133","0,9","--","--","16,8","38,4","52","52","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-2","No","00:24:02","1","--","--","--","--","--","00:23:45","00:24:02","84","112"
 Other,2026-04-27 20:16:10,false,"Sauna","0,00","63","00:20:30","75","111","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-2","No","00:20:30","1","--","--","--","--","--","00:20:30","00:20:30","--","--"
@@ -141,7 +144,7 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-05-07";
+const TODAY = "2026-05-08";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -786,7 +789,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 88; // updated 2026-05-06
+  const hrvBaseline = 86; // updated 2026-05-07
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
@@ -836,9 +839,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 23 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 22 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Thu May 7 · updated with May 6 Garmin data</div>
+          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Fri May 8 · updated with May 7 Garmin data</div>
         </div>
         <button onClick={() => fileRef.current?.click()} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
           ↑ Upload CSV
