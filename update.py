@@ -220,7 +220,8 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
 
     # 2. Daily HRV row (full mode only)
     if has_wellness and f'date:"{date_str}",hrv:' not in code:
-        new_daily = f'    {{date:"{date_str}",hrv:{hrv_ms},rhr:{rhr_val},spo2:{spo2_val},resp:{resp_val}}},'
+        ss_str = str(wellness.get("sleep_score", "null"))
+        new_daily = f'    {{date:"{date_str}",hrv:{hrv_ms},rhr:{rhr_val},spo2:{spo2_val},resp:{resp_val},sleep_score:{ss_str}}},'
         code = re.sub(
             r'(    \{date:"[\d-]+",hrv:\d+[^}]+\},)(\n  \],)',
             lambda m: m.group(1) + '\n' + new_daily + m.group(2),

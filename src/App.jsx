@@ -15,29 +15,29 @@ const HEALTH_DATA = {
     ["2026-04-18",55],["2026-04-19",55],["2026-04-27",55],["2026-04-28",55],
   ],
   daily: [
-    {date:"2026-04-14",hrv:116,rhr:44,spo2:97,resp:12.9},
-    {date:"2026-04-15",hrv:82, rhr:41,spo2:96,resp:12.0},
-    {date:"2026-04-16",hrv:100,rhr:42,spo2:97,resp:12.3},
-    {date:"2026-04-17",hrv:96, rhr:41,spo2:98,resp:11.5},
-    {date:"2026-04-18",hrv:128,rhr:42,spo2:97,resp:13.0},
-    {date:"2026-04-19",hrv:120,rhr:41,spo2:98,resp:12.6},
-    {date:"2026-04-20",hrv:105,rhr:44,spo2:97,resp:13.2},
-    {date:"2026-04-21",hrv:97, rhr:41,spo2:97,resp:12.2},
-    {date:"2026-04-22",hrv:101,rhr:40,spo2:99,resp:11.0},
-    {date:"2026-04-23",hrv:80, rhr:42,spo2:97,resp:11.6},
-    {date:"2026-04-24",hrv:75, rhr:40,spo2:99,resp:11.6},
-    {date:"2026-04-25",hrv:96, rhr:46,spo2:99,resp:13.8},
-    {date:"2026-04-26",hrv:114,rhr:42,spo2:100,resp:12.2},
-    {date:"2026-04-27",hrv:128,rhr:40,spo2:99, resp:12.0},
-    {date:"2026-04-28",hrv:135,rhr:40,spo2:99, resp:12.0},
-    {date:"2026-04-29",hrv:140,rhr:40,spo2:96, resp:13.2},
-    {date:"2026-04-30",hrv:154,rhr:40,spo2:95, resp:8.8},
-    {date:"2026-05-01",hrv:167,rhr:41,spo2:98, resp:10.6},
-    {date:"2026-05-02",hrv:176,rhr:40,spo2:98, resp:12.4},
-    {date:"2026-05-03",hrv:128,rhr:41,spo2:98, resp:16.1},
-    {date:"2026-05-04",hrv:113,rhr:41,spo2:91, resp:8.6},
-    {date:"2026-05-05",hrv:99, rhr:41,spo2:93, resp:8.7},
-    {date:"2026-05-06",hrv:99, rhr:41,spo2:98, resp:12.7},
+    {date:"2026-04-14",hrv:116,rhr:44,spo2:97,resp:12.9,sleep_score:null},
+    {date:"2026-04-15",hrv:82, rhr:41,spo2:96,resp:12.0,sleep_score:null},
+    {date:"2026-04-16",hrv:100,rhr:42,spo2:97,resp:12.3,sleep_score:null},
+    {date:"2026-04-17",hrv:96, rhr:41,spo2:98,resp:11.5,sleep_score:null},
+    {date:"2026-04-18",hrv:128,rhr:42,spo2:97,resp:13.0,sleep_score:null},
+    {date:"2026-04-19",hrv:120,rhr:41,spo2:98,resp:12.6,sleep_score:null},
+    {date:"2026-04-20",hrv:105,rhr:44,spo2:97,resp:13.2,sleep_score:null},
+    {date:"2026-04-21",hrv:97, rhr:41,spo2:97,resp:12.2,sleep_score:null},
+    {date:"2026-04-22",hrv:101,rhr:40,spo2:99,resp:11.0,sleep_score:null},
+    {date:"2026-04-23",hrv:80, rhr:42,spo2:97,resp:11.6,sleep_score:null},
+    {date:"2026-04-24",hrv:75, rhr:40,spo2:99,resp:11.6,sleep_score:null},
+    {date:"2026-04-25",hrv:96, rhr:46,spo2:99,resp:13.8,sleep_score:null},
+    {date:"2026-04-26",hrv:114,rhr:42,spo2:100,resp:12.2,sleep_score:null},
+    {date:"2026-04-27",hrv:128,rhr:40,spo2:99, resp:12.0,sleep_score:null},
+    {date:"2026-04-28",hrv:135,rhr:40,spo2:99, resp:12.0,sleep_score:null},
+    {date:"2026-04-29",hrv:140,rhr:40,spo2:96, resp:13.2,sleep_score:null},
+    {date:"2026-04-30",hrv:154,rhr:40,spo2:95, resp:8.8, sleep_score:95},
+    {date:"2026-05-01",hrv:167,rhr:41,spo2:98, resp:10.6,sleep_score:76},
+    {date:"2026-05-02",hrv:176,rhr:40,spo2:98, resp:12.4,sleep_score:83},
+    {date:"2026-05-03",hrv:128,rhr:41,spo2:98, resp:16.1,sleep_score:33},
+    {date:"2026-05-04",hrv:113,rhr:41,spo2:91, resp:8.6, sleep_score:91},
+    {date:"2026-05-05",hrv:99, rhr:41,spo2:93, resp:8.7, sleep_score:93},
+    {date:"2026-05-06",hrv:99, rhr:41,spo2:98, resp:12.7,sleep_score:86},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94, light:259,awake:0},
@@ -552,14 +552,54 @@ function HealthView() {
         <Stat label="RESPIRATION" value={`${today.resp} br/min`} sub="baseline 10.7–13.7" color="#d97706" bg="#fffbeb" border="#fcd34d" />
       </div>
 
+      {/* SLEEP SCORE */}
+      {(() => {
+        const scores = HEALTH_DATA.daily.filter(d => d.sleep_score != null);
+        if (scores.length === 0) return null;
+        const latest = scores[scores.length - 1];
+        const scoreColor = latest.sleep_score >= 80 ? "#15803d" : latest.sleep_score >= 60 ? "#d97706" : "#dc2626";
+        const scoreBg   = latest.sleep_score >= 80 ? "#f0fdf4" : latest.sleep_score >= 60 ? "#fffbeb" : "#fef2f2";
+        const scoreBo   = latest.sleep_score >= 80 ? "#86efac" : latest.sleep_score >= 60 ? "#fcd34d" : "#fca5a5";
+        const scoreLabel = latest.sleep_score >= 80 ? "Good" : latest.sleep_score >= 60 ? "Fair" : "Poor";
+        const avg7 = Math.round(scores.slice(-7).reduce((s,d) => s + d.sleep_score, 0) / Math.min(7, scores.length));
+        return (
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>SLEEP SCORE</div>
+            <div style={{ background:scoreBg, border:`1.5px solid ${scoreBo}`, borderRadius:10, padding:"14px" }}>
+              <div style={{ display:"flex", gap:12, marginBottom:10 }}>
+                <div style={{ textAlign:"center", minWidth:64 }}>
+                  <div style={{ fontSize:36, fontWeight:900, color:scoreColor, lineHeight:1 }}>{latest.sleep_score}</div>
+                  <div style={{ fontSize:10, color:scoreColor, fontWeight:700 }}>{scoreLabel}</div>
+                  <div style={{ fontSize:9, color:"#94a3b8", marginTop:2 }}>{latest.date.slice(5)}</div>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:11, color:"#475569", marginBottom:4 }}>
+                    7-day avg: <strong style={{ color:scoreColor }}>{avg7}</strong>
+                  </div>
+                  <div style={{ fontSize:10, color:"#94a3b8", lineHeight:1.7 }}>
+                    ≥80 Good · 60–79 Fair · &lt;60 Poor<br />
+                    Score 33 on May 3 = post-late-night nap only
+                  </div>
+                </div>
+              </div>
+              <Sparkline data={scores.map(d => [d.date, d.sleep_score])} color={scoreColor} height={44} />
+              <div style={{ display:"flex", justifyContent:"space-between", marginTop:4, fontSize:9, color:"#94a3b8" }}>
+                <span>{scores[0]?.date?.slice(5)}</span>
+                <span>{scores[scores.length-1]?.date?.slice(5)}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* HRV TREND */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>HRV — 14 DAY TREND</div>
+      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>HRV — TREND</div>
       <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"12px 14px", marginBottom:16 }}>
         <Sparkline data={HEALTH_DATA.daily.map(d => [d.date, d.hrv])} color="#7c3aed" height={48} />
         <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
-          <span style={{ fontSize:9, color:"#94a3b8" }}>Apr 14</span>
-          <span style={{ fontSize:10, fontWeight:700, color:"#7c3aed" }}>Today: {today.hrv}ms ↑</span>
-          <span style={{ fontSize:9, color:"#94a3b8" }}>Apr 27</span>
+          <span style={{ fontSize:9, color:"#94a3b8" }}>{HEALTH_DATA.daily[0]?.date?.slice(5)}</span>
+          <span style={{ fontSize:10, fontWeight:700, color:"#7c3aed" }}>Today: {today.hrv}ms</span>
+          <span style={{ fontSize:9, color:"#94a3b8" }}>{HEALTH_DATA.daily[HEALTH_DATA.daily.length-1]?.date?.slice(5)}</span>
         </div>
       </div>
 
@@ -978,9 +1018,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {view === "schedule" && <ScheduleView activities={activities} />}
-      {view === "health" && <HealthView />}
-
       {/* INSIGHTS */}
       {view === "insights" && (
         <div style={{ padding:"14px 14px 40px" }}>
@@ -1185,6 +1222,7 @@ export default function Dashboard() {
       )}
 
       {view === "schedule" && <ScheduleView activities={activities} />}
+      {view === "health" && <HealthView />}
 
       {/* HISTORY */}
       {view === "history" && (
