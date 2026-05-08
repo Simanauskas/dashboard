@@ -103,46 +103,43 @@ function parseSheetBf(csvText) {
   }
 }
 
-const CSV_DATA = `
-Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Tennis V2","2026-05-07 13:46:18","false","Tennis","0,24","696","01:11:40","126","185","2,8","12","--","297:37","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:01","01:11:40","--","--"
-"Cycling","2026-04-18 12:38:04","false","VLN - 100km","36,61","1.339","03:41:36","104","155","2,2","--","--","9,9","38,2","782","983","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-9","No","03:41:36","1","24","12","37","--","--","03:15:32","04:52:45","81","221"
-"Trail Running","2026-04-19 09:05:48","false","VLN - 100km","9,18","713","01:05:10","127","160","2,6","169","249","7:06","3:34","292","279","0,83","7,8","6,5","306","49,8% L / 50,3% R","6:16","292","0,0","272","460","10.844","--","--","-15","No","00:01:17,0","10","31","13","39","--","--","01:04:33","01:09:55","91","186"
-"Cycling","2026-04-19 10:32:08","false","VLN - 100km","36,86","1.133","02:30:03","118","155","2,6","--","--","14,7","45,5","662","717","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-17","No","02:30:03","1","26","14","36","--","--","02:24:40","02:39:09","100","182"
-"Tennis","2026-04-21 08:37:56","false","Tennis","0,75","588","01:22:09","113","152","2,0","30","200","0,5","9,6","--","--","0,30","--","--","--","--","--","--","0,0","--","--","5.160","--","--","-15","No","01:22:09","1","27","15","36","--","--","00:12:05","01:22:09","--","--"
-"Strength Training","2026-04-21 18:47:05","false","Strength","0,00","261","00:36:51","107","150","1,7","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","4","-3","No","00:36:51","1","--","--","--","--","--","00:28:25","00:36:51","--","--"
-"Cycling","2026-04-22 08:36:22","false","Vilnius Cycling","6,81","187","00:24:23","104","131","0,9","--","--","16,8","41,7","59","54","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-24","No","00:24:23","1","--","--","--","--","--","00:23:00","06:45:56","99","148"
-"Indoor Running","2026-04-22 17:00:52","false","Circle training","1,53","371","00:49:03","109","168","2,5","40","255","31:59","2:44","--","--","0,75","6,2","4,3","476","50,5% L / 49,5% R","--","184","0,0","42","522","1.672","--","--","-7","No","00:02:28,0","7","26","14","42","--","--","00:15:20","00:49:03","--","--"
-"Indoor Running","2026-04-22 17:51:09","false","Indoor Running","1,50","118","00:09:33,0","140","177","2,1","162","216","6:22","3:25","--","--","0,96","5,8","5,7","296","50,0% L / 50,0% R","--","308","0,0","245","485","1.512","--","--","-1","No","00:09:33,0","1","36","25","46","--","--","00:09:29","00:09:33,0","--","--"
-"Tennis","2026-04-23 07:57:25","false","Tennis","0,53","527","01:34:14","98","145","0,9","22","240","0,3","16,4","--","--","0,26","--","--","--","--","--","--","0,0","--","--","4.978","--","--","-10","No","01:34:14","1","23","12","33","--","--","00:08:22","01:34:14","--","--"
-"Indoor Running","2026-04-24 16:59:52","false","Hyrox group ","2,70","502","00:52:37","125","165","2,8","70","250","19:31","2:42","--","--","0,69","7,6","5,1","403","51,8% L / 48,2% R","--","177","0,0","68","737","3.336","--","--","-7","No","00:02:09,8","7","30","12","47","--","--","00:33:21","00:52:37","--","--"
-"Tennis","2026-04-25 11:00:39","false","Tennis","0,33","430","01:05:07","107","150","1,4","21","187","0,3","9,3","--","--","0,24","--","--","--","--","--","--","0,0","--","--","3.160","--","--","-8","No","01:05:07","1","25","16","35","--","--","00:05:36","01:05:07","--","--"
-"Cycling","2026-04-25 14:21:25","false","Vilnius Cycling","12,42","264","00:58:36","85","136","0,6","--","--","12,7","26,7","103","103","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-5","No","00:58:36","1","--","--","--","--","--","00:55:20","01:27:58","93","149"
-"Treadmill Running","2026-04-26 09:27:13","false","Tempo 40min 4:30","10,50","702","00:51:56","146","161","3,7","185","192","4:57","4:12","--","--","1,13","5,4","6,3","271","50,2% L / 49,8% R","--","344","0,0","336","394","9.522","--","--","-13","No","00:03:23,0","3","33","26","41","--","--","00:51:55","00:51:56","--","--"
-"Strength Training","2026-04-26 10:20:26","false","100 wall balls","0,00","51","00:03:42,5","147","169","1,3","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","100","1","-1","No","00:03:42,5","1","33","20","42","--","--","00:03:42,5","00:03:42,5","--","--"
-"Other","2026-04-26 10:36:09","false","Vilnius Sauna","0,26","90","00:12:27","102","141","0,7","4","143","1,3","7,7","14","11","5,06","--","--","--","--","--","--","0,0","--","--","132","--","--","-1","No","00:12:27","1","--","--","--","--","--","00:04:41","00:12:27","137","149"
-"Other","2026-04-26 13:44:35","false","Massage","0,00","--","00:50:00","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","--","--","No","00:50:00","1","--","--","--","0","0","--:--:--","00:50:00","--","--"
-"Indoor Running","2026-04-27 19:00:35","false","Hyrox group ","2,84","546","01:02:13","121","169","2,8","62","246","21:54","2:59","--","--","0,72","12,1","9,8","441","52,6% L / 47,4% R","--","218","0,0","93","1.249","3.448","--","--","-8","No","00:00:19,6","23","30","13","44","--","--","00:33:39","01:02:41","--","--"
-"Other","2026-04-27 20:16:10","false","Sauna","0,00","63","00:20:30","75","111","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-2","No","00:20:30","1","--","--","--","--","--","00:20:30","00:20:30","--","--"
-"Cycling","2026-04-28 11:05:00","false","Vilnius Cycling","6,72","194","00:24:02","106","133","0,9","--","--","16,8","38,4","52","52","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-2","No","00:24:02","1","--","--","--","--","--","00:23:45","00:24:02","84","112"
-"Running","2026-04-28 19:31:20","false","Z2-3","9,33","645","00:47:42","140","154","3,2","182","187","5:07","4:17","48","42","1,07","5,8","6,4","269","50,6% L / 49,4% R","5:07","334","0,0","329","460","8.630","--","--","-11","No","00:47:42","1","29","25","40","--","--","00:47:41","00:47:42","84","112"
-"Tennis","2026-04-29 10:24:46","false","Tennis","0,76","601","01:32:42","107","151","1,9","25","233","0,5","12,2","--","--","0,33","--","--","--","--","--","--","0,0","--","--","5.602","-13","--","No","01:32:42","1","--","25","13","35","00:11:06","01:32:42","--","--"
-"Other","2026-04-29 12:09:52","false","Sauna","0,00","57","00:14:24","80","103","0,1","0","115","--","--","--","--","0,00","--","--","--","--","--","--","0,0","--","--","24","-2","29,0","No","00:14:24","1","43,0","--","--","--","00:00:00","00:14:24","--","--"
+const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+Running,2026-04-28 19:31:20,false,"Z2-3","9,33","645","00:47:42","140","154","3,2","182","187","5:07","4:17","48","42","1,07","5,8","6,4","269","50,6% L / 49,4% R","5:07","334","0,0","329","460","8.630","--","--","-11","No","00:47:42","1","29","25","40","--","--","00:47:41","00:47:42","84","112"
+Cycling,2026-04-28 11:05:00,false,"Vilnius Cycling","6,72","194","00:24:02","106","133","0,9","--","--","16,8","38,4","52","52","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-2","No","00:24:02","1","--","--","--","--","--","00:23:45","00:24:02","84","112"
+Other,2026-04-27 20:16:10,false,"Sauna","0,00","63","00:20:30","75","111","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-2","No","00:20:30","1","--","--","--","--","--","00:20:30","00:20:30","--","--"
+Indoor Running,2026-04-27 19:00:35,false,"Hyrox group ","2,84","546","01:02:13","121","169","2,8","62","246","21:54","2:59","--","--","0,72","12,1","9,8","441","52,6% L / 47,4% R","--","218","0,0","93","1.249","3.448","--","--","-8","No","00:00:19,6","23","30","13","44","--","--","00:33:39","01:02:41","--","--"
+Other,2026-04-26 13:44:35,false,"Massage","0,00","--","00:50:00","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","--","--","No","00:50:00","1","--","--","--","0","0","--:--:--","00:50:00","--","--"
+Other,2026-04-26 10:36:09,false,"Vilnius Sauna","0,26","90","00:12:27","102","141","0,7","4","143","1,3","7,7","14","11","5,06","--","--","--","--","--","--","0,0","--","--","132","--","--","-1","No","00:12:27","1","--","--","--","--","--","00:04:41","00:12:27","137","149"
+Strength Training,2026-04-26 10:20:26,false,"100 wall balls","0,00","51","00:03:42,5","147","169","1,3","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","100","1","-1","No","00:03:42,5","1","33","20","42","--","--","00:03:42,5","00:03:42,5","--","--"
+Treadmill Running,2026-04-26 09:27:13,false,"Tempo 40min 4:30","10,50","702","00:51:56","146","161","3,7","185","192","4:57","4:12","--","--","1,13","5,4","6,3","271","50,2% L / 49,8% R","--","344","0,0","336","394","9.522","--","--","-13","No","00:03:23,0","3","33","26","41","--","--","00:51:55","00:51:56","--","--"
+Cycling,2026-04-25 14:21:25,false,"Vilnius Cycling","12,42","264","00:58:36","85","136","0,6","--","--","12,7","26,7","103","103","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-5","No","00:58:36","1","--","--","--","--","--","00:55:20","01:27:58","93","149"
+Tennis,2026-04-25 11:00:39,false,"Tennis","0,33","430","01:05:07","107","150","1,4","21","187","0,3","9,3","--","--","0,24","--","--","--","--","--","--","0,0","--","--","3.160","--","--","-8","No","01:05:07","1","25","16","35","--","--","00:05:36","01:05:07","--","--"
+Indoor Running,2026-04-24 16:59:52,false,"Hyrox group ","2,70","502","00:52:37","125","165","2,8","70","250","19:31","2:42","--","--","0,69","7,6","5,1","403","51,8% L / 48,2% R","--","177","0,0","68","737","3.336","--","--","-7","No","00:02:09,8","7","30","12","47","--","--","00:33:21","00:52:37","--","--"
+Tennis,2026-04-23 07:57:25,false,"Tennis","0,53","527","01:34:14","98","145","0,9","22","240","0,3","16,4","--","--","0,26","--","--","--","--","--","--","0,0","--","--","4.978","--","--","-10","No","01:34:14","1","23","12","33","--","--","00:08:22","01:34:14","--","--"
+Indoor Running,2026-04-22 17:51:09,false,"Indoor Running","1,50","118","00:09:33,0","140","177","2,1","162","216","6:22","3:25","--","--","0,96","5,8","5,7","296","50,0% L / 50,0% R","--","308","0,0","245","485","1.512","--","--","-1","No","00:09:33,0","1","36","25","46","--","--","00:09:29","00:09:33,0","--","--"
+Indoor Running,2026-04-22 17:00:52,false,"Circle training","1,53","371","00:49:03","109","168","2,5","40","255","31:59","2:44","--","--","0,75","6,2","4,3","476","50,5% L / 49,5% R","--","184","0,0","42","522","1.672","--","--","-7","No","00:02:28,0","7","26","14","42","--","--","00:15:20","00:49:03","--","--"
+Cycling,2026-04-22 08:36:22,false,"Vilnius Cycling","6,81","187","00:24:23","104","131","0,9","--","--","16,8","41,7","59","54","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-24","No","00:24:23","1","--","--","--","--","--","00:23:00","06:45:56","99","148"
+Strength Training,2026-04-21 18:47:05,false,"Strength","0,00","261","00:36:51","107","150","1,7","--","--","--","--","--","--","--","--","--","--","--","--","--","0,0","--","--","--","--","4","-3","No","00:36:51","1","--","--","--","--","--","00:28:25","00:36:51","--","--"
+Tennis,2026-04-21 08:37:56,false,"Tennis","0,75","588","01:22:09","113","152","2,0","30","200","0,5","9,6","--","--","0,30","--","--","--","--","--","--","0,0","--","--","5.160","--","--","-15","No","01:22:09","1","27","15","36","--","--","00:12:05","01:22:09","--","--"
+Trail Running,2026-04-19 09:05:48,false,"VLN - 100km","9,18","713","01:05:10","127","160","2,6","169","249","7:06","3:34","292","279","0,83","7,8","6,5","306","49,8% L / 50,3% R","6:16","292","0,0","272","460","10.844","--","--","-15","No","00:01:17,0","10","31","13","39","--","--","01:04:33","01:09:55","91","186"
+Cycling,2026-04-19 10:32:08,false,"VLN - 100km","36,86","1.133","02:30:03","118","155","2,6","--","--","14,7","45,5","662","717","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-17","No","02:30:03","1","26","14","36","--","--","02:24:40","02:39:09","100","182"
+Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104","155","2,2","--","--","9,9","38,2","782","983","--","--","--","--","--","--","--","0,0","--","--","--","--","--","-9","No","03:41:36","1","24","12","37","--","--","03:15:32","04:52:45","81","221"
 "Indoor Running","2026-04-29 17:51:40","false","Hyrox group +100WB","2,29","536","00:57:54","118","173","2,8","54","226","25:17","3:17","--","--","0,64","15,2","9,8","440","50,9% L / 49,1% R","--","191","0,0","78","874","2.798","-7","--","No","00:00:08,9","4","--","28","12","42","00:28:21","01:01:44","--","--"
+"Other","2026-04-29 12:09:52","false","Sauna","0,00","57","00:14:24","80","103","0,1","0","115","--","--","--","--","0,00","--","--","--","--","--","--","0,0","--","--","24","-2","29,0","No","00:14:24","1","43,0","--","--","--","00:00:00","00:14:24","--","--"
+"Tennis","2026-04-29 10:24:46","false","Tennis","0,76","601","01:32:42","107","151","1,9","25","233","0,5","12,2","--","--","0,33","--","--","--","--","--","--","0,0","--","--","5.602","-13","--","No","01:32:42","1","--","25","13","35","00:11:06","01:32:42","--","--"
 "Cycling","2026-04-30 09:06:35","false","Vilnius Cycling","7,00","208","00:26:25","105","128","1,0","--","--","15,9","34,3","61","57","--","--","--","--","--","--","--","0,0","--","--","--","-25","--","No","00:26:25","1","--","--","--","--","00:24:10","07:48:31","100","148"
-"Cycling","2026-05-01 10:47:01","false","Vilnius Cycling","1,66","45","00:05:15,9","108","125","0,3","--","--","18,9","41,5","14","23","--","--","--","--","--","--","--","0,0","--","--","--","-1","--","No","00:05:15,9","1","--","23","14","33","00:04:50","00:05:15,9","90","111"
-"Tennis","2026-05-01 11:06:39","false","Tennis","0,84","636","01:27:44","107","148","2,0","23","244","0,6","13,5","--","--","0,42","--","--","--","--","--","--","0,0","--","--","4.554","-12","--","No","01:27:44","1","--","25","11","35","00:09:43","01:27:44","--","--"
-"Cycling","2026-05-01 12:46:07","false","Vilnius Cycling","1,70","50","00:06:38,0","102","127","0,3","--","--","15,3","27,2","20","9","--","--","--","--","--","--","--","0,0","--","--","--","-1","--","No","00:06:38,0","1","--","23","17","29","00:05:41","00:06:38,0","90","110"
 "Inline Skating","2026-05-01 17:48:05","false","Vilnius Inline Skating","10,06","281","00:53:18","94","153","0,4","--","--","11,3","26,3","42","43","--","--","--","--","--","--","--","0,0","--","--","1.896","-3","--","No","00:53:18","1","--","--","--","--","00:51:08","01:08:26","91","115"
+"Cycling","2026-05-01 12:46:07","false","Vilnius Cycling","1,70","50","00:06:38,0","102","127","0,3","--","--","15,3","27,2","20","9","--","--","--","--","--","--","--","0,0","--","--","--","-1","--","No","00:06:38,0","1","--","23","17","29","00:05:41","00:06:38,0","90","110"
+"Tennis","2026-05-01 11:06:39","false","Tennis","0,84","636","01:27:44","107","148","2,0","23","244","0,6","13,5","--","--","0,42","--","--","--","--","--","--","0,0","--","--","4.554","-12","--","No","01:27:44","1","--","25","11","35","00:09:43","01:27:44","--","--"
+"Cycling","2026-05-01 10:47:01","false","Vilnius Cycling","1,66","45","00:05:15,9","108","125","0,3","--","--","18,9","41,5","14","23","--","--","--","--","--","--","--","0,0","--","--","--","-1","--","No","00:05:15,9","1","--","23","14","33","00:04:50","00:05:15,9","90","111"
 "Tennis","2026-05-04 11:52:28","false","Tennis","0,55","637","01:27:46","111","169","2,5","17","230","0,4","11,0","--","--","0,36","--","--","--","--","--","--","0,0","--","--","3.992","-13","--","No","01:27:46","1","--","--","--","--","00:07:12","01:27:46","--","--"
-"Tennis","2026-05-05 08:03:05","false","Tennis","0,43","699","01:19:30","122","162","2,4","17","231","0,3","11,0","--","--","0,32","--","--","--","--","--","--","0,0","--","--","4.568","-15","--","No","01:19:30","1","--","--","--","--","00:05:35","01:19:30","--","--"
-"Inline Skating","2026-05-05 17:41:05","false","Klaipeda Inline Skating","7,17","308","00:41:40","93","135","0,4","--","--","10,3","25,2","19","17","--","--","--","--","--","--","--","0,0","--","--","1.660","--","--","No","00:41:40","1","--","--","--","--","00:36:06","00:42:46","5","17"
 "Indoor Running","2026-05-05 18:50:28","false","Hyrox group","2,97","439","01:02:47","103","169","2,0","50","250","21:07","4:42","--","--","1,05","7,9","8,1","257","--","--","223","0,0","79","374","3.768","-5","--","No","00:01:25,5","5","--","--","--","--","00:17:51","01:02:47","--","--"
-"Tennis V2","2026-05-06 07:58:40","false","Tennis","0,25","476.0","01:02:28","111","158","2,1","15.359375","--","248:45","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:03:52","01:02:28","--","--"
-"Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201.0","00:33:48","94","139","1,0","--","--","7:02","--","--","--","10.439999997615814","11.389999985694885","--","--","--","--","--","--","--","--","--","--","--","--","No","--","5","--","--","--","--","--","00:27:51","01:48:18","--","--"
-"Tennis V2","2026-05-06 17:33:00","false","Padel","0,48","486.0","01:26:44","97","170","1,3","19.875","--","181:09","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:16","01:26:44","--","--"
-"Other","2026-05-06 19:11:17","false","Sauna","0,00","45.0","00:18:54","66","128","0,1","1.484375","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:18:54","00:18:54","--","--"
-`;
+"Inline Skating","2026-05-05 17:41:05","false","Klaipeda Inline Skating","7,17","308","00:41:40","93","135","0,4","--","--","10,3","25,2","19","17","--","--","--","--","--","--","--","0,0","--","--","1.660","--","--","No","00:41:40","1","--","--","--","--","00:36:06","00:42:46","5","17"
+"Tennis","2026-05-05 08:03:05","false","Tennis","0,43","699","01:19:30","122","162","2,4","17","231","0,3","11,0","--","--","0,32","--","--","--","--","--","--","0,0","--","--","4.568","-15","--","No","01:19:30","1","--","--","--","--","00:05:35","01:19:30","--","--"
+"Other","2026-05-06 19:11:17","false","Sauna","0,00","45","00:18:54","66","128","0,1","1","141","--","--","--","--","0,00","--","--","--","--","--","--","0,0","--","--","122","-1","27,0","No","00:18:54","1","38,0","--","--","--","00:00:00","00:18:54","--","--"
+"Tennis","2026-05-06 17:33:00","false","Padel","0,48","486","01:26:44","97","170","1,3","20","200","0,3","9,9","--","--","0,28","--","--","--","--","--","--","0,0","--","--","3.872","-6","--","No","01:26:44","1","--","--","--","--","00:08:16","01:26:44","--","--"
+"Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
+"Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
 const TODAY = "2026-05-07";
 
@@ -267,7 +264,78 @@ function analyze(raw) {
   const hardSessions = enriched.filter(a => a._avgHR > 140 && a._days >= 1);
   const daysSinceHard = hardSessions.length > 0 ? hardSessions[0]._days : 99;
   const weeklyKm = enriched.filter(a => (isRun(a) || isHyrox(a)) && a._days >= 1 && a._days <= 7).reduce((s,a) => s + (a._dist||0), 0);
-  return { enriched, atl, ctl, tsb, yesterday, daysSinceHard, weeklyKm };
+
+  // Weekly TRIMP (last 8 weeks)
+  const weeklyTrimp = [];
+  for (let w = 7; w >= 0; w--) {
+    const start = w * 7 + 1, end = (w + 1) * 7;
+    const trimp = enriched.filter(a => a._days >= start && a._days <= end).reduce((s,a) => s + a._trimp, 0);
+    const weekStart = new Date(TODAY); weekStart.setDate(weekStart.getDate() - end);
+    const wLabel = weekStart.toLocaleDateString('en', { month:'short', day:'numeric' });
+    weeklyTrimp.push({ label: wLabel, trimp: Math.round(trimp), daysAgo: start });
+  }
+
+  // HR Zone distribution (last 4 weeks) using CPET bike zones +10 for running
+  // Zones: A <125, B 125-142, C 142-156, D 156-177, E >177 (running: +10 to bike zones)
+  const zoneMinutes = { A:0, B:0, C:0, D:0, E:0 };
+  enriched.filter(a => a._days >= 1 && a._days <= 28 && a._avgHR > 0 && a._dur > 0).forEach(a => {
+    const hr = a._avgHR, dur = a._dur / 60;
+    // Use rough zone assignment from avg HR (simplified — assumes avg represents session)
+    if (hr > 177)      zoneMinutes.E += dur;
+    else if (hr > 156) zoneMinutes.D += dur;
+    else if (hr > 142) zoneMinutes.C += dur;
+    else if (hr > 125) zoneMinutes.B += dur;
+    else               zoneMinutes.A += dur;
+  });
+  const totalZoneMin = Object.values(zoneMinutes).reduce((s,v) => s+v, 0);
+
+  // Hyrox simulation sessions (indoor running, >45min, HR avg >110)
+  const hyroxSims = enriched.filter(a => {
+    const t = (a.Title || "").toLowerCase();
+    return t.includes("hyrox sim") || t.includes("hyrox race") || t.includes("hyrox simulation");
+  }).slice(0, 6).reverse();
+
+  // Running pace trend (Z2/Z3 runs: avg HR 120-155, dist > 4km)
+  const paceTrend = enriched.filter(a =>
+    isRun(a) && a._avgHR >= 120 && a._avgHR <= 160 && (a._dist||0) > 3
+  ).slice(0, 8).reverse().map(a => {
+    const speed = parseNum(a["Avg Speed"]);
+    const paceStr = a["Avg Pace"] || a["Avg Speed"];
+    let paceSec = null;
+    if (paceStr && paceStr.includes(":")) {
+      const parts = paceStr.split(":");
+      paceSec = +parts[0]*60 + +parts[1];
+    } else if (speed && speed > 0) {
+      paceSec = 3600 / speed;
+    }
+    return { date: a._date, paceSec, hr: a._avgHR, title: a.Title, dist: a._dist };
+  }).filter(p => p.paceSec);
+
+  // Readiness history (last 30 days from HEALTH_DATA)
+  const readinessHistory = HEALTH_DATA.daily.slice(-30).map(d => {
+    const trimp = dailyTrimp[d.date] || 0;
+    return { date: d.date, hrv: d.hrv, trimp };
+  });
+
+  // ATL history for overlay (last 42 days)
+  const atlHistory = [];
+  for (let i = 41; i >= 0; i--) {
+    const d = new Date(TODAY); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0,10);
+    atlHistory.push({ date: ds, atl: 0 }); // placeholder, filled below
+  }
+  let atlR = 0, ctlR = 0;
+  atlHistory.forEach((pt, idx) => {
+    const trimp = dailyTrimp[pt.date] || 0;
+    atlR = atlR * (1 - K_ATL) + trimp * K_ATL;
+    ctlR = ctlR * (1 - K_CTL) + trimp * K_CTL;
+    atlHistory[idx].atl = atlR;
+    atlHistory[idx].ctl = ctlR;
+  });
+
+  return { enriched, atl, ctl, tsb, yesterday, daysSinceHard, weeklyKm,
+           weeklyTrimp, zoneMinutes, totalZoneMin, hyroxSims, paceTrend,
+           readinessHistory, atlHistory };
 }
 
 function readiness(tsb, dsh, hrv, hrvBaseline) {
@@ -672,7 +740,9 @@ export default function Dashboard() {
 
   if (!ana) return <div style={{ padding:40, color:"#333" }}>Loading…</div>;
 
-  const { yesterday, tsb, daysSinceHard, weeklyKm, atl, ctl } = ana;
+  const { yesterday, tsb, daysSinceHard, weeklyKm, atl, ctl,
+          weeklyTrimp, zoneMinutes, totalZoneMin, hyroxSims, paceTrend,
+          readinessHistory, atlHistory } = ana;
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
@@ -718,7 +788,7 @@ export default function Dashboard() {
   notes.push(`Week running km so far: ${weeklyKm.toFixed(1)} km · 3 Hyrox sessions this week · on track`);
   notes.push(`HRV 128ms today (7d avg: Balanced) — outstanding recovery after Hyrox. RHR 40bpm. Body battery +66. Green light to train hard.`);
 
-  const TABS = [["today","TODAY"],["schedule","SCHEDULE"],["health","HEALTH"],["history","HISTORY"],["load","LOAD"]];
+  const TABS = [["today","TODAY"],["schedule","SCHEDULE"],["health","HEALTH"],["history","HISTORY"],["load","LOAD"],["insights","INSIGHTS"]];
 
   return (
     <div style={{ minHeight:"100vh", background:"#ffffff", fontFamily:"'Inter',system-ui,sans-serif", color:"#1e293b", fontSize:13 }}>
@@ -797,7 +867,7 @@ export default function Dashboard() {
                     {fmtDur(a._dur)}
                     {a._avgHR > 0 ? ` · HR ${a._avgHR}/${parseNum(a["Max HR"]) || "—"}bpm` : ""}
                     {a._dist > 0 ? ` · ${a._dist.toFixed(1)}km` : ""}
-                    {a["Total Reps"] && a["Total Reps"] !== "--" ? ` · ${a["Total Reps"]} reps` : ""}
+                    {a["Total Reps"] && a["Total Reps"] !== "--" && isStrength(a) ? ` · ${a["Total Reps"]} reps` : ""}
                     {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
                   </div>
                 </div>
@@ -911,6 +981,211 @@ export default function Dashboard() {
       {view === "schedule" && <ScheduleView activities={activities} />}
       {view === "health" && <HealthView />}
 
+      {/* INSIGHTS */}
+      {view === "insights" && (
+        <div style={{ padding:"14px 14px 40px" }}>
+
+          {/* HRV + ATL overlay */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HRV vs TRAINING LOAD (42 DAYS)</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+            {(() => {
+              const data = atlHistory.filter((_, i) => i % 1 === 0);
+              const hrvData = HEALTH_DATA.daily;
+              const maxAtl = Math.max(...data.map(d => d.atl), 1);
+              const maxHrv = Math.max(...HEALTH_DATA.daily.map(d => d.hrv), 1);
+              const W = 320, H = 80;
+              const atlPts = data.map((d,i) => `${(i/(data.length-1))*W},${H - (d.atl/maxAtl)*(H-8) - 4}`).join(" ");
+              const hrvPts = data.map((d,i) => {
+                const hd = hrvData.find(h => h.date === d.date);
+                if (!hd) return null;
+                return `${(i/(data.length-1))*W},${H - (hd.hrv/maxHrv)*(H-8) - 4}`;
+              }).filter(Boolean);
+              return (
+                <div>
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:H }} preserveAspectRatio="none">
+                    <polyline points={atlPts} fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.7" strokeLinejoin="round" />
+                    {hrvPts.length > 1 && <polyline points={hrvPts.join(" ")} fill="none" stroke="#7c3aed" strokeWidth="2" opacity="0.8" strokeLinejoin="round" />}
+                  </svg>
+                  {/* Date axis */}
+                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:4, fontSize:9, color:"#94a3b8" }}>
+                    {[0, 0.25, 0.5, 0.75, 1].map(frac => {
+                      const d = new Date(TODAY);
+                      d.setDate(d.getDate() - Math.round((1-frac)*41));
+                      return <span key={frac}>{d.toLocaleDateString('en',{month:'short',day:'numeric'})}</span>;
+                    })}
+                  </div>
+                  <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10 }}>
+                    <span style={{ color:"#dc2626" }}>━ ATL (fatigue)</span>
+                    <span style={{ color:"#7c3aed" }}>━ HRV</span>
+                    <span style={{ color:"#94a3b8", marginLeft:"auto" }}>HRV falls when ATL spikes = needs recovery</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Readiness history sparkline */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>READINESS HISTORY (30 DAYS)</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+            {(() => {
+              const scores = HEALTH_DATA.daily.slice(-30).map(d => {
+                const atlD = atlHistory.find(a => a.date === d.date);
+                const tsbD = atlD ? (atlD.ctl - atlD.atl) : 0;
+                return readiness(tsbD, 99, d.hrv, 88);
+              });
+              if (scores.length < 2) return <div style={{ color:"#94a3b8", fontSize:11 }}>Not enough data yet</div>;
+              const W = 320, H = 60;
+              const min = 1, max = 10;
+              const pts = scores.map((v,i) => `${(i/(scores.length-1))*W},${H - ((v-min)/(max-min))*(H-8) - 4}`).join(" ");
+              const avg = (scores.reduce((s,v)=>s+v,0)/scores.length).toFixed(1);
+              const trend = scores[scores.length-1] > scores[0] ? "↑" : "↓";
+              return (
+                <div>
+                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
+                    <span style={{ fontSize:12, fontWeight:700, color:"#1e293b" }}>Avg: {avg}/10 {trend}</span>
+                    <span style={{ fontSize:10, color:"#94a3b8" }}>Last 30 days</span>
+                  </div>
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:H }} preserveAspectRatio="none">
+                    {[3,5,7].map(v => (
+                      <line key={v} x1="0" x2={W} y1={H - ((v-min)/(max-min))*(H-8) - 4} y2={H - ((v-min)/(max-min))*(H-8) - 4} stroke="#e2e8f0" strokeWidth="1" />
+                    ))}
+                    <polyline points={pts} fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+                    {scores.map((v,i) => {
+                      const x = (i/(scores.length-1))*W;
+                      const y = H - ((v-min)/(max-min))*(H-8) - 4;
+                      const c = v >= 7 ? "#16a34a" : v >= 4 ? "#d97706" : "#dc2626";
+                      return <circle key={i} cx={x} cy={y} r="3" fill={c} />;
+                    })}
+                  </svg>
+                  <div style={{ display:"flex", gap:10, marginTop:6, fontSize:10 }}>
+                    <span style={{ color:"#16a34a" }}>● 7–10 push</span>
+                    <span style={{ color:"#d97706" }}>● 4–6 smart</span>
+                    <span style={{ color:"#dc2626" }}>● 1–3 rest</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* HR Zone distribution */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HR ZONE DISTRIBUTION (28 DAYS)</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+            {totalZoneMin > 0 ? (
+              <div>
+                {[
+                  { z:"E", name:"VO₂max", c:"#dc2626", bg:"#fef2f2" },
+                  { z:"D", name:"Development", c:"#ea580c", bg:"#fff7ed" },
+                  { z:"C", name:"Intensive", c:"#eab308", bg:"#fefce8" },
+                  { z:"B", name:"Aerobic", c:"#16a34a", bg:"#f0fdf4" },
+                  { z:"A", name:"Recovery", c:"#94a3b8", bg:"#f8fafc" },
+                ].map(({ z, name, c, bg }) => {
+                  const mins = Math.round(zoneMinutes[z]);
+                  const pct = totalZoneMin > 0 ? (mins / totalZoneMin * 100) : 0;
+                  return (
+                    <div key={z} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                      <div style={{ width:20, height:20, borderRadius:"50%", background:c, color:"#fff", fontSize:10, fontWeight:900, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{z}</div>
+                      <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:18, overflow:"hidden" }}>
+                        <div style={{ height:"100%", width:`${pct}%`, background:c+"cc", borderRadius:4, transition:"width 0.5s" }} />
+                      </div>
+                      <div style={{ fontSize:10, fontWeight:600, color:c, minWidth:32, textAlign:"right" }}>{pct.toFixed(0)}%</div>
+                      <div style={{ fontSize:10, color:"#94a3b8", minWidth:52 }}>{Math.round(mins)}m · {name}</div>
+                    </div>
+                  );
+                })}
+                <div style={{ marginTop:10, padding:"8px 10px", background:"#fffbeb", border:"1px solid #fcd34d", borderRadius:6, fontSize:10, color:"#92400e" }}>
+                  💡 Ideal Hyrox split: ~40% Zone B/C aerobic + ~35% Zone D/E race intensity + ~25% recovery
+                </div>
+              </div>
+            ) : <div style={{ color:"#94a3b8", fontSize:11 }}>No HR data in last 28 days</div>}
+          </div>
+
+          {/* Hyrox simulation tracker */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HYROX SIMULATION SESSIONS</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+            {hyroxSims.length === 0
+              ? <div style={{ color:"#94a3b8", fontSize:11 }}>No Hyrox sessions found yet</div>
+              : hyroxSims.map((a, i) => {
+                  const gct = parseNum(a["Avg Ground Contact Time"]);
+                  const vr = parseNum(a["Avg Vertical Ratio"]);
+                  const np = parseNum(a["Normalized Power® (NP®)"]);
+                  const improving = i > 0 && a._avgHR < hyroxSims[i-1]._avgHR;
+                  return (
+                    <div key={i} style={{ padding:"10px 12px", marginBottom:6, background: i === hyroxSims.length-1 ? "#faf5ff" : "#fff", border:`1px solid ${i === hyroxSims.length-1 ? "#7c3aed" : "#e2e8f0"}`, borderRadius:8 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                        <span style={{ fontSize:12, fontWeight:700, color:"#4c1d95" }}>🦘 {a.Title}</span>
+                        <span style={{ fontSize:10, color:"#94a3b8" }}>{a._date}</span>
+                      </div>
+                      <div style={{ fontSize:11, color:"#64748b", marginTop:4, display:"flex", gap:12, flexWrap:"wrap" }}>
+                        <span>⏱ {fmtDur(a._dur)}</span>
+                        <span>❤️ {a._avgHR} bpm avg</span>
+                        {a._dist > 0 && <span>📏 {a._dist.toFixed(1)}km</span>}
+                        {gct && <span>GCT {gct}ms {gct < 380 ? "✓" : "↑"}</span>}
+                        {vr && <span>VR {vr}% {vr < 9 ? "✓" : "↑"}</span>}
+                        {np && <span>NP {np}W</span>}
+                        <span style={{ fontWeight:700, color: a._trimp > 80 ? "#dc2626" : "#7c3aed" }}>TRIMP {a._trimp.toFixed(0)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+            {hyroxSims.length > 1 && (() => {
+              const first = hyroxSims[0], last = hyroxSims[hyroxSims.length-1];
+              const hrDiff = last._avgHR - first._avgHR;
+              return (
+                <div style={{ marginTop:8, padding:"8px 10px", background: hrDiff < 0 ? "#f0fdf4" : "#fffbeb", border:`1px solid ${hrDiff < 0 ? "#86efac" : "#fcd34d"}`, borderRadius:6, fontSize:11, color: hrDiff < 0 ? "#15803d" : "#92400e" }}>
+                  {hrDiff < 0 ? `✓ HR trending down ${Math.abs(hrDiff)} bpm over ${hyroxSims.length} sessions — aerobic efficiency improving` : `→ HR up ${hrDiff} bpm — fatigue accumulation or higher intensity`}
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Running pace trend */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>AEROBIC EFFICIENCY (PACE AT SAME HR)</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+            {paceTrend.length < 2
+              ? <div style={{ color:"#94a3b8", fontSize:11 }}>Need more Z2/Z3 runs for trend (min 2)</div>
+              : (() => {
+                  const maxSec = Math.max(...paceTrend.map(p => p.paceSec));
+                  const minSec = Math.min(...paceTrend.map(p => p.paceSec));
+                  const fmtPace = s => `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,"0")}`;
+                  const first = paceTrend[0], last = paceTrend[paceTrend.length-1];
+                  const diff = first.paceSec - last.paceSec; // positive = faster = better
+                  return (
+                    <div>
+                      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
+                        <div>
+                          <div style={{ fontSize:18, fontWeight:900, color: diff > 0 ? "#15803d" : diff < -10 ? "#dc2626" : "#1e293b" }}>
+                            {diff > 0 ? `↑ ${fmtPace(Math.abs(diff))}/km faster` : diff < 0 ? `↓ ${fmtPace(Math.abs(diff))}/km slower` : "→ stable"}
+                          </div>
+                          <div style={{ fontSize:10, color:"#94a3b8" }}>vs first recorded run · same HR range</div>
+                        </div>
+                        <div style={{ textAlign:"right", fontSize:11, color:"#64748b" }}>
+                          <div>{fmtPace(first.paceSec)}/km → {fmtPace(last.paceSec)}/km</div>
+                          <div style={{ fontSize:10, color:"#94a3b8" }}>HR {first.hr} → {last.hr} bpm</div>
+                        </div>
+                      </div>
+                      {paceTrend.map((p, i) => (
+                        <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+                          <div style={{ fontSize:9, color:"#94a3b8", minWidth:72 }}>{p.date}</div>
+                          <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:16, overflow:"hidden" }}>
+                            <div style={{ height:"100%", width:`${((maxSec-p.paceSec)/(maxSec-minSec||1)*80+20)}%`, background:"#c2410c99", borderRadius:4 }} />
+                          </div>
+                          <div style={{ fontSize:10, fontWeight:600, color:"#c2410c", minWidth:44, textAlign:"right" }}>{fmtPace(p.paceSec)}/km</div>
+                          <div style={{ fontSize:9, color:"#94a3b8", minWidth:36 }}>{p.hr}bpm</div>
+                        </div>
+                      ))}
+                      <div style={{ marginTop:8, fontSize:10, color:"#64748b" }}>
+                        💡 Improving pace at same HR = aerobic adaptation working. Target: sub 5:00/km at HR 140 by race day.
+                      </div>
+                    </div>
+                  );
+                })()}
+          </div>
+
+        </div>
+      )}
+
+      {view === "schedule" && <ScheduleView activities={activities} />}
+
       {/* HISTORY */}
       {view === "history" && (
         <div style={{ padding:"14px 14px 40px" }}>
@@ -975,6 +1250,69 @@ export default function Dashboard() {
               </div>
             );
           })}
+          {/* Weekly TRIMP target bars */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>WEEKLY TRIMP VS TARGET</div>
+          {(() => {
+            const race = new Date("2026-05-30");
+            const todayD = new Date(TODAY);
+            const weeksOut = Math.ceil((race - todayD) / (7*86400000));
+            // Target: 400-500 TRIMP/wk weeks 3+ out, 300-400 wk 2, taper wk 1
+            const getTarget = (wk) => {
+              if (wk <= 0) return [0, 0];
+              if (wk === 1) return [100, 200];   // race week — taper
+              if (wk === 2) return [250, 350];   // final hard week
+              return [400, 500];                  // build phase
+            };
+            return weeklyTrimp.map((w, i) => {
+              const wOut = 8 - i; // approximate weeks from race
+              const [lo, hi] = getTarget(wOut);
+              const pct = hi > 0 ? Math.min(100, (w.trimp / hi) * 100) : 0;
+              const status = w.trimp === 0 ? "empty" : w.trimp >= lo && w.trimp <= hi ? "green" : w.trimp > hi ? "amber" : "red";
+              const sc = { green:"#16a34a", amber:"#d97706", red:"#dc2626", empty:"#e2e8f0" }[status];
+              return (
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:22 }}>{w.label}</div>
+                  <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:20, position:"relative", overflow:"hidden" }}>
+                    <div style={{ height:"100%", width:`${pct}%`, background:sc+"99", borderRadius:4, transition:"width 0.4s" }} />
+                    {hi > 0 && <div style={{ position:"absolute", left:`${(lo/hi)*100}%`, top:0, width:1, height:"100%", background:sc, opacity:0.4 }} />}
+                  </div>
+                  <div style={{ fontSize:10, fontWeight:700, color:sc, minWidth:36, textAlign:"right" }}>
+                    {w.trimp > 0 ? w.trimp : "—"}
+                  </div>
+                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:54 }}>
+                    {hi > 0 ? `${lo}–${hi}` : "rest"}
+                  </div>
+                </div>
+              );
+            });
+          })()}
+
+          {/* Taper countdown */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>TAPER PLAN</div>
+          {[
+            { week:"May 11–17", theme:"Race Sim",    target:"400–500", note:"3× Hyrox · intervals · long run" },
+            { week:"May 18–24", theme:"Peak Load",   target:"450–520", note:"Highest volume week — push hard" },
+            { week:"May 25–30", theme:"Race Week 🏁", target:"100–200", note:"Cut 40% · activate only · TSB +10→+20" },
+          ].map((row, i) => {
+            const isPast = new Date(row.week.split("–")[0] + " 2026") < new Date(TODAY);
+            const isCurrent = !isPast && new Date(row.week.split("–")[0] + " 2026") <= new Date(TODAY);
+            return (
+              <div key={i} style={{ display:"flex", gap:10, padding:"10px 12px", marginBottom:6,
+                background: isCurrent ? "#faf5ff" : "#f8fafc",
+                border: `1px solid ${isCurrent ? "#7c3aed" : "#e2e8f0"}`,
+                borderRadius:8, opacity: isPast ? 0.5 : 1 }}>
+                <div style={{ minWidth:80 }}>
+                  <div style={{ fontSize:10, fontWeight:700, color: isCurrent ? "#7c3aed" : "#1e293b" }}>{row.week}</div>
+                  <div style={{ fontSize:9, color:"#94a3b8" }}>{row.theme}</div>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:"#475569" }}>Target: {row.target} TRIMP</div>
+                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{row.note}</div>
+                </div>
+              </div>
+            );
+          })}
+
           <div style={{ marginTop:16, padding:"12px 14px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:11, color:"#475569", lineHeight:1.9 }}>
             <strong style={{ color:"#1e293b" }}>Race week target:</strong> TSB +10 to +20 by May 29.<br />
             <strong style={{ color:"#1e293b" }}>Taper starts:</strong> May 25 — cut volume 40%.<br />
