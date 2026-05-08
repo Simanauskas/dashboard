@@ -88,28 +88,20 @@ def get_client():
     import garth
     from garminconnect import Garmin
 
-    # Resume garth tokens first — garminconnect 0.2.8 uses garth's
-    # module-level client, so resume() patches it before Garmin() starts
+    # Resume garth tokens
     garth.resume(str(Path.home() / ".garth"))
 
-    # Instantiate without credentials — garth is already authenticated
-    client = Garmin()
-    client.garth = garth  # explicit assignment as belt-and-suspenders
-
-    # Verify auth actually works by calling a lightweight endpoint
+    # Force refresh the OAuth2 access token immediately — it expires every ~27h
+    # so we can't rely on it being valid. The refresh token lasts 30 days.
     try:
-        client.connectapi("/userprofile-service/userprofile/personal-information")
-        print(f"Auth OK (garth {garth.__version__})")
+        garth.client.refresh_oauth2()
+        print(f"Token refreshed OK (garth {garth.__version__})")
     except Exception as e:
-        # Token may have expired — try token refresh
-        print(f"Auth verify failed ({e}), attempting token refresh...")
-        try:
-            garth.client.refresh_oauth2()
-            garth.save(str(Path.home() / ".garth"))
-            print(f"Auth OK after refresh (garth {garth.__version__})")
-        except Exception as e2:
-            print(f"Auth refresh also failed: {e2}")
-            # Continue anyway — individual calls will log their own errors
+        print(f"Token refresh failed: {e} — will try anyway")
+
+    # Instantiate client after refresh so it picks up the new access token
+    client = Garmin()
+    client.garth = garth
 
     return client
 
