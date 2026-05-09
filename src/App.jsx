@@ -847,10 +847,39 @@ export default function Dashboard() {
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
           <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Sat May 9 · updated with May 8 Garmin data</div>
         </div>
-        <button onClick={() => fileRef.current?.click()} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
-          ↑ Upload CSV
+        <button onClick={async () => {
+            const token = "__DISPATCH_TOKEN_PLACEHOLDER__";
+            if (!token) { alert("No dispatch token configured"); return; }
+            const btn = document.activeElement;
+            btn.textContent = "Refreshing…";
+            btn.disabled = true;
+            try {
+              const res = await fetch(
+                "https://api.github.com/repos/Simanauskas/dashboard/actions/workflows/update.yml/dispatches",
+                {
+                  method: "POST",
+                  headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/vnd.github+json",
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ ref: "main", inputs: { mode: "activities" } }),
+                }
+              );
+              if (res.status === 204) {
+                btn.textContent = "✓ Running…";
+                setTimeout(() => { btn.textContent = "⟳ Refresh"; btn.disabled = false; }, 8000);
+              } else {
+                btn.textContent = "✗ Error";
+                btn.disabled = false;
+              }
+            } catch(e) {
+              btn.textContent = "✗ Error";
+              btn.disabled = false;
+            }
+          }} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
+          ⟳ Refresh
         </button>
-        <input ref={fileRef} type="file" accept=".csv" style={{ display:"none" }} onChange={handleUpload} />
       </div>
 
       {/* READINESS */}

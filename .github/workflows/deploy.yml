@@ -33,6 +33,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Inject dispatch token
+        run: |
+          sed -i "s|__DISPATCH_TOKEN_PLACEHOLDER__|${{ secrets.DISPATCH_TOKEN }}|g" src/App.jsx
+
       - name: Build
         run: npm run build
 
