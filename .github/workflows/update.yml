@@ -2,7 +2,7 @@ name: Daily Garmin Update
 
 on:
   schedule:
-    - cron: '0 5 * * *'       # 05:00 UTC = 08:00 LT — full update (HRV+sleep+activities)
+    - cron: '0 5 * * *'       # 05:00 UTC = 08:00 LT — full update
     - cron: '0 6-20 * * *'    # hourly 06-20 UTC (09-23 LT) — activities only
   workflow_dispatch:
     inputs:
@@ -12,7 +12,7 @@ on:
         default: 'full'
 
 permissions:
-  contents: write           # needed to commit the updated App.jsx
+  contents: write
 
 jobs:
   update:
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT }}   # PAT with repo+workflow scope for push
+          token: ${{ secrets.PAT }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -30,13 +30,66 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install "garth==0.4.47" "garminconnect==0.2.8"
+        run: pip install "garth==0.4.47" "garminconnect==0.2.8" requests
 
       - name: Restore Garmin tokens
         run: |
           mkdir -p ~/.garth
           echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
           echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+
+      - name: Refresh and persist tokens
+        env:
+          PAT: ${{ secrets.PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - << 'PYEOF'
+          import garth, json, os, base64, urllib.request, urllib.error
+
+          garth.resume(os.path.expanduser("~/.garth"))
+          try:
+              garth.client.refresh_oauth2()
+              garth.save(os.path.expanduser("~/.garth"))
+              print("Token refreshed OK")
+          except Exception as e:
+              print(f"Token refresh failed: {e} — using existing tokens")
+
+          # Push updated oauth2 token back to GitHub Secrets so it stays fresh
+          try:
+              oauth2 = open(os.path.expanduser("~/.garth/oauth2_token.json")).read().strip()
+              pat    = os.environ["PAT"]
+              repo   = os.environ["REPO"]
+
+              # Get repo public key for secret encryption
+              req = urllib.request.Request(
+                  f"https://api.github.com/repos/{repo}/actions/secrets/public-key",
+                  headers={"Authorization": f"Bearer {pat}", "Accept": "application/vnd.github+json"}
+              )
+              key_data = json.loads(urllib.request.urlopen(req).read())
+              key_id   = key_data["key_id"]
+              pub_key  = key_data["key"]
+
+              # Encrypt secret using libsodium (PyNaCl)
+              import subprocess, sys
+              subprocess.run([sys.executable, "-m", "pip", "install", "PyNaCl", "-q"])
+              from nacl import encoding, public
+              pk     = public.PublicKey(pub_key.encode(), encoding.Base64Encoder())
+              box    = public.SealedBox(pk)
+              enc    = base64.b64encode(box.encrypt(oauth2.encode())).decode()
+
+              # Update the secret
+              body = json.dumps({"encrypted_value": enc, "key_id": key_id}).encode()
+              req2 = urllib.request.Request(
+                  f"https://api.github.com/repos/{repo}/actions/secrets/GARTH_OAUTH2",
+                  data=body, method="PUT",
+                  headers={"Authorization": f"Bearer {pat}", "Accept": "application/vnd.github+json",
+                           "Content-Type": "application/json"}
+              )
+              urllib.request.urlopen(req2)
+              print("GARTH_OAUTH2 secret updated in GitHub")
+          except Exception as e:
+              print(f"Secret update failed (non-fatal): {e}")
+          PYEOF
 
       - name: Determine mode
         id: mode
