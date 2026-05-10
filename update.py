@@ -137,10 +137,26 @@ def fetch_wellness(client, date_str):
         if spo2 and 85 <= spo2 <= 100: result['spo2'] = round(spo2)
         if resp and resp > 0:          result['resp'] = round(resp, 1)
         if rhr  and 30 <= rhr <= 70:   result['rhr']  = round(rhr)
+        # Sleep score — try multiple field locations Garmin uses
+        ss = None
+        scores = dto.get('sleepScores')
+        if isinstance(scores, dict):
+            overall = scores.get('overall')
+            ss = overall.get('value') if isinstance(overall, dict) else overall
+        if ss is None:
+            ss = dto.get('sleepScore') or dto.get('sleepQualityScore')
+        if ss is None:
+            # Also try top-level sleepScoreFeedback numeric or sleepScoreInsight
+            ss = data.get('sleepScore') or data.get('score')
+        if ss and isinstance(ss, (int, float)) and 0 < ss <= 100:
+            result['sleep_score'] = round(ss)
         s = result['sleep']
         total = sum(s.values())
         print(f"Sleep: deep={s['deep']} rem={s['rem']} light={s['light']} awake={s['awake']} = {total//60}h{total%60}m")
-        print(f"SpO2={result.get('spo2')}  resp={result.get('resp')}  RHR={result.get('rhr')}")
+        print(f"SpO2={result.get('spo2')}  resp={result.get('resp')}  RHR={result.get('rhr')}  SleepScore={result.get('sleep_score')}")
+        # Debug: print raw sleepScores structure once
+        if scores is not None:
+            print(f"  sleepScores raw: {str(scores)[:200]}")
     except Exception as e:
         print(f"Sleep failed: {e}")
         result.setdefault('sleep', {'deep':0,'rem':0,'light':0,'awake':0})
