@@ -137,26 +137,34 @@ def fetch_wellness(client, date_str):
         if spo2 and 85 <= spo2 <= 100: result['spo2'] = round(spo2)
         if resp and resp > 0:          result['resp'] = round(resp, 1)
         if rhr  and 30 <= rhr <= 70:   result['rhr']  = round(rhr)
-        # Sleep score — try multiple field locations Garmin uses
+        # Sleep score — the overall score is at top level, not inside sleepScores dict
+        # sleepScores dict contains sub-scores (duration, stress, rem etc) with qualifierKeys
+        # The numeric overall score is in dailySleepDTO.sleepScore or data.overallSleepScore
         ss = None
-        scores = dto.get('sleepScores')
-        if isinstance(scores, dict):
-            overall = scores.get('overall')
-            ss = overall.get('value') if isinstance(overall, dict) else overall
+        # Try top-level fields first (most reliable)
+        for field in ('sleepScore', 'overallSleepScore', 'sleepQualityScore', 'score'):
+            v = dto.get(field)
+            if v and isinstance(v, (int, float)) and 0 < v <= 100:
+                ss = round(v); break
+        # Also try parent data object
         if ss is None:
-            ss = dto.get('sleepScore') or dto.get('sleepQualityScore')
-        if ss is None:
-            # Also try top-level sleepScoreFeedback numeric or sleepScoreInsight
-            ss = data.get('sleepScore') or data.get('score')
-        if ss and isinstance(ss, (int, float)) and 0 < ss <= 100:
-            result['sleep_score'] = round(ss)
+            for field in ('sleepScore', 'overallSleepScore', 'score'):
+                v = data.get(field)
+                if v and isinstance(v, (int, float)) and 0 < v <= 100:
+                    ss = round(v); break
+        if ss:
+            result['sleep_score'] = ss
         s = result['sleep']
         total = sum(s.values())
         print(f"Sleep: deep={s['deep']} rem={s['rem']} light={s['light']} awake={s['awake']} = {total//60}h{total%60}m")
         print(f"SpO2={result.get('spo2')}  resp={result.get('resp')}  RHR={result.get('rhr')}  SleepScore={result.get('sleep_score')}")
-        # Debug: print raw sleepScores structure once
-        if scores is not None:
-            print(f"  sleepScores raw: {str(scores)[:200]}")
+        # Debug: print all top-level keys to find the score
+        print(f"  dto keys: {[k for k in dto.keys() if 'sleep' in k.lower() or 'score' in k.lower()]}")
+        print(f"  data keys: {[k for k in data.keys() if 'sleep' in k.lower() or 'score' in k.lower()]}")
+        # Print actual values of score-related fields
+        for k in dto:
+            if 'score' in k.lower() and dto[k] is not None:
+                print(f"  dto[{k}] = {str(dto[k])[:100]}")
     except Exception as e:
         print(f"Sleep failed: {e}")
         result.setdefault('sleep', {'deep':0,'rem':0,'light':0,'awake':0})
