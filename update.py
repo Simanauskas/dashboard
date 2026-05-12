@@ -109,6 +109,23 @@ def fetch_wellness(client, date_str):
     """HRV, sleep, RHR, SpO2, resp via JSON APIs."""
     result = {}
 
+    # Sleep score — separate endpoint from sleep data
+    try:
+        ss_data = client.connectapi(f"/wellness-service/wellness/dailyStress/{date_str}")
+        # sleep score is at /sleep-service/sleep/{date} not dailySleepData
+    except:
+        pass
+    try:
+        score_data = client.connectapi(f"/sleep-service/sleep/{date_str}")
+        ss = score_data.get('dailySleepDTO', {}).get('sleepScore') or              score_data.get('sleepScore') or              score_data.get('overallSleepScore')
+        if ss and isinstance(ss, (int, float)) and 0 < ss <= 100:
+            result['sleep_score'] = round(ss)
+            print(f"SleepScore from /sleep/{date_str}: {round(ss)}")
+        else:
+            print(f"SleepScore endpoint keys: {list(score_data.keys())[:8]}")
+    except Exception as e:
+        print(f"SleepScore endpoint failed: {e}")
+
     # HRV
     try:
         data = client.connectapi(f"/hrv-service/hrv/{date_str}")
@@ -158,13 +175,6 @@ def fetch_wellness(client, date_str):
         total = sum(s.values())
         print(f"Sleep: deep={s['deep']} rem={s['rem']} light={s['light']} awake={s['awake']} = {total//60}h{total%60}m")
         print(f"SpO2={result.get('spo2')}  resp={result.get('resp')}  RHR={result.get('rhr')}  SleepScore={result.get('sleep_score')}")
-        # Debug: print all top-level keys to find the score
-        print(f"  dto keys: {[k for k in dto.keys() if 'sleep' in k.lower() or 'score' in k.lower()]}")
-        print(f"  data keys: {[k for k in data.keys() if 'sleep' in k.lower() or 'score' in k.lower()]}")
-        # Print actual values of score-related fields
-        for k in dto:
-            if 'score' in k.lower() and dto[k] is not None:
-                print(f"  dto[{k}] = {str(dto[k])[:100]}")
     except Exception as e:
         print(f"Sleep failed: {e}")
         result.setdefault('sleep', {'deep':0,'rem':0,'light':0,'awake':0})
