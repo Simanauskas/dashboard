@@ -171,10 +171,27 @@ def fetch_wellness(client, date_str):
                     ss = round(v); break
         if ss:
             result['sleep_score'] = ss
+        # Fallback: map sleepScoreFeedback qualifier to approximate score
+        # Garmin doesn't expose the numeric score via API — only the feedback key
+        if 'sleep_score' not in result:
+            feedback = dto.get('sleepScoreFeedback', '')
+            score_map = {
+                'POSITIVE_OPTIMAL_STRUCTURE': 88,
+                'POSITIVE_GOOD_SLEEP': 82,
+                'POSITIVE_RECOVERING': 75,
+                'NEUTRAL_BALANCED': 68,
+                'NEGATIVE_POOR_SLEEP': 52,
+                'NEGATIVE_FRAGMENTED': 45,
+                'NEGATIVE_VERY_POOR_SLEEP': 38,
+            }
+            approx = score_map.get(feedback)
+            if approx:
+                result['sleep_score'] = approx
         s = result['sleep']
         total = sum(s.values())
         print(f"Sleep: deep={s['deep']} rem={s['rem']} light={s['light']} awake={s['awake']} = {total//60}h{total%60}m")
-        print(f"SpO2={result.get('spo2')}  resp={result.get('resp')}  RHR={result.get('rhr')}  SleepScore={result.get('sleep_score')}")
+        fb = dto.get('sleepScoreFeedback','')
+        print(f"SpO2={result.get('spo2')}  resp={result.get('resp')}  RHR={result.get('rhr')}  SleepScore={result.get('sleep_score')} (feedback={fb})")
     except Exception as e:
         print(f"Sleep failed: {e}")
         result.setdefault('sleep', {'deep':0,'rem':0,'light':0,'awake':0})
