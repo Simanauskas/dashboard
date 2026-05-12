@@ -381,15 +381,23 @@ if __name__ == '__main__':
     client = get_client()
 
     today = datetime.date.today().isoformat()
+    yesterday = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
 
     if args.mode == 'full':
-        # Full update: HRV + sleep + RHR for yesterday + activities for both days
-        wellness = fetch_wellness(client, target)
-        csv_rows_yesterday = fetch_activities(client, target)
-        csv_rows_today     = fetch_activities(client, today)
-        patch(target, wellness, csv_rows_yesterday)
-        if csv_rows_today:
-            patch(today, {}, csv_rows_today, advance_today=False)
+        # Full update: fetch wellness + activities for yesterday AND today
+        # Today's wellness may already be available if watch synced (typically ~08:30 LT)
+        # Runs hourly 08:00-12:00 LT to catch the sync whenever it happens
+        for date_str in [yesterday, today]:
+            wellness = fetch_wellness(client, date_str)
+            has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
+            if has_wellness:
+                print(f"  ✓ Wellness data available for {date_str}")
+            else:
+                print(f"  ✗ No wellness data yet for {date_str}")
+            csv_rows = fetch_activities(client, date_str)
+            # Only advance TODAY pointer when patching yesterday's data
+            advance = (date_str == yesterday)
+            patch(date_str, wellness, csv_rows, advance_today=advance)
     else:
         # Activities-only: fetch today's new workouts
         csv_rows = fetch_activities(client, today)
