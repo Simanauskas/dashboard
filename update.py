@@ -176,6 +176,7 @@ def fetch_wellness(client, date_str):
         if 'sleep_score' not in result:
             feedback = dto.get('sleepScoreFeedback', '')
             score_map = {
+                'POSITIVE_HIGHLY_RECOVERING': 95,   # near-perfect night
                 'POSITIVE_OPTIMAL_STRUCTURE': 88,
                 'POSITIVE_GOOD_SLEEP': 82,
                 'POSITIVE_RECOVERING': 75,
