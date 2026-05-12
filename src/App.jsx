@@ -43,6 +43,7 @@ const HEALTH_DATA = {
     {date:"2026-05-09",hrv:117,rhr:43,spo2:96,resp:12.0,sleep_score:null},
     {date:"2026-05-10",hrv:0,rhr:40,spo2:98,resp:12.0,sleep_score:null},
     {date:"2026-05-11",hrv:127,rhr:43,spo2:93,resp:12.0,sleep_score:null},
+    {date:"2026-05-12",hrv:95,rhr:43,spo2:95,resp:12.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94, light:259,awake:0},
@@ -73,6 +74,7 @@ const HEALTH_DATA = {
     {date:"2026-05-09",deep:113,rem:110,light:274,awake:23},
     {date:"2026-05-10",deep:0,rem:0,light:0,awake:0},
     {date:"2026-05-11",deep:94,rem:95,light:265,awake:4},
+    {date:"2026-05-12",deep:143,rem:117,light:207,awake:0},
   ],
 };
 
@@ -802,7 +804,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 109; // updated 2026-05-11
+  const hrvBaseline = 110; // updated 2026-05-12
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
