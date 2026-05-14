@@ -861,39 +861,104 @@ export default function Dashboard() {
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
           <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Wed May 13 · updated with May 12 Garmin data</div>
         </div>
-        <button onClick={async () => {
+        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }} id="auth-controls">
+          {/* ⟳ Refresh button */}
+          <button id="refresh-btn" onClick={async () => {
             const token = "__DISPATCH_TOKEN_PLACEHOLDER__";
             if (!token) { alert("No dispatch token configured"); return; }
-            const btn = document.activeElement;
-            btn.textContent = "Refreshing…";
-            btn.disabled = true;
+            const btn = document.getElementById("refresh-btn");
+            btn.textContent = "Refreshing…"; btn.disabled = true;
             try {
               const res = await fetch(
                 "https://api.github.com/repos/Simanauskas/dashboard/actions/workflows/update.yml/dispatches",
-                {
-                  method: "POST",
-                  headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Accept": "application/vnd.github+json",
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ ref: "main", inputs: { mode: "activities" } }),
-                }
+                { method:"POST", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/vnd.github+json", "Content-Type":"application/json" },
+                  body: JSON.stringify({ ref:"main", inputs:{ mode:"activities" } }) }
               );
               if (res.status === 204) {
                 btn.textContent = "✓ Running…";
                 setTimeout(() => { btn.textContent = "⟳ Refresh"; btn.disabled = false; }, 8000);
               } else {
-                btn.textContent = "✗ Error";
+                btn.textContent = "✗ Error"; btn.disabled = false;
+              }
+            } catch(e) { btn.textContent = "✗ Error"; btn.disabled = false; }
+          }} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
+            ⟳ Refresh
+          </button>
+
+          {/* 🔑 Renew Credentials button + MFA flow */}
+          <button id="renew-btn" onClick={async () => {
+            const WORKER = "https://auth.simas.fit";
+            const btn = document.getElementById("renew-btn");
+            const mfaArea = document.getElementById("mfa-area");
+
+            btn.textContent = "Connecting…"; btn.disabled = true;
+            try {
+              const res = await fetch(`${WORKER}/auth/start`, { method:"POST" });
+              const data = await res.json();
+              if (data.status === "mfa_required") {
+                // Show MFA input
+                mfaArea.style.display = "flex";
+                mfaArea.dataset.session = data.sessionId;
+                document.getElementById("mfa-input").focus();
+                btn.textContent = "Check your email →";
+              } else if (data.error) {
+                btn.textContent = `✗ ${data.error}`;
                 btn.disabled = false;
               }
             } catch(e) {
-              btn.textContent = "✗ Error";
-              btn.disabled = false;
+              btn.textContent = "✗ Worker unreachable"; btn.disabled = false;
             }
-          }} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
-          ⟳ Refresh
-        </button>
+          }} style={{ background:"#0f172a", border:"1px solid #334155", borderRadius:8, padding:"8px 14px", color:"#94a3b8", fontSize:11, fontWeight:700, cursor:"pointer" }}>
+            🔑 Renew
+          </button>
+        </div>
+
+        {/* MFA input area — hidden until needed */}
+        <div id="mfa-area" style={{ display:"none", alignItems:"center", gap:8, marginTop:8, width:"100%", flexWrap:"wrap" }}>
+          <span style={{ fontSize:11, color:"#94a3b8" }}>Enter the code from your email:</span>
+          <input id="mfa-input" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={8}
+            placeholder="123456"
+            style={{ width:90, padding:"6px 10px", borderRadius:7, border:"1.5px solid #7c3aed",
+                     fontSize:14, fontWeight:700, letterSpacing:3, textAlign:"center", outline:"none" }}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") document.getElementById("mfa-submit").click();
+            }}
+          />
+          <button id="mfa-submit" onClick={async () => {
+            const WORKER = "https://auth.simas.fit";
+            const code = document.getElementById("mfa-input").value.trim();
+            const btn  = document.getElementById("mfa-submit");
+            if (!code) return;
+            btn.textContent = "Verifying…"; btn.disabled = true;
+            try {
+              const res  = await fetch(`${WORKER}/auth/verify`, {
+                method:"POST", headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify({ code })
+              });
+              const data = await res.json();
+              if (data.status === "success") {
+                document.getElementById("mfa-area").style.display = "none";
+                document.getElementById("renew-btn").textContent = "✓ Done — updating…";
+                setTimeout(() => {
+                  document.getElementById("renew-btn").textContent = "🔑 Renew";
+                  document.getElementById("renew-btn").disabled = false;
+                }, 60000);
+              } else {
+                btn.textContent = "✗ " + (data.error || "Failed");
+                btn.disabled = false;
+              }
+            } catch(e) { btn.textContent = "✗ Error"; btn.disabled = false; }
+          }} style={{ background:"#7c3aed", border:"none", borderRadius:7, padding:"6px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
+            Submit
+          </button>
+          <button onClick={() => {
+            document.getElementById("mfa-area").style.display = "none";
+            document.getElementById("renew-btn").textContent = "🔑 Renew";
+            document.getElementById("renew-btn").disabled = false;
+          }} style={{ background:"none", border:"none", color:"#94a3b8", fontSize:11, cursor:"pointer" }}>
+            Cancel
+          </button>
+        </div>
       </div>
 
       {/* READINESS */}
