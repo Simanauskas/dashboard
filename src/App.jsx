@@ -80,6 +80,50 @@ const HEALTH_DATA = {
   ],
 };
 
+// ── Hyrox session log — manually maintained, update.py does not touch this ──
+// Add a new object per session. Runs: seconds for each 1km. Stations: seconds + avg HR.
+// Set estimateMin to null once you've raced (hides the estimate banner).
+const HYROX_SESSIONS = [
+  {
+    date: "2026-05-16",
+    label: "Baseline",
+    avgHR: 161,
+    totalTime: 3316,
+    runTime: 2056,
+    stationTime: 1260,
+    estimateMin: "70–75",
+    runs: [241, 254, 253, 256, 267, 265, 270, 251],
+    stations: [
+      { name: "Small Ball ×150",       time: 326, hr: 158, notes: "Sub for Ski Erg" },
+      { name: "Sled Push 50 m",        time: 75,  hr: 159, notes: "" },
+      { name: "Sled Pull 50 m",        time: 83,  hr: 155, notes: "" },
+      { name: "Burpee Broad Jump 80 m",time: 186, hr: 159, notes: "" },
+      { name: "Farmer Walk 160 m",     time: 71,  hr: 162, notes: "24 kg" },
+      { name: "Lunges 100 m",          time: 286, hr: 154, notes: "24 kg" },
+      { name: "Wall Balls 100 × 6 kg", time: 234, hr: 159, notes: "" },
+    ],
+  },
+  // ── template for next session ───────────────────────────────────────────
+  // {
+  //   date: "YYYY-MM-DD",
+  //   label: "Session 2",
+  //   avgHR: null,
+  //   totalTime: 0, runTime: 0, stationTime: 0,
+  //   estimateMin: "70–75",
+  //   runs: [0,0,0,0,0,0,0,0],
+  //   stations: [
+  //     { name: "Ski Erg 1000 m",          time: 0, hr: null, notes: "" },
+  //     { name: "Sled Push 50 m",           time: 0, hr: null, notes: "" },
+  //     { name: "Sled Pull 50 m",           time: 0, hr: null, notes: "" },
+  //     { name: "Burpee Broad Jump 80 m",   time: 0, hr: null, notes: "" },
+  //     { name: "Rowing 1000 m",            time: 0, hr: null, notes: "" },
+  //     { name: "Farmer Walk 160 m",        time: 0, hr: null, notes: "24 kg" },
+  //     { name: "Lunges 100 m",             time: 0, hr: null, notes: "24 kg" },
+  //     { name: "Wall Balls 100 × 6 kg",    time: 0, hr: null, notes: "" },
+  //   ],
+  // },
+];
+
 // Body fat — fetched live from Google Sheets
 // CORS proxy needed — Google Sheets blocks direct browser fetch
 const SHEET_ID = "1Kdiy4LbhG_C5c8XcT8nwrOJxiyufUCWwxRORqN84zyg";
@@ -197,6 +241,12 @@ function parseDuration(v) {
 function fmtDur(s) {
   const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function fmtMMSS(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.round(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
 function dateOf(a) { return (a.Date || "").split(" ")[0]; }
@@ -508,6 +558,184 @@ function ScheduleView({ activities }) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function HyroxView() {
+  const [selIdx, setSelIdx] = useState(HYROX_SESSIONS.length - 1);
+  if (!HYROX_SESSIONS.length) return (
+    <div style={{ padding:"40px 14px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>
+      No sessions yet. Add your first session to HYROX_SESSIONS in App.jsx.
+    </div>
+  );
+  const s = HYROX_SESSIONS[selIdx];
+  const avgRunPace = s.runs.reduce((a, b) => a + b, 0) / s.runs.length;
+  const fastestRun = Math.min(...s.runs);
+  const slowestRun = Math.max(...s.runs);
+  const maxRunSec = Math.max(...s.runs);
+  const minRunSec = Math.min(...s.runs);
+  const runRange = maxRunSec - minRunSec || 1;
+  const maxStationTime = Math.max(...s.stations.map(st => st.time), 1);
+
+  const Stat = ({ label, value, sub, color, bg, border }) => (
+    <div style={{ padding:"10px 12px", background: bg || "#f8fafc", border:`1.5px solid ${border || "#e2e8f0"}`, borderRadius:10, flex:1, minWidth:0 }}>
+      <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1, textTransform:"uppercase" }}>{label}</div>
+      <div style={{ fontSize:18, fontWeight:900, color: color || "#1e293b", lineHeight:1.1, marginTop:3 }}>{value}</div>
+      {sub && <div style={{ fontSize:10, color:"#64748b", marginTop:2 }}>{sub}</div>}
+    </div>
+  );
+
+  return (
+    <div style={{ padding:"14px 14px 60px" }}>
+
+      {/* session picker */}
+      {HYROX_SESSIONS.length > 1 && (
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14 }}>
+          {HYROX_SESSIONS.map((sess, i) => (
+            <button key={i} onClick={() => setSelIdx(i)} style={{
+              padding:"4px 12px", borderRadius:6, fontSize:11, fontWeight:700,
+              cursor:"pointer", border:"1.5px solid",
+              borderColor: i === selIdx ? "#7c3aed" : "#e2e8f0",
+              background: i === selIdx ? "#ede9fe" : "#f8fafc",
+              color: i === selIdx ? "#4c1d95" : "#94a3b8",
+              fontFamily:"inherit",
+            }}>
+              {sess.label || sess.date}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* top stats */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:14 }}>
+        <Stat label="Total time"    value={fmtMMSS(s.totalTime)}    sub={s.date} color="#1e293b" />
+        <Stat label="Running 8×1km" value={fmtMMSS(s.runTime)}      sub={`avg ${fmtMMSS(avgRunPace)}/km`} color="#c2410c" bg="#fff7ed" border="#fdba74" />
+        <Stat label="Stations"      value={fmtMMSS(s.stationTime)}  sub={`${s.stations.length} stations`} color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:18 }}>
+        <Stat label="Avg HR"        value={s.avgHR ? `${s.avgHR} bpm` : "—"}  sub="whole session" color="#dc2626" bg="#fef2f2" border="#fca5a5" />
+        <Stat label="Pace range"    value={`${fmtMMSS(fastestRun)}–${fmtMMSS(slowestRun)}`} sub="fastest → slowest run" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
+      </div>
+
+      {/* run splits */}
+      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — 8 × 1 KM</div>
+      <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
+        {s.runs.map((t, i) => {
+          const barW = Math.round(((maxRunSec - t) / runRange) * 60 + 35);
+          const isF = t === fastestRun, isS = t === slowestRun;
+          return (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+              <div style={{ fontSize:10, color:"#94a3b8", minWidth:18, textAlign:"right" }}>R{i+1}</div>
+              <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:20, overflow:"hidden" }}>
+                <div style={{ height:"100%", width:`${barW}%`, background: isF ? "#16a34a99" : isS ? "#dc262699" : "#c2410c66", borderRadius:4 }} />
+              </div>
+              <div style={{ fontSize:11, fontWeight:700, color: isF ? "#15803d" : isS ? "#dc2626" : "#c2410c", minWidth:40, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
+                {fmtMMSS(t)}
+              </div>
+              {isF && <span style={{ fontSize:9, color:"#15803d", fontWeight:700 }}>↑ fast</span>}
+              {isS && <span style={{ fontSize:9, color:"#dc2626", fontWeight:700 }}>↓ slow</span>}
+              {!isF && !isS && <span style={{ fontSize:9, color:"#94a3b8", minWidth:28 }}></span>}
+            </div>
+          );
+        })}
+        <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16 }}>
+          <span>avg <strong>{fmtMMSS(avgRunPace)}/km</strong></span>
+          <span>drift <strong>+{fmtMMSS(slowestRun - fastestRun)}</strong> first→last</span>
+          <span>total running <strong>{fmtMMSS(s.runTime)}</strong></span>
+        </div>
+      </div>
+
+      {/* station breakdown */}
+      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION BREAKDOWN</div>
+      <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"14px", marginBottom:16 }}>
+        {s.stations.map((st, i) => {
+          const barW = Math.round((st.time / maxStationTime) * 85 + 10);
+          return (
+            <div key={i} style={{ marginBottom:10 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                <span style={{ fontSize:11, fontWeight:600, color:"#4c1d95" }}>{st.name}</span>
+                <span style={{ fontSize:12, fontWeight:800, color:"#6d28d9", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(st.time)}</span>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:14, overflow:"hidden" }}>
+                  <div style={{ height:"100%", width:`${barW}%`, background:"#7c3aed88", borderRadius:4 }} />
+                </div>
+                <div style={{ fontSize:10, color:"#94a3b8", minWidth:54, textAlign:"right" }}>
+                  {st.hr ? `HR ${st.hr}` : ""}
+                  {st.notes ? ` · ${st.notes}` : ""}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div style={{ marginTop:4, padding:"8px 10px", background:"#fff", border:"1px solid #ddd6fe", borderRadius:6, fontSize:10, color:"#6d28d9", display:"flex", gap:16, flexWrap:"wrap" }}>
+          <span>total stations <strong>{fmtMMSS(s.stationTime)}</strong></span>
+          <span>longest <strong>{s.stations.reduce((a,b) => b.time > a.time ? b : a).name.split(" ")[0]} {fmtMMSS(Math.max(...s.stations.map(st => st.time)))}</strong></span>
+          <span>fastest <strong>{s.stations.reduce((a,b) => b.time < a.time ? b : a).name.split(" ")[0]} {fmtMMSS(Math.min(...s.stations.map(st => st.time)))}</strong></span>
+        </div>
+      </div>
+
+      {/* multi-session comparison sparkline */}
+      {HYROX_SESSIONS.length > 1 && (
+        <>
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>PROGRESS — TOTAL TIME</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+            <Sparkline data={HYROX_SESSIONS.map(sess => [sess.date, sess.totalTime])} color="#7c3aed" height={48} />
+            <div style={{ display:"flex", justifyContent:"space-between", marginTop:6, fontSize:10, color:"#94a3b8" }}>
+              {HYROX_SESSIONS.map((sess, i) => (
+                <span key={i} style={{ fontWeight: i === selIdx ? 700 : 400, color: i === selIdx ? "#7c3aed" : "#94a3b8" }}>
+                  {sess.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* estimated finish banner */}
+      {s.estimateMin && (
+        <div style={{ background:"linear-gradient(135deg,#4c1d95,#6d28d9)", borderRadius:12, padding:"16px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
+          <div>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.65)", fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase" }}>Projected finish · Hyrox Open (Riga)</div>
+            <div style={{ fontSize:32, fontWeight:900, color:"#ffffff", lineHeight:1.1, marginTop:2 }}>~{s.estimateMin} min</div>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.65)" }}>based on {s.label} baseline</div>
+            <div style={{ fontSize:13, color:"#e9d5ff", fontWeight:700, marginTop:2 }}>top ~20–25% Open Men · first race</div>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.5)", marginTop:4 }}>Set estimateMin: null after racing</div>
+          </div>
+        </div>
+      )}
+
+      {/* estimate breakdown */}
+      {s.estimateMin && (
+        <div style={{ marginTop:12, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px" }}>
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>ESTIMATE BREAKDOWN</div>
+          {[
+            { seg:"8 × 1 km runs",            est:"~38:00", note:"avg ~4:45/km projected (race adrenaline vs. fatigue)" },
+            { seg:"Ski Erg 1000 m",            est:"~4:30",  note:"not trained today — estimated from aerobic profile" },
+            { seg:"Sled Push (official ~102kg)",est:"~2:30", note:"today was 1:15 but lighter weight" },
+            { seg:"Sled Pull",                 est:"~1:45",  note:"today 1:23 + slight fatigue factor" },
+            { seg:"Burpee Broad Jump 80 m",    est:"~4:00",  note:"today 3:06 — mid-race fatigue adds ~1 min" },
+            { seg:"Rowing 1000 m",             est:"~4:00",  note:"not trained today — estimated from VO₂max 55" },
+            { seg:"Farmer's Carry 200 m",      est:"~2:30",  note:"official 200 m vs today's 160 m, same 24 kg" },
+            { seg:"Sandbag Lunges 100 m",      est:"~5:00",  note:"today 4:46 @ 24 kg; official 20 kg + fatigue" },
+            { seg:"Wall Balls 100 × 6 kg",     est:"~4:15",  note:"today 3:54 — end-of-race adds ~20 s" },
+            { seg:"Transitions (~8×)",         est:"~3:00",  note:"walking between stations in venue" },
+          ].map((row, i) => (
+            <div key={i} style={{ display:"flex", alignItems:"baseline", gap:10, padding:"5px 0", borderBottom:"1px solid #f1f5f9" }}>
+              <div style={{ flex:1, fontSize:11, color:"#334155" }}>{row.seg}</div>
+              <div style={{ fontSize:12, fontWeight:800, color:"#6d28d9", minWidth:44, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>{row.est}</div>
+              <div style={{ fontSize:10, color:"#94a3b8", minWidth:180, display:"none" }}>{row.note}</div>
+            </div>
+          ))}
+          <div style={{ marginTop:10, fontSize:10, color:"#64748b", fontStyle:"italic" }}>
+            Tap to expand notes — or check the hyrox_log.xlsx for full breakdown.
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -849,7 +1077,7 @@ export default function Dashboard() {
   notes.push(`Week running km so far: ${weeklyKm.toFixed(1)} km · 3 Hyrox sessions this week · on track`);
   notes.push(`HRV 128ms today (7d avg: Balanced) — outstanding recovery after Hyrox. RHR 40bpm. Body battery +66. Green light to train hard.`);
 
-  const TABS = [["today","TODAY"],["schedule","SCHEDULE"],["health","HEALTH"],["history","HISTORY"],["load","LOAD"],["insights","INSIGHTS"]];
+  const TABS = [["today","TODAY"],["schedule","SCHEDULE"],["hyrox","🏃 HYROX"],["health","HEALTH"],["history","HISTORY"],["load","LOAD"],["insights","INSIGHTS"]];
 
   return (
     <div style={{ minHeight:"100vh", background:"#ffffff", fontFamily:"'Inter',system-ui,sans-serif", color:"#1e293b", fontSize:13 }}>
@@ -1338,6 +1566,7 @@ export default function Dashboard() {
 
       {view === "schedule" && <ScheduleView activities={activities} />}
       {view === "health" && <HealthView />}
+      {view === "hyrox" && <HyroxView />}
 
       {/* HISTORY */}
       {view === "history" && (
