@@ -896,9 +896,8 @@ export default function Dashboard() {
               const res = await fetch(`${WORKER}/auth/start`, { method:"POST" });
               const data = await res.json();
               if (data.status === "mfa_required") {
-                // Show MFA input
                 mfaArea.style.display = "flex";
-                mfaArea.dataset.session = data.sessionId;
+                mfaArea.dataset.session = data.session;
                 document.getElementById("mfa-input").focus();
                 btn.textContent = "Check your email →";
               } else if (data.error) {
@@ -931,9 +930,10 @@ export default function Dashboard() {
             if (!code) return;
             btn.textContent = "Verifying…"; btn.disabled = true;
             try {
+              const session = document.getElementById("mfa-area").dataset.session;
               const res  = await fetch(`${WORKER}/auth/verify`, {
                 method:"POST", headers:{ "Content-Type":"application/json" },
-                body: JSON.stringify({ code })
+                body: JSON.stringify({ code, session })
               });
               const data = await res.json();
               if (data.status === "success") {
