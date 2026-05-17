@@ -97,7 +97,7 @@ def get_client():
         garth.client.refresh_oauth2()
         print(f"Token refreshed OK (garth {garth.__version__})")
     except Exception as e:
-        print(f"Token refresh failed: {e} — will try anyway")
+        pass  # token_refresh.py handles validation; we just use whatever tokens are loaded
 
     # Instantiate client after refresh so it picks up the new access token
     client = Garmin()
@@ -122,9 +122,8 @@ def fetch_wellness(client, date_str):
             result['sleep_score'] = round(ss)
             print(f"SleepScore from /sleep/{date_str}: {round(ss)}")
         else:
-            print(f"SleepScore endpoint keys: {list(score_data.keys())[:8]}")
-    except Exception as e:
-        print(f"SleepScore endpoint failed: {e}")
+    except Exception:
+        pass  # SleepScore endpoint often 404s for older dates — silently fall back to feedback mapping
 
     # HRV
     try:
@@ -221,8 +220,6 @@ def fetch_activities(client, date_str):
         print("Activities: no data after 3 attempts — skipping"); return []
 
     dates_seen = set((a.get('startTimeLocal') or '')[:10] for a in acts if a.get('startTimeLocal'))
-    print(f"  Garmin returned activities for dates: {sorted(dates_seen)}")
-    print(f"  Filtering for: {date_str}")
 
     TYPE_MAP = {
         'running':'Running','treadmill_running':'Treadmill Running',
