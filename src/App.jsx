@@ -45,6 +45,8 @@ const HEALTH_DATA = {
     {date:"2026-05-11",hrv:127,rhr:43,spo2:93,resp:12.0,sleep_score:null},
     {date:"2026-05-12",hrv:95,rhr:43,spo2:95,resp:12.0,sleep_score:null},
     {date:"2026-05-13",hrv:0,rhr:40,spo2:98,resp:12.0,sleep_score:null},
+    {date:"2026-05-16",hrv:92,rhr:49,spo2:96,resp:14.0,sleep_score:null},
+    {date:"2026-05-17",hrv:115,rhr:44,spo2:98,resp:12.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94, light:259,awake:0},
@@ -77,6 +79,8 @@ const HEALTH_DATA = {
     {date:"2026-05-11",deep:94,rem:95,light:265,awake:4},
     {date:"2026-05-12",deep:143,rem:117,light:207,awake:0},
     {date:"2026-05-13",deep:0,rem:0,light:0,awake:0},
+    {date:"2026-05-16",deep:102,rem:49,light:213,awake:9},
+    {date:"2026-05-17",deep:93,rem:119,light:349,awake:3},
   ],
 };
 
@@ -162,6 +166,10 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Inline Skating","2026-05-17 11:59:45","false","Vilnius Inline Skating","4,59","140","00:20:12","102","186","0,6","--","--","4:24","--","--","--","17","16","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:12","00:20:12","--","--"
+"Cycling","2026-05-16 11:57:57","false","Vilnius Cycling","1,87","62","00:09:54","96","184","0,2","--","--","5:17","--","--","--","3","28","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:03","00:09:54","--","--"
+"Indoor Running","2026-05-16 10:00:30","false","Hyrox weekend track","10,87","1061","01:20:39","144","171","4,5","119","--","7:25","--","--","--","--","--","--","108,84","6,8","7,6","316","--","--","--","--","--","--","--","--","--","No","--","18","--","--","--","--","--","01:00:57","01:20:54","--","--"
+"Cycling","2026-05-16 09:48:13","false","Vilnius Cycling","1,55","63","00:06:28","112","134","0,7","--","--","4:09","--","--","--","36","4","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:06:23","00:07:52","--","--"
 "Running","2026-05-12 21:33:50","false","Vilnius Running","5,81","411","00:33:08","129","139","2,5","175","--","5:42","--","--","--","22","19","--","101,07","6,5","6,8","285","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:33:08","00:33:08","--","--"
 "Running","2026-05-11 17:50:11","false","Z4 8km","8,75","615","00:38:38","160","173","4,2","183","--","4:24","--","--","--","39","41","--","--","--","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:38:38","00:38:38","--","--"
 "Tennis V2","2026-05-11 08:57:44","false","Tennis","0,57","633","01:17:42","116","155","2,2","24","--","137:44","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:13","01:17:42","--","--"
@@ -206,7 +214,7 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-05-13";
+const TODAY = "2026-05-17";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1035,7 +1043,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 110; // updated 2026-05-12
+  const hrvBaseline = 105; // updated 2026-05-17
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
@@ -1085,9 +1093,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 17 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 13 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Wed May 13 · updated with May 12 Garmin data</div>
+          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Sun May 17 · updated with May 16 Garmin data</div>
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }} id="auth-controls">
           {/* ⟳ Refresh button */}
