@@ -1098,25 +1098,25 @@ export default function Dashboard() {
           <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Sun May 17 · updated with May 16 Garmin data</div>
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }} id="auth-controls">
-          {/* ⟳ Refresh button */}
+          {/* ⟳ Refresh button — calls Worker which has the PAT */}
           <button id="refresh-btn" onClick={async () => {
-            const token = "__DISPATCH_TOKEN_PLACEHOLDER__";
-            if (!token) { alert("No dispatch token configured"); return; }
+            const WORKER = "https://auth.simas.fit";
             const btn = document.getElementById("refresh-btn");
             btn.textContent = "Refreshing…"; btn.disabled = true;
             try {
-              const res = await fetch(
-                "https://api.github.com/repos/Simanauskas/dashboard/actions/workflows/update.yml/dispatches",
-                { method:"POST", headers:{ "Authorization":`Bearer ${token}`, "Accept":"application/vnd.github+json", "Content-Type":"application/json" },
-                  body: JSON.stringify({ ref:"main", inputs:{ mode:"activities" } }) }
-              );
-              if (res.status === 204) {
+              const res = await fetch(`${WORKER}/refresh`, {
+                method:"POST",
+                headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify({ mode: "activities" })
+              });
+              const data = await res.json();
+              if (data.status === "triggered") {
                 btn.textContent = "✓ Running…";
                 setTimeout(() => { btn.textContent = "⟳ Refresh"; btn.disabled = false; }, 8000);
               } else {
-                btn.textContent = "✗ Error"; btn.disabled = false;
+                btn.textContent = `✗ ${data.error || "Error"}`; btn.disabled = false;
               }
-            } catch(e) { btn.textContent = "✗ Error"; btn.disabled = false; }
+            } catch(e) { btn.textContent = "✗ " + e.message; btn.disabled = false; }
           }} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
             ⟳ Refresh
           </button>

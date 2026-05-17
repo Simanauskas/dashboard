@@ -2,14 +2,18 @@ name: Daily Garmin Update
 
 on:
   schedule:
-    - cron: '0 5-9 * * *'     # 05:00-09:00 UTC = 08:00-12:00 LT — full update hourly until synced
-    - cron: '0 10-20 * * *'   # hourly 10:00-20:00 UTC (13:00-23:00 LT) — activities only
+    - cron: '0 5-9 * * *'     # 05:00-09:00 UTC — full update hourly until synced
+    - cron: '0 10-20 * * *'   # 10:00-20:00 UTC — activities only
   workflow_dispatch:
     inputs:
       mode:
-        description: 'full or activities'
+        description: 'full, activities, or backfill'
         required: false
         default: 'full'
+      days:
+        description: 'For backfill mode: days back to fetch (default 14)'
+        required: false
+        default: '14'
 
 permissions:
   contents: write
@@ -38,7 +42,7 @@ jobs:
           echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
           echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
 
-      - name: Refresh and persist tokens
+      - name: Validate tokens
         env:
           PAT: ${{ secrets.PAT }}
           REPO: ${{ github.repository }}
@@ -49,18 +53,19 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
             HOUR=$(date -u +%H)
-            # Full wellness fetch 05:00-09:00 UTC (08:00-12:00 LT) — catches watch sync
             if [ "$HOUR" -ge 5 ] && [ "$HOUR" -le 9 ]; then
               echo "mode=full" >> $GITHUB_OUTPUT
             else
               echo "mode=activities" >> $GITHUB_OUTPUT
             fi
+            echo "days=14" >> $GITHUB_OUTPUT
           else
             echo "mode=${{ inputs.mode || 'full' }}" >> $GITHUB_OUTPUT
+            echo "days=${{ inputs.days || '14' }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Run update
-        run: python update.py --mode ${{ steps.mode.outputs.mode }}
+        run: python update.py --mode ${{ steps.mode.outputs.mode }} --days ${{ steps.mode.outputs.days }}
 
       - name: Commit and push if changed
         run: |

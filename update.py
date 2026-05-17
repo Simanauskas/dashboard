@@ -377,7 +377,8 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument('--mode',   default='full', choices=['full','activities'])
+    p.add_argument('--mode',   default='full', choices=['full','activities','backfill'])
+    p.add_argument('--days',   type=int, default=14, help='For backfill mode: how many days back to fetch')
     p.add_argument('--date',   default=None)
     args = p.parse_args()
 
@@ -391,19 +392,31 @@ if __name__ == '__main__':
 
     if args.mode == 'full':
         # Full update: fetch wellness + activities for yesterday AND today
-        # Today's wellness may already be available if watch synced (typically ~08:30 LT)
-        # Runs hourly 08:00-12:00 LT to catch the sync whenever it happens
         for date_str in [yesterday, today]:
             wellness = fetch_wellness(client, date_str)
             has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
-            if has_wellness:
-                print(f"  ✓ Wellness data available for {date_str}")
-            else:
-                print(f"  ✗ No wellness data yet for {date_str}")
+            print(f"  {'✓' if has_wellness else '✗'} Wellness data for {date_str}")
             csv_rows = fetch_activities(client, date_str)
-            # Only advance TODAY pointer when patching yesterday's data
             advance = (date_str == yesterday)
             patch(date_str, wellness, csv_rows, advance_today=advance)
+
+    elif args.mode == 'backfill':
+        # Backfill: fetch wellness + activities for last N days
+        # Useful after auth was broken to fill in gaps
+        today_d = datetime.date.today()
+        print(f"Backfilling {args.days} days...")
+        for i in range(args.days, 0, -1):
+            date_str = (today_d - datetime.timedelta(days=i)).isoformat()
+            print(f"  Fetching {date_str}...")
+            try:
+                wellness = fetch_wellness(client, date_str)
+                csv_rows = fetch_activities(client, date_str)
+                # Only advance today pointer on the most recent date
+                advance = (i == 1)
+                patch(date_str, wellness, csv_rows, advance_today=advance)
+            except Exception as e:
+                print(f"    ⚠ Skipped {date_str}: {e}")
+
     else:
         # Activities-only: fetch today's new workouts
         csv_rows = fetch_activities(client, today)
