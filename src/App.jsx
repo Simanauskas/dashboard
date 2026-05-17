@@ -3,12 +3,11 @@ import { useState, useEffect, useRef } from "react";
 const HEALTH_DATA = {
   fitnessAge: { bio: 27.8, chrono: 35, bmi: 24.2, rhr: 38, vo2max: 52.9 },
   weight: [
-    ["2026-05-12",75.9],
-  ],["2026-01-17",73.1],["2026-01-20",73.1],
+    ["2026-01-13",73.6],["2026-01-17",73.1],["2026-01-20",73.1],
     ["2026-02-12",73.5],["2026-02-15",73.9],["2026-02-24",74.3],["2026-02-28",75.5],
     ["2026-03-04",73.4],["2026-03-08",72.3],["2026-03-12",73.1],["2026-03-16",73.2],
     ["2026-03-19",73.2],["2026-03-22",74.1],["2026-03-23",73.5],["2026-03-24",72.9],
-    ["2026-04-16",75.0],
+    ["2026-04-16",75.0],["2026-05-12",75.9],
   ],
   vo2max: [
     ["2026-03-09",52],["2026-03-17",53],["2026-03-21",53],["2026-03-24",53],
@@ -38,31 +37,38 @@ const HEALTH_DATA = {
     {date:"2026-05-17",hrv:115,rhr:44,spo2:98,resp:12.0,sleep_score:95},
   ],
   sleep: [
-    {date:"2026-04-14",deep:111,rem:94, light:259,awake:0},
+    {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
     {date:"2026-04-15",deep:194,rem:156,light:187,awake:3},
-    {date:"2026-04-16",deep:84, rem:123,light:257,awake:1},
+    {date:"2026-04-16",deep:84,rem:123,light:257,awake:1},
     {date:"2026-04-17",deep:146,rem:108,light:213,awake:2},
-    {date:"2026-04-18",deep:100,rem:84, light:222,awake:0},
+    {date:"2026-04-18",deep:100,rem:84,light:222,awake:0},
     {date:"2026-04-19",deep:141,rem:109,light:220,awake:1},
-    {date:"2026-04-20",deep:92, rem:75, light:270,awake:26},
-    {date:"2026-04-21",deep:155,rem:88, light:215,awake:4},
-    {date:"2026-04-22",deep:113,rem:80, light:266,awake:1},
-    {date:"2026-04-23",deep:110,rem:84, light:218,awake:7},
+    {date:"2026-04-20",deep:92,rem:75,light:270,awake:26},
+    {date:"2026-04-21",deep:155,rem:88,light:215,awake:4},
+    {date:"2026-04-22",deep:113,rem:80,light:266,awake:1},
+    {date:"2026-04-23",deep:110,rem:84,light:218,awake:7},
     {date:"2026-04-24",deep:177,rem:115,light:262,awake:2},
-    {date:"2026-04-25",deep:53, rem:16, light:330,awake:9},
-    {date:"2026-04-26",deep:97, rem:104,light:291,awake:3},
+    {date:"2026-04-25",deep:53,rem:16,light:330,awake:9},
+    {date:"2026-04-26",deep:97,rem:104,light:291,awake:3},
     {date:"2026-04-27",deep:127,rem:128,light:201,awake:18},
     {date:"2026-04-28",deep:102,rem:152,light:183,awake:0},
     {date:"2026-04-29",deep:124,rem:117,light:208,awake:17},
-    {date:"2026-04-30",deep:84, rem:146,light:203,awake:23},
-    {date:"2026-05-01",deep:50, rem:58, light:169,awake:69},
+    {date:"2026-04-30",deep:84,rem:146,light:203,awake:23},
+    {date:"2026-05-01",deep:50,rem:58,light:169,awake:69},
     {date:"2026-05-02",deep:132,rem:105,light:195,awake:58},
-    {date:"2026-05-04",deep:109,rem:81, light:228,awake:35},
     {date:"2026-05-04",deep:132,rem:95,light:231,awake:6},
-    {date:"2026-05-05",deep:44, rem:117,light:273,awake:10},
     {date:"2026-05-05",deep:145,rem:127,light:180,awake:1},
-    {date:"2026-05-06",deep:62, rem:199,light:146,awake:0},
     {date:"2026-05-06",deep:71,rem:75,light:283,awake:0},
+    {date:"2026-05-07",deep:109,rem:95,light:284,awake:3},
+    {date:"2026-05-08",deep:75,rem:115,light:260,awake:0},
+    {date:"2026-05-09",deep:113,rem:110,light:274,awake:23},
+    {date:"2026-05-10",deep:94,rem:139,light:283,awake:9},
+    {date:"2026-05-11",deep:94,rem:95,light:265,awake:4},
+    {date:"2026-05-12",deep:143,rem:117,light:207,awake:0},
+    {date:"2026-05-13",deep:142,rem:127,light:220,awake:2},
+    {date:"2026-05-14",deep:70,rem:94,light:297,awake:2},
+    {date:"2026-05-15",deep:114,rem:89,light:216,awake:0},
+    {date:"2026-05-16",deep:102,rem:49,light:213,awake:9},
     {date:"2026-05-17",deep:93,rem:119,light:349,awake:3},
   ],
 };
@@ -474,7 +480,7 @@ const SS = {
   other:  { bg:"#f0fdf4", border:"#16a34a", text:"#14532d", dot:"#16a34a" },
 };
 
-function Sparkline({ data, color = "#7c3aed", height = 64 }) {
+function Sparkline({ data, color = "#7c3aed", height = 110 }) {
   if (!data || data.length < 2) return null;
   // Normalize entries to {date, val}
   const entries = data.map(d => {
@@ -487,7 +493,8 @@ function Sparkline({ data, color = "#7c3aed", height = 64 }) {
   const vals = entries.map(e => e.val);
   const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
 
-  const w = 320, h = height;
+  // Wider viewBox so sparkline renders bigger on desktop while staying responsive
+  const w = 800, h = height;
   const padL = 4, padR = 24, padT = 8, padB = 14;
   const innerW = w - padL - padR, innerH = h - padT - padB;
   const xAt = i => padL + (i / (entries.length - 1)) * innerW;
@@ -513,7 +520,7 @@ function Sparkline({ data, color = "#7c3aed", height = 64 }) {
   };
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} style={{ width:"100%", height, display:"block" }}>
+    <svg viewBox={`0 0 ${w} ${h}`} style={{ width:"100%", height:"auto", display:"block", maxHeight: height*1.5 }} preserveAspectRatio="xMidYMid meet">
       <line x1={padL} x2={w-padR} y1={padT} y2={padT} stroke="#e2e8f0" strokeDasharray="2,3" />
       <line x1={padL} x2={w-padR} y1={padT+innerH} y2={padT+innerH} stroke="#e2e8f0" strokeDasharray="2,3" />
       <text x={w-padR+2} y={padT+3} fill="#94a3b8" fontSize="8" textAnchor="start">{max}</text>

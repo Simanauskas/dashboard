@@ -324,14 +324,14 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
         ss_str = str(wellness.get("sleep_score", "null"))
         new_daily = f'    {{date:"{date_str}",hrv:{hrv_ms},rhr:{rhr_val},spo2:{spo2_val},resp:{resp_val},sleep_score:{ss_str}}},'
 
-        # Try replace first
+        # Try replace first (any whitespace tolerated by [^}]+)
         replaced = False
         def repl(m):
             nonlocal replaced
             replaced = True
             return new_daily.strip()
         code = re.sub(
-            rf'    \{{date:"{date_str}",hrv:[^}}]+\}},',
+            rf'    \{{date:"{date_str}",hrv:[^}}]*\}},',
             repl, code, count=1
         )
 
@@ -353,8 +353,9 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
             nonlocal replaced_sleep
             replaced_sleep = True
             return new_sleep_line.strip()
+        # tolerate any whitespace between fields (existing entries have spaces like "rem:94, light:259")
         code = re.sub(
-            rf'    \{{date:"{date_str}",deep:\d+,rem:\d+,light:\d+,awake:\d+\}},',
+            rf'    \{{date:"{date_str}",deep:\s*\d+,\s*rem:\s*\d+,\s*light:\s*\d+,\s*awake:\s*\d+\}},',
             repl_sleep, code, count=1
         )
 
@@ -365,37 +366,53 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
                 code, count=1
             )
 
-    # 3b. Sort daily and sleep arrays by date (handles out-of-order backfill)
+    # 3b. Sort + dedupe daily and sleep arrays (handles out-of-order backfill + duplicates)
     for label in ['daily', 'sleep']:
-        m_arr = re.search(rf'{label}:\s*\[(.*?)\]', code, re.DOTALL)
+        # Match `{label}: [ ... \n  ],` — anchored to line-end bracket so we don't accidentally
+        # close on an inner ] (like a nested array)
+        m_arr = re.search(rf'({label}:\s*\[)(.*?)(\n  \],)', code, re.DOTALL)
         if m_arr:
-            block = m_arr.group(1)
+            block = m_arr.group(2)
             entries = re.findall(r'    \{date:"[\d-]+"[^}]+\},', block)
             if len(entries) > 1:
-                entries_sorted = sorted(entries, key=lambda e: re.search(r'date:"([\d-]+)"', e).group(1))
+                # Dedupe by date — keep LAST occurrence (most recently patched)
+                by_date = {}
+                for e in entries:
+                    d = re.search(r'date:"([\d-]+)"', e).group(1)
+                    by_date[d] = e
+                entries_sorted = [by_date[d] for d in sorted(by_date.keys())]
                 new_block = '\n' + '\n'.join(entries_sorted) + '\n  '
-                code = code.replace(m_arr.group(0), f'{label}: [{new_block}]', 1)
+                code = code.replace(m_arr.group(0), f'{label}: [{new_block}],', 1)
 
-    # 3c. Weight entry (if found)
+    # Sort + dedupe weight array (same approach but tuple-style entries)
+    m_w = re.search(r'(weight:\s*\[)(.*?)(\n  \],)', code, re.DOTALL)
+    if m_w:
+        w_block = m_w.group(2)
+        w_entries = re.findall(r'\["[\d-]+",[\d.]+\]', w_block)
+        if w_entries:
+            by_date = {}
+            for e in w_entries:
+                d = re.search(r'\["([\d-]+)"', e).group(1)
+                by_date[d] = e
+            sorted_entries = [by_date[d] for d in sorted(by_date.keys())]
+            new_w_block = '\n    ' + ','.join(sorted_entries) + ',\n  '
+            code = code.replace(m_w.group(0), f'weight: [{new_w_block}],', 1)
+
+    # 3c. Weight entry — simple: replace if date exists, else add to end (sort step dedupes/sorts)
     w = wellness.get('weight')
     if w:
         w_date, w_kg = w
-        # Replace existing entry for this date, or insert sorted
-        w_pattern = rf'\["{w_date}",[\d.]+\]'
         new_entry = f'["{w_date}",{w_kg}]'
-        if re.search(w_pattern, code):
-            code = re.sub(w_pattern, new_entry, code)
+        if re.search(rf'\["{w_date}",[\d.]+\]', code):
+            # Replace existing entry for this date
+            code = re.sub(rf'\["{w_date}",[\d.]+\]', new_entry, code, count=1)
         else:
-            # Insert into weight array — find weight: [ ... ] and add chronologically
-            m_w = re.search(r'(weight:\s*\[)(.*?)(\s*\],)', code, re.DOTALL)
-            if m_w:
-                existing = re.findall(r'\["([\d-]+)",[\d.]+\]', m_w.group(2))
-                if w_date not in existing:
-                    # Add to end and sort
-                    all_entries = re.findall(r'\["[\d-]+",[\d.]+\]', m_w.group(2)) + [new_entry]
-                    all_sorted = sorted(all_entries, key=lambda e: re.search(r'\["([\d-]+)"', e).group(1))
-                    new_block = '\n    ' + ','.join(all_sorted) + ',\n  '
-                    code = code.replace(m_w.group(0), f'weight: [{new_block}],')
+            # Append before the array close — match \n  ], end-of-weight-array
+            code = re.sub(
+                r'(weight:\s*\[(?:[^\]]|\][^,])*?)(\n  \],)',
+                rf'\g<1>,\n    {new_entry}\g<2>',
+                code, count=1
+            )
 
     # 4. CSV activity rows — deduplicate by startTime (field 1, first 19 chars)
     if csv_rows:
