@@ -121,7 +121,6 @@ def fetch_wellness(client, date_str):
         if ss and isinstance(ss, (int, float)) and 0 < ss <= 100:
             result['sleep_score'] = round(ss)
             print(f"SleepScore from /sleep/{date_str}: {round(ss)}")
-        else:
     except Exception:
         pass  # SleepScore endpoint often 404s for older dates — silently fall back to feedback mapping
 
