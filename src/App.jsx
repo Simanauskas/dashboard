@@ -47,6 +47,8 @@ const HEALTH_DATA = {
     {date:"2026-05-13",hrv:0,rhr:40,spo2:98,resp:12.0,sleep_score:null},
     {date:"2026-05-16",hrv:92,rhr:49,spo2:96,resp:14.0,sleep_score:null},
     {date:"2026-05-17",hrv:115,rhr:44,spo2:98,resp:12.0,sleep_score:95},
+    {date:"2026-05-14",hrv:110,rhr:47,spo2:96,resp:13.0,sleep_score:88},
+    {date:"2026-05-15",hrv:123,rhr:41,spo2:96,resp:12.0,sleep_score:75},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94, light:259,awake:0},
@@ -81,6 +83,8 @@ const HEALTH_DATA = {
     {date:"2026-05-13",deep:0,rem:0,light:0,awake:0},
     {date:"2026-05-16",deep:102,rem:49,light:213,awake:9},
     {date:"2026-05-17",deep:93,rem:119,light:349,awake:3},
+    {date:"2026-05-14",deep:70,rem:94,light:297,awake:2},
+    {date:"2026-05-15",deep:114,rem:89,light:216,awake:0},
   ],
 };
 
@@ -166,6 +170,11 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Indoor Running","2026-05-15 16:54:59","false","Hyrox group ","2,58","536","00:56:46","120","165","2,8","65","--","21:57","--","--","--","--","--","--","69,99","11,2","7,2","431","--","--","--","--","--","--","--","--","--","No","--","8","--","--","--","--","--","00:32:07","00:56:46","--","--"
+"Tennis V2","2026-05-15 08:57:57","false","Tennis","0,40","313","01:01:48","92","144","0,6","17","--","155:45","--","--","--","--","--","--","36,89","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:23","01:01:48","--","--"
+"Cycling","2026-05-14 08:44:28","false","Vilnius Cycling","19,78","354","01:23:42","81","127","0,9","--","--","4:13","--","--","--","127","118","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:17:32","09:12:46","--","--"
+"Tennis V2","2026-05-13 19:08:23","false","Tennis","0,60","588","01:11:19","117","155","2,2","25","--","119:02","--","--","--","--","--","--","34,12","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:26","01:11:19","--","--"
+"Cycling","2026-05-13 10:08:32","false","Vilnius Cycling","7,08","193","00:24:29","106","135","1,2","--","--","3:27","--","--","--","55","51","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:22:35","07:17:03","--","--"
 "Inline Skating","2026-05-17 11:59:45","false","Vilnius Inline Skating","4,59","140","00:20:12","102","186","0,6","--","--","4:24","--","--","--","17","16","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:12","00:20:12","--","--"
 "Cycling","2026-05-16 11:57:57","false","Vilnius Cycling","1,87","62","00:09:54","96","184","0,2","--","--","5:17","--","--","--","3","28","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:03","00:09:54","--","--"
 "Indoor Running","2026-05-16 10:00:30","false","Hyrox weekend track","10,87","1061","01:20:39","144","171","4,5","119","--","7:25","--","--","--","--","--","--","108,84","6,8","7,6","316","--","--","--","--","--","--","--","--","--","No","--","18","--","--","--","--","--","01:00:57","01:20:54","--","--"
@@ -1043,7 +1052,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 105; // updated 2026-05-17
+  const hrvBaseline = 101; // updated 2026-05-16
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
