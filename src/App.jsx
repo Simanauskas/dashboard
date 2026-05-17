@@ -495,21 +495,60 @@ const SS = {
   other:  { bg:"#f0fdf4", border:"#16a34a", text:"#14532d", dot:"#16a34a" },
 };
 
-function Sparkline({ data, color = "#7c3aed", height = 40 }) {
+function Sparkline({ data, color = "#7c3aed", height = 64 }) {
   if (!data || data.length < 2) return null;
-  const vals = data.map(d => Array.isArray(d) ? d[1] : d.bf);
+  // Normalize entries to {date, val}
+  const entries = data.map(d => {
+    if (Array.isArray(d)) return { date: d[0], val: d[1] };
+    if (d.bf !== undefined) return { date: d.date, val: d.bf };
+    return { date: d.date, val: d.val };
+  }).filter(e => e.val != null && !isNaN(e.val));
+
+  if (entries.length < 2) return null;
+  const vals = entries.map(e => e.val);
   const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
-  const w = 240, h = height;
-  const pts = vals.map((v, i) => {
-    const x = (i / (vals.length - 1)) * w;
-    const y = h - ((v - min) / range) * (h - 8) - 4;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
-  const lastPt = pts.split(" ").pop().split(",");
+
+  const w = 320, h = height;
+  const padL = 4, padR = 24, padT = 8, padB = 14;
+  const innerW = w - padL - padR, innerH = h - padT - padB;
+  const xAt = i => padL + (i / (entries.length - 1)) * innerW;
+  const yAt = v => padT + innerH - ((v - min) / range) * innerH;
+
+  // Smooth path
+  const pts = entries.map((e, i) => [xAt(i), yAt(e.val)]);
+  let path = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 1; i < pts.length; i++) {
+    const [x1, y1] = pts[i-1], [x2, y2] = pts[i];
+    const midX = (x1 + x2) / 2;
+    path += ` Q ${midX.toFixed(1)},${y1.toFixed(1)} ${midX.toFixed(1)},${((y1+y2)/2).toFixed(1)} T ${x2.toFixed(1)},${y2.toFixed(1)}`;
+  }
+
+  const lastIdx = entries.length - 1;
+  const labelIdx = entries.length <= 3
+    ? entries.map((_, i) => i)
+    : [0, Math.floor(entries.length / 2), lastIdx];
+
+  const fmtDate = (s) => {
+    const parts = s.split("-");
+    return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1])-1]} ${parseInt(parts[2])}`;
+  };
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} style={{ width:"100%", height }} preserveAspectRatio="none">
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={lastPt[0]} cy={lastPt[1]} r="4" fill={color} />
+    <svg viewBox={`0 0 ${w} ${h}`} style={{ width:"100%", height, display:"block" }}>
+      <line x1={padL} x2={w-padR} y1={padT} y2={padT} stroke="#e2e8f0" strokeDasharray="2,3" />
+      <line x1={padL} x2={w-padR} y1={padT+innerH} y2={padT+innerH} stroke="#e2e8f0" strokeDasharray="2,3" />
+      <text x={w-padR+2} y={padT+3} fill="#94a3b8" fontSize="8" textAnchor="start">{max}</text>
+      <text x={w-padR+2} y={padT+innerH+3} fill="#94a3b8" fontSize="8" textAnchor="start">{min}</text>
+
+      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={xAt(lastIdx).toFixed(1)} cy={yAt(entries[lastIdx].val).toFixed(1)} r="2.5" fill={color} stroke="#fff" strokeWidth="1.5" />
+
+      {labelIdx.map(i => (
+        <text key={i} x={xAt(i).toFixed(1)} y={h-2} fill="#94a3b8" fontSize="9"
+          textAnchor={i === 0 ? "start" : i === lastIdx ? "end" : "middle"}>
+          {fmtDate(entries[i].date)}
+        </text>
+      ))}
     </svg>
   );
 }
@@ -927,11 +966,8 @@ function HealthView() {
             <div style={{ fontSize:10, color:"#94a3b8" }}>target: 72–73 kg</div>
           </div>
         </div>
-        <Sparkline data={HEALTH_DATA.weight} color="#0369a1" height={40} />
-        <div style={{ display:"flex", justifyContent:"space-between", marginTop:4 }}>
-          <span style={{ fontSize:9, color:"#94a3b8" }}>Jan 2026</span>
-          <span style={{ fontSize:9, color:"#94a3b8" }}>Apr 2026</span>
-        </div>
+        <Sparkline data={HEALTH_DATA.weight} color="#0369a1" height={64} />
+        
       </div>
 
       {/* BODY FAT */}
@@ -960,7 +996,7 @@ function HealthView() {
             <div style={{ fontSize:10, color:"#64748b" }}>14.7% → 7.6%</div>
           </div>
         </div>
-        {bfEntries.length > 1 && <Sparkline data={bfEntries} color="#15803d" height={40} />}
+        {bfEntries.length > 1 && <Sparkline data={bfEntries} color="#15803d" height={64} />}
         <div style={{ fontSize:9, color: bfStatus === "live" ? "#15803d" : "#94a3b8", marginTop:6 }}>
           {bfStatus === "live"
             ? "✓ Live from your Google Sheet — updates automatically when you add a new column."
@@ -986,7 +1022,7 @@ function HealthView() {
             <div>Hyrox sub-75: 50+ ✓</div>
           </div>
         </div>
-        <Sparkline data={HEALTH_DATA.vo2max} color="#c2410c" height={40} />
+        <Sparkline data={HEALTH_DATA.vo2max} color="#c2410c" height={64} />
         <div style={{ marginTop:10, padding:"8px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:11, color:"#9a3412" }}>
           🏆 <strong>Lab-tested CPET (Nov 2024): 60 ml/kg/min</strong> — 152% of predicted, classified as <strong>EXCELLENT</strong>
         </div>

@@ -196,6 +196,26 @@ def fetch_wellness(client, date_str):
         print(f"Sleep failed: {e}")
         result.setdefault('sleep', {'deep':0,'rem':0,'light':0,'awake':0})
 
+    # Weight (most recent on or before this date, within last 30 days)
+    try:
+        d = datetime.date.fromisoformat(date_str)
+        from_d = (d - datetime.timedelta(days=30)).isoformat()
+        wi = client.get_weigh_ins(from_d, date_str)
+        # Structure: { 'dailyWeightSummaries': [{summaryDate, allWeightMetrics: [{weight: grams, ...}]}] }
+        latest = None
+        for day in (wi.get('dailyWeightSummaries') or []):
+            for entry in (day.get('allWeightMetrics') or []):
+                w_kg = entry.get('weight', 0) / 1000.0 if entry.get('weight') else None
+                if w_kg and w_kg > 30:  # sanity
+                    cand = (day.get('summaryDate'), round(w_kg, 1))
+                    if not latest or cand[0] > latest[0]:
+                        latest = cand
+        if latest:
+            result['weight'] = latest
+            print(f"Weight: {latest[1]}kg on {latest[0]}")
+    except Exception as e:
+        pass  # no weight log for this period
+
     return result
 
 def fetch_activities(client, date_str):
@@ -300,25 +320,83 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
         code = re.sub(r'const TODAY = "[^"]+";',
                       f'const TODAY = "{tomorrow.isoformat()}";', code)
 
-    # 2. Daily HRV row (full mode only)
-    if has_wellness and f'date:"{date_str}",hrv:' not in code:
+    # 2. Daily HRV row — replace if exists, otherwise insert (sorted)
+    if has_wellness:
         ss_str = str(wellness.get("sleep_score", "null"))
         new_daily = f'    {{date:"{date_str}",hrv:{hrv_ms},rhr:{rhr_val},spo2:{spo2_val},resp:{resp_val},sleep_score:{ss_str}}},'
+
+        # Try replace first
+        replaced = False
+        def repl(m):
+            nonlocal replaced
+            replaced = True
+            return new_daily.strip()
         code = re.sub(
-            r'(    \{date:"[\d-]+",hrv:\d+[^}]+\},)(\n  \],)',
-            lambda m: m.group(1) + '\n' + new_daily + m.group(2),
-            code, count=1
+            rf'    \{{date:"{date_str}",hrv:[^}}]+\}},',
+            repl, code, count=1
         )
 
-    # 3. Sleep row (full mode only)
-    if has_wellness and f'date:"{date_str}",deep:' not in code:
+        if not replaced:
+            # Insert before closing daily array bracket
+            code = re.sub(
+                r'(    \{date:"[\d-]+",hrv:\d+[^}]+\},)(\n  \],)',
+                lambda m: m.group(1) + '\n' + new_daily + m.group(2),
+                code, count=1
+            )
+
+    # 3. Sleep row — replace if exists (handles zero-fill rows being overwritten)
+    if has_wellness and stages:
         d,rm,li,aw = (stages.get(k,0) for k in ('deep','rem','light','awake'))
-        new_sleep = f'    {{date:"{date_str}",deep:{d},rem:{rm},light:{li},awake:{aw}}},'
+        new_sleep_line = f'    {{date:"{date_str}",deep:{d},rem:{rm},light:{li},awake:{aw}}},'
+
+        replaced_sleep = False
+        def repl_sleep(m):
+            nonlocal replaced_sleep
+            replaced_sleep = True
+            return new_sleep_line.strip()
         code = re.sub(
-            r'(    \{date:"[\d-]+",deep:\d+[^}]+\},)(\n  \],)',
-            lambda m: m.group(1) + '\n' + new_sleep + m.group(2),
-            code, count=1
+            rf'    \{{date:"{date_str}",deep:\d+,rem:\d+,light:\d+,awake:\d+\}},',
+            repl_sleep, code, count=1
         )
+
+        if not replaced_sleep:
+            code = re.sub(
+                r'(    \{date:"[\d-]+",deep:\d+[^}]+\},)(\n  \],)',
+                lambda m: m.group(1) + '\n' + new_sleep_line + m.group(2),
+                code, count=1
+            )
+
+    # 3b. Sort daily and sleep arrays by date (handles out-of-order backfill)
+    for label in ['daily', 'sleep']:
+        m_arr = re.search(rf'{label}:\s*\[(.*?)\]', code, re.DOTALL)
+        if m_arr:
+            block = m_arr.group(1)
+            entries = re.findall(r'    \{date:"[\d-]+"[^}]+\},', block)
+            if len(entries) > 1:
+                entries_sorted = sorted(entries, key=lambda e: re.search(r'date:"([\d-]+)"', e).group(1))
+                new_block = '\n' + '\n'.join(entries_sorted) + '\n  '
+                code = code.replace(m_arr.group(0), f'{label}: [{new_block}]', 1)
+
+    # 3c. Weight entry (if found)
+    w = wellness.get('weight')
+    if w:
+        w_date, w_kg = w
+        # Replace existing entry for this date, or insert sorted
+        w_pattern = rf'\["{w_date}",[\d.]+\]'
+        new_entry = f'["{w_date}",{w_kg}]'
+        if re.search(w_pattern, code):
+            code = re.sub(w_pattern, new_entry, code)
+        else:
+            # Insert into weight array — find weight: [ ... ] and add chronologically
+            m_w = re.search(r'(weight:\s*\[)(.*?)(\s*\],)', code, re.DOTALL)
+            if m_w:
+                existing = re.findall(r'\["([\d-]+)",[\d.]+\]', m_w.group(2))
+                if w_date not in existing:
+                    # Add to end and sort
+                    all_entries = re.findall(r'\["[\d-]+",[\d.]+\]', m_w.group(2)) + [new_entry]
+                    all_sorted = sorted(all_entries, key=lambda e: re.search(r'\["([\d-]+)"', e).group(1))
+                    new_block = '\n    ' + ','.join(all_sorted) + ',\n  '
+                    code = code.replace(m_w.group(0), f'weight: [{new_block}],')
 
     # 4. CSV activity rows — deduplicate by startTime (field 1, first 19 chars)
     if csv_rows:
