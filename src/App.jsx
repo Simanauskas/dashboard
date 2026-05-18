@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 const HEALTH_DATA = {
   fitnessAge: { bio: 27.8, chrono: 35, bmi: 24.2, rhr: 38, vo2max: 52.9 },
   weight: [
-    ["2026-01-13",73.6],["2026-01-17",73.1],["2026-01-20",73.1],["2026-02-12",73.5],["2026-02-15",73.9],["2026-02-24",74.3],["2026-02-28",75.5],["2026-03-04",73.4],["2026-03-08",72.3],["2026-03-12",73.1],["2026-03-16",73.2],["2026-03-19",73.2],["2026-03-22",74.1],["2026-03-23",73.5],["2026-03-24",72.9],["2026-04-16",75.0],["2026-05-12",75.9],
+    ["2026-01-13",73.6], ["2026-01-17",73.1], ["2026-01-20",73.1], ["2026-02-12",73.5], ["2026-02-15",73.9], ["2026-02-24",74.3], ["2026-02-28",75.5], ["2026-03-04",73.4], ["2026-03-08",72.3], ["2026-03-12",73.1], ["2026-03-16",73.2], ["2026-03-19",73.2], ["2026-03-22",74.1], ["2026-03-23",73.5], ["2026-03-24",72.9], ["2026-04-16",75.0], ["2026-05-12",75.9], ["2026-05-17",76.7],
   ],
   vo2max: [
     ["2026-03-09",52],["2026-03-17",53],["2026-03-21",53],["2026-03-24",53],
@@ -12,25 +12,38 @@ const HEALTH_DATA = {
   ],
   daily: [
     {date:"2026-04-14",hrv:116,rhr:44,spo2:97,resp:12.9,sleep_score:null},
-    {date:"2026-04-15",hrv:82, rhr:41,spo2:96,resp:12.0,sleep_score:null},
+    {date:"2026-04-15",hrv:82,rhr:41,spo2:96,resp:12.0,sleep_score:null},
     {date:"2026-04-16",hrv:100,rhr:42,spo2:97,resp:12.3,sleep_score:null},
-    {date:"2026-04-17",hrv:96, rhr:41,spo2:98,resp:11.5,sleep_score:null},
+    {date:"2026-04-17",hrv:96,rhr:41,spo2:98,resp:11.5,sleep_score:null},
     {date:"2026-04-18",hrv:128,rhr:42,spo2:97,resp:13.0,sleep_score:null},
     {date:"2026-04-19",hrv:120,rhr:41,spo2:98,resp:12.6,sleep_score:null},
     {date:"2026-04-20",hrv:105,rhr:44,spo2:97,resp:13.2,sleep_score:null},
-    {date:"2026-04-21",hrv:97, rhr:41,spo2:97,resp:12.2,sleep_score:null},
+    {date:"2026-04-21",hrv:97,rhr:41,spo2:97,resp:12.2,sleep_score:null},
     {date:"2026-04-22",hrv:101,rhr:40,spo2:99,resp:11.0,sleep_score:null},
-    {date:"2026-04-23",hrv:80, rhr:42,spo2:97,resp:11.6,sleep_score:null},
-    {date:"2026-04-24",hrv:75, rhr:40,spo2:99,resp:11.6,sleep_score:null},
-    {date:"2026-04-25",hrv:96, rhr:46,spo2:99,resp:13.8,sleep_score:null},
+    {date:"2026-04-23",hrv:80,rhr:42,spo2:97,resp:11.6,sleep_score:null},
+    {date:"2026-04-24",hrv:75,rhr:40,spo2:99,resp:11.6,sleep_score:null},
+    {date:"2026-04-25",hrv:96,rhr:46,spo2:99,resp:13.8,sleep_score:null},
     {date:"2026-04-26",hrv:114,rhr:42,spo2:100,resp:12.2,sleep_score:null},
-    {date:"2026-04-27",hrv:128,rhr:40,spo2:99, resp:12.0,sleep_score:null},
-    {date:"2026-04-28",hrv:135,rhr:40,spo2:99, resp:12.0,sleep_score:null},
-    {date:"2026-04-29",hrv:140,rhr:40,spo2:96, resp:13.2,sleep_score:null},
-    {date:"2026-04-30",hrv:154,rhr:40,spo2:95, resp:8.8, sleep_score:95},
-    {date:"2026-05-01",hrv:167,rhr:41,spo2:98, resp:10.6,sleep_score:76},
-    {date:"2026-05-02",hrv:176,rhr:40,spo2:98, resp:12.4,sleep_score:83},
-    {date:"2026-05-18",hrv:0,rhr:40,spo2:98,resp:12.0,sleep_score:null},
+    {date:"2026-04-27",hrv:128,rhr:40,spo2:99,resp:12.0,sleep_score:null},
+    {date:"2026-04-28",hrv:135,rhr:40,spo2:99,resp:12.0,sleep_score:null},
+    {date:"2026-04-29",hrv:140,rhr:40,spo2:96,resp:13.2,sleep_score:null},
+    {date:"2026-04-30",hrv:154,rhr:40,spo2:95,resp:8.8,sleep_score:95},
+    {date:"2026-05-01",hrv:167,rhr:41,spo2:98,resp:10.6,sleep_score:76},
+    {date:"2026-05-02",hrv:176,rhr:40,spo2:98,resp:12.4,sleep_score:83},
+    {date:"2026-05-03",hrv:29,rhr:69,spo2:91,resp:16.0,sleep_score:null},
+    {date:"2026-05-04",hrv:71,rhr:44,spo2:95,resp:13.0,sleep_score:88},
+    {date:"2026-05-05",hrv:90,rhr:40,spo2:94,resp:11.0,sleep_score:88},
+    {date:"2026-05-06",hrv:123,rhr:42,spo2:96,resp:12.0,sleep_score:null},
+    {date:"2026-05-07",hrv:118,rhr:44,spo2:96,resp:14.0,sleep_score:95},
+    {date:"2026-05-08",hrv:109,rhr:43,spo2:94,resp:12.0,sleep_score:95},
+    {date:"2026-05-09",hrv:117,rhr:43,spo2:96,resp:12.0,sleep_score:95},
+    {date:"2026-05-10",hrv:89,rhr:49,spo2:95,resp:13.0,sleep_score:null},
+    {date:"2026-05-11",hrv:127,rhr:43,spo2:93,resp:12.0,sleep_score:88},
+    {date:"2026-05-12",hrv:95,rhr:43,spo2:95,resp:12.0,sleep_score:95},
+    {date:"2026-05-13",hrv:80,rhr:43,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-05-14",hrv:110,rhr:47,spo2:96,resp:13.0,sleep_score:88},
+    {date:"2026-05-15",hrv:123,rhr:41,spo2:96,resp:12.0,sleep_score:75},
+    {date:"2026-05-16",hrv:92,rhr:49,spo2:96,resp:14.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -1406,36 +1419,69 @@ export default function Dashboard() {
           <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HRV vs TRAINING LOAD (42 DAYS)</div>
           <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
             {(() => {
-              const data = atlHistory.filter((_, i) => i % 1 === 0);
-              const hrvData = HEALTH_DATA.daily;
-              const maxAtl = Math.max(...data.map(d => d.atl), 1);
-              const maxHrv = Math.max(...HEALTH_DATA.daily.map(d => d.hrv), 1);
-              const W = 320, H = 80;
-              const atlPts = data.map((d,i) => `${(i/(data.length-1))*W},${H - (d.atl/maxAtl)*(H-8) - 4}`).join(" ");
-              const hrvPts = data.map((d,i) => {
-                const hd = hrvData.find(h => h.date === d.date);
-                if (!hd) return null;
-                return `${(i/(data.length-1))*W},${H - (hd.hrv/maxHrv)*(H-8) - 4}`;
-              }).filter(Boolean);
+              const data = atlHistory.filter(d => d.atl > 0).slice(-42);
+              const hrvByDate = {};
+              HEALTH_DATA.daily.forEach(d => { if (d.hrv > 0) hrvByDate[d.date] = d.hrv; });
+              const points = data.map(d => ({ date: d.date, atl: d.atl, hrv: hrvByDate[d.date] || null }));
+              const maxAtl = Math.max(...points.map(p => p.atl), 1);
+              const validHrv = points.filter(p => p.hrv).map(p => p.hrv);
+              const minHrv = Math.min(...validHrv, 100);
+              const maxHrv = Math.max(...validHrv, 150);
+
+              const W = 800, H = 200;
+              const padL = 6, padR = 24, padT = 12, padB = 22;
+              const innerW = W - padL - padR, innerH = H - padT - padB;
+              const xAt = i => padL + (i / (points.length - 1)) * innerW;
+              const yAtl = v => padT + innerH - (v / maxAtl) * innerH;
+              const yHrv = v => padT + innerH - ((v - minHrv) / (maxHrv - minHrv || 1)) * innerH;
+
+              const smooth = (pts) => {
+                if (pts.length < 2) return "";
+                let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+                for (let i = 1; i < pts.length; i++) {
+                  const [x1,y1] = pts[i-1], [x2,y2] = pts[i];
+                  const mx = (x1+x2)/2;
+                  d += ` Q ${mx.toFixed(1)},${y1.toFixed(1)} ${mx.toFixed(1)},${((y1+y2)/2).toFixed(1)} T ${x2.toFixed(1)},${y2.toFixed(1)}`;
+                }
+                return d;
+              };
+
+              const atlPath = smooth(points.map((p,i) => [xAt(i), yAtl(p.atl)]));
+              const hrvPts = points.map((p,i) => p.hrv ? [xAt(i), yHrv(p.hrv)] : null).filter(Boolean);
+              const hrvPath = smooth(hrvPts);
+
+              // Pick 4 date labels evenly
+              const labelIdx = [0, Math.floor(points.length/3), Math.floor(2*points.length/3), points.length-1];
+              const fmt = (s) => { const p = s.split("-"); return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+p[1]-1]} ${+p[2]}`; };
+
               return (
                 <div>
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:H }} preserveAspectRatio="none">
-                    <polyline points={atlPts} fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.7" strokeLinejoin="round" />
-                    {hrvPts.length > 1 && <polyline points={hrvPts.join(" ")} fill="none" stroke="#7c3aed" strokeWidth="2" opacity="0.8" strokeLinejoin="round" />}
+                  <div style={{ display:"flex", gap:16, marginBottom:8, fontSize:10 }}>
+                    <span style={{ color:"#dc2626", fontWeight:600 }}>━ ATL (fatigue)</span>
+                    <span style={{ color:"#7c3aed", fontWeight:600 }}>━ HRV (recovery)</span>
+                    <span style={{ color:"#94a3b8", marginLeft:"auto" }}>HRV falls when ATL spikes → recovery needed</span>
+                  </div>
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block", maxHeight: 280 }} preserveAspectRatio="xMidYMid meet">
+                    <line x1={padL} x2={W-padR} y1={padT} y2={padT} stroke="#e2e8f0" strokeDasharray="2,3" />
+                    <line x1={padL} x2={W-padR} y1={padT+innerH/2} y2={padT+innerH/2} stroke="#f1f5f9" strokeDasharray="2,3" />
+                    <line x1={padL} x2={W-padR} y1={padT+innerH} y2={padT+innerH} stroke="#e2e8f0" strokeDasharray="2,3" />
+
+                    {/* Right axis: HRV range */}
+                    <text x={W-padR+2} y={padT+4} fill="#7c3aed" fontSize="9" textAnchor="start">{Math.round(maxHrv)}</text>
+                    <text x={W-padR+2} y={padT+innerH+3} fill="#7c3aed" fontSize="9" textAnchor="start">{Math.round(minHrv)}</text>
+                    {/* Left axis: ATL range */}
+                    <text x={padL} y={padT-2} fill="#dc2626" fontSize="9" textAnchor="start">{Math.round(maxAtl)}</text>
+
+                    <path d={atlPath} fill="none" stroke="#dc2626" strokeWidth="2" strokeLinejoin="round" opacity="0.85" />
+                    <path d={hrvPath} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinejoin="round" opacity="0.9" />
+
+                    {labelIdx.map(i => (
+                      <text key={i} x={xAt(i).toFixed(1)} y={H-4} fill="#94a3b8" fontSize="10"
+                        textAnchor={i===0?"start":i===points.length-1?"end":"middle"}>
+                        {fmt(points[i].date)}
+                      </text>
+                    ))}
                   </svg>
-                  {/* Date axis */}
-                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:4, fontSize:9, color:"#94a3b8" }}>
-                    {[0, 0.25, 0.5, 0.75, 1].map(frac => {
-                      const d = new Date(TODAY);
-                      d.setDate(d.getDate() - Math.round((1-frac)*41));
-                      return <span key={frac}>{d.toLocaleDateString('en',{month:'short',day:'numeric'})}</span>;
-                    })}
-                  </div>
-                  <div style={{ display:"flex", gap:16, marginTop:6, fontSize:10 }}>
-                    <span style={{ color:"#dc2626" }}>━ ATL (fatigue)</span>
-                    <span style={{ color:"#7c3aed" }}>━ HRV</span>
-                    <span style={{ color:"#94a3b8", marginLeft:"auto" }}>HRV falls when ATL spikes = needs recovery</span>
-                  </div>
                 </div>
               );
             })()}
@@ -1445,38 +1491,65 @@ export default function Dashboard() {
           <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>READINESS HISTORY (30 DAYS)</div>
           <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
             {(() => {
-              const scores = HEALTH_DATA.daily.slice(-30).map(d => {
+              const daily30 = HEALTH_DATA.daily.filter(d => d.hrv > 0).slice(-30);
+              const scores = daily30.map(d => {
                 const atlD = atlHistory.find(a => a.date === d.date);
                 const tsbD = atlD ? (atlD.ctl - atlD.atl) : 0;
-                return readiness(tsbD, 99, d.hrv, 88);
+                return { date: d.date, val: readiness(tsbD, 99, d.hrv, 88) };
               });
               if (scores.length < 2) return <div style={{ color:"#94a3b8", fontSize:11 }}>Not enough data yet</div>;
-              const W = 320, H = 60;
+
+              const W = 800, H = 180;
+              const padL = 6, padR = 24, padT = 14, padB = 22;
+              const innerW = W - padL - padR, innerH = H - padT - padB;
               const min = 1, max = 10;
-              const pts = scores.map((v,i) => `${(i/(scores.length-1))*W},${H - ((v-min)/(max-min))*(H-8) - 4}`).join(" ");
-              const avg = (scores.reduce((s,v)=>s+v,0)/scores.length).toFixed(1);
-              const trend = scores[scores.length-1] > scores[0] ? "↑" : "↓";
+              const xAt = i => padL + (i / (scores.length - 1)) * innerW;
+              const yAt = v => padT + innerH - ((v - min) / (max - min)) * innerH;
+
+              const pts = scores.map((s,i) => [xAt(i), yAt(s.val)]);
+              let path = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+              for (let i = 1; i < pts.length; i++) {
+                const [x1,y1] = pts[i-1], [x2,y2] = pts[i];
+                const mx = (x1+x2)/2;
+                path += ` Q ${mx.toFixed(1)},${y1.toFixed(1)} ${mx.toFixed(1)},${((y1+y2)/2).toFixed(1)} T ${x2.toFixed(1)},${y2.toFixed(1)}`;
+              }
+
+              const avg = (scores.reduce((s,o)=>s+o.val,0)/scores.length).toFixed(1);
+              const trend = scores[scores.length-1].val > scores[0].val ? "↑" : "↓";
+              const fmt = (s) => { const p = s.split("-"); return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+p[1]-1]} ${+p[2]}`; };
+              const labelIdx = [0, Math.floor(scores.length/3), Math.floor(2*scores.length/3), scores.length-1];
+
               return (
                 <div>
                   <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-                    <span style={{ fontSize:12, fontWeight:700, color:"#1e293b" }}>Avg: {avg}/10 {trend}</span>
-                    <span style={{ fontSize:10, color:"#94a3b8" }}>Last 30 days</span>
+                    <span style={{ fontSize:13, fontWeight:700, color:"#1e293b" }}>Avg: {avg}/10 {trend}</span>
+                    <span style={{ fontSize:11, color:"#94a3b8" }}>Last {scores.length} days</span>
                   </div>
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:H }} preserveAspectRatio="none">
-                    {[3,5,7].map(v => (
-                      <line key={v} x1="0" x2={W} y1={H - ((v-min)/(max-min))*(H-8) - 4} y2={H - ((v-min)/(max-min))*(H-8) - 4} stroke="#e2e8f0" strokeWidth="1" />
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block", maxHeight: 260 }} preserveAspectRatio="xMidYMid meet">
+                    {[3, 5, 7].map(v => (
+                      <line key={v} x1={padL} x2={W-padR} y1={yAt(v)} y2={yAt(v)} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2,3" />
                     ))}
-                    <polyline points={pts} fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-                    {scores.map((v,i) => {
-                      const x = (i/(scores.length-1))*W;
-                      const y = H - ((v-min)/(max-min))*(H-8) - 4;
-                      const c = v >= 7 ? "#16a34a" : v >= 4 ? "#d97706" : "#dc2626";
-                      return <circle key={i} cx={x} cy={y} r="3" fill={c} />;
+                    <text x={W-padR+2} y={yAt(10)+3} fill="#94a3b8" fontSize="9" textAnchor="start">10</text>
+                    <text x={W-padR+2} y={yAt(5)+3} fill="#94a3b8" fontSize="9" textAnchor="start">5</text>
+                    <text x={W-padR+2} y={yAt(1)+3} fill="#94a3b8" fontSize="9" textAnchor="start">1</text>
+
+                    <path d={path} fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+
+                    {scores.map((s,i) => {
+                      const c = s.val >= 7 ? "#16a34a" : s.val >= 4 ? "#d97706" : "#dc2626";
+                      return <circle key={i} cx={xAt(i).toFixed(1)} cy={yAt(s.val).toFixed(1)} r="3.5" fill={c} stroke="#fff" strokeWidth="1.5" />;
                     })}
+
+                    {labelIdx.map(i => (
+                      <text key={i} x={xAt(i).toFixed(1)} y={H-4} fill="#94a3b8" fontSize="10"
+                        textAnchor={i===0?"start":i===scores.length-1?"end":"middle"}>
+                        {fmt(scores[i].date)}
+                      </text>
+                    ))}
                   </svg>
-                  <div style={{ display:"flex", gap:10, marginTop:6, fontSize:10 }}>
-                    <span style={{ color:"#16a34a" }}>● 7–10 push</span>
-                    <span style={{ color:"#d97706" }}>● 4–6 smart</span>
+                  <div style={{ display:"flex", gap:14, marginTop:8, fontSize:11 }}>
+                    <span style={{ color:"#16a34a" }}>● 7–10 push hard</span>
+                    <span style={{ color:"#d97706" }}>● 4–6 train smart</span>
                     <span style={{ color:"#dc2626" }}>● 1–3 rest</span>
                   </div>
                 </div>
@@ -1671,40 +1744,82 @@ export default function Dashboard() {
           })}
           {/* Weekly TRIMP target bars */}
           <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>WEEKLY TRIMP VS TARGET</div>
+          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
           {(() => {
             const race = new Date("2026-05-30");
-            const todayD = new Date(TODAY);
-            const weeksOut = Math.ceil((race - todayD) / (7*86400000));
-            // Target: 400-500 TRIMP/wk weeks 3+ out, 300-400 wk 2, taper wk 1
-            const getTarget = (wk) => {
-              if (wk <= 0) return [0, 0];
-              if (wk === 1) return [100, 200];   // race week — taper
-              if (wk === 2) return [250, 350];   // final hard week
-              return [400, 500];                  // build phase
+            // Compute weeks-from-race for each entry by parsing label like "May 11–17"
+            // weeklyTrimp is ordered oldest→newest. The LAST entry is the current/most-recent week.
+            const getTarget = (weeksOut) => {
+              if (weeksOut <= 0) return [0, 0, "rest"];                  // post-race
+              if (weeksOut === 1) return [100, 200, "Race week — taper"];
+              if (weeksOut === 2) return [250, 350, "Final hard week"];
+              if (weeksOut === 3) return [400, 520, "Peak load"];
+              return [400, 500, "Build phase"];
             };
+
+            // Parse start date of each label, e.g. "May 11–17" → Date for May 11 of this year
+            const parseStart = (label) => {
+              const yr = new Date(TODAY).getFullYear();
+              const [monStr, dayStr] = label.split(" ");
+              const monIdx = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].indexOf(monStr);
+              return new Date(yr, monIdx, parseInt(dayStr));
+            };
+
             return weeklyTrimp.map((w, i) => {
-              const wOut = 8 - i; // approximate weeks from race
-              const [lo, hi] = getTarget(wOut);
+              const startD = parseStart(w.label);
+              const weekEnd = new Date(startD); weekEnd.setDate(startD.getDate() + 6);
+              const weeksOut = Math.ceil((race - weekEnd) / (7*86400000));
+              const [lo, hi, phase] = getTarget(weeksOut);
+              const isPast = weekEnd < new Date(TODAY);
+              const isCurrent = startD <= new Date(TODAY) && weekEnd >= new Date(TODAY);
+
               const pct = hi > 0 ? Math.min(100, (w.trimp / hi) * 100) : 0;
-              const status = w.trimp === 0 ? "empty" : w.trimp >= lo && w.trimp <= hi ? "green" : w.trimp > hi ? "amber" : "red";
-              const sc = { green:"#16a34a", amber:"#d97706", red:"#dc2626", empty:"#e2e8f0" }[status];
+              const status = w.trimp === 0 ? "empty"
+                : (w.trimp >= lo && w.trimp <= hi) ? "green"
+                : w.trimp > hi ? "amber" : "red";
+              const sc = { green:"#16a34a", amber:"#d97706", red:"#dc2626", empty:"#cbd5e1" }[status];
+              const loPct = hi > 0 ? (lo/hi)*100 : 0;
+
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:22 }}>{w.label}</div>
-                  <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:20, position:"relative", overflow:"hidden" }}>
-                    <div style={{ height:"100%", width:`${pct}%`, background:sc+"99", borderRadius:4, transition:"width 0.4s" }} />
-                    {hi > 0 && <div style={{ position:"absolute", left:`${(lo/hi)*100}%`, top:0, width:1, height:"100%", background:sc, opacity:0.4 }} />}
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8, opacity: isPast && !isCurrent ? 0.55 : 1 }}>
+                  <div style={{ minWidth:90 }}>
+                    <div style={{ fontSize:11, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? "#7c3aed" : "#1e293b" }}>
+                      {w.label}{isCurrent && " ←"}
+                    </div>
+                    <div style={{ fontSize:9, color:"#94a3b8" }}>{phase}</div>
                   </div>
-                  <div style={{ fontSize:10, fontWeight:700, color:sc, minWidth:36, textAlign:"right" }}>
+                  <div style={{ flex:1, background:"#f1f5f9", borderRadius:5, height:22, position:"relative", overflow:"hidden", border:"1px solid #e2e8f0" }}>
+                    {/* target zone band */}
+                    {hi > 0 && (
+                      <div style={{ position:"absolute", left:`${loPct}%`, width:`${100-loPct}%`, top:0, height:"100%", background:"#16a34a14" }} />
+                    )}
+                    {/* actual bar */}
+                    <div style={{ height:"100%", width:`${pct}%`, background:sc, borderRadius:5, transition:"width 0.4s", opacity:0.85 }} />
+                    {/* target markers */}
+                    {hi > 0 && (
+                      <>
+                        <div style={{ position:"absolute", left:`${loPct}%`, top:0, width:2, height:"100%", background:"#16a34a" }} />
+                        <div style={{ position:"absolute", left:`100%`, top:0, width:2, height:"100%", background:"#d97706", transform:"translateX(-2px)" }} />
+                      </>
+                    )}
+                  </div>
+                  <div style={{ fontSize:12, fontWeight:800, color:sc, minWidth:42, textAlign:"right" }}>
                     {w.trimp > 0 ? w.trimp : "—"}
                   </div>
-                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:54 }}>
+                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:58 }}>
                     {hi > 0 ? `${lo}–${hi}` : "rest"}
                   </div>
                 </div>
               );
             });
           })()}
+          <div style={{ display:"flex", gap:14, marginTop:10, fontSize:10, color:"#94a3b8", flexWrap:"wrap" }}>
+            <span><span style={{ display:"inline-block", width:10, height:10, background:"#16a34a", borderRadius:2, verticalAlign:"middle" }} /> In target zone</span>
+            <span><span style={{ display:"inline-block", width:10, height:10, background:"#d97706", borderRadius:2, verticalAlign:"middle" }} /> Over target</span>
+            <span><span style={{ display:"inline-block", width:10, height:10, background:"#dc2626", borderRadius:2, verticalAlign:"middle" }} /> Under target</span>
+            <span style={{ marginLeft:"auto" }}>Green band = target zone</span>
+          </div>
+          </div>
 
           {/* Taper countdown */}
           <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>TAPER PLAN</div>

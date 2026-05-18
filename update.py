@@ -306,13 +306,16 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
     race     = datetime.date(2026, 5, 30)
     days_to  = (race - tomorrow).days
 
-    hrv_ms   = wellness.get('hrv', 0)
-    weekly   = wellness.get('hrv_weekly', 0)
-    stages   = wellness.get('sleep', {})
-    rhr_val  = wellness.get('rhr', 40)
-    spo2_val = wellness.get('spo2', 98)
-    resp_val = wellness.get('resp', 12.0)
-    has_wellness = bool(wellness)   # False in activities-only mode
+    hrv_ms   = wellness.get('hrv') or 0
+    weekly   = wellness.get('hrv_weekly') or 0
+    stages   = wellness.get('sleep') or {}
+    rhr_val  = wellness.get('rhr') or 40
+    spo2_val = wellness.get('spo2') or 98
+    resp_val = wellness.get('resp') or 12.0
+    # Only patch daily/sleep when we have REAL data — not just defaults
+    has_real_hrv   = bool(wellness.get('hrv'))   # > 0 and not None
+    has_real_sleep = bool(stages.get('deep') or stages.get('rem') or stages.get('light'))
+    has_wellness   = has_real_hrv or has_real_sleep
 
     # 1. TODAY — only advance when processing yesterday's data, not today's activities
     if advance_today:
@@ -320,7 +323,8 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
                       f'const TODAY = "{tomorrow.isoformat()}";', code)
 
     # 2. Daily HRV row — replace if exists, otherwise insert (sorted)
-    if has_wellness:
+    # Only patch if we have real HRV data — avoids writing hrv:0 placeholder
+    if has_real_hrv:
         ss_str = str(wellness.get("sleep_score", "null"))
         new_daily = f'    {{date:"{date_str}",hrv:{hrv_ms},rhr:{rhr_val},spo2:{spo2_val},resp:{resp_val},sleep_score:{ss_str}}},'
 
@@ -343,8 +347,8 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
                 code, count=1
             )
 
-    # 3. Sleep row — replace if exists (handles zero-fill rows being overwritten)
-    if has_wellness and stages:
+    # 3. Sleep row — only patch if real sleep data (avoids writing all-zeros)
+    if has_real_sleep:
         d,rm,li,aw = (stages.get(k,0) for k in ('deep','rem','light','awake'))
         new_sleep_line = f'    {{date:"{date_str}",deep:{d},rem:{rm},light:{li},awake:{aw}}},'
 
