@@ -47,7 +47,7 @@ const HEALTH_DATA = {
     {date:"2026-05-17",hrv:115,rhr:44,spo2:98,resp:12.0,sleep_score:95},
     {date:"2026-05-19",hrv:121,rhr:43,spo2:97,resp:12.0,sleep_score:95},
     {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
-    {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
+    {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -86,7 +86,7 @@ const HEALTH_DATA = {
     {date:"2026-05-18",deep:129,rem:136,light:265,awake:0},
     {date:"2026-05-19",deep:100,rem:117,light:272,awake:2},
     {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
-    {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
+    {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
   ],
 };
 
