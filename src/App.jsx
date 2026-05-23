@@ -48,6 +48,8 @@ const HEALTH_DATA = {
     {date:"2026-05-19",hrv:121,rhr:43,spo2:97,resp:12.0,sleep_score:95},
     {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
+    {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
+    {date:"2026-05-23",hrv:98,rhr:40,spo2:94,resp:10.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -87,6 +89,8 @@ const HEALTH_DATA = {
     {date:"2026-05-19",deep:100,rem:117,light:272,awake:2},
     {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
     {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
+    {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
+    {date:"2026-05-23",deep:110,rem:115,light:267,awake:8},
   ],
 };
 
@@ -172,6 +176,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Inline Skating","2026-05-23 15:33:58","false","Vilnius Inline Skating","9,62","304","00:46:08","99","163","0,7","--","--","4:47","--","--","--","51","49","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:42:02","01:00:42","--","--"
 "Running","2026-05-22 20:08:20","false","Z2 45min","8,75","603","00:44:15","136","148","3,1","177","--","5:03","--","--","--","36","38","--","111,46","6,0","6,9","274","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:44:15","00:44:15","--","--"
 "Cycling","2026-05-22 17:35:41","false","Vilnius Cycling","6,14","161","00:20:23","105","129","0,7","--","--","3:19","--","--","--","65","68","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:18:41","00:37:36","--","--"
 "Tennis V2","2026-05-21 19:29:45","false","Tennis","0,80","595","01:22:10","112","157","2,1","27","--","103:31","--","--","--","--","--","--","35,25","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:21","01:22:10","--","--"
@@ -1105,7 +1110,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 110; // updated 2026-05-22
+  const hrvBaseline = 111; // updated 2026-05-23
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
