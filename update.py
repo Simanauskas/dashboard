@@ -236,7 +236,7 @@ def fetch_activities(client, date_str):
         if attempt < 2:
             _time.sleep(5)
     if not acts:
-        print("Activities: no data after 3 attempts — skipping"); return []
+        print("Activities: no data after 3 attempts — skipping"); return [], {}
 
     dates_seen = set((a.get('startTimeLocal') or '')[:10] for a in acts if a.get('startTimeLocal'))
 
@@ -295,7 +295,7 @@ def fetch_activities(client, date_str):
         rows.append(buf.getvalue().strip())
 
     print(f"Activities: {len(rows)}")
-    # Also return activity_ids keyed by startTime[:10] for lap fetching
+    # Also return activity_ids keyed by startTime[:10] for lap fetching keyed by startTime[:10] for lap fetching
     activity_ids = {
         (a.get("startTimeLocal") or "")[:10]: a["activityId"]
         for a in (acts or [])
