@@ -49,7 +49,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-23",hrv:98,rhr:40,spo2:94,resp:10.0,sleep_score:95},
+    {date:"2026-05-24",hrv:114,rhr:43,spo2:94,resp:12.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -90,7 +90,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
     {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
-    {date:"2026-05-23",deep:110,rem:115,light:267,awake:8},
+    {date:"2026-05-24",deep:77,rem:105,light:303,awake:3},
   ],
 };
 
@@ -137,6 +137,14 @@ const HYROX_SESSIONS = [
   //   ],
   // },
 ];
+
+// Lap splits — auto-patched by update.py via /activity-service/activity/{id}/splits
+// Keys are "YYYY-MM-DD". Each entry is an array of lap objects:
+//   { lap: N, t: elapsed_seconds, avgHr: N, maxHr: N, dist: meters }
+// update.py writes fresh laps whenever it finds an indoor_running/running activity.
+const LAPS_DATA = {
+};
+
 
 // Body fat — fetched live from Google Sheets
 // CORS proxy needed — Google Sheets blocks direct browser fetch
@@ -651,10 +659,14 @@ function HyroxView() {
     </div>
   );
   const s = HYROX_SESSIONS[selIdx];
-  const avgRunPace = s.runs.reduce((a, b) => a + b, 0) / s.runs.length;
-  const fastestRun = Math.min(...s.runs);
-  const slowestRun = Math.max(...s.runs);
-  const maxRunSec = Math.max(...s.runs);
+  // runs[] supports both legacy number and {t, hr} object formats
+  const normRuns = s.runs.map(r => typeof r === 'object' ? r : {t: r, hr: null});
+  const runTimes = normRuns.map(r => r.t);
+  const avgRunPace = runTimes.reduce((a, b) => a + b, 0) / runTimes.length;
+  const fastestRun = Math.min(...runTimes);
+  const slowestRun = Math.max(...runTimes);
+  const garminLaps = LAPS_DATA[s.date] || [];
+  const maxRunSec = Math.max(...runTimes);
   const minRunSec = Math.min(...s.runs);
   const runRange = maxRunSec - minRunSec || 1;
   const maxStationTime = Math.max(...s.stations.map(st => st.time), 1);
@@ -702,9 +714,14 @@ function HyroxView() {
       {/* run splits */}
       <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — 8 × 1 KM</div>
       <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        {s.runs.map((t, i) => {
+        {normRuns.map((run, i) => {
+          const t = run.t;
+          // Prefer HR from Garmin laps if available, fall back to runs[].hr
+          const lapHr = garminLaps[i]?.avgHr || run.hr;
+          const lapMaxHr = garminLaps[i]?.maxHr || null;
           const barW = Math.round(((maxRunSec - t) / runRange) * 60 + 35);
           const isF = t === fastestRun, isS = t === slowestRun;
+          const hrColor = lapHr ? (lapHr > 167 ? "#dc2626" : lapHr > 146 ? "#ea580c" : lapHr > 132 ? "#d97706" : "#16a34a") : "#94a3b8";
           return (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
               <div style={{ fontSize:10, color:"#94a3b8", minWidth:18, textAlign:"right" }}>R{i+1}</div>
@@ -714,13 +731,21 @@ function HyroxView() {
               <div style={{ fontSize:11, fontWeight:700, color: isF ? "#15803d" : isS ? "#dc2626" : "#c2410c", minWidth:40, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
                 {fmtMMSS(t)}
               </div>
-              {isF && <span style={{ fontSize:9, color:"#15803d", fontWeight:700 }}>↑ fast</span>}
-              {isS && <span style={{ fontSize:9, color:"#dc2626", fontWeight:700 }}>↓ slow</span>}
-              {!isF && !isS && <span style={{ fontSize:9, color:"#94a3b8", minWidth:28 }}></span>}
+              {lapHr && (
+                <div style={{ fontSize:10, color: hrColor, minWidth:48, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
+                  ♥ {lapHr}{lapMaxHr ? <span style={{color:"#94a3b8"}}> /{lapMaxHr}</span> : null}
+                </div>
+              )}
+              {!lapHr && (isF
+                ? <span style={{ fontSize:9, color:"#15803d", fontWeight:700, minWidth:48 }}>↑ fast</span>
+                : isS
+                  ? <span style={{ fontSize:9, color:"#dc2626", fontWeight:700, minWidth:48 }}>↓ slow</span>
+                  : <span style={{ fontSize:9, color:"#94a3b8", minWidth:48 }}></span>
+              )}
             </div>
           );
         })}
-        <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16 }}>
+        <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16, flexWrap:"wrap" }}>
           <span>avg <strong>{fmtMMSS(avgRunPace)}/km</strong></span>
           <span>drift <strong>+{fmtMMSS(slowestRun - fastestRun)}</strong> first→last</span>
           <span>total running <strong>{fmtMMSS(s.runTime)}</strong></span>

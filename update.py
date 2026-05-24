@@ -295,11 +295,90 @@ def fetch_activities(client, date_str):
         rows.append(buf.getvalue().strip())
 
     print(f"Activities: {len(rows)}")
-    return rows
+    # Also return activity_ids keyed by startTime[:10] for lap fetching
+    activity_ids = {
+        (a.get("startTimeLocal") or "")[:10]: a["activityId"]
+        for a in (acts or [])
+        if (a.get("startTimeLocal") or "")[:10] == date_str
+    }
+    return rows, activity_ids
 
 # ── Patch App.jsx ─────────────────────────────────────────────────────────────
 
-def patch(date_str, wellness, csv_rows, advance_today=True):
+def fetch_activity_laps(client, activity_id):
+    """
+    Fetch per-lap data for a given Garmin activity ID.
+    Returns a list of lap dicts:
+      { elapsed_sec, moving_sec, avg_hr, max_hr, distance_m, start_time, lap_index }
+    Falls back to [] on any error.
+
+    Useful endpoints:
+      /activity-service/activity/{id}/splits  -> lap-level splits (fastest, most reliable)
+      /activity-service/activity/{id}/details -> full detail incl. per-second records
+
+    For Hyrox sims recorded as a single Indoor Running activity the treadmill
+    laps map 1-to-1 to 800 m run segments.  Station times must still be entered
+    manually (they happen off the treadmill) but run lap HR is captured here.
+    """
+    if not activity_id:
+        return []
+    try:
+        data = client.connectapi(f"/activity-service/activity/{activity_id}/splits")
+        laps_raw = data.get("lapDTOs") or data.get("laps") or []
+        laps = []
+        for i, lap in enumerate(laps_raw):
+            elapsed  = lap.get("duration") or lap.get("elapsedDuration") or 0
+            moving   = lap.get("movingDuration") or elapsed
+            avg_hr   = lap.get("averageHR") or lap.get("averageHeartRate")
+            max_hr   = lap.get("maxHR") or lap.get("maxHeartRate")
+            dist_m   = lap.get("distance") or 0
+            start    = lap.get("startTimeLocal") or lap.get("startTime") or ""
+            laps.append({
+                "lap_index":   i + 1,
+                "elapsed_sec": round(elapsed),
+                "moving_sec":  round(moving),
+                "avg_hr":      round(avg_hr)  if avg_hr  else None,
+                "max_hr":      round(max_hr)  if max_hr  else None,
+                "distance_m":  round(dist_m),
+                "start_time":  start,
+            })
+        print(f"  Laps fetched: {len(laps)} for activity {activity_id}")
+        return laps
+    except Exception as e:
+        print(f"  fetch_activity_laps failed for {activity_id}: {e}")
+        return []
+
+
+def find_activity_id_for_date(client, date_str, title_hint=None):
+    """
+    Return the Garmin activity ID for an Indoor Running / Hyrox activity on date_str.
+    If title_hint is provided, prefer activities whose name contains that string.
+    Falls back to the first Indoor Running activity on that date.
+    Returns None if nothing matches.
+    """
+    try:
+        acts = client.get_activities(0, 30)
+        candidates = [
+            a for a in acts
+            if (a.get("startTimeLocal") or "")[:10] == date_str
+            and a.get("activityType", {}).get("typeKey", "") in
+                ("indoor_running", "running", "treadmill_running", "other")
+        ]
+        if not candidates:
+            return None
+        if title_hint:
+            for a in candidates:
+                if title_hint.lower() in (a.get("activityName") or "").lower():
+                    return a["activityId"]
+        # Fall back to first candidate (most recent)
+        return candidates[0]["activityId"]
+    except Exception as e:
+        print(f"  find_activity_id_for_date failed: {e}")
+        return None
+
+
+def patch(date_str, wellness, csv_rows, advance_today=True, laps_by_date=None):
+    laps_by_date = laps_by_date or {}
     code     = DASHBOARD.read_text(encoding='utf-8')
     today    = datetime.date.fromisoformat(date_str)
     tomorrow = today + datetime.timedelta(days=1)
@@ -446,6 +525,38 @@ def patch(date_str, wellness, csv_rows, advance_today=True):
             if to_add:
                 code = code[:ins] + '\n'.join(to_add) + '\n' + code[ins:]
 
+
+    # 4b. Lap data — store raw laps per activity date for dashboard analysis
+    # Format: LAPS_DATA["YYYY-MM-DD"] = [{elapsed_sec, moving_sec, avg_hr, max_hr, distance_m}, ...]
+    if laps_by_date:
+        for lap_date, laps in laps_by_date.items():
+            if not laps:
+                continue
+            # Serialize laps as a compact JS array of objects
+            def _lap_obj(l):
+                hr_str    = f'avgHr:{l["avg_hr"]},' if l["avg_hr"] else ''
+                max_hr_str= f'maxHr:{l["max_hr"]},' if l["max_hr"] else ''
+                dist_str  = f'dist:{l["distance_m"]},' if l["distance_m"] else ''
+                return (f'{{lap:{l["lap_index"]},t:{l["elapsed_sec"]},'
+                        f'{hr_str}{max_hr_str}{dist_str}}}').replace(',}', '}')
+            laps_js = '[' + ','.join(_lap_obj(l) for l in laps) + ']'
+            new_entry = f'  "{lap_date}":{laps_js},'
+
+            # Try to replace existing entry for this date
+            replaced_lap = re.sub(
+                rf'  "{re.escape(lap_date)}":\[.*?\],',
+                new_entry, code, count=1, flags=re.DOTALL
+            )
+            if replaced_lap != code:
+                code = replaced_lap
+            else:
+                # Insert before closing brace of LAPS_DATA
+                code = re.sub(
+                    r'(const LAPS_DATA = \{)(.*?)(\n\};)',
+                    lambda m: m.group(1) + m.group(2) + '\n' + new_entry + m.group(3),
+                    code, count=1, flags=re.DOTALL
+                )
+
     # 5. Countdown (only update on full morning run)
     if advance_today:
         code = re.sub(r'HYROX RIGA · MAY 30 · \d+ DAYS',
@@ -491,9 +602,15 @@ if __name__ == '__main__':
             wellness = fetch_wellness(client, date_str)
             has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
             print(f"  {'✓' if has_wellness else '✗'} Wellness data for {date_str}")
-            csv_rows = fetch_activities(client, date_str)
+            csv_rows, activity_ids = fetch_activities(client, date_str)
+            # Fetch laps for any hyrox/run activity on this date
+            laps_by_date = {}
+            for act_date, act_id in activity_ids.items():
+                laps = fetch_activity_laps(client, act_id)
+                if laps:
+                    laps_by_date[act_date] = laps
             advance = (date_str == yesterday)
-            patch(date_str, wellness, csv_rows, advance_today=advance)
+            patch(date_str, wellness, csv_rows, advance_today=advance, laps_by_date=laps_by_date)
 
     elif args.mode == 'backfill':
         # Backfill: fetch wellness + activities for last N days
@@ -505,7 +622,8 @@ if __name__ == '__main__':
             print(f"  Fetching {date_str}...")
             try:
                 wellness = fetch_wellness(client, date_str)
-                csv_rows = fetch_activities(client, date_str)
+                csv_rows, activity_ids = fetch_activities(client, date_str)
+                laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
                 # Only advance today pointer on the most recent date
                 advance = (i == 1)
                 patch(date_str, wellness, csv_rows, advance_today=advance)
@@ -514,7 +632,8 @@ if __name__ == '__main__':
 
     else:
         # Activities-only: fetch today's new workouts
-        csv_rows = fetch_activities(client, today)
-        patch(today, {}, csv_rows, advance_today=False)
+        csv_rows, activity_ids = fetch_activities(client, today)
+        laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
+        patch(today, {}, csv_rows, advance_today=False, laps_by_date=laps_by_date)
 
     print("Done.")
