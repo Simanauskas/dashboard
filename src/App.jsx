@@ -49,7 +49,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-24",hrv:114,rhr:43,spo2:94,resp:12.0,sleep_score:95},
+    {date:"2026-05-25",hrv:105,rhr:42,spo2:94,resp:12.0,sleep_score:88},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -90,7 +90,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
     {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
-    {date:"2026-05-24",deep:77,rem:105,light:303,awake:3},
+    {date:"2026-05-25",deep:106,rem:130,light:290,awake:5},
   ],
 };
 
@@ -146,6 +146,8 @@ const LAPS_DATA = {
   "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
   "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
   "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
+  "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
+  "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
 };
 
 
@@ -187,6 +189,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Tennis V2","2026-05-25 19:09:38","false","Tennis","0,49","421","00:52:46","112","155","1,8","28","--","107:31","--","--","--","--","--","--","33,85","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:06:49","00:52:46","--","--"
 "Cycling","2026-05-24 10:16:41","false","Indoor Cycling","7,70","175","00:20:02","111","121","0,9","--","--","2:36","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:02","00:20:02","--","--"
 "Indoor Running","2026-05-24 09:04:33","false","Hyrox sim 800m runs","8,24","993","01:04:10","156","170","4,3","117","--","7:47","--","--","--","--","--","--","88,51","10,6","8,3","342","--","--","--","--","--","--","--","--","--","No","--","17","--","--","--","--","--","00:52:35","01:04:10","--","--"
 "Cycling","2026-05-23 20:29:49","false","Vilnius Cycling","3,65","116","00:15:20","102","127","0,6","--","--","4:12","--","--","--","55","52","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:13:35","00:38:40","--","--"
@@ -1141,7 +1144,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 110; // updated 2026-05-24
+  const hrvBaseline = 109; // updated 2026-05-25
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
