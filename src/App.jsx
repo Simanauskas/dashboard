@@ -49,7 +49,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-25",hrv:105,rhr:42,spo2:94,resp:12.0,sleep_score:88},
+    {date:"2026-05-26",hrv:109,rhr:44,spo2:94,resp:13.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -90,7 +90,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
     {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
-    {date:"2026-05-25",deep:106,rem:130,light:290,awake:5},
+    {date:"2026-05-26",deep:111,rem:117,light:301,awake:2},
   ],
 };
 
@@ -147,6 +147,7 @@ const LAPS_DATA = {
   "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
   "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
   "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
+  "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
   "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
   "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
 };
@@ -262,7 +263,7 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-05-25";
+const TODAY = "2026-05-26";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1145,7 +1146,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 109; // updated 2026-05-25
+  const hrvBaseline = 108; // updated 2026-05-26
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
@@ -1195,9 +1196,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 5 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 4 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Mon May 25 · updated with May 24 Garmin data</div>
+          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Tue May 26 · updated with May 25 Garmin data</div>
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }} id="auth-controls">
           {/* ⟳ Refresh button — calls Worker which has the PAT */}
