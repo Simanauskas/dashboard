@@ -49,7 +49,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-26",hrv:109,rhr:44,spo2:94,resp:13.0,sleep_score:95},
+    {date:"2026-05-27",hrv:102,rhr:45,spo2:95,resp:13.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -90,7 +90,7 @@ const HEALTH_DATA = {
     {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
     {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
-    {date:"2026-05-26",deep:111,rem:117,light:301,awake:2},
+    {date:"2026-05-27",deep:109,rem:119,light:223,awake:29},
   ],
 };
 
@@ -150,6 +150,7 @@ const LAPS_DATA = {
   "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
   "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
   "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
+  "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
   "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
   "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
 };
@@ -269,8 +270,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-05-27";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-05-27T07:07:00Z";
-const LAST_DATA = "2026-05-27T07:07:00Z";
+const LAST_RUN  = "2026-05-27T08:07:00Z";
+const LAST_DATA = "2026-05-27T08:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
