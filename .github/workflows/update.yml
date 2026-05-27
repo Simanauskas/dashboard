@@ -1,9 +1,12 @@
 name: Daily Garmin Update
 
 on:
-  schedule:
-    - cron: '0 5-9 * * *'     # 05:00-09:00 UTC — full update hourly until synced
-    - cron: '0 10-20 * * *'   # 10:00-20:00 UTC — activities only
+  # Scheduling moved to Cloudflare Worker (auth.simas.fit) for reliability.
+  # GitHub Actions cron is best-effort and drifts 15-30+ min during high load.
+  # Cloudflare cron triggers this workflow via workflow_dispatch hourly.
+  # schedule:
+  #   - cron: '0 5-9 * * *'     # 05:00-09:00 UTC — full update hourly until synced
+  #   - cron: '0 10-20 * * *'   # 10:00-20:00 UTC — activities only
   workflow_dispatch:
     inputs:
       mode:
@@ -72,5 +75,5 @@ jobs:
           git config user.name  "garmin-bot"
           git config user.email "bot@simanauskas.github.io"
           git add src/App.jsx
-          git diff --staged --quiet || git commit -m "chore: daily update $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "chore: sync $(date -u +%Y-%m-%dT%H:%MZ) mode=${{ steps.mode.outputs.mode }}"
           git push

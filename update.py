@@ -578,6 +578,20 @@ def patch(date_str, wellness, csv_rows, advance_today=True, laps_by_date=None):
     DASHBOARD.write_text(code, encoding='utf-8')
     print(f"✓ Patched {DASHBOARD}")
 
+def stamp_run(got_fresh_data: bool):
+    """Write LAST_RUN (always) and LAST_DATA (only when fresh Garmin data was ingested)
+    so the dashboard can tell the user when the workflow last attempted a sync and
+    whether tokens are likely still valid. Both stamps are UTC ISO with minutes."""
+    code = DASHBOARD.read_text(encoding='utf-8')
+    now_utc = datetime.datetime.utcnow().replace(microsecond=0, second=0).isoformat() + "Z"
+    code = re.sub(r'const LAST_RUN  = "[^"]+";',
+                  f'const LAST_RUN  = "{now_utc}";', code)
+    if got_fresh_data:
+        code = re.sub(r'const LAST_DATA = "[^"]+";',
+                      f'const LAST_DATA = "{now_utc}";', code)
+    DASHBOARD.write_text(code, encoding='utf-8')
+    print(f"✓ Stamped LAST_RUN={now_utc} fresh_data={got_fresh_data}")
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
@@ -596,44 +610,58 @@ if __name__ == '__main__':
     today = datetime.date.today().isoformat()
     yesterday = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
 
-    if args.mode == 'full':
-        # Full update: fetch wellness + activities for yesterday AND today
-        for date_str in [yesterday, today]:
-            wellness = fetch_wellness(client, date_str)
-            has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
-            print(f"  {'✓' if has_wellness else '✗'} Wellness data for {date_str}")
-            csv_rows, activity_ids = fetch_activities(client, date_str)
-            # Fetch laps for any hyrox/run activity on this date
-            laps_by_date = {}
-            for act_date, act_id in activity_ids.items():
-                laps = fetch_activity_laps(client, act_id)
-                if laps:
-                    laps_by_date[act_date] = laps
-            advance = (date_str == yesterday)
-            patch(date_str, wellness, csv_rows, advance_today=advance, laps_by_date=laps_by_date)
+    got_fresh_data = False
 
-    elif args.mode == 'backfill':
-        # Backfill: fetch wellness + activities for last N days
-        # Useful after auth was broken to fill in gaps
-        today_d = datetime.date.today()
-        print(f"Backfilling {args.days} days...")
-        for i in range(args.days, 0, -1):
-            date_str = (today_d - datetime.timedelta(days=i)).isoformat()
-            print(f"  Fetching {date_str}...")
-            try:
+    try:
+        if args.mode == 'full':
+            # Full update: fetch wellness + activities for yesterday AND today
+            for date_str in [yesterday, today]:
                 wellness = fetch_wellness(client, date_str)
+                has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
+                print(f"  {'✓' if has_wellness else '✗'} Wellness data for {date_str}")
                 csv_rows, activity_ids = fetch_activities(client, date_str)
-                laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
-                # Only advance today pointer on the most recent date
-                advance = (i == 1)
-                patch(date_str, wellness, csv_rows, advance_today=advance)
-            except Exception as e:
-                print(f"    ⚠ Skipped {date_str}: {e}")
+                if has_wellness or csv_rows:
+                    got_fresh_data = True
+                # Fetch laps for any hyrox/run activity on this date
+                laps_by_date = {}
+                for act_date, act_id in activity_ids.items():
+                    laps = fetch_activity_laps(client, act_id)
+                    if laps:
+                        laps_by_date[act_date] = laps
+                advance = (date_str == yesterday)
+                patch(date_str, wellness, csv_rows, advance_today=advance, laps_by_date=laps_by_date)
 
-    else:
-        # Activities-only: fetch today's new workouts
-        csv_rows, activity_ids = fetch_activities(client, today)
-        laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
-        patch(today, {}, csv_rows, advance_today=False, laps_by_date=laps_by_date)
+        elif args.mode == 'backfill':
+            # Backfill: fetch wellness + activities for last N days
+            # Useful after auth was broken to fill in gaps
+            today_d = datetime.date.today()
+            print(f"Backfilling {args.days} days...")
+            for i in range(args.days, 0, -1):
+                date_str = (today_d - datetime.timedelta(days=i)).isoformat()
+                print(f"  Fetching {date_str}...")
+                try:
+                    wellness = fetch_wellness(client, date_str)
+                    csv_rows, activity_ids = fetch_activities(client, date_str)
+                    if wellness.get('hrv') or wellness.get('sleep') or csv_rows:
+                        got_fresh_data = True
+                    laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
+                    # Only advance today pointer on the most recent date
+                    advance = (i == 1)
+                    patch(date_str, wellness, csv_rows, advance_today=advance)
+                except Exception as e:
+                    print(f"    ⚠ Skipped {date_str}: {e}")
+
+        else:
+            # Activities-only: fetch today's new workouts
+            csv_rows, activity_ids = fetch_activities(client, today)
+            if csv_rows:
+                got_fresh_data = True
+            laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
+            patch(today, {}, csv_rows, advance_today=False, laps_by_date=laps_by_date)
+    finally:
+        # Always stamp LAST_RUN (so the dashboard can show 'scheduler is alive')
+        # even on partial failures, and stamp LAST_DATA only when we actually
+        # pulled fresh Garmin data (so the dashboard knows tokens are still valid).
+        stamp_run(got_fresh_data)
 
     print("Done.")

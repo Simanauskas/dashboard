@@ -264,6 +264,9 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
 const TODAY = "2026-05-26";
+// LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
+const LAST_RUN  = "2026-05-26T00:00:00Z";
+const LAST_DATA = "2026-05-26T00:00:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1198,7 +1201,46 @@ export default function Dashboard() {
         <div>
           <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 4 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          <div style={{ fontSize:11, color:"#94a3b8", marginTop:2 }}>Tue May 26 · updated with May 25 Garmin data</div>
+          {(() => {
+            const now = new Date();
+            const lastRun  = new Date(LAST_RUN);
+            const lastData = new Date(LAST_DATA);
+            const fmtClock = d => d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
+            const fmtDay = d => {
+              const today = new Date(); today.setHours(0,0,0,0);
+              const yest = new Date(today); yest.setDate(yest.getDate()-1);
+              const dd = new Date(d); dd.setHours(0,0,0,0);
+              if (dd.getTime() === today.getTime()) return "today";
+              if (dd.getTime() === yest.getTime()) return "yesterday";
+              return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+            };
+            const ago = d => {
+              const m = Math.floor((now - d) / 60000);
+              if (m < 1) return "just now";
+              if (m < 60) return `${m} min ago`;
+              const h = Math.floor(m / 60);
+              if (h < 24) return `${h}h ${m % 60}m ago`;
+              return `${Math.floor(h / 24)}d ago`;
+            };
+            const runMin  = (now - lastRun)  / 60000;
+            const dataMin = (now - lastData) / 60000;
+            // Tokens die ~27h after last refresh. If LAST_DATA is older than ~28h → likely expired.
+            const tokensLikelyDead = dataMin > 28 * 60;
+            // Workflow runs hourly. If LAST_RUN is older than ~90 min → scheduler missed runs.
+            const schedulerStuck = runMin > 90;
+            let color, msg;
+            if (tokensLikelyDead) {
+              color = "#dc2626";
+              msg = `⚠ Last data: ${fmtDay(lastData)} ${fmtClock(lastData)} (${ago(lastData)}). Tokens likely expired — tap 🔑 Renew.`;
+            } else if (schedulerStuck) {
+              color = "#d97706";
+              msg = `⚠ Last run: ${fmtClock(lastRun)} (${ago(lastRun)}). Scheduler may be stuck — tap ⟳ Refresh.`;
+            } else {
+              color = "#64748b";
+              msg = `Synced ${fmtClock(lastRun)} (${ago(lastRun)}) · data through ${fmtDay(lastData)}`;
+            }
+            return <div style={{ fontSize:11, color, marginTop:2, fontWeight: (tokensLikelyDead || schedulerStuck) ? 700 : 400 }}>{msg}</div>;
+          })()}
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }} id="auth-controls">
           {/* ⟳ Refresh button — calls Worker which has the PAT */}
