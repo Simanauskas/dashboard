@@ -50,8 +50,6 @@ const HEALTH_DATA = {
     {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
     {date:"2026-05-26",hrv:109,rhr:44,spo2:94,resp:13.0,sleep_score:95},
-    {date:"2026-05-27",hrv:102,rhr:45,spo2:95,resp:13.0,sleep_score:null},
-    {date:"2026-05-28",hrv:128,rhr:41,spo2:94,resp:11.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -93,72 +91,70 @@ const HEALTH_DATA = {
     {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
     {date:"2026-05-26",deep:111,rem:117,light:301,awake:2},
-    {date:"2026-05-27",deep:109,rem:119,light:223,awake:29},
-    {date:"2026-05-28",deep:134,rem:102,light:243,awake:0},
   ],
 };
 
-// ── Hyrox session log — manually maintained, update.py does not touch this ──
-// Add a new object per session. Runs: seconds for each 1km. Stations: seconds + avg HR.
-// Set estimateMin to null once you've raced (hides the estimate banner).
-const HYROX_SESSIONS = [
-  {
-    date: "2026-05-16",
-    label: "Baseline",
-    avgHR: 161,
-    totalTime: 3316,
-    runTime: 2056,
-    stationTime: 1260,
-    estimateMin: "70–75",
-    runs: [241, 254, 253, 256, 267, 265, 270, 251],
-    stations: [
-      { name: "Small Ball ×150",       time: 326, hr: 158, notes: "Sub for Ski Erg" },
-      { name: "Sled Push 50 m",        time: 75,  hr: 159, notes: "" },
-      { name: "Sled Pull 50 m",        time: 83,  hr: 155, notes: "" },
-      { name: "Burpee Broad Jump 80 m",time: 186, hr: 159, notes: "" },
-      { name: "Farmer Walk 160 m",     time: 71,  hr: 162, notes: "24 kg" },
-      { name: "Lunges 100 m",          time: 286, hr: 154, notes: "24 kg" },
-      { name: "Wall Balls 100 × 6 kg", time: 234, hr: 159, notes: "" },
+// ── Hyrox sessions data ───────────────────────────────────────────────────────
+// HYROX_DATA holds every Hyrox session: races, sims, and group sessions.
+// Keys are Garmin activity IDs (numeric strings) for auto-fetched sessions,
+// or "manual-<date>-<slug>" for entries you added by hand.
+//
+// update.py auto-fills date, name, type, totalTime, avgHR, maxHR, description,
+// photos, and laps[] (with role:"run"|"station"|"warmup"|"cooldown") whenever
+// an activity name contains "hyrox", "race simulation", or similar Hyrox markers.
+//
+// Manual fields (NOT touched by update.py once set):
+//   estimateMin    — projected race finish ("70–75"); set to null after racing
+//   stationNames   — { lap_index: "Ski Erg", ... } map; assign names to station laps
+//                    to enable per-station trend comparison across sessions
+//   notes          — your free-text notes about prescribed workout, conditions, etc.
+//
+// On a clean Hyrox sim, laps map 1:1: [run, station, run, station, ...]
+// On a race, expect 17 laps (8 runs + 8 stations + 1 final). On a group session,
+// it's whatever the coach prescribed — assign stationNames per-session.
+const HYROX_DATA = {
+"manual-2026-05-16-baseline": {
+    date:"2026-05-16", name:"Hyrox weekend track (Baseline)", type:"sim",
+    totalTime:3316, avgHR:161, maxHR:171,
+    description:`First baseline Hyrox-style session. Small Ball substituted for Ski Erg.`,
+    photos:[],
+    laps:[
+      {i:1,t:241,role:"run"},  {i:2,t:326,avgHr:158,role:"station"},
+      {i:3,t:254,role:"run"},  {i:4,t:75, avgHr:159,role:"station"},
+      {i:5,t:253,role:"run"},  {i:6,t:83, avgHr:155,role:"station"},
+      {i:7,t:256,role:"run"},  {i:8,t:186,avgHr:159,role:"station"},
+      {i:9,t:267,role:"run"},  {i:10,t:71, avgHr:162,role:"station"},
+      {i:11,t:265,role:"run"}, {i:12,t:286,avgHr:154,role:"station"},
+      {i:13,t:270,role:"run"}, {i:14,t:234,avgHr:159,role:"station"},
+      {i:15,t:251,role:"run"},
     ],
+    // Manual annotations preserved across update.py runs:
+    estimateMin: "70–75",
+    stationNames: {
+      2: "Small Ball ×150",
+      4: "Sled Push 50 m",
+      6: "Sled Pull 50 m",
+      8: "Burpee Broad Jump 80 m",
+      10: "Farmer Walk 160 m",
+      12: "Lunges 100 m",
+      14: "Wall Balls 100 × 6 kg",
+    },
+    notes:"Sub for Ski Erg; Farmer/Lunges with 24kg; Wall balls 6kg. First baseline.",
   },
-  // ── template for next session ───────────────────────────────────────────
-  // {
-  //   date: "YYYY-MM-DD",
-  //   label: "Session 2",
-  //   avgHR: null,
-  //   totalTime: 0, runTime: 0, stationTime: 0,
-  //   estimateMin: "70–75",
-  //   runs: [0,0,0,0,0,0,0,0],
-  //   stations: [
-  //     { name: "Ski Erg 1000 m",          time: 0, hr: null, notes: "" },
-  //     { name: "Sled Push 50 m",           time: 0, hr: null, notes: "" },
-  //     { name: "Sled Pull 50 m",           time: 0, hr: null, notes: "" },
-  //     { name: "Burpee Broad Jump 80 m",   time: 0, hr: null, notes: "" },
-  //     { name: "Rowing 1000 m",            time: 0, hr: null, notes: "" },
-  //     { name: "Farmer Walk 160 m",        time: 0, hr: null, notes: "24 kg" },
-  //     { name: "Lunges 100 m",             time: 0, hr: null, notes: "24 kg" },
-  //     { name: "Wall Balls 100 × 6 kg",    time: 0, hr: null, notes: "" },
-  //   ],
-  // },
-];
-
-// Lap splits — auto-patched by update.py via /activity-service/activity/{id}/splits
-// Keys are "YYYY-MM-DD". Each entry is an array of lap objects:
-//   { lap: N, t: elapsed_seconds, avgHr: N, maxHr: N, dist: meters }
-// update.py writes fresh laps whenever it finds an indoor_running/running activity.
-const LAPS_DATA = {
-  "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
-  "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
-  "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
-  "2026-05-24":[{lap:1,t:231,avgHr:145,maxHr:156,dist:767},{lap:2,t:254,avgHr:148,maxHr:154,dist:72},{lap:3,t:214,avgHr:159,maxHr:166,dist:719},{lap:4,t:157,avgHr:151,maxHr:164,dist:49},{lap:5,t:225,avgHr:158,maxHr:167,dist:738},{lap:6,t:236,avgHr:159,maxHr:165,dist:179},{lap:7,t:231,avgHr:162,maxHr:168,dist:739},{lap:8,t:163,avgHr:162,maxHr:166,dist:20},{lap:9,t:124,avgHr:136,maxHr:166,dist:44},{lap:10,t:222,avgHr:157,maxHr:169,dist:749},{lap:11,t:286,avgHr:155,maxHr:163,dist:152},{lap:12,t:250,avgHr:162,maxHr:165,dist:738},{lap:13,t:147,avgHr:159,maxHr:165,dist:299},{lap:14,t:237,avgHr:161,maxHr:165,dist:734},{lap:15,t:337,avgHr:152,maxHr:164,dist:201},{lap:16,t:235,avgHr:162,maxHr:170,dist:724},{lap:17,t:302,avgHr:160,maxHr:169,dist:319}],
-  "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
-  "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
-  "2026-05-25":[{lap:1,t:3167,avgHr:112,maxHr:155,dist:491}],
-  "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
-  "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
-  "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
-  "2026-05-26":[{lap:1,t:1451,avgHr:105,maxHr:129,dist:7064}],
 };
+
+// ── Canonical Hyrox station catalog (for plan generation + station matching) ──
+// Use these exact names when assigning stationNames so trend matching works.
+const HYROX_STATIONS = [
+  "Ski Erg 1000 m",
+  "Sled Push 50 m",
+  "Sled Pull 50 m",
+  "Burpee Broad Jump 80 m",
+  "Rowing 1000 m",
+  "Farmer Walk 200 m",
+  "Lunges 100 m",
+  "Wall Balls 100",
+];
 
 
 // Body fat — fetched live from Google Sheets
@@ -273,10 +269,10 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-05-28";
+const TODAY = "2026-05-27";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-05-28T05:07:00Z";
-const LAST_DATA = "2026-05-28T05:07:00Z";
+const LAST_RUN  = "2026-05-27T16:08:00Z";
+const LAST_DATA = "2026-05-27T09:08:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -673,24 +669,55 @@ function ScheduleView({ activities }) {
 }
 
 function HyroxView() {
-  const [selIdx, setSelIdx] = useState(HYROX_SESSIONS.length - 1);
-  if (!HYROX_SESSIONS.length) return (
+  // Convert HYROX_DATA map to a date-sorted array for picker UX
+  const sessions = Object.entries(HYROX_DATA)
+    .map(([id, s]) => ({ id, ...s }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const [tab, setTab] = useState("session");        // 'session' | 'trends' | 'notes'
+  const [selIdx, setSelIdx] = useState(Math.max(0, sessions.length - 1));
+
+  if (!sessions.length) return (
     <div style={{ padding:"40px 14px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>
-      No sessions yet. Add your first session to HYROX_SESSIONS in App.jsx.
+      No Hyrox sessions yet. They'll auto-appear here when you do an activity named with "hyrox" or "race simulation".
     </div>
   );
-  const s = HYROX_SESSIONS[selIdx];
-  // runs[] supports both legacy number and {t, hr} object formats
-  const normRuns = s.runs.map(r => typeof r === 'object' ? r : {t: r, hr: null});
-  const runTimes = normRuns.map(r => r.t);
-  const avgRunPace = runTimes.reduce((a, b) => a + b, 0) / runTimes.length;
-  const fastestRun = Math.min(...runTimes);
-  const slowestRun = Math.max(...runTimes);
-  const garminLaps = LAPS_DATA[s.date] || [];
-  const maxRunSec = Math.max(...runTimes);
-  const minRunSec = Math.min(...s.runs);
-  const runRange = maxRunSec - minRunSec || 1;
-  const maxStationTime = Math.max(...s.stations.map(st => st.time), 1);
+
+  const s = sessions[selIdx];
+
+  // ── Derived: runs / stations / warmup / cooldown from classified laps ────────
+  // Lap structure: { i, t, avgHr?, maxHr?, dist?, role }
+  // role is auto-set by update.py; baseline session has manual roles.
+  const allLaps    = s.laps || [];
+  const runLaps    = allLaps.filter(l => l.role === "run");
+  const stationLaps= allLaps.filter(l => l.role === "station");
+  const warmupLaps = allLaps.filter(l => l.role === "warmup" || l.role === "cooldown");
+
+  const runTimes   = runLaps.map(l => l.t);
+  const stationT   = stationLaps.map(l => l.t);
+  const totalRun   = runTimes.reduce((a,b)=>a+b, 0);
+  const totalStat  = stationT.reduce((a,b)=>a+b, 0);
+  const avgRunPace = runTimes.length ? totalRun / runTimes.length : 0;
+  const fastestRun = runTimes.length ? Math.min(...runTimes) : 0;
+  const slowestRun = runTimes.length ? Math.max(...runTimes) : 0;
+  const maxRunSec  = slowestRun || 1;
+  const minRunSec  = fastestRun || 0;
+  const runRange   = (maxRunSec - minRunSec) || 1;
+  const maxStTime  = stationT.length ? Math.max(...stationT) : 1;
+
+  // Station display name: stationNames[lap.i] if set, else "Station N" (numbered in order)
+  const stationDisplay = (lap, idx) => (s.stationNames && s.stationNames[lap.i]) || `Station ${idx + 1}`;
+
+  // ── Notes (manual, persisted to localStorage per session) ───────────────────
+  const noteKey = `hyrox-notes-${s.id}`;
+  const [noteText, setNoteText] = useState(() => {
+    if (typeof window === "undefined") return s.notes || "";
+    return window.localStorage.getItem(noteKey) || s.notes || "";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(noteKey, noteText);
+  }, [noteText, noteKey]);
 
   const Stat = ({ label, value, sub, color, bg, border }) => (
     <div style={{ padding:"10px 12px", background: bg || "#f8fafc", border:`1.5px solid ${border || "#e2e8f0"}`, borderRadius:10, flex:1, minWidth:0 }}>
@@ -700,167 +727,372 @@ function HyroxView() {
     </div>
   );
 
+  // ── Tab navigation ───────────────────────────────────────────────────────────
+  const TabBtn = ({ id, label }) => (
+    <button onClick={() => setTab(id)} style={{
+      padding:"7px 14px", borderRadius:7, fontSize:11, fontWeight:700,
+      cursor:"pointer", border:"1.5px solid",
+      borderColor: tab === id ? "#7c3aed" : "#e2e8f0",
+      background:  tab === id ? "#ede9fe" : "#fff",
+      color:       tab === id ? "#4c1d95" : "#64748b",
+      fontFamily:"inherit",
+    }}>{label}</button>
+  );
+
   return (
     <div style={{ padding:"14px 14px 60px" }}>
 
-      {/* session picker */}
-      {HYROX_SESSIONS.length > 1 && (
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14 }}>
-          {HYROX_SESSIONS.map((sess, i) => (
-            <button key={i} onClick={() => setSelIdx(i)} style={{
+      {/* Tab switcher */}
+      <div style={{ display:"flex", gap:6, marginBottom:14 }}>
+        <TabBtn id="session" label="Session" />
+        <TabBtn id="trends" label="Trends" />
+        <TabBtn id="notes"  label="Notes" />
+      </div>
+
+      {/* Session picker (always visible — switching sessions while on Trends still useful) */}
+      {sessions.length > 1 && (
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14, overflowX:"auto" }}>
+          {sessions.map((sess, i) => (
+            <button key={sess.id} onClick={() => setSelIdx(i)} style={{
               padding:"4px 12px", borderRadius:6, fontSize:11, fontWeight:700,
               cursor:"pointer", border:"1.5px solid",
               borderColor: i === selIdx ? "#7c3aed" : "#e2e8f0",
-              background: i === selIdx ? "#ede9fe" : "#f8fafc",
-              color: i === selIdx ? "#4c1d95" : "#94a3b8",
-              fontFamily:"inherit",
+              background:  i === selIdx ? "#ede9fe" : "#f8fafc",
+              color:       i === selIdx ? "#4c1d95" : "#94a3b8",
+              fontFamily:"inherit", whiteSpace:"nowrap",
             }}>
-              {sess.label || sess.date}
+              {sess.date} · {sess.type || "?"}
             </button>
           ))}
         </div>
       )}
 
-      {/* top stats */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:14 }}>
-        <Stat label="Total time"    value={fmtMMSS(s.totalTime)}    sub={s.date} color="#1e293b" />
-        <Stat label="Running 8×1km" value={fmtMMSS(s.runTime)}      sub={`avg ${fmtMMSS(avgRunPace)}/km`} color="#c2410c" bg="#fff7ed" border="#fdba74" />
-        <Stat label="Stations"      value={fmtMMSS(s.stationTime)}  sub={`${s.stations.length} stations`} color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:18 }}>
-        <Stat label="Avg HR"        value={s.avgHR ? `${s.avgHR} bpm` : "—"}  sub="whole session" color="#dc2626" bg="#fef2f2" border="#fca5a5" />
-        <Stat label="Pace range"    value={`${fmtMMSS(fastestRun)}–${fmtMMSS(slowestRun)}`} sub="fastest → slowest run" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
-      </div>
-
-      {/* run splits */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — 8 × 1 KM</div>
-      <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        {normRuns.map((run, i) => {
-          const t = run.t;
-          // Prefer HR from Garmin laps if available, fall back to runs[].hr
-          const lapHr = garminLaps[i]?.avgHr || run.hr;
-          const lapMaxHr = garminLaps[i]?.maxHr || null;
-          const barW = Math.round(((maxRunSec - t) / runRange) * 60 + 35);
-          const isF = t === fastestRun, isS = t === slowestRun;
-          const hrColor = lapHr ? (lapHr > 167 ? "#dc2626" : lapHr > 146 ? "#ea580c" : lapHr > 132 ? "#d97706" : "#16a34a") : "#94a3b8";
-          return (
-            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
-              <div style={{ fontSize:10, color:"#94a3b8", minWidth:18, textAlign:"right" }}>R{i+1}</div>
-              <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:20, overflow:"hidden" }}>
-                <div style={{ height:"100%", width:`${barW}%`, background: isF ? "#16a34a99" : isS ? "#dc262699" : "#c2410c66", borderRadius:4 }} />
-              </div>
-              <div style={{ fontSize:11, fontWeight:700, color: isF ? "#15803d" : isS ? "#dc2626" : "#c2410c", minWidth:40, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
-                {fmtMMSS(t)}
-              </div>
-              {lapHr && (
-                <div style={{ fontSize:10, color: hrColor, minWidth:48, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
-                  ♥ {lapHr}{lapMaxHr ? <span style={{color:"#94a3b8"}}> /{lapMaxHr}</span> : null}
-                </div>
-              )}
-              {!lapHr && (isF
-                ? <span style={{ fontSize:9, color:"#15803d", fontWeight:700, minWidth:48 }}>↑ fast</span>
-                : isS
-                  ? <span style={{ fontSize:9, color:"#dc2626", fontWeight:700, minWidth:48 }}>↓ slow</span>
-                  : <span style={{ fontSize:9, color:"#94a3b8", minWidth:48 }}></span>
-              )}
-            </div>
-          );
-        })}
-        <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16, flexWrap:"wrap" }}>
-          <span>avg <strong>{fmtMMSS(avgRunPace)}/km</strong></span>
-          <span>drift <strong>+{fmtMMSS(slowestRun - fastestRun)}</strong> first→last</span>
-          <span>total running <strong>{fmtMMSS(s.runTime)}</strong></span>
-        </div>
-      </div>
-
-      {/* station breakdown */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION BREAKDOWN</div>
-      <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        {s.stations.map((st, i) => {
-          const barW = Math.round((st.time / maxStationTime) * 85 + 10);
-          return (
-            <div key={i} style={{ marginBottom:10 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                <span style={{ fontSize:11, fontWeight:600, color:"#4c1d95" }}>{st.name}</span>
-                <span style={{ fontSize:12, fontWeight:800, color:"#6d28d9", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(st.time)}</span>
-              </div>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:14, overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:`${barW}%`, background:"#7c3aed88", borderRadius:4 }} />
-                </div>
-                <div style={{ fontSize:10, color:"#94a3b8", minWidth:54, textAlign:"right" }}>
-                  {st.hr ? `HR ${st.hr}` : ""}
-                  {st.notes ? ` · ${st.notes}` : ""}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        <div style={{ marginTop:4, padding:"8px 10px", background:"#fff", border:"1px solid #ddd6fe", borderRadius:6, fontSize:10, color:"#6d28d9", display:"flex", gap:16, flexWrap:"wrap" }}>
-          <span>total stations <strong>{fmtMMSS(s.stationTime)}</strong></span>
-          <span>longest <strong>{s.stations.reduce((a,b) => b.time > a.time ? b : a).name.split(" ")[0]} {fmtMMSS(Math.max(...s.stations.map(st => st.time)))}</strong></span>
-          <span>fastest <strong>{s.stations.reduce((a,b) => b.time < a.time ? b : a).name.split(" ")[0]} {fmtMMSS(Math.min(...s.stations.map(st => st.time)))}</strong></span>
-        </div>
-      </div>
-
-      {/* multi-session comparison sparkline */}
-      {HYROX_SESSIONS.length > 1 && (
+      {/* ── SESSION TAB ───────────────────────────────────────────────────── */}
+      {tab === "session" && (
         <>
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>PROGRESS — TOTAL TIME</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            <Sparkline data={HYROX_SESSIONS.map(sess => [sess.date, sess.totalTime])} color="#7c3aed" height={48} />
-            <div style={{ display:"flex", justifyContent:"space-between", marginTop:6, fontSize:10, color:"#94a3b8" }}>
-              {HYROX_SESSIONS.map((sess, i) => (
-                <span key={i} style={{ fontWeight: i === selIdx ? 700 : 400, color: i === selIdx ? "#7c3aed" : "#94a3b8" }}>
-                  {sess.label}
-                </span>
-              ))}
-            </div>
+          {/* top stats */}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:14 }}>
+            <Stat label="Total time"  value={fmtMMSS(s.totalTime)} sub={s.date} color="#1e293b" />
+            <Stat label={`Running ×${runTimes.length}`} value={fmtMMSS(totalRun)} sub={avgRunPace ? `avg ${fmtMMSS(avgRunPace)}` : "—"} color="#c2410c" bg="#fff7ed" border="#fdba74" />
+            <Stat label="Stations"    value={fmtMMSS(totalStat)} sub={`${stationLaps.length} stations`} color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
           </div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:18 }}>
+            <Stat label="Avg HR"     value={s.avgHR ? `${s.avgHR} bpm` : "—"} sub={s.maxHR ? `max ${s.maxHR}` : "whole session"} color="#dc2626" bg="#fef2f2" border="#fca5a5" />
+            <Stat label="Run range"  value={runTimes.length ? `${fmtMMSS(fastestRun)}–${fmtMMSS(slowestRun)}` : "—"} sub="fastest → slowest" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
+          </div>
+
+          {/* Description from Garmin Connect */}
+          {s.description && (
+            <div style={{ marginBottom:14, padding:"10px 12px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8 }}>
+              <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:2, marginBottom:4 }}>DESCRIPTION</div>
+              <div style={{ fontSize:12, color:"#334155", whiteSpace:"pre-wrap" }}>{s.description}</div>
+            </div>
+          )}
+
+          {/* Photos from Garmin Connect */}
+          {s.photos && s.photos.length > 0 && (
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:2, marginBottom:6 }}>PHOTOS ({s.photos.length})</div>
+              <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:4 }}>
+                {s.photos.map((url, i) => (
+                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ flexShrink:0 }}>
+                    <img src={url} alt={`session photo ${i+1}`} style={{ height:120, borderRadius:8, border:"1px solid #e2e8f0" }} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* run splits */}
+          {runLaps.length > 0 && (
+            <>
+              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — {runLaps.length} laps</div>
+              <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
+                {runLaps.map((run, i) => {
+                  const t = run.t;
+                  const barW = Math.round(((maxRunSec - t) / runRange) * 60 + 35);
+                  const isF = t === fastestRun, isS = t === slowestRun && fastestRun !== slowestRun;
+                  const hr = run.avgHr;
+                  const maxHr = run.maxHr;
+                  const hrColor = hr ? (hr > 167 ? "#dc2626" : hr > 146 ? "#ea580c" : hr > 132 ? "#d97706" : "#16a34a") : "#94a3b8";
+                  return (
+                    <div key={run.i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+                      <div style={{ fontSize:10, color:"#94a3b8", minWidth:22, textAlign:"right" }}>R{i+1}</div>
+                      <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:20, overflow:"hidden" }}>
+                        <div style={{ height:"100%", width:`${barW}%`, background: isF ? "#16a34a99" : isS ? "#dc262699" : "#c2410c66", borderRadius:4 }} />
+                      </div>
+                      <div style={{ fontSize:11, fontWeight:700, color: isF ? "#15803d" : isS ? "#dc2626" : "#c2410c", minWidth:40, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
+                        {fmtMMSS(t)}
+                      </div>
+                      {hr && (
+                        <div style={{ fontSize:10, color: hrColor, minWidth:48, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
+                          ♥ {hr}{maxHr ? <span style={{color:"#94a3b8"}}> /{maxHr}</span> : null}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16, flexWrap:"wrap" }}>
+                  {avgRunPace > 0 && <span>avg <strong>{fmtMMSS(avgRunPace)}</strong></span>}
+                  {fastestRun !== slowestRun && <span>drift <strong>+{fmtMMSS(slowestRun - fastestRun)}</strong> fast→slow</span>}
+                  <span>total running <strong>{fmtMMSS(totalRun)}</strong></span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* station breakdown */}
+          {stationLaps.length > 0 && (
+            <>
+              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION BREAKDOWN</div>
+              <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"14px", marginBottom:16 }}>
+                {stationLaps.map((st, i) => {
+                  const barW = Math.round((st.t / maxStTime) * 85 + 10);
+                  const named = !!(s.stationNames && s.stationNames[st.i]);
+                  return (
+                    <div key={st.i} style={{ marginBottom:10 }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                        <span style={{ fontSize:11, fontWeight:600, color: named ? "#4c1d95" : "#94a3b8", fontStyle: named ? "normal" : "italic" }}>{stationDisplay(st, i)}</span>
+                        <span style={{ fontSize:12, fontWeight:800, color:"#6d28d9", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(st.t)}</span>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:14, overflow:"hidden" }}>
+                          <div style={{ height:"100%", width:`${barW}%`, background:"#7c3aed88", borderRadius:4 }} />
+                        </div>
+                        <div style={{ fontSize:10, color:"#94a3b8", minWidth:54, textAlign:"right" }}>
+                          {st.avgHr ? `♥ ${st.avgHr}` : ""}
+                          {st.dist ? ` · ${st.dist}m` : ""}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {!s.stationNames && (
+                  <div style={{ marginTop:8, padding:"8px 10px", background:"#fef3c7", border:"1px solid #fde68a", borderRadius:6, fontSize:10, color:"#92400e" }}>
+                    💡 Add station names in HYROX_DATA.{s.id}.stationNames to enable cross-session trends.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* warmup/cooldown */}
+          {warmupLaps.length > 0 && (
+            <div style={{ marginBottom:14, fontSize:10, color:"#94a3b8", textAlign:"center" }}>
+              Ignoring {warmupLaps.length} warmup/cooldown lap{warmupLaps.length>1?"s":""} ({warmupLaps.map(l => fmtMMSS(l.t)).join(", ")}) — anomalous distance, likely treadmill drift.
+            </div>
+          )}
+
+          {/* projected finish */}
+          {s.estimateMin && (
+            <div style={{ background:"linear-gradient(135deg,#4c1d95,#6d28d9)", borderRadius:12, padding:"16px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12, marginBottom:14 }}>
+              <div>
+                <div style={{ fontSize:10, color:"rgba(255,255,255,0.65)", fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase" }}>Projected finish</div>
+                <div style={{ fontSize:32, fontWeight:900, color:"#ffffff", lineHeight:1.1, marginTop:2 }}>~{s.estimateMin} min</div>
+              </div>
+              <div style={{ textAlign:"right" }}>
+                <div style={{ fontSize:11, color:"rgba(255,255,255,0.65)" }}>based on this session</div>
+                <div style={{ fontSize:10, color:"rgba(255,255,255,0.5)", marginTop:4 }}>Set estimateMin: null after racing</div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
-      {/* estimated finish banner */}
-      {s.estimateMin && (
-        <div style={{ background:"linear-gradient(135deg,#4c1d95,#6d28d9)", borderRadius:12, padding:"16px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
-          <div>
-            <div style={{ fontSize:10, color:"rgba(255,255,255,0.65)", fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase" }}>Projected finish · Hyrox Open (Riga)</div>
-            <div style={{ fontSize:32, fontWeight:900, color:"#ffffff", lineHeight:1.1, marginTop:2 }}>~{s.estimateMin} min</div>
-          </div>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ fontSize:11, color:"rgba(255,255,255,0.65)" }}>based on {s.label} baseline</div>
-            <div style={{ fontSize:13, color:"#e9d5ff", fontWeight:700, marginTop:2 }}>top ~20–25% Open Men · first race</div>
-            <div style={{ fontSize:10, color:"rgba(255,255,255,0.5)", marginTop:4 }}>Set estimateMin: null after racing</div>
-          </div>
-        </div>
-      )}
+      {/* ── TRENDS TAB ────────────────────────────────────────────────────── */}
+      {tab === "trends" && (() => {
+        // Aggregate across all sessions: per-station and per-run trends
+        // Match stations by stationNames; sessions without stationNames contribute totals only.
+        const tot = sessions.map(sess => ({
+          date: sess.date,
+          id: sess.id,
+          totalTime: sess.totalTime,
+          runTime: (sess.laps || []).filter(l => l.role === "run").reduce((a,b)=>a+b.t, 0),
+          stationTime: (sess.laps || []).filter(l => l.role === "station").reduce((a,b)=>a+b.t, 0),
+          avgHR: sess.avgHR,
+        }));
+        // Per-station time series: { stationName: [{date, time, hr, id}] }
+        const byStation = {};
+        sessions.forEach(sess => {
+          if (!sess.stationNames) return;
+          (sess.laps || []).filter(l => l.role === "station").forEach(lap => {
+            const name = sess.stationNames[lap.i];
+            if (!name) return;
+            (byStation[name] = byStation[name] || []).push({
+              date: sess.date, time: lap.t, hr: lap.avgHr || null, id: sess.id,
+            });
+          });
+        });
+        // Per-run-index time series (R1 across all sessions, R2 across all, etc.)
+        // Only useful when every session has the same number of runs — show only if ≥3 runs in most sessions
+        const runIndexSeries = {};
+        sessions.forEach(sess => {
+          const runs = (sess.laps || []).filter(l => l.role === "run");
+          runs.forEach((r, i) => {
+            const k = `R${i+1}`;
+            (runIndexSeries[k] = runIndexSeries[k] || []).push({
+              date: sess.date, time: r.t, hr: r.avgHr || null,
+            });
+          });
+        });
 
-      {/* estimate breakdown */}
-      {s.estimateMin && (
-        <div style={{ marginTop:12, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>ESTIMATE BREAKDOWN</div>
-          {[
-            { seg:"8 × 1 km runs",            est:"~38:00", note:"avg ~4:45/km projected (race adrenaline vs. fatigue)" },
-            { seg:"Ski Erg 1000 m",            est:"~4:30",  note:"not trained today — estimated from aerobic profile" },
-            { seg:"Sled Push (official ~102kg)",est:"~2:30", note:"today was 1:15 but lighter weight" },
-            { seg:"Sled Pull",                 est:"~1:45",  note:"today 1:23 + slight fatigue factor" },
-            { seg:"Burpee Broad Jump 80 m",    est:"~4:00",  note:"today 3:06 — mid-race fatigue adds ~1 min" },
-            { seg:"Rowing 1000 m",             est:"~4:00",  note:"not trained today — estimated from VO₂max 55" },
-            { seg:"Farmer's Carry 200 m",      est:"~2:30",  note:"official 200 m vs today's 160 m, same 24 kg" },
-            { seg:"Sandbag Lunges 100 m",      est:"~5:00",  note:"today 4:46 @ 24 kg; official 20 kg + fatigue" },
-            { seg:"Wall Balls 100 × 6 kg",     est:"~4:15",  note:"today 3:54 — end-of-race adds ~20 s" },
-            { seg:"Transitions (~8×)",         est:"~3:00",  note:"walking between stations in venue" },
-          ].map((row, i) => (
-            <div key={i} style={{ display:"flex", alignItems:"baseline", gap:10, padding:"5px 0", borderBottom:"1px solid #f1f5f9" }}>
-              <div style={{ flex:1, fontSize:11, color:"#334155" }}>{row.seg}</div>
-              <div style={{ fontSize:12, fontWeight:800, color:"#6d28d9", minWidth:44, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>{row.est}</div>
-              <div style={{ fontSize:10, color:"#94a3b8", minWidth:180, display:"none" }}>{row.note}</div>
+        const stationNames = Object.keys(byStation).filter(n => byStation[n].length >= 1);
+
+        return (
+          <>
+            {/* Total time trend */}
+            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>TOTAL TIME — ACROSS SESSIONS</div>
+            <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
+              {tot.length >= 2 ? (
+                <Sparkline data={tot.map(t => [t.date, t.totalTime])} color="#7c3aed" height={60} />
+              ) : (
+                <div style={{ fontSize:11, color:"#94a3b8", textAlign:"center", padding:"20px 0" }}>
+                  Need at least 2 sessions to show a trend. ({tot.length} so far)
+                </div>
+              )}
+              <div style={{ marginTop:10, display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:8 }}>
+                {tot.map(t => (
+                  <div key={t.id} style={{ padding:"8px 10px", background:"#fff", border:"1px solid #e2e8f0", borderRadius:6, fontSize:11 }}>
+                    <div style={{ color:"#64748b", fontSize:10 }}>{t.date}</div>
+                    <div style={{ fontWeight:800, color:"#1e293b" }}>{fmtMMSS(t.totalTime)}</div>
+                    <div style={{ color:"#94a3b8", fontSize:10 }}>
+                      run {fmtMMSS(t.runTime)} · stn {fmtMMSS(t.stationTime)}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-          <div style={{ marginTop:10, fontSize:10, color:"#64748b", fontStyle:"italic" }}>
-            Tap to expand notes — or check the hyrox_log.xlsx for full breakdown.
+
+            {/* Per-station trends */}
+            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION TIMES — TREND</div>
+            {stationNames.length === 0 ? (
+              <div style={{ background:"#fef3c7", border:"1px solid #fde68a", borderRadius:8, padding:"12px 14px", marginBottom:16, fontSize:11, color:"#92400e" }}>
+                No stations are named across sessions yet. Add <code>stationNames</code> in HYROX_DATA entries to enable per-station trend lines.
+              </div>
+            ) : (
+              <div style={{ marginBottom:16 }}>
+                {stationNames.map(name => {
+                  const series = byStation[name];
+                  const times = series.map(s => s.time);
+                  const best = Math.min(...times);
+                  const worst = Math.max(...times);
+                  const latest = series[series.length - 1];
+                  const first = series[0];
+                  const delta = latest.time - first.time;
+                  const trend = series.length < 2 ? "—" : delta < -5 ? "↓ faster" : delta > 5 ? "↑ slower" : "≈ same";
+                  const trendColor = series.length < 2 ? "#94a3b8" : delta < -5 ? "#16a34a" : delta > 5 ? "#dc2626" : "#64748b";
+                  return (
+                    <div key={name} style={{ marginBottom:12, background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:"10px 12px" }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:6 }}>
+                        <div style={{ fontSize:12, fontWeight:700, color:"#4c1d95" }}>{name}</div>
+                        <div style={{ fontSize:11, fontWeight:700, color: trendColor }}>{trend} ({series.length} sess.)</div>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                        {series.map((p, i) => {
+                          const barH = Math.round(((p.time - best) / (worst - best || 1)) * 30 + 6);
+                          const isLatest = i === series.length - 1;
+                          return (
+                            <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center" }}>
+                              <div style={{ fontSize:10, fontWeight:700, color: isLatest ? "#6d28d9" : "#94a3b8", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(p.time)}</div>
+                              <div style={{ width:"100%", marginTop:3, height:40, display:"flex", alignItems:"flex-end" }}>
+                                <div style={{ width:"100%", height:`${barH}px`, background: isLatest ? "#7c3aed" : "#c4b5fd", borderRadius:"3px 3px 0 0" }} />
+                              </div>
+                              <div style={{ fontSize:9, color:"#94a3b8", marginTop:3 }}>{p.date.slice(5)}</div>
+                              {p.hr && <div style={{ fontSize:9, color:"#dc2626" }}>♥{p.hr}</div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Per-run-index trends */}
+            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN TIMES BY POSITION — TREND</div>
+            <div style={{ marginBottom:16 }}>
+              {Object.entries(runIndexSeries).filter(([_,arr]) => arr.length >= 2).map(([k, series]) => {
+                const times = series.map(s => s.time);
+                const best = Math.min(...times), worst = Math.max(...times);
+                const latest = series[series.length-1].time, first = series[0].time;
+                const delta = latest - first;
+                const trend = delta < -3 ? "↓ faster" : delta > 3 ? "↑ slower" : "≈ same";
+                const trendColor = delta < -3 ? "#16a34a" : delta > 3 ? "#dc2626" : "#64748b";
+                return (
+                  <div key={k} style={{ marginBottom:8, background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:"8px 12px", display:"flex", alignItems:"center", gap:10 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:"#c2410c", minWidth:30 }}>{k}</div>
+                    <div style={{ flex:1, display:"flex", alignItems:"center", gap:4 }}>
+                      {series.map((p, i) => (
+                        <div key={i} style={{ flex:1, fontSize:10, color: i === series.length-1 ? "#c2410c" : "#94a3b8", fontWeight: i === series.length-1 ? 700 : 400, textAlign:"center" }}>
+                          {fmtMMSS(p.time)}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontSize:10, fontWeight:700, color: trendColor, minWidth:60, textAlign:"right" }}>{trend}</div>
+                  </div>
+                );
+              })}
+              {Object.values(runIndexSeries).every(arr => arr.length < 2) && (
+                <div style={{ fontSize:11, color:"#94a3b8", textAlign:"center", padding:"10px" }}>
+                  Need ≥2 sessions with runs to show a trend.
+                </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
+
+      {/* ── NOTES TAB ─────────────────────────────────────────────────────── */}
+      {tab === "notes" && (
+        <>
+          <div style={{ marginBottom:8, fontSize:10, color:"#64748b" }}>
+            <strong>{s.date}</strong> · {s.name}
           </div>
-        </div>
+          <div style={{ marginBottom:6, fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>PRESCRIBED WORKOUT (notes)</div>
+          <textarea
+            value={noteText}
+            onChange={e => setNoteText(e.target.value)}
+            placeholder="Type the prescribed workout here (e.g. from the coach's whiteboard photo). Saved locally in this browser only."
+            style={{
+              width:"100%", minHeight:200, padding:"10px 12px",
+              border:"1.5px solid #e2e8f0", borderRadius:8,
+              fontSize:13, fontFamily:"inherit", color:"#334155",
+              resize:"vertical", boxSizing:"border-box",
+            }}
+          />
+          <div style={{ marginTop:8, display:"flex", gap:8, alignItems:"center", justifyContent:"space-between" }}>
+            <div style={{ fontSize:10, color:"#94a3b8" }}>
+              Saved locally in this browser only · {noteText.length} chars
+            </div>
+            <button
+              onClick={() => { if (typeof navigator !== "undefined" && navigator.clipboard) navigator.clipboard.writeText(noteText); }}
+              style={{ padding:"6px 12px", borderRadius:6, fontSize:11, fontWeight:700, cursor:"pointer", border:"1.5px solid #c4b5fd", background:"#ede9fe", color:"#4c1d95", fontFamily:"inherit" }}
+            >📋 Copy</button>
+          </div>
+
+          {s.description && (
+            <>
+              <div style={{ marginTop:18, marginBottom:6, fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>GARMIN DESCRIPTION (read-only)</div>
+              <div style={{ padding:"10px 12px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:12, color:"#475569", whiteSpace:"pre-wrap" }}>
+                {s.description}
+              </div>
+            </>
+          )}
+
+          {s.photos && s.photos.length > 0 && (
+            <>
+              <div style={{ marginTop:18, marginBottom:6, fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>PHOTOS ({s.photos.length})</div>
+              <div style={{ display:"flex", gap:8, overflowX:"auto" }}>
+                {s.photos.map((url, i) => (
+                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ flexShrink:0 }}>
+                    <img src={url} alt={`photo ${i+1}`} style={{ height:150, borderRadius:8, border:"1px solid #e2e8f0" }} />
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
 
     </div>
@@ -1159,7 +1391,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 110; // updated 2026-05-28
+  const hrvBaseline = 109; // updated 2026-05-27
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
@@ -1209,7 +1441,7 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 2 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 3 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
           {(() => {
             const now = new Date();

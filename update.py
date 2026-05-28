@@ -301,38 +301,111 @@ def fetch_activities(client, date_str):
         for a in (acts or [])
         if (a.get("startTimeLocal") or "")[:10] == date_str
     }
-    return rows, activity_ids
+    # Per-activity summary (used to build HYROX_DATA entries downstream).
+    # Indexed by activity_id, not date — multiple activities per day are safe.
+    activity_summaries = {
+        str(a["activityId"]): {
+            "activity_id":  str(a["activityId"]),
+            "date":         (a.get("startTimeLocal") or "")[:10],
+            "name":         a.get("activityName", "Activity"),
+            "total_time":   round(a.get("duration") or a.get("elapsedDuration") or 0),
+            "avg_hr":       round(a["averageHR"]) if a.get("averageHR") else None,
+            "max_hr":       round(a["maxHR"]) if a.get("maxHR") else None,
+            "distance_m":   round(a["distance"]) if a.get("distance") else 0,
+            "calories":     a.get("calories"),
+        }
+        for a in (acts or [])
+        if (a.get("startTimeLocal") or "")[:10] == date_str
+    }
+    return rows, activity_ids, activity_summaries
 
 # ── Patch App.jsx ─────────────────────────────────────────────────────────────
 
-def fetch_activity_laps(client, activity_id):
+def _classify_laps(laps):
     """
-    Fetch per-lap data for a given Garmin activity ID.
-    Returns a list of lap dicts:
-      { elapsed_sec, moving_sec, avg_hr, max_hr, distance_m, start_time, lap_index }
-    Falls back to [] on any error.
+    Tag each lap with role: 'run' | 'station' | 'warmup' | 'cooldown'.
 
-    Useful endpoints:
-      /activity-service/activity/{id}/splits  -> lap-level splits (fastest, most reliable)
-      /activity-service/activity/{id}/details -> full detail incl. per-second records
+    Strategy:
+    - Treadmill calibration is unreliable, so we look at lap DISTANCE in meters as
+      a noisy signal but pair it with relative magnitude.
+    - Laps >500m → 'run' (Hyrox runs are nominally 1000m; even badly-calibrated
+      treadmills won't drift below 500m for a real 1km run)
+    - Other laps → 'station' (typically ~50-300m if any, often 0)
+    - First/last lap may be warmup/cooldown if its distance is >1.5× the median
+      run distance OR its time is markedly different from the other long laps.
 
-    For Hyrox sims recorded as a single Indoor Running activity the treadmill
-    laps map 1-to-1 to 800 m run segments.  Station times must still be entered
-    manually (they happen off the treadmill) but run lap HR is captured here.
+    Returns the same list with a 'role' key added to each lap dict.
     """
-    if not activity_id:
-        return []
+    if not laps:
+        return laps
+    classified = [dict(l) for l in laps]  # copy
+    # First pass: long vs short by distance
+    for lap in classified:
+        d = lap.get("distance_m") or 0
+        lap["role"] = "run" if d > 500 else "station"
+
+    # Detect warmup/cooldown: first and last laps that are anomalously long
+    runs = [l for l in classified if l["role"] == "run"]
+    if len(runs) >= 3:
+        run_dists = sorted(l["distance_m"] for l in runs)
+        median = run_dists[len(run_dists) // 2]
+        threshold = median * 1.5
+
+        # Only check first lap
+        if classified[0]["role"] == "run" and classified[0]["distance_m"] > threshold:
+            classified[0]["role"] = "warmup"
+        # Only check last lap
+        if classified[-1]["role"] == "run" and classified[-1]["distance_m"] > threshold:
+            classified[-1]["role"] = "cooldown"
+
+    return classified
+
+
+def _is_hyrox_activity(activity_name):
+    """Return True if the activity name suggests Hyrox content worth deep-fetching.
+    Conservative: matches 'hyrox', 'sim', 'race'. We deliberately MISS plain 'circle'
+    or 'group' if no hyrox keyword — avoids burning API calls on every workout.
+    Hyrox group sessions ARE matched because they contain 'hyrox'."""
+    if not activity_name:
+        return False
+    t = activity_name.lower()
+    return "hyrox" in t or "race simulation" in t
+
+
+def fetch_hyrox_session_data(client, activity_id, activity_name):
+    """
+    Fetch laps + description + photo URLs for a Hyrox-tagged activity.
+    Returns a dict with keys:
+      activity_id, name, type, laps, description, photo_urls
+    or None on any error / non-Hyrox activity.
+
+    type: 'race' | 'sim' | 'group' | None
+      derived from activity name
+    """
+    if not activity_id or not _is_hyrox_activity(activity_name):
+        return None
+
+    name_lower = activity_name.lower()
+    if "race" in name_lower and "sim" not in name_lower:
+        session_type = "race"
+    elif "sim" in name_lower:
+        session_type = "sim"
+    elif "group" in name_lower:
+        session_type = "group"
+    else:
+        session_type = None
+
+    # 1. Laps
+    laps = []
     try:
         data = client.connectapi(f"/activity-service/activity/{activity_id}/splits")
         laps_raw = data.get("lapDTOs") or data.get("laps") or []
-        laps = []
         for i, lap in enumerate(laps_raw):
             elapsed  = lap.get("duration") or lap.get("elapsedDuration") or 0
             moving   = lap.get("movingDuration") or elapsed
             avg_hr   = lap.get("averageHR") or lap.get("averageHeartRate")
             max_hr   = lap.get("maxHR") or lap.get("maxHeartRate")
             dist_m   = lap.get("distance") or 0
-            start    = lap.get("startTimeLocal") or lap.get("startTime") or ""
             laps.append({
                 "lap_index":   i + 1,
                 "elapsed_sec": round(elapsed),
@@ -340,13 +413,54 @@ def fetch_activity_laps(client, activity_id):
                 "avg_hr":      round(avg_hr)  if avg_hr  else None,
                 "max_hr":      round(max_hr)  if max_hr  else None,
                 "distance_m":  round(dist_m),
-                "start_time":  start,
             })
-        print(f"  Laps fetched: {len(laps)} for activity {activity_id}")
-        return laps
+        laps = _classify_laps(laps)
+        print(f"  Hyrox session {activity_id}: {len(laps)} laps "
+              f"({sum(1 for l in laps if l['role']=='run')} runs, "
+              f"{sum(1 for l in laps if l['role']=='station')} stations)")
     except Exception as e:
-        print(f"  fetch_activity_laps failed for {activity_id}: {e}")
-        return []
+        print(f"  fetch_hyrox laps failed for {activity_id}: {e}")
+        return None
+
+    # 2. Description (text field user enters in Garmin Connect)
+    description = ""
+    try:
+        details = client.connectapi(f"/activity-service/activity/{activity_id}")
+        # Description lives under summaryDTO or top-level depending on API version
+        description = (
+            details.get("description")
+            or (details.get("summaryDTO") or {}).get("description")
+            or ""
+        ).strip()
+        if description:
+            print(f"  Description: {description[:80]}...")
+    except Exception as e:
+        print(f"  fetch description failed for {activity_id}: {e}")
+
+    # 3. Photo URLs (Garmin Connect "metadata" photos attached to activity)
+    photo_urls = []
+    try:
+        imgs = client.connectapi(f"/activity-service/activity/{activity_id}/images")
+        # Response shape: list of {url, thumbnail, ...} or {activityImages: [...]}
+        img_list = imgs if isinstance(imgs, list) else imgs.get("activityImages", [])
+        for img in img_list:
+            url = img.get("url") or img.get("imageUrl") or img.get("originalUrl")
+            if url:
+                photo_urls.append(url)
+        if photo_urls:
+            print(f"  Photos: {len(photo_urls)}")
+    except Exception as e:
+        # 404 is normal — most activities have no photos
+        pass
+
+    return {
+        "activity_id":  str(activity_id),
+        "name":         activity_name,
+        "type":         session_type,
+        "laps":         laps,
+        "description":  description,
+        "photo_urls":   photo_urls,
+    }
 
 
 def find_activity_id_for_date(client, date_str, title_hint=None):
@@ -377,8 +491,8 @@ def find_activity_id_for_date(client, date_str, title_hint=None):
         return None
 
 
-def patch(date_str, wellness, csv_rows, advance_today=True, laps_by_date=None):
-    laps_by_date = laps_by_date or {}
+def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None):
+    hyrox_sessions = hyrox_sessions or {}
     code     = DASHBOARD.read_text(encoding='utf-8')
     today    = datetime.date.fromisoformat(date_str)
     tomorrow = today + datetime.timedelta(days=1)
@@ -528,34 +642,137 @@ def patch(date_str, wellness, csv_rows, advance_today=True, laps_by_date=None):
 
     # 4b. Lap data — store raw laps per activity date for dashboard analysis
     # Format: LAPS_DATA["YYYY-MM-DD"] = [{elapsed_sec, moving_sec, avg_hr, max_hr, distance_m}, ...]
-    if laps_by_date:
-        for lap_date, laps in laps_by_date.items():
-            if not laps:
-                continue
-            # Serialize laps as a compact JS array of objects
+    # 4b. Hyrox session data — keyed by Garmin activity_id (not date), so multiple
+    # sessions per day don't collide. Each entry holds laps + description + photos
+    # + summary stats. Manual fields (notes, station names) are preserved across
+    # updates by NOT touching keys that already exist with a manual edit signature.
+    if hyrox_sessions:
+        # Serialize one session to a compact JS object literal
+        def _hyrox_session_js(sess):
             def _lap_obj(l):
-                hr_str    = f'avgHr:{l["avg_hr"]},' if l["avg_hr"] else ''
-                max_hr_str= f'maxHr:{l["max_hr"]},' if l["max_hr"] else ''
-                dist_str  = f'dist:{l["distance_m"]},' if l["distance_m"] else ''
-                return (f'{{lap:{l["lap_index"]},t:{l["elapsed_sec"]},'
-                        f'{hr_str}{max_hr_str}{dist_str}}}').replace(',}', '}')
-            laps_js = '[' + ','.join(_lap_obj(l) for l in laps) + ']'
-            new_entry = f'  "{lap_date}":{laps_js},'
+                parts = [f'i:{l["lap_index"]}', f't:{l["elapsed_sec"]}']
+                if l.get("avg_hr"):     parts.append(f'avgHr:{l["avg_hr"]}')
+                if l.get("max_hr"):     parts.append(f'maxHr:{l["max_hr"]}')
+                if l.get("distance_m"): parts.append(f'dist:{l["distance_m"]}')
+                parts.append(f'role:"{l.get("role", "station")}"')
+                return '{' + ','.join(parts) + '}'
 
-            # Try to replace existing entry for this date
-            replaced_lap = re.sub(
-                rf'  "{re.escape(lap_date)}":\[.*?\],',
-                new_entry, code, count=1, flags=re.DOTALL
+            laps_js = '[' + ','.join(_lap_obj(l) for l in sess["laps"]) + ']'
+            photos_js = '[' + ','.join(f'"{u}"' for u in sess.get("photo_urls", [])) + ']'
+            # Escape description for safe inclusion as JS template literal:
+            # only need to escape backticks and ${ (template-literal interpolation)
+            desc = (sess.get("description") or "").replace('\\', '\\\\').replace('`', '\\`').replace('${', '\\${')
+
+            type_js = f'"{sess["type"]}"' if sess.get("type") else 'null'
+            avg_hr  = sess.get("avg_hr") or "null"
+            max_hr  = sess.get("max_hr") or "null"
+
+            return (
+                f'  "{sess["activity_id"]}": {{\n'
+                f'    date:"{sess["date"]}", name:"{sess["name"].replace(chr(34), chr(92)+chr(34))}", type:{type_js},\n'
+                f'    totalTime:{sess.get("total_time", 0)}, avgHR:{avg_hr}, maxHR:{max_hr},\n'
+                f'    description:`{desc}`,\n'
+                f'    photos:{photos_js},\n'
+                f'    laps:{laps_js},\n'
+                f'  }}'
             )
-            if replaced_lap != code:
-                code = replaced_lap
-            else:
-                # Insert before closing brace of LAPS_DATA
-                code = re.sub(
-                    r'(const LAPS_DATA = \{)(.*?)(\n\};)',
-                    lambda m: m.group(1) + m.group(2) + '\n' + new_entry + m.group(3),
-                    code, count=1, flags=re.DOTALL
-                )
+
+        # Strategy: parse the existing HYROX_DATA block as a whole, extract any
+        # existing entries we want to keep, merge with new ones, then write back.
+        # This is the only way to guarantee no duplicate keys (the old regex-
+        # insert approach was creating duplicates on every run).
+        m_block = re.search(
+            r'(const HYROX_DATA = \{\n)(.*?)(\n\};)',
+            code, re.DOTALL
+        )
+        if m_block:
+            existing_block = m_block.group(2)
+            # Extract existing entries keyed by activity_id. Match the outer "id": { ... }
+            # by balancing braces — easier with a positional scan than a regex.
+            existing = {}
+            i = 0
+            while i < len(existing_block):
+                m_key = re.search(r'"([^"]+)":\s*\{', existing_block[i:])
+                if not m_key:
+                    break
+                key = m_key.group(1)
+                start = i + m_key.start()
+                brace_open = i + m_key.end() - 1   # position of {
+                # Find matching }
+                depth = 1
+                j = brace_open + 1
+                while j < len(existing_block) and depth > 0:
+                    if existing_block[j] == '{': depth += 1
+                    elif existing_block[j] == '}': depth -= 1
+                    j += 1
+                if depth != 0:
+                    print(f"  ⚠ HYROX_DATA parse error near key {key} — skipping merge")
+                    existing = {}
+                    break
+                # Include trailing comma if present
+                end = j
+                if end < len(existing_block) and existing_block[end] == ',':
+                    end += 1
+                existing[key] = existing_block[start:end].rstrip(',').strip()
+                i = end
+
+            # Overwrite auto-fetched fields, but preserve manual fields
+            # (estimateMin, stationNames, notes) from the prior version of each entry
+            for act_id, sess in hyrox_sessions.items():
+                prior = existing.get(act_id, "")
+                # Extract manual fields from prior entry text (regex into the JS literal)
+                preserved_lines = []
+                # estimateMin: matches `estimateMin: "70–75"` or `estimateMin: null` or `estimateMin: 75`
+                m_em = re.search(r'estimateMin:\s*([^,\n}]+)', prior)
+                if m_em:
+                    preserved_lines.append(f'    estimateMin: {m_em.group(1).strip()},')
+                # stationNames: balanced-brace extraction
+                m_sn_start = re.search(r'stationNames:\s*\{', prior)
+                if m_sn_start:
+                    sn_open = m_sn_start.end() - 1
+                    depth = 1
+                    k = sn_open + 1
+                    while k < len(prior) and depth > 0:
+                        if prior[k] == '{': depth += 1
+                        elif prior[k] == '}': depth -= 1
+                        k += 1
+                    if depth == 0:
+                        sn_body = prior[sn_open:k]  # includes braces
+                        preserved_lines.append(f'    stationNames: {sn_body},')
+                # notes: backtick or quoted string (notes:`...`, or notes:"...")
+                m_nt = re.search(r'notes:\s*(`[^`]*`|"[^"]*")', prior)
+                if m_nt:
+                    preserved_lines.append(f'    notes: {m_nt.group(1)},')
+
+                # Build the new entry. _hyrox_session_js produces something like:
+                #   "id": {
+                #     date:"...", ...
+                #     laps:[...],
+                #   }
+                # We inject preserved_lines just before the closing brace.
+                new_entry = _hyrox_session_js(sess).strip().rstrip(',')
+                if preserved_lines:
+                    # Insert preserved lines before the last "  }" of the entry
+                    last_brace = new_entry.rfind('}')
+                    if last_brace != -1:
+                        new_entry = (new_entry[:last_brace]
+                                     + '\n'.join(preserved_lines) + '\n  '
+                                     + new_entry[last_brace:])
+                existing[act_id] = new_entry
+
+            # Reassemble: sort by date inside each entry (best-effort) then write
+            def _entry_date(entry_str):
+                m = re.search(r'date:"(\d{4}-\d{2}-\d{2})"', entry_str)
+                return m.group(1) if m else "0000-00-00"
+
+            sorted_entries = sorted(existing.values(), key=_entry_date)
+            new_block_inner = ',\n'.join(sorted_entries)
+            new_block = m_block.group(1) + new_block_inner + ',' + m_block.group(3)
+            code = code[:m_block.start()] + new_block + code[m_block.end():]
+            print(f"  ✓ HYROX_DATA: {len(existing)} entries ({len(hyrox_sessions)} updated this run)")
+        else:
+            print("  ⚠ HYROX_DATA block not found in App.jsx — skipping Hyrox patch. "
+                  "Add `const HYROX_DATA = {\\n};` to App.jsx to enable.")
 
     # 5. Countdown (only update on full morning run)
     if advance_today:
@@ -619,17 +836,18 @@ if __name__ == '__main__':
                 wellness = fetch_wellness(client, date_str)
                 has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
                 print(f"  {'✓' if has_wellness else '✗'} Wellness data for {date_str}")
-                csv_rows, activity_ids = fetch_activities(client, date_str)
+                csv_rows, activity_ids, activity_summaries = fetch_activities(client, date_str)
                 if has_wellness or csv_rows:
                     got_fresh_data = True
-                # Fetch laps for any hyrox/run activity on this date
-                laps_by_date = {}
-                for act_date, act_id in activity_ids.items():
-                    laps = fetch_activity_laps(client, act_id)
-                    if laps:
-                        laps_by_date[act_date] = laps
+                # Fetch Hyrox session detail (laps + description + photos) per activity
+                hyrox_sessions = {}
+                for act_id, summary in activity_summaries.items():
+                    detail = fetch_hyrox_session_data(client, act_id, summary["name"])
+                    if detail:
+                        hyrox_sessions[act_id] = {**summary, **detail}
                 advance = (date_str == yesterday)
-                patch(date_str, wellness, csv_rows, advance_today=advance, laps_by_date=laps_by_date)
+                patch(date_str, wellness, csv_rows, advance_today=advance,
+                      hyrox_sessions=hyrox_sessions)
 
         elif args.mode == 'backfill':
             # Backfill: fetch wellness + activities for last N days
@@ -641,23 +859,33 @@ if __name__ == '__main__':
                 print(f"  Fetching {date_str}...")
                 try:
                     wellness = fetch_wellness(client, date_str)
-                    csv_rows, activity_ids = fetch_activities(client, date_str)
+                    csv_rows, activity_ids, activity_summaries = fetch_activities(client, date_str)
                     if wellness.get('hrv') or wellness.get('sleep') or csv_rows:
                         got_fresh_data = True
-                    laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
+                    hyrox_sessions = {}
+                    for act_id, summary in activity_summaries.items():
+                        detail = fetch_hyrox_session_data(client, act_id, summary["name"])
+                        if detail:
+                            hyrox_sessions[act_id] = {**summary, **detail}
                     # Only advance today pointer on the most recent date
                     advance = (i == 1)
-                    patch(date_str, wellness, csv_rows, advance_today=advance)
+                    patch(date_str, wellness, csv_rows, advance_today=advance,
+                          hyrox_sessions=hyrox_sessions)
                 except Exception as e:
                     print(f"    ⚠ Skipped {date_str}: {e}")
 
         else:
             # Activities-only: fetch today's new workouts
-            csv_rows, activity_ids = fetch_activities(client, today)
+            csv_rows, activity_ids, activity_summaries = fetch_activities(client, today)
             if csv_rows:
                 got_fresh_data = True
-            laps_by_date = {d: fetch_activity_laps(client, aid) for d, aid in activity_ids.items()}
-            patch(today, {}, csv_rows, advance_today=False, laps_by_date=laps_by_date)
+            hyrox_sessions = {}
+            for act_id, summary in activity_summaries.items():
+                detail = fetch_hyrox_session_data(client, act_id, summary["name"])
+                if detail:
+                    hyrox_sessions[act_id] = {**summary, **detail}
+            patch(today, {}, csv_rows, advance_today=False,
+                  hyrox_sessions=hyrox_sessions)
     finally:
         # Always stamp LAST_RUN (so the dashboard can show 'scheduler is alive')
         # even on partial failures, and stamp LAST_DATA only when we actually
