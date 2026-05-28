@@ -41,16 +41,10 @@ const HEALTH_DATA = {
     {date:"2026-05-11",hrv:127,rhr:43,spo2:93,resp:12.0,sleep_score:88},
     {date:"2026-05-12",hrv:95,rhr:43,spo2:95,resp:12.0,sleep_score:95},
     {date:"2026-05-13",hrv:80,rhr:43,spo2:98,resp:12.0,sleep_score:88},
-    {date:"2026-05-14",hrv:110,rhr:47,spo2:96,resp:13.0,sleep_score:88},
-    {date:"2026-05-15",hrv:123,rhr:41,spo2:96,resp:12.0,sleep_score:75},
-    {date:"2026-05-16",hrv:92,rhr:49,spo2:96,resp:14.0,sleep_score:null},
-    {date:"2026-05-17",hrv:115,rhr:44,spo2:98,resp:12.0,sleep_score:95},
-    {date:"2026-05-19",hrv:121,rhr:43,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-20",hrv:93,rhr:42,spo2:97,resp:11.0,sleep_score:88},
-    {date:"2026-05-21",hrv:124,rhr:42,spo2:96,resp:12.0,sleep_score:95},
-    {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-26",hrv:109,rhr:44,spo2:94,resp:13.0,sleep_score:95},
-    {date:"2026-05-27",hrv:102,rhr:45,spo2:95,resp:13.0,sleep_score:null},
+    {date:"2026-05-18",hrv:111,rhr:43,spo2:96,resp:12.0,sleep_score:95},
+    {date:"2026-05-23",hrv:98,rhr:40,spo2:94,resp:10.0,sleep_score:95},
+    {date:"2026-05-24",hrv:114,rhr:43,spo2:94,resp:12.0,sleep_score:95},
+    {date:"2026-05-25",hrv:105,rhr:42,spo2:94,resp:12.0,sleep_score:88},
     {date:"2026-05-28",hrv:128,rhr:41,spo2:94,resp:11.0,sleep_score:95},
   ],
   sleep: [
@@ -83,17 +77,9 @@ const HEALTH_DATA = {
     {date:"2026-05-11",deep:94,rem:95,light:265,awake:4},
     {date:"2026-05-12",deep:143,rem:117,light:207,awake:0},
     {date:"2026-05-13",deep:142,rem:127,light:220,awake:2},
-    {date:"2026-05-14",deep:70,rem:94,light:297,awake:2},
-    {date:"2026-05-15",deep:114,rem:89,light:216,awake:0},
-    {date:"2026-05-16",deep:102,rem:49,light:213,awake:9},
-    {date:"2026-05-17",deep:93,rem:119,light:349,awake:3},
-    {date:"2026-05-18",deep:129,rem:136,light:265,awake:0},
-    {date:"2026-05-19",deep:100,rem:117,light:272,awake:2},
-    {date:"2026-05-20",deep:139,rem:126,light:200,awake:4},
-    {date:"2026-05-21",deep:101,rem:111,light:261,awake:5},
-    {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
-    {date:"2026-05-26",deep:111,rem:117,light:301,awake:2},
-    {date:"2026-05-27",deep:109,rem:119,light:223,awake:29},
+    {date:"2026-05-23",deep:110,rem:115,light:267,awake:8},
+    {date:"2026-05-24",deep:77,rem:105,light:303,awake:3},
+    {date:"2026-05-25",deep:106,rem:130,light:290,awake:5},
     {date:"2026-05-28",deep:134,rem:102,light:243,awake:0},
   ],
 };
@@ -117,6 +103,13 @@ const HEALTH_DATA = {
 // On a race, expect 17 laps (8 runs + 8 stations + 1 final). On a group session,
 // it's whatever the coach prescribed — assign stationNames per-session.
 const HYROX_DATA = {
+"22890762209": {
+    date:"2026-05-15", name:"Hyrox group ", type:"group",
+    totalTime:3407, avgHR:120, maxHR:165,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:1325,avgHr:95,maxHr:140,dist:705,role:"run"},{i:2,t:203,avgHr:136,maxHr:154,dist:197,role:"station"},{i:3,t:371,avgHr:146,maxHr:163,dist:275,role:"station"},{i:4,t:116,avgHr:114,maxHr:154,dist:41,role:"station"},{i:5,t:575,avgHr:143,maxHr:165,dist:922,role:"run"},{i:6,t:128,avgHr:111,maxHr:150,dist:34,role:"station"},{i:7,t:554,avgHr:137,maxHr:151,dist:280,role:"station"},{i:8,t:135,avgHr:120,maxHr:148,dist:130,role:"station"}],
+  },
 "manual-2026-05-16-baseline": {
     date:"2026-05-16", name:"Hyrox weekend track (Baseline)", type:"sim",
     totalTime:3316, avgHR:161, maxHR:171,
@@ -144,6 +137,40 @@ const HYROX_DATA = {
       14: "Wall Balls 100 × 6 kg",
     },
     notes:"Sub for Ski Erg; Farmer/Lunges with 24kg; Wall balls 6kg. First baseline.",
+  },
+"22897588795": {
+    date:"2026-05-16", name:"Hyrox weekend track", type:null,
+    totalTime:4840, avgHR:144, maxHR:171,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:1516,avgHr:109,maxHr:142,dist:2051,role:"warmup"},{i:2,t:241,avgHr:155,maxHr:165,dist:1001,role:"run"},{i:3,t:326,avgHr:158,maxHr:163,dist:59,role:"station"},{i:4,t:254,avgHr:164,maxHr:170,dist:992,role:"run"},{i:5,t:75,avgHr:159,maxHr:165,dist:51,role:"station"},{i:6,t:252,avgHr:163,maxHr:167,dist:961,role:"run"},{i:7,t:83,avgHr:155,maxHr:162,dist:119,role:"station"},{i:8,t:256,avgHr:163,maxHr:167,dist:1021,role:"run"},{i:9,t:186,avgHr:159,maxHr:167,dist:57,role:"station"},{i:10,t:267,avgHr:165,maxHr:171,dist:1053,role:"run"},{i:11,t:71,avgHr:162,maxHr:171,dist:187,role:"station"},{i:12,t:265,avgHr:164,maxHr:170,dist:1047,role:"run"},{i:13,t:286,avgHr:154,maxHr:164,dist:123,role:"station"},{i:14,t:270,avgHr:161,maxHr:169,dist:947,role:"run"},{i:15,t:234,avgHr:159,maxHr:166,dist:219,role:"station"},{i:16,t:3,avgHr:163,maxHr:166,dist:4,role:"station"},{i:17,t:251,avgHr:165,maxHr:169,dist:955,role:"run"},{i:18,t:5,avgHr:169,maxHr:170,dist:21,role:"station"}],
+  },
+"22927038722": {
+    date:"2026-05-18", name:"Hyrox group", type:"group",
+    totalTime:3100, avgHR:138, maxHR:173,
+    description:`Warmup
+[40 Push ups + 500m run] x2
+2min rest
+[50 ball slams + 25 BBJ] x2
+2min rest
+[45m sled push + 450m row] x2
+100 WB`,
+    photos:[],
+    laps:[{i:1,t:879,avgHr:115,maxHr:145,dist:1178,role:"run"},{i:2,t:566,avgHr:135,maxHr:169,dist:1001,role:"run"},{i:3,t:119,avgHr:120,maxHr:169,dist:130,role:"station"},{i:4,t:570,avgHr:156,maxHr:169,dist:162,role:"station"},{i:5,t:123,avgHr:139,maxHr:169,dist:97,role:"station"},{i:6,t:602,avgHr:150,maxHr:167,dist:283,role:"station"},{i:7,t:238,avgHr:165,maxHr:173,dist:191,role:"station"},{i:8,t:1,avgHr:173,maxHr:173,dist:2,role:"station"}],
+  },
+"22949451743": {
+    date:"2026-05-20", name:"Hyrox group", type:"group",
+    totalTime:2632, avgHR:141, maxHR:171,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:446,avgHr:123,maxHr:143,dist:465,role:"station"},{i:2,t:81,avgHr:107,maxHr:127,dist:20,role:"station"},{i:3,t:565,avgHr:154,maxHr:169,dist:346,role:"station"},{i:4,t:121,avgHr:121,maxHr:160,dist:58,role:"station"},{i:5,t:563,avgHr:146,maxHr:171,dist:1010,role:"run"},{i:6,t:697,avgHr:149,maxHr:170,dist:296,role:"station"},{i:7,t:22,avgHr:158,maxHr:160,dist:15,role:"station"},{i:8,t:136,avgHr:128,maxHr:152,dist:49,role:"station"}],
+  },
+"22990829019": {
+    date:"2026-05-24", name:"Hyrox sim 800m runs", type:"sim",
+    totalTime:3850, avgHR:156, maxHR:170,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:231,avgHr:145,maxHr:156,dist:767,role:"run"},{i:2,t:254,avgHr:148,maxHr:154,dist:72,role:"station"},{i:3,t:214,avgHr:159,maxHr:166,dist:719,role:"run"},{i:4,t:157,avgHr:151,maxHr:164,dist:49,role:"station"},{i:5,t:225,avgHr:158,maxHr:167,dist:738,role:"run"},{i:6,t:236,avgHr:159,maxHr:165,dist:179,role:"station"},{i:7,t:231,avgHr:162,maxHr:168,dist:739,role:"run"},{i:8,t:163,avgHr:162,maxHr:166,dist:20,role:"station"},{i:9,t:124,avgHr:136,maxHr:166,dist:44,role:"station"},{i:10,t:222,avgHr:157,maxHr:169,dist:749,role:"run"},{i:11,t:286,avgHr:155,maxHr:163,dist:152,role:"station"},{i:12,t:250,avgHr:162,maxHr:165,dist:738,role:"run"},{i:13,t:147,avgHr:159,maxHr:165,dist:299,role:"station"},{i:14,t:237,avgHr:161,maxHr:165,dist:734,role:"run"},{i:15,t:337,avgHr:152,maxHr:164,dist:201,role:"station"},{i:16,t:235,avgHr:162,maxHr:170,dist:724,role:"run"},{i:17,t:302,avgHr:160,maxHr:169,dist:319,role:"station"}],
   },
 };
 
@@ -277,8 +304,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-05-28";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-05-28T20:20:00Z";
-const LAST_DATA = "2026-05-28T20:20:00Z";
+const LAST_RUN  = "2026-05-28T20:26:00Z";
+const LAST_DATA = "2026-05-28T20:26:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1397,7 +1424,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 110; // updated 2026-05-28
+  const hrvBaseline = 109; // updated 2026-05-27
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
