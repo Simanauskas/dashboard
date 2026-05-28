@@ -236,7 +236,7 @@ def fetch_activities(client, date_str):
         if attempt < 2:
             _time.sleep(5)
     if not acts:
-        print("Activities: no data after 3 attempts — skipping"); return [], {}
+        print("Activities: no data after 3 attempts — skipping"); return [], {}, {}
 
     dates_seen = set((a.get('startTimeLocal') or '')[:10] for a in acts if a.get('startTimeLocal'))
 
