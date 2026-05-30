@@ -301,10 +301,10 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-05-29";
+const TODAY = "2026-05-30";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-05-30T04:08:00Z";
-const LAST_DATA = "2026-05-29T19:08:00Z";
+const LAST_RUN  = "2026-05-30T05:08:00Z";
+const LAST_DATA = "2026-05-30T05:08:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1473,7 +1473,7 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 1 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · 0 DAYS</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
           {(() => {
             const now = new Date();
