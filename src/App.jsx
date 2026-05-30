@@ -45,6 +45,8 @@ const HEALTH_DATA = {
     {date:"2026-05-23",hrv:98,rhr:40,spo2:94,resp:10.0,sleep_score:95},
     {date:"2026-05-24",hrv:114,rhr:43,spo2:94,resp:12.0,sleep_score:95},
     {date:"2026-05-25",hrv:105,rhr:42,spo2:94,resp:12.0,sleep_score:88},
+    {date:"2026-05-29",hrv:125,rhr:43,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-05-30",hrv:100,rhr:43,spo2:96,resp:12.0,sleep_score:88},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -79,6 +81,8 @@ const HEALTH_DATA = {
     {date:"2026-05-23",deep:110,rem:115,light:267,awake:8},
     {date:"2026-05-24",deep:77,rem:105,light:303,awake:3},
     {date:"2026-05-25",deep:106,rem:130,light:290,awake:5},
+    {date:"2026-05-29",deep:114,rem:84,light:262,awake:2},
+    {date:"2026-05-30",deep:121,rem:111,light:247,awake:10},
   ],
 };
 
@@ -170,6 +174,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:231,avgHr:145,maxHr:156,dist:767,role:"run"},{i:2,t:254,avgHr:148,maxHr:154,dist:72,role:"station"},{i:3,t:214,avgHr:159,maxHr:166,dist:719,role:"run"},{i:4,t:157,avgHr:151,maxHr:164,dist:49,role:"station"},{i:5,t:225,avgHr:158,maxHr:167,dist:738,role:"run"},{i:6,t:236,avgHr:159,maxHr:165,dist:179,role:"station"},{i:7,t:231,avgHr:162,maxHr:168,dist:739,role:"run"},{i:8,t:163,avgHr:162,maxHr:166,dist:20,role:"station"},{i:9,t:124,avgHr:136,maxHr:166,dist:44,role:"station"},{i:10,t:222,avgHr:157,maxHr:169,dist:749,role:"run"},{i:11,t:286,avgHr:155,maxHr:163,dist:152,role:"station"},{i:12,t:250,avgHr:162,maxHr:165,dist:738,role:"run"},{i:13,t:147,avgHr:159,maxHr:165,dist:299,role:"station"},{i:14,t:237,avgHr:161,maxHr:165,dist:734,role:"run"},{i:15,t:337,avgHr:152,maxHr:164,dist:201,role:"station"},{i:16,t:235,avgHr:162,maxHr:170,dist:724,role:"run"},{i:17,t:302,avgHr:160,maxHr:169,dist:319,role:"station"}],
   },
+"23064789093": {
+    date:"2026-05-30", name:"Hyrox race Riga 1:14:56", type:"race",
+    totalTime:4506, avgHR:161, maxHR:177,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:330,avgHr:162,maxHr:170,dist:1234,role:"run"},{i:2,t:322,avgHr:167,maxHr:171,dist:223,role:"station"},{i:3,t:272,avgHr:165,maxHr:169,dist:977,role:"run"},{i:4,t:156,avgHr:166,maxHr:175,dist:153,role:"station"},{i:5,t:302,avgHr:165,maxHr:175,dist:1008,role:"run"},{i:6,t:269,avgHr:170,maxHr:177,dist:231,role:"station"},{i:7,t:276,avgHr:165,maxHr:170,dist:948,role:"run"},{i:8,t:381,avgHr:161,maxHr:170,dist:92,role:"station"},{i:9,t:316,avgHr:156,maxHr:163,dist:991,role:"run"},{i:10,t:294,avgHr:152,maxHr:160,dist:165,role:"station"},{i:11,t:303,avgHr:156,maxHr:162,dist:969,role:"run"},{i:12,t:17,avgHr:153,maxHr:155,dist:25,role:"station"},{i:13,t:134,avgHr:160,maxHr:170,dist:265,role:"station"},{i:14,t:287,avgHr:157,maxHr:161,dist:966,role:"run"},{i:15,t:327,avgHr:158,maxHr:165,dist:299,role:"station"},{i:16,t:266,avgHr:159,maxHr:162,dist:895,role:"run"},{i:17,t:252,avgHr:162,maxHr:174,dist:287,role:"station"},{i:18,t:4,avgHr:172,maxHr:173,dist:19,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -224,6 +235,9 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Yoga","2026-05-30 11:36:06","false","Yoga","0,00","19","00:02:01","110","119","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:02:01","00:02:01","--","--"
+"Indoor Running","2026-05-30 10:10:06","false","Hyrox race Riga 1:14:56","9,75","1223","01:15:06","161","177","4,9","123","--","7:42","--","--","--","--","--","--","105,60","8,5","8,1","327","--","--","--","--","--","--","--","--","--","No","--","18","--","--","--","--","--","01:03:14","01:15:06","--","--"
+"Yoga","2026-05-30 09:40:07","false","Yoga","0,00","215","00:19:25","124","161","2,0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:19:25","00:19:25","--","--"
 "Cycling","2026-05-29 08:30:39","false","Vilnius Cycling","5,74","152","00:24:47","93","125","0,5","--","--","4:19","--","--","--","50","49","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:58","01:12:13","--","--"
 "Strength Training","2026-05-28 17:26:30","false","Strength","0,00","128","00:19:21","96","134","0,6","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:19:21","00:19:21","--","--"
 "Cycling","2026-05-28 08:45:39","false","Vilnius Cycling","6,62","195","00:23:08","106","128","0,9","--","--","3:29","--","--","--","79","77","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:51","06:09:56","--","--"
@@ -303,8 +317,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-05-30";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-05-30T17:08:00Z";
-const LAST_DATA = "2026-05-30T09:08:00Z";
+const LAST_RUN  = "2026-05-30T17:11:00Z";
+const LAST_DATA = "2026-05-30T17:11:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1423,7 +1437,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 111; // updated 2026-05-29
+  const hrvBaseline = 111; // updated 2026-05-30
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
