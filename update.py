@@ -743,6 +743,20 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
                 m_nt = re.search(r'notes:\s*(`[^`]*`|"[^"]*")', prior)
                 if m_nt:
                     preserved_lines.append(f'    notes: {m_nt.group(1)},')
+                # official: balanced-brace extraction (nested object with arrays of objects).
+                # Source of truth for official race times/ranks; merged with Garmin HR in the view.
+                m_of_start = re.search(r'official:\s*\{', prior)
+                if m_of_start:
+                    of_open = m_of_start.end() - 1
+                    depth = 1
+                    k = of_open + 1
+                    while k < len(prior) and depth > 0:
+                        if prior[k] == '{': depth += 1
+                        elif prior[k] == '}': depth -= 1
+                        k += 1
+                    if depth == 0:
+                        of_body = prior[of_open:k]  # includes braces
+                        preserved_lines.append(f'    official: {of_body},')
 
                 # Build the new entry. _hyrox_session_js produces something like:
                 #   "id": {
