@@ -316,7 +316,7 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-05-31";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-05-31T17:08:00Z";
+const LAST_RUN  = "2026-05-31T11:07:00Z";
 const LAST_DATA = "2026-05-31T09:07:00Z";
 
 function parseCSV(raw) {
@@ -753,6 +753,63 @@ function HyroxView() {
   // Station display name: stationNames[lap.i] if set, else "Station N" (numbered in order)
   const stationDisplay = (lap, idx) => (s.stationNames && s.stationNames[lap.i]) || `Station ${idx + 1}`;
 
+  // ── Official-results override ────────────────────────────────────────────────
+  // If s.official is present (e.g. uploaded from a Hyrox/ROXFIT result), it is the
+  // source of truth for TIMES and RANKS. Garmin laps still supply HR (avg/max),
+  // since official results carry no heart-rate data. Structure:
+  //   official: {
+  //     finishTime: 4496,                        // seconds (optional; overrides s.totalTime)
+  //     roxzone: { time: 318, rank: 355 },       // optional
+  //     runs:     [{ time: 327, rank: 296 }, ...],        // in race order, R1..Rn
+  //     stations: [{ name:"Ski Erg 1000 m", time: 279, rank: 535 }, ...],  // in race order
+  //   }
+  // Matching to Garmin laps for HR: runs match by order (i-th official run ↔ i-th run lap);
+  // stations match by name (official.stations[k].name ↔ stationNames[lap.i]), falling back
+  // to order if names don't line up. Missing HR just renders blank — never blocks the time.
+  const official = s.official || null;
+  const hasOfficial = !!official;
+
+  // Build HR lookup from Garmin laps
+  const runHrByOrder = runLaps.map(l => ({ avgHr: l.avgHr, maxHr: l.maxHr }));
+  const stationHrByName = {};
+  stationLaps.forEach((l, idx) => {
+    const nm = (s.stationNames && s.stationNames[l.i]) || null;
+    if (nm) stationHrByName[nm] = { avgHr: l.avgHr, maxHr: l.maxHr };
+  });
+  const stationHrByOrder = stationLaps.map(l => ({ avgHr: l.avgHr, maxHr: l.maxHr }));
+
+  // Merged views: official time/rank + Garmin HR. Fall back to raw laps when no official.
+  const mergedRuns = hasOfficial && official.runs
+    ? official.runs.map((r, i) => ({
+        i: i + 1, t: r.time, rank: r.rank ?? null,
+        avgHr: (runHrByOrder[i] || {}).avgHr ?? null,
+        maxHr: (runHrByOrder[i] || {}).maxHr ?? null,
+      }))
+    : runLaps.map((l, i) => ({ i: i + 1, t: l.t, rank: null, avgHr: l.avgHr ?? null, maxHr: l.maxHr ?? null }));
+
+  const mergedStations = hasOfficial && official.stations
+    ? official.stations.map((st, i) => {
+        const hr = stationHrByName[st.name] || stationHrByOrder[i] || {};
+        return { i: i + 1, name: st.name, t: st.time, rank: st.rank ?? null,
+                 avgHr: hr.avgHr ?? null, maxHr: hr.maxHr ?? null };
+      })
+    : stationLaps.map((l, i) => ({ i: i + 1, name: stationDisplay(l, i), t: l.t, rank: null,
+                                   avgHr: l.avgHr ?? null, maxHr: l.maxHr ?? null, dist: l.dist }));
+
+  // Recompute totals from merged (official) data when present
+  const mRunTimes  = mergedRuns.map(r => r.t);
+  const mStatTimes = mergedStations.map(st => st.t);
+  const mTotalRun  = mRunTimes.reduce((a,b)=>a+b, 0);
+  const mTotalStat = mStatTimes.reduce((a,b)=>a+b, 0);
+  const mAvgRun    = mRunTimes.length ? mTotalRun / mRunTimes.length : 0;
+  const mFastRun   = mRunTimes.length ? Math.min(...mRunTimes) : 0;
+  const mSlowRun   = mRunTimes.length ? Math.max(...mRunTimes) : 0;
+  const mMaxStTime = mStatTimes.length ? Math.max(...mStatTimes) : 1;
+  const mMaxRunSec = mSlowRun || 1;
+  const mRunRange  = (mSlowRun - mFastRun) || 1;
+  const displayTotal = hasOfficial && official.finishTime ? official.finishTime : s.totalTime;
+  const hrColorFor = (hr) => hr ? (hr > 167 ? "#dc2626" : hr > 146 ? "#ea580c" : hr > 132 ? "#d97706" : "#16a34a") : "#94a3b8";
+
   // ── Notes (manual, persisted to localStorage per session) ───────────────────
   const noteKey = `hyrox-notes-${s.id}`;
   const [noteText, setNoteText] = useState(() => {
@@ -815,15 +872,24 @@ function HyroxView() {
       {/* ── SESSION TAB ───────────────────────────────────────────────────── */}
       {tab === "session" && (
         <>
+          {/* official-source badge */}
+          {hasOfficial && (
+            <div style={{ marginBottom:12, padding:"7px 12px", background:"#ecfdf5", border:"1.5px solid #6ee7b7", borderRadius:8, display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ fontSize:13 }}>🏁</span>
+              <span style={{ fontSize:11, fontWeight:700, color:"#065f46" }}>Official results</span>
+              <span style={{ fontSize:10, color:"#047857" }}>— times &amp; ranks from official data; HR from Garmin</span>
+            </div>
+          )}
+
           {/* top stats */}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:14 }}>
-            <Stat label="Total time"  value={fmtMMSS(s.totalTime)} sub={s.date} color="#1e293b" />
-            <Stat label={`Running ×${runTimes.length}`} value={fmtMMSS(totalRun)} sub={avgRunPace ? `avg ${fmtMMSS(avgRunPace)}` : "—"} color="#c2410c" bg="#fff7ed" border="#fdba74" />
-            <Stat label="Stations"    value={fmtMMSS(totalStat)} sub={`${stationLaps.length} stations`} color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
+            <Stat label="Total time"  value={fmtMMSS(displayTotal)} sub={s.date} color="#1e293b" />
+            <Stat label={`Running ×${mergedRuns.length}`} value={fmtMMSS(mTotalRun)} sub={mAvgRun ? `avg ${fmtMMSS(mAvgRun)}` : "—"} color="#c2410c" bg="#fff7ed" border="#fdba74" />
+            <Stat label="Stations"    value={fmtMMSS(mTotalStat)} sub={`${mergedStations.length} stations`} color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:18 }}>
             <Stat label="Avg HR"     value={s.avgHR ? `${s.avgHR} bpm` : "—"} sub={s.maxHR ? `max ${s.maxHR}` : "whole session"} color="#dc2626" bg="#fef2f2" border="#fca5a5" />
-            <Stat label="Run range"  value={runTimes.length ? `${fmtMMSS(fastestRun)}–${fmtMMSS(slowestRun)}` : "—"} sub="fastest → slowest" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
+            <Stat label="Run range"  value={mergedRuns.length ? `${fmtMMSS(mFastRun)}–${fmtMMSS(mSlowRun)}` : "—"} sub="fastest → slowest" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
           </div>
 
           {/* Description from Garmin Connect */}
@@ -849,17 +915,17 @@ function HyroxView() {
           )}
 
           {/* run splits */}
-          {runLaps.length > 0 && (
+          {mergedRuns.length > 0 && (
             <>
-              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — {runLaps.length} laps</div>
+              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — {mergedRuns.length} laps{hasOfficial ? " · official" : ""}</div>
               <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
-                {runLaps.map((run, i) => {
+                {mergedRuns.map((run, i) => {
                   const t = run.t;
-                  const barW = Math.round(((maxRunSec - t) / runRange) * 60 + 35);
-                  const isF = t === fastestRun, isS = t === slowestRun && fastestRun !== slowestRun;
+                  const barW = Math.round(((mMaxRunSec - t) / mRunRange) * 60 + 35);
+                  const isF = t === mFastRun, isS = t === mSlowRun && mFastRun !== mSlowRun;
                   const hr = run.avgHr;
                   const maxHr = run.maxHr;
-                  const hrColor = hr ? (hr > 167 ? "#dc2626" : hr > 146 ? "#ea580c" : hr > 132 ? "#d97706" : "#16a34a") : "#94a3b8";
+                  const hrColor = hrColorFor(hr);
                   return (
                     <div key={run.i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
                       <div style={{ fontSize:10, color:"#94a3b8", minWidth:22, textAlign:"right" }}>R{i+1}</div>
@@ -874,47 +940,56 @@ function HyroxView() {
                           ♥ {hr}{maxHr ? <span style={{color:"#94a3b8"}}> /{maxHr}</span> : null}
                         </div>
                       )}
+                      {run.rank != null && (
+                        <div style={{ fontSize:9, color:"#94a3b8", minWidth:34, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>#{run.rank}</div>
+                      )}
                     </div>
                   );
                 })}
                 <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16, flexWrap:"wrap" }}>
-                  {avgRunPace > 0 && <span>avg <strong>{fmtMMSS(avgRunPace)}</strong></span>}
-                  {fastestRun !== slowestRun && <span>drift <strong>+{fmtMMSS(slowestRun - fastestRun)}</strong> fast→slow</span>}
-                  <span>total running <strong>{fmtMMSS(totalRun)}</strong></span>
+                  {mAvgRun > 0 && <span>avg <strong>{fmtMMSS(mAvgRun)}</strong></span>}
+                  {mFastRun !== mSlowRun && <span>drift <strong>+{fmtMMSS(mSlowRun - mFastRun)}</strong> fast→slow</span>}
+                  <span>total running <strong>{fmtMMSS(mTotalRun)}</strong></span>
                 </div>
               </div>
             </>
           )}
 
           {/* station breakdown */}
-          {stationLaps.length > 0 && (
+          {mergedStations.length > 0 && (
             <>
-              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION BREAKDOWN</div>
+              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION BREAKDOWN{hasOfficial ? " · official" : ""}</div>
               <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"14px", marginBottom:16 }}>
-                {stationLaps.map((st, i) => {
-                  const barW = Math.round((st.t / maxStTime) * 85 + 10);
-                  const named = !!(s.stationNames && s.stationNames[st.i]);
+                {mergedStations.map((st, i) => {
+                  const barW = Math.round((st.t / mMaxStTime) * 85 + 10);
+                  const named = hasOfficial ? true : !!(s.stationNames && s.stationNames[stationLaps[i] && stationLaps[i].i]);
                   return (
-                    <div key={st.i} style={{ marginBottom:10 }}>
+                    <div key={i} style={{ marginBottom:10 }}>
                       <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                        <span style={{ fontSize:11, fontWeight:600, color: named ? "#4c1d95" : "#94a3b8", fontStyle: named ? "normal" : "italic" }}>{stationDisplay(st, i)}</span>
+                        <span style={{ fontSize:11, fontWeight:600, color: named ? "#4c1d95" : "#94a3b8", fontStyle: named ? "normal" : "italic" }}>{st.name}</span>
                         <span style={{ fontSize:12, fontWeight:800, color:"#6d28d9", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(st.t)}</span>
                       </div>
                       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                         <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:14, overflow:"hidden" }}>
                           <div style={{ height:"100%", width:`${barW}%`, background:"#7c3aed88", borderRadius:4 }} />
                         </div>
-                        <div style={{ fontSize:10, color:"#94a3b8", minWidth:54, textAlign:"right" }}>
+                        <div style={{ fontSize:10, color:"#94a3b8", minWidth:74, textAlign:"right" }}>
                           {st.avgHr ? `♥ ${st.avgHr}` : ""}
-                          {st.dist ? ` · ${st.dist}m` : ""}
+                          {st.rank != null ? `${st.avgHr ? " · " : ""}#${st.rank}` : (st.dist ? ` · ${st.dist}m` : "")}
                         </div>
                       </div>
                     </div>
                   );
                 })}
-                {!s.stationNames && (
+                {!hasOfficial && !s.stationNames && (
                   <div style={{ marginTop:8, padding:"8px 10px", background:"#fef3c7", border:"1px solid #fde68a", borderRadius:6, fontSize:10, color:"#92400e" }}>
                     💡 Add station names in HYROX_DATA.{s.id}.stationNames to enable cross-session trends.
+                  </div>
+                )}
+                {hasOfficial && official.roxzone && (
+                  <div style={{ marginTop:8, padding:"8px 10px", background:"#eef2ff", border:"1px solid #c7d2fe", borderRadius:6, fontSize:10, color:"#3730a3", display:"flex", justifyContent:"space-between" }}>
+                    <span>Roxzone (transitions)</span>
+                    <span style={{ fontWeight:700, fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(official.roxzone.time)}{official.roxzone.rank != null ? ` · #${official.roxzone.rank}` : ""}</span>
                   </div>
                 )}
               </div>
@@ -946,34 +1021,47 @@ function HyroxView() {
 
       {/* ── TRENDS TAB ────────────────────────────────────────────────────── */}
       {tab === "trends" && (() => {
+        // Helper: official-aware accessors so trends use official times when present.
+        const sessRuns = (sess) => {
+          const laps = (sess.laps || []).filter(l => l.role === "run");
+          if (sess.official && sess.official.runs)
+            return sess.official.runs.map((r, i) => ({ t: r.time, avgHr: (laps[i]||{}).avgHr || null }));
+          return laps.map(l => ({ t: l.t, avgHr: l.avgHr || null }));
+        };
+        const sessStations = (sess) => {
+          const laps = (sess.laps || []).filter(l => l.role === "station");
+          if (sess.official && sess.official.stations) {
+            const hrByName = {};
+            laps.forEach(l => { const n = sess.stationNames && sess.stationNames[l.i]; if (n) hrByName[n] = l.avgHr || null; });
+            return sess.official.stations.map((st, i) => ({ name: st.name, t: st.time, hr: hrByName[st.name] ?? ((laps[i]||{}).avgHr || null) }));
+          }
+          return laps.map(l => ({ name: sess.stationNames && sess.stationNames[l.i], t: l.t, hr: l.avgHr || null }));
+        };
+        const sessTotal = (sess) => (sess.official && sess.official.finishTime) ? sess.official.finishTime : sess.totalTime;
+
         // Aggregate across all sessions: per-station and per-run trends
-        // Match stations by stationNames; sessions without stationNames contribute totals only.
         const tot = sessions.map(sess => ({
           date: sess.date,
           id: sess.id,
-          totalTime: sess.totalTime,
-          runTime: (sess.laps || []).filter(l => l.role === "run").reduce((a,b)=>a+b.t, 0),
-          stationTime: (sess.laps || []).filter(l => l.role === "station").reduce((a,b)=>a+b.t, 0),
+          totalTime: sessTotal(sess),
+          runTime: sessRuns(sess).reduce((a,b)=>a+b.t, 0),
+          stationTime: sessStations(sess).reduce((a,b)=>a+b.t, 0),
           avgHR: sess.avgHR,
         }));
         // Per-station time series: { stationName: [{date, time, hr, id}] }
         const byStation = {};
         sessions.forEach(sess => {
-          if (!sess.stationNames) return;
-          (sess.laps || []).filter(l => l.role === "station").forEach(lap => {
-            const name = sess.stationNames[lap.i];
-            if (!name) return;
-            (byStation[name] = byStation[name] || []).push({
-              date: sess.date, time: lap.t, hr: lap.avgHr || null, id: sess.id,
+          sessStations(sess).forEach(st => {
+            if (!st.name) return;
+            (byStation[st.name] = byStation[st.name] || []).push({
+              date: sess.date, time: st.t, hr: st.hr, id: sess.id,
             });
           });
         });
         // Per-run-index time series (R1 across all sessions, R2 across all, etc.)
-        // Only useful when every session has the same number of runs — show only if ≥3 runs in most sessions
         const runIndexSeries = {};
         sessions.forEach(sess => {
-          const runs = (sess.laps || []).filter(l => l.role === "run");
-          runs.forEach((r, i) => {
+          sessRuns(sess).forEach((r, i) => {
             const k = `R${i+1}`;
             (runIndexSeries[k] = runIndexSeries[k] || []).push({
               date: sess.date, time: r.t, hr: r.avgHr || null,
