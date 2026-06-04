@@ -351,7 +351,7 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-04";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-04T15:08:00Z";
+const LAST_RUN  = "2026-06-04T16:08:00Z";
 const LAST_DATA = "2026-06-04T09:08:00Z";
 
 function parseCSV(raw) {
