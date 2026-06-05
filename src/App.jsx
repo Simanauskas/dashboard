@@ -42,10 +42,16 @@ const HEALTH_DATA = {
     {date:"2026-05-12",hrv:95,rhr:43,spo2:95,resp:12.0,sleep_score:95},
     {date:"2026-05-13",hrv:80,rhr:43,spo2:98,resp:12.0,sleep_score:88},
     {date:"2026-05-18",hrv:111,rhr:43,spo2:96,resp:12.0,sleep_score:95},
-    {date:"2026-05-23",hrv:98,rhr:40,spo2:94,resp:10.0,sleep_score:95},
-    {date:"2026-05-24",hrv:114,rhr:43,spo2:94,resp:12.0,sleep_score:95},
-    {date:"2026-05-25",hrv:105,rhr:42,spo2:94,resp:12.0,sleep_score:88},
-    {date:"2026-05-29",hrv:125,rhr:43,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
+    {date:"2026-05-26",hrv:109,rhr:44,spo2:94,resp:13.0,sleep_score:95},
+    {date:"2026-05-27",hrv:102,rhr:45,spo2:95,resp:13.0,sleep_score:null},
+    {date:"2026-05-28",hrv:128,rhr:41,spo2:94,resp:11.0,sleep_score:95},
+    {date:"2026-05-30",hrv:100,rhr:43,spo2:96,resp:12.0,sleep_score:88},
+    {date:"2026-05-31",hrv:124,rhr:40,spo2:93,resp:12.0,sleep_score:95},
+    {date:"2026-06-01",hrv:120,rhr:43,spo2:95,resp:13.0,sleep_score:null},
+    {date:"2026-06-02",hrv:98,rhr:41,spo2:95,resp:11.0,sleep_score:95},
+    {date:"2026-06-03",hrv:113,rhr:44,spo2:94,resp:12.0,sleep_score:null},
+    {date:"2026-06-04",hrv:102,rhr:45,spo2:98,resp:13.0,sleep_score:null},
     {date:"2026-06-05",hrv:126,rhr:41,spo2:98,resp:11.0,sleep_score:88},
   ],
   sleep: [
@@ -78,11 +84,15 @@ const HEALTH_DATA = {
     {date:"2026-05-11",deep:94,rem:95,light:265,awake:4},
     {date:"2026-05-12",deep:143,rem:117,light:207,awake:0},
     {date:"2026-05-13",deep:142,rem:127,light:220,awake:2},
-    {date:"2026-05-23",deep:110,rem:115,light:267,awake:8},
-    {date:"2026-05-24",deep:77,rem:105,light:303,awake:3},
-    {date:"2026-05-25",deep:106,rem:130,light:290,awake:5},
-    {date:"2026-05-29",deep:114,rem:84,light:262,awake:2},
-    {date:"2026-05-31",deep:127,rem:81,light:305,awake:0},
+    {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
+    {date:"2026-05-26",deep:111,rem:117,light:301,awake:2},
+    {date:"2026-05-27",deep:109,rem:119,light:223,awake:29},
+    {date:"2026-05-28",deep:134,rem:102,light:243,awake:0},
+    {date:"2026-05-30",deep:121,rem:111,light:247,awake:10},
+    {date:"2026-06-01",deep:109,rem:35,light:186,awake:7},
+    {date:"2026-06-02",deep:108,rem:116,light:239,awake:0},
+    {date:"2026-06-03",deep:113,rem:92,light:237,awake:13},
+    {date:"2026-06-04",deep:110,rem:127,light:208,awake:13},
     {date:"2026-06-05",deep:114,rem:116,light:296,awake:3},
   ],
 };
@@ -180,12 +190,13 @@ const HYROX_DATA = {
     totalTime:4506, avgHR:161, maxHR:177,
     description:``,
     photos:[],
-  stationNames: {
+    laps:[{i:1,t:330,avgHr:162,maxHr:170,dist:1234,role:"run"},{i:2,t:322,avgHr:167,maxHr:171,dist:223,role:"station"},{i:3,t:272,avgHr:165,maxHr:169,dist:977,role:"run"},{i:4,t:156,avgHr:166,maxHr:175,dist:153,role:"station"},{i:5,t:302,avgHr:165,maxHr:175,dist:1008,role:"run"},{i:6,t:269,avgHr:170,maxHr:177,dist:231,role:"station"},{i:7,t:276,avgHr:165,maxHr:170,dist:948,role:"run"},{i:8,t:381,avgHr:161,maxHr:170,dist:92,role:"station"},{i:9,t:316,avgHr:156,maxHr:163,dist:991,role:"run"},{i:10,t:294,avgHr:152,maxHr:160,dist:165,role:"station"},{i:11,t:303,avgHr:156,maxHr:162,dist:969,role:"run"},{i:12,t:17,avgHr:153,maxHr:155,dist:25,role:"station"},{i:13,t:134,avgHr:160,maxHr:170,dist:265,role:"station"},{i:14,t:287,avgHr:157,maxHr:161,dist:966,role:"run"},{i:15,t:327,avgHr:158,maxHr:165,dist:299,role:"station"},{i:16,t:266,avgHr:159,maxHr:162,dist:895,role:"run"},{i:17,t:252,avgHr:162,maxHr:174,dist:287,role:"station"},{i:18,t:4,avgHr:172,maxHr:173,dist:19,role:"station"}],
+      stationNames: {
     2:"Ski Erg 1000 m", 4:"Sled Push 50 m", 6:"Sled Pull 50 m",
     8:"Burpee Broad Jump 80 m", 10:"Row 1000 m", 12:"Farmers Carry 200 m",
     15:"Sandbag Lunge 100 m", 17:"Wall Balls 100",
   },
-  official: {
+    official: {
     finishTime: 4496,                       // 74:56
     roxzone: { time: 318, rank: 355 },      // 5:18
     runs: [
@@ -209,7 +220,6 @@ const HYROX_DATA = {
       { name: "Wall Balls 100",        time: 246, rank: 37  },  // 4:06
     ],
   },
-    laps:[{i:1,t:330,avgHr:162,maxHr:170,dist:1234,role:"run"},{i:2,t:322,avgHr:167,maxHr:171,dist:223,role:"station"},{i:3,t:272,avgHr:165,maxHr:169,dist:977,role:"run"},{i:4,t:156,avgHr:166,maxHr:175,dist:153,role:"station"},{i:5,t:302,avgHr:165,maxHr:175,dist:1008,role:"run"},{i:6,t:269,avgHr:170,maxHr:177,dist:231,role:"station"},{i:7,t:276,avgHr:165,maxHr:170,dist:948,role:"run"},{i:8,t:381,avgHr:161,maxHr:170,dist:92,role:"station"},{i:9,t:316,avgHr:156,maxHr:163,dist:991,role:"run"},{i:10,t:294,avgHr:152,maxHr:160,dist:165,role:"station"},{i:11,t:303,avgHr:156,maxHr:162,dist:969,role:"run"},{i:12,t:17,avgHr:153,maxHr:155,dist:25,role:"station"},{i:13,t:134,avgHr:160,maxHr:170,dist:265,role:"station"},{i:14,t:287,avgHr:157,maxHr:161,dist:966,role:"run"},{i:15,t:327,avgHr:158,maxHr:165,dist:299,role:"station"},{i:16,t:266,avgHr:159,maxHr:162,dist:895,role:"run"},{i:17,t:252,avgHr:162,maxHr:174,dist:287,role:"station"},{i:18,t:4,avgHr:172,maxHr:173,dist:19,role:"station"}],
   },
 };
 
@@ -353,8 +363,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-05T09:25:00Z";
-const LAST_DATA = "2026-06-05T09:25:00Z";
+const LAST_RUN  = "2026-06-05T09:48:00Z";
+const LAST_DATA = "2026-06-05T09:48:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1561,7 +1571,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 111; // updated 2026-06-05
+  const hrvBaseline = 111; // updated 2026-06-04
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
