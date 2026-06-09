@@ -53,6 +53,8 @@ const HEALTH_DATA = {
     {date:"2026-06-03",hrv:113,rhr:44,spo2:94,resp:12.0,sleep_score:null},
     {date:"2026-06-04",hrv:102,rhr:45,spo2:98,resp:13.0,sleep_score:null},
     {date:"2026-06-06",hrv:107,rhr:43,spo2:95,resp:12.0,sleep_score:88},
+    {date:"2026-06-08",hrv:121,rhr:41,spo2:95,resp:12.0,sleep_score:95},
+    {date:"2026-06-09",hrv:98,rhr:39,spo2:96,resp:11.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -94,6 +96,8 @@ const HEALTH_DATA = {
     {date:"2026-06-03",deep:113,rem:92,light:237,awake:13},
     {date:"2026-06-04",deep:110,rem:127,light:208,awake:13},
     {date:"2026-06-06",deep:137,rem:102,light:235,awake:3},
+    {date:"2026-06-08",deep:120,rem:92,light:230,awake:0},
+    {date:"2026-06-09",deep:151,rem:165,light:222,awake:1},
   ],
 };
 
@@ -275,6 +279,9 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Tennis V2","2026-06-09 10:43:22","false","Tennis","0,27","375","01:05:52","94","137","0,7","13","--","238:05","--","--","--","--","--","--","32,38","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:03:45","01:05:52","--","--"
+"Indoor Running","2026-06-08 19:08:10","false","Indoor Running","2,10","525","00:37:45","144","175","3,3","69","--","17:57","--","--","--","--","--","--","67,94","9,9","9,7","441","--","--","--","--","--","--","--","--","--","No","--","4","--","--","--","--","--","00:24:59","00:42:23","--","--"
+"Tennis V2","2026-06-08 09:32:39","false","Tennis","1,04","974","02:00:17","113","168","2,5","26","--","114:56","--","--","--","--","--","--","32,86","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:13:35","02:00:17","--","--"
 "Other","2026-06-05 18:19:23","false","Sauna","0,00","97","00:22:19","82","110","0,2","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:22:19","00:22:19","--","--"
 "Indoor Running","2026-06-05 17:03:27","false","Indoor Running","2,68","558","00:45:05","137","167","3,0","75","--","16:48","--","--","--","--","--","--","70,27","10,9","7,1","398","--","--","--","--","--","--","--","--","--","No","--","8","--","--","--","--","--","00:30:27","00:48:53","--","--"
 "Cycling","2026-06-05 10:53:21","false","Vilnius Cycling","5,02","147","00:18:47","103","128","0,8","--","--","3:44","--","--","--","50","53","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:17:44","00:53:11","--","--"
@@ -365,8 +372,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-09";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-09T11:07:00Z";
-const LAST_DATA = "2026-06-09T09:07:00Z";
+const LAST_RUN  = "2026-06-09T11:44:00Z";
+const LAST_DATA = "2026-06-09T11:44:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1573,7 +1580,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 112; // updated 2026-06-06
+  const hrvBaseline = 111; // updated 2026-06-09
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
