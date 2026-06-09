@@ -43,17 +43,9 @@ const HEALTH_DATA = {
     {date:"2026-05-13",hrv:80,rhr:43,spo2:98,resp:12.0,sleep_score:88},
     {date:"2026-05-18",hrv:111,rhr:43,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
-    {date:"2026-05-26",hrv:109,rhr:44,spo2:94,resp:13.0,sleep_score:95},
-    {date:"2026-05-27",hrv:102,rhr:45,spo2:95,resp:13.0,sleep_score:null},
-    {date:"2026-05-28",hrv:128,rhr:41,spo2:94,resp:11.0,sleep_score:95},
-    {date:"2026-05-30",hrv:100,rhr:43,spo2:96,resp:12.0,sleep_score:88},
-    {date:"2026-05-31",hrv:124,rhr:40,spo2:93,resp:12.0,sleep_score:95},
-    {date:"2026-06-01",hrv:120,rhr:43,spo2:95,resp:13.0,sleep_score:null},
-    {date:"2026-06-02",hrv:98,rhr:41,spo2:95,resp:11.0,sleep_score:95},
-    {date:"2026-06-03",hrv:113,rhr:44,spo2:94,resp:12.0,sleep_score:null},
-    {date:"2026-06-04",hrv:102,rhr:45,spo2:98,resp:13.0,sleep_score:null},
-    {date:"2026-06-06",hrv:107,rhr:43,spo2:95,resp:12.0,sleep_score:88},
-    {date:"2026-06-08",hrv:121,rhr:41,spo2:95,resp:12.0,sleep_score:95},
+    {date:"2026-05-29",hrv:125,rhr:43,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-06-05",hrv:126,rhr:41,spo2:98,resp:11.0,sleep_score:88},
+    {date:"2026-06-07",hrv:116,rhr:41,spo2:94,resp:12.0,sleep_score:95},
     {date:"2026-06-09",hrv:98,rhr:39,spo2:96,resp:11.0,sleep_score:95},
   ],
   sleep: [
@@ -87,16 +79,10 @@ const HEALTH_DATA = {
     {date:"2026-05-12",deep:143,rem:117,light:207,awake:0},
     {date:"2026-05-13",deep:142,rem:127,light:220,awake:2},
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
-    {date:"2026-05-26",deep:111,rem:117,light:301,awake:2},
-    {date:"2026-05-27",deep:109,rem:119,light:223,awake:29},
-    {date:"2026-05-28",deep:134,rem:102,light:243,awake:0},
-    {date:"2026-05-30",deep:121,rem:111,light:247,awake:10},
-    {date:"2026-06-01",deep:109,rem:35,light:186,awake:7},
-    {date:"2026-06-02",deep:108,rem:116,light:239,awake:0},
-    {date:"2026-06-03",deep:113,rem:92,light:237,awake:13},
-    {date:"2026-06-04",deep:110,rem:127,light:208,awake:13},
-    {date:"2026-06-06",deep:137,rem:102,light:235,awake:3},
-    {date:"2026-06-08",deep:120,rem:92,light:230,awake:0},
+    {date:"2026-05-29",deep:114,rem:84,light:262,awake:2},
+    {date:"2026-05-31",deep:127,rem:81,light:305,awake:0},
+    {date:"2026-06-05",deep:114,rem:116,light:296,awake:3},
+    {date:"2026-06-07",deep:93,rem:115,light:231,awake:1},
     {date:"2026-06-09",deep:151,rem:165,light:222,awake:1},
   ],
 };
@@ -225,6 +211,13 @@ const HYROX_DATA = {
     ],
   },
   },
+"23140613577": {
+    date:"2026-06-05", name:"Hyrox group ", type:"group",
+    totalTime:2706, avgHR:137, maxHR:167,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:390,avgHr:117,maxHr:139,dist:381,role:"station"},{i:2,t:580,avgHr:151,maxHr:167,dist:565,role:"run"},{i:3,t:151,avgHr:118,maxHr:163,dist:66,role:"station"},{i:4,t:545,avgHr:148,maxHr:167,dist:1012,role:"run"},{i:5,t:124,avgHr:119,maxHr:167,dist:60,role:"station"},{i:6,t:559,avgHr:132,maxHr:153,dist:312,role:"station"},{i:7,t:88,avgHr:119,maxHr:131,dist:37,role:"station"},{i:8,t:270,avgHr:151,maxHr:164,dist:252,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -279,6 +272,13 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Cycling","2026-06-07 18:19:25","false","Vilnius Cycling","7,83","163","00:22:20","101","122","0,6","--","--","2:51","--","--","--","42","57","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:22:08","00:22:48","--","--"
+"Strength Training","2026-06-07 17:05:09","false","Strength","0,00","113","00:08:49","128","158","1,6","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:49","00:08:49","--","--"
+"Cycling","2026-06-07 12:10:55","false","Vilnius Cycling","7,80","195","00:29:29","96","130","0,9","--","--","3:47","--","--","--","70","38","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:29:14","03:03:01","--","--"
+"Other","2026-06-07 10:10:09","false","Sauna","0,00","294","01:33:55","73","127","0,2","1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","3","--","--","--","--","--","01:33:55","01:33:55","--","--"
+"Running","2026-06-07 08:11:48","false","Vilnius Running","11,08","781","01:00:18","125","143","3,0","174","--","5:26","--","--","--","44","42","--","104,98","8,1","8,6","255","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:00:18","01:00:30","--","--"
+"Cycling","2026-06-07 07:47:57","false","Vilnius Cycling","4,50","114","00:11:40","113","127","0,9","--","--","2:35","--","--","--","28","24","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:11:36","00:12:59","--","--"
+"Cycling","2026-06-06 17:56:36","false","Vilnius Cycling","10,96","154","00:48:35","74","97","0,1","--","--","4:26","--","--","--","73","76","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:46:47","00:50:07","--","--"
 "Tennis V2","2026-06-09 10:43:22","false","Tennis","0,27","375","01:05:52","94","137","0,7","13","--","238:05","--","--","--","--","--","--","32,38","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:03:45","01:05:52","--","--"
 "Indoor Running","2026-06-08 19:08:10","false","Indoor Running","2,10","525","00:37:45","144","175","3,3","69","--","17:57","--","--","--","--","--","--","67,94","9,9","9,7","441","--","--","--","--","--","--","--","--","--","No","--","4","--","--","--","--","--","00:24:59","00:42:23","--","--"
 "Tennis V2","2026-06-08 09:32:39","false","Tennis","1,04","974","02:00:17","113","168","2,5","26","--","114:56","--","--","--","--","--","--","32,86","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:13:35","02:00:17","--","--"
@@ -372,8 +372,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-09";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-09T11:44:00Z";
-const LAST_DATA = "2026-06-09T11:44:00Z";
+const LAST_RUN  = "2026-06-09T11:55:00Z";
+const LAST_DATA = "2026-06-09T11:55:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1580,7 +1580,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 111; // updated 2026-06-09
+  const hrvBaseline = 111; // updated 2026-06-08
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
