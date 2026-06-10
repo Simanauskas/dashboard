@@ -1,0 +1,28 @@
+name: Create Garmin Workouts
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install "garth==0.4.47"
+
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+
+      - name: Create workouts
+        run: python create_workouts.py
