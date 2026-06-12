@@ -73,14 +73,9 @@ def find_transport_event_type():
         types = garth.connectapi("/activity-service/activity/eventTypes")
     except Exception as e:
         print(f"  ⚠ Could not fetch event types: {e}")
-        return None
-    for t in types:
-        print(f"  event type: {t.get('typeKey')} / {t.get('typeId')}")
-    candidates = [
-        t for t in types
-        if "transport" in t.get("typeKey", "").lower()
-    ]
-    return candidates[0] if candidates else None
+        return {"typeId": 5, "typeKey": "transportation"}
+    candidates = [t for t in types if "transport" in t.get("typeKey", "").lower()]
+    return candidates[0] if candidates else {"typeId": 5, "typeKey": "transportation"}
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -98,10 +93,7 @@ def main():
         pass
 
     transport_type = find_transport_event_type()
-    if transport_type:
-        print(f"Transport event type found: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
-    else:
-        print("⚠ No transportation event type found — event type will be left unchanged.")
+    print(f"Transport event type: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
 
     print(f"Fetching activities since {CUTOFF} …")
     acts = fetch_all_activities()
@@ -113,7 +105,7 @@ def main():
             continue
         s_lat, s_lon = a.get("startLatitude"), a.get("startLongitude")
         e_lat, e_lon = a.get("endLatitude"), a.get("endLongitude")
-        if s_lat is None or e_lat is None:
+        if s_lat is None and e_lat is None:
             skipped_no_gps += 1
             continue
         if not (near_work(s_lat, s_lon) or near_work(e_lat, e_lon)):
@@ -135,7 +127,7 @@ def main():
         date = (a.get("startTimeLocal") or "")[:16]
         mins = int((a.get("duration") or 0) // 60)
         already = old_name == NEW_NAME and (
-            not transport_type or (a.get("eventType") or {}).get("typeKey") == transport_type["typeKey"]
+            (a.get("eventType") or {}).get("typeKey") == transport_type["typeKey"]
         )
         flag = "✓ already done" if already else ("APPLY" if args.apply else "would rename")
         print(f"  {date}  {mins}min  id={aid}  '{old_name}' ({old_type})  → {flag}")
@@ -143,12 +135,10 @@ def main():
         if already or not args.apply:
             continue
 
-        payload = {"activityId": aid, "activityName": NEW_NAME}
-        if transport_type:
-            payload["eventType"] = {
-                "typeId": transport_type["typeId"],
-                "typeKey": transport_type["typeKey"],
-            }
+        payload = {"activityId": aid, "activityName": NEW_NAME, "eventType": {
+            "typeId": transport_type["typeId"],
+            "typeKey": transport_type["typeKey"],
+        }}
         try:
             garth.client.put(
                 "connectapi",
