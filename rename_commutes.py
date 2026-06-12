@@ -22,7 +22,7 @@ import garth
 
 CUTOFF = "2025-11-01"
 WORK = (54.674395, 25.272151)           # Algirdo g. 34, Vilnius
-WORK_RADIUS_M = 300
+WORK_RADIUS_M = 500
 MAX_DURATION_S = 45 * 60               # 45 minutes
 NEW_NAME = "Commute to work"
 
@@ -68,18 +68,14 @@ def fetch_all_activities():
     return acts
 
 
-def find_transport_type():
+def find_transport_event_type():
     try:
-        types = garth.connectapi("/activity-service/activity/activityTypes")
+        types = garth.connectapi("/activity-service/activity/eventTypes")
     except Exception as e:
-        print(f"  ⚠ Could not fetch activity types: {e}")
-        return None
-    candidates = [
-        t for t in types
-        if any(kw in t.get("typeKey", "").lower() for kw in ("transport", "commut"))
-    ]
-    candidates.sort(key=lambda t: ("transport" not in t["typeKey"], t["typeKey"]))
-    return candidates[0] if candidates else None
+        print(f"  ⚠ Could not fetch event types: {e}")
+        return {"typeId": 5, "typeKey": "transportation"}
+    candidates = [t for t in types if "transport" in t.get("typeKey", "").lower()]
+    return candidates[0] if candidates else {"typeId": 5, "typeKey": "transportation"}
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -96,11 +92,11 @@ def main():
     except Exception:
         pass
 
-    transport_type = find_transport_type()
+    transport_type = find_transport_event_type()
     if transport_type:
-        print(f"Transport type found: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
+        print(f"Transport event type found: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
     else:
-        print("⚠ No transportation type found — activity type will be left unchanged.")
+        print("⚠ No transportation event type found — event type will be left unchanged.")
 
     print(f"Fetching activities since {CUTOFF} …")
     acts = fetch_all_activities()
@@ -112,7 +108,7 @@ def main():
             continue
         s_lat, s_lon = a.get("startLatitude"), a.get("startLongitude")
         e_lat, e_lon = a.get("endLatitude"), a.get("endLongitude")
-        if s_lat is None or e_lat is None:
+        if s_lat is None and e_lat is None:
             skipped_no_gps += 1
             continue
         if not (near_work(s_lat, s_lon) or near_work(e_lat, e_lon)):
@@ -144,7 +140,7 @@ def main():
 
         payload = {"activityId": aid, "activityName": NEW_NAME}
         if transport_type:
-            payload["activityTypeDTO"] = {
+            payload["eventType"] = {
                 "typeId": transport_type["typeId"],
                 "typeKey": transport_type["typeKey"],
             }
