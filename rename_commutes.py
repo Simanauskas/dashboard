@@ -151,7 +151,7 @@ def main():
         if already or not args.apply:
             continue
 
-        payload = {"activityId": aid, "activityName": NEW_NAME, "eventType": {
+        payload = {"activityId": aid, "activityName": NEW_NAME, "eventTypeDTO": {
             "typeId": transport_type["typeId"],
             "typeKey": transport_type["typeKey"],
         }}
