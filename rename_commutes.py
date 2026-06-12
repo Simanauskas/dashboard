@@ -2,11 +2,11 @@
 """
 rename_commutes.py
 ──────────────────
-Finds all activities since CUTOFF where:
-  - start or end point is within WORK_RADIUS_M of the office, AND
-  - duration is at most MAX_DURATION_S
-and renames them to NEW_NAME with activity type Transportation.
+Finds all cycling activities since CUTOFF where the GPS track passes
+within WORK_RADIUS_M of the office at any point, and the ride is at
+least MIN_DISTANCE_M long.
 
+Renames matches to NEW_NAME with event type Transportation.
 DRY RUN by default. Pass --apply to write.
 """
 
@@ -22,9 +22,8 @@ import garth
 
 CUTOFF = "2025-11-01"
 WORK = (54.674395, 25.272151)           # Algirdo g. 34, Vilnius
-WORK_RADIUS_M = 1500
-MAX_DURATION_S = 45 * 60               # 45 minutes
-MIN_DISTANCE_M = 2000                  # at least 2 km — rules out short errand rides
+WORK_RADIUS_M = 300
+MIN_DISTANCE_M = 2000                  # at least 2 km — filters trivial rides
 NEW_NAME = "Commute to work"
 
 CYCLING_KEYS = {
@@ -42,12 +41,6 @@ def haversine_m(lat1, lon1, lat2, lon2):
     dl = math.radians(lon2 - lon1)
     a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
     return 2 * R * math.asin(math.sqrt(a))
-
-
-def near_work(lat, lon):
-    if lat is None or lon is None:
-        return False
-    return haversine_m(lat, lon, WORK[0], WORK[1]) <= WORK_RADIUS_M
 
 
 def is_cycling(act):
@@ -72,6 +65,20 @@ def fetch_all_activities():
             break
         start += page
     return acts
+
+
+def track_passes_work(aid):
+    """Return True if any GPS point in the activity is within WORK_RADIUS_M of office."""
+    try:
+        details = garth.connectapi(f"/activity-service/activity/{aid}/details")
+        polyline = (details.get("geoPolylineDTO") or {}).get("polyline", [])
+        for pt in polyline:
+            lat, lon = pt.get("lat"), pt.get("lon")
+            if lat and lon and haversine_m(lat, lon, WORK[0], WORK[1]) <= WORK_RADIUS_M:
+                return True
+    except Exception as e:
+        print(f"    ⚠ track fetch failed for {aid}: {e}")
+    return False
 
 
 def find_transport_event_type():
@@ -99,54 +106,33 @@ def main():
         pass
 
     transport_type = find_transport_event_type()
-    if transport_type:
-        print(f"Transport event type found: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
-    else:
-        print("⚠ No transportation event type found — event type will be left unchanged.")
+    print(f"Transport event type: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
 
     print(f"Fetching activities since {CUTOFF} …")
     acts = fetch_all_activities()
     print(f"  {len(acts)} total activities\n")
 
-    matches, skipped_no_gps, skipped_too_long = [], 0, 0
-    nearby_debug = []  # (dist_m, activity) for cycling activities with GPS
-    for a in acts:
-        if not is_cycling(a):
-            continue
-        s_lat, s_lon = a.get("startLatitude"), a.get("startLongitude")
-        e_lat, e_lon = a.get("endLatitude"), a.get("endLongitude")
-        if s_lat is None and e_lat is None:
-            skipped_no_gps += 1
-            continue
-        # collect closest distance to office for debug
-        dists = []
-        if s_lat is not None: dists.append(haversine_m(s_lat, s_lon, WORK[0], WORK[1]))
-        if e_lat is not None: dists.append(haversine_m(e_lat, e_lon, WORK[0], WORK[1]))
-        min_dist = min(dists) if dists else None
-        if min_dist is not None:
-            nearby_debug.append((min_dist, a))
-        if not (near_work(s_lat, s_lon) or near_work(e_lat, e_lon)):
-            continue
-        duration = a.get("duration", 0) or 0
-        if duration > MAX_DURATION_S:
-            skipped_too_long += 1
-            continue
-        distance = a.get("distance", 0) or 0
-        if distance < MIN_DISTANCE_M:
-            continue
-        matches.append(a)
+    # Pre-filter: cycling type + minimum distance (avoids GPS track fetches for non-candidates)
+    candidates = [
+        a for a in acts
+        if is_cycling(a) and (a.get("distance") or 0) >= MIN_DISTANCE_M
+    ]
+    print(f"  {len(candidates)} cycling activities ≥ {MIN_DISTANCE_M/1000:.0f}km — checking GPS tracks …\n")
 
-    print(f"  (skipped {skipped_no_gps} with no GPS, {skipped_too_long} near-office but >45 min)")
-    # show 20 closest GPS activities to office (regardless of match)
-    nearby_debug.sort(key=lambda x: x[0])
-    print(f"\n  20 closest GPS activities to office ({WORK_RADIUS_M}m threshold):")
-    for dist, a in nearby_debug[:20]:
-        t = (a.get("activityType") or {}).get("typeKey", "?")
+    matches = []
+    for a in candidates:
+        aid = a["activityId"]
         date = (a.get("startTimeLocal") or "")[:16]
+        dist_km = (a.get("distance") or 0) / 1000
         mins = int((a.get("duration") or 0) // 60)
-        print(f"    {date}  {mins}min  {int(dist)}m  {t}  '{a.get('activityName','?')}'")
-    print()
-    print(f"  {len(matches)} commute matches:\n")
+        print(f"  checking {date}  {mins}min  {dist_km:.1f}km  id={aid} …", end=" ", flush=True)
+        if track_passes_work(aid):
+            print("✓ passes office")
+            matches.append(a)
+        else:
+            print("skip")
+
+    print(f"\n  {len(matches)} commute matches:\n")
 
     changed = 0
     for a in matches:
@@ -155,21 +141,20 @@ def main():
         old_type = (a.get("activityType") or {}).get("typeKey", "?")
         date = (a.get("startTimeLocal") or "")[:16]
         mins = int((a.get("duration") or 0) // 60)
+        dist_km = (a.get("distance") or 0) / 1000
         already = old_name == NEW_NAME and (
-            not transport_type or old_type == transport_type["typeKey"]
+            (a.get("eventType") or {}).get("typeKey") == transport_type["typeKey"]
         )
         flag = "✓ already done" if already else ("APPLY" if args.apply else "would rename")
-        print(f"  {date}  {mins}min  id={aid}  '{old_name}' ({old_type})  → {flag}")
+        print(f"  {date}  {mins}min  {dist_km:.1f}km  id={aid}  '{old_name}' ({old_type})  → {flag}")
 
         if already or not args.apply:
             continue
 
-        payload = {"activityId": aid, "activityName": NEW_NAME}
-        if transport_type:
-            payload["eventType"] = {
-                "typeId": transport_type["typeId"],
-                "typeKey": transport_type["typeKey"],
-            }
+        payload = {"activityId": aid, "activityName": NEW_NAME, "eventType": {
+            "typeId": transport_type["typeId"],
+            "typeKey": transport_type["typeKey"],
+        }}
         try:
             garth.client.put(
                 "connectapi",
