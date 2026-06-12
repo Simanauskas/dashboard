@@ -2,13 +2,11 @@
 """
 rename_commutes.py
 ──────────────────
-Finds all activities since CUTOFF where:
-  - activity is cycling type
-  - start or end point is within WORK_RADIUS_M of the office
-  - duration is at most MAX_DURATION_S
-  - distance is at least MIN_DISTANCE_M
-and renames them to NEW_NAME with event type Transportation.
+Finds all cycling activities since CUTOFF where the GPS track passes
+within WORK_RADIUS_M of the office at any point, and the ride is at
+least MIN_DISTANCE_M long.
 
+Renames matches to NEW_NAME with event type Transportation.
 DRY RUN by default. Pass --apply to write.
 """
 
@@ -24,9 +22,8 @@ import garth
 
 CUTOFF = "2025-11-01"
 WORK = (54.674395, 25.272151)           # Algirdo g. 34, Vilnius
-WORK_RADIUS_M = 1500
-MAX_DURATION_S = 45 * 60               # 45 minutes
-MIN_DISTANCE_M = 2000                  # at least 2 km
+WORK_RADIUS_M = 300
+MIN_DISTANCE_M = 2000                  # at least 2 km — filters trivial rides
 NEW_NAME = "Commute to work"
 
 CYCLING_KEYS = {
@@ -44,12 +41,6 @@ def haversine_m(lat1, lon1, lat2, lon2):
     dl = math.radians(lon2 - lon1)
     a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
     return 2 * R * math.asin(math.sqrt(a))
-
-
-def near_work(lat, lon):
-    if lat is None or lon is None:
-        return False
-    return haversine_m(lat, lon, WORK[0], WORK[1]) <= WORK_RADIUS_M
 
 
 def is_cycling(act):
@@ -74,6 +65,20 @@ def fetch_all_activities():
             break
         start += page
     return acts
+
+
+def track_passes_work(aid):
+    """Return True if any GPS point in the activity is within WORK_RADIUS_M of office."""
+    try:
+        details = garth.connectapi(f"/activity-service/activity/{aid}/details")
+        polyline = (details.get("geoPolylineDTO") or {}).get("polyline", [])
+        for pt in polyline:
+            lat, lon = pt.get("lat"), pt.get("lon")
+            if lat and lon and haversine_m(lat, lon, WORK[0], WORK[1]) <= WORK_RADIUS_M:
+                return True
+    except Exception as e:
+        print(f"    ⚠ track fetch failed for {aid}: {e}")
+    return False
 
 
 def find_transport_event_type():
@@ -107,28 +112,27 @@ def main():
     acts = fetch_all_activities()
     print(f"  {len(acts)} total activities\n")
 
-    matches, skipped_no_gps, skipped_too_long = [], 0, 0
-    for a in acts:
-        if not is_cycling(a):
-            continue
-        s_lat, s_lon = a.get("startLatitude"), a.get("startLongitude")
-        e_lat, e_lon = a.get("endLatitude"), a.get("endLongitude")
-        if s_lat is None and e_lat is None:
-            skipped_no_gps += 1
-            continue
-        if not (near_work(s_lat, s_lon) or near_work(e_lat, e_lon)):
-            continue
-        duration = a.get("duration", 0) or 0
-        if duration > MAX_DURATION_S:
-            skipped_too_long += 1
-            continue
-        distance = a.get("distance", 0) or 0
-        if distance < MIN_DISTANCE_M:
-            continue
-        matches.append(a)
+    # Pre-filter: cycling type + minimum distance (avoids GPS track fetches for non-candidates)
+    candidates = [
+        a for a in acts
+        if is_cycling(a) and (a.get("distance") or 0) >= MIN_DISTANCE_M
+    ]
+    print(f"  {len(candidates)} cycling activities ≥ {MIN_DISTANCE_M/1000:.0f}km — checking GPS tracks …\n")
 
-    print(f"  (skipped {skipped_no_gps} cycling with no GPS, {skipped_too_long} near-office but >45 min)")
-    print(f"  {len(matches)} commute matches:\n")
+    matches = []
+    for a in candidates:
+        aid = a["activityId"]
+        date = (a.get("startTimeLocal") or "")[:16]
+        dist_km = (a.get("distance") or 0) / 1000
+        mins = int((a.get("duration") or 0) // 60)
+        print(f"  checking {date}  {mins}min  {dist_km:.1f}km  id={aid} …", end=" ", flush=True)
+        if track_passes_work(aid):
+            print("✓ passes office")
+            matches.append(a)
+        else:
+            print("skip")
+
+    print(f"\n  {len(matches)} commute matches:\n")
 
     changed = 0
     for a in matches:
