@@ -100,6 +100,7 @@ def main():
     print(f"  {len(acts)} total activities\n")
 
     matches, skipped_no_gps, skipped_too_long = [], 0, 0
+    nearby_debug = []  # (dist_m, activity) for candidates with GPS
     for a in acts:
         if not is_candidate(a):
             continue
@@ -108,6 +109,12 @@ def main():
         if s_lat is None and e_lat is None:
             skipped_no_gps += 1
             continue
+        dists = []
+        if s_lat is not None: dists.append(haversine_m(s_lat, s_lon, WORK[0], WORK[1]))
+        if e_lat is not None: dists.append(haversine_m(e_lat, e_lon, WORK[0], WORK[1]))
+        min_dist = min(dists) if dists else None
+        if min_dist is not None:
+            nearby_debug.append((min_dist, a))
         if not (near_work(s_lat, s_lon) or near_work(e_lat, e_lon)):
             continue
         duration = a.get("duration", 0) or 0
@@ -117,6 +124,14 @@ def main():
         matches.append(a)
 
     print(f"  (skipped {skipped_no_gps} with no GPS, {skipped_too_long} near-office but >45 min)")
+    nearby_debug.sort(key=lambda x: x[0])
+    print(f"\n  20 closest GPS activities to office ({WORK_RADIUS_M}m threshold):")
+    for dist, a in nearby_debug[:20]:
+        t = (a.get("activityType") or {}).get("typeKey", "?")
+        date = (a.get("startTimeLocal") or "")[:16]
+        mins = int((a.get("duration") or 0) // 60)
+        print(f"    {date}  {mins}min  {int(dist)}m  {t}  '{a.get('activityName','?')}'")
+    print()
     print(f"  {len(matches)} commute matches:\n")
 
     changed = 0
