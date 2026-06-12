@@ -22,11 +22,16 @@ import garth
 
 CUTOFF = "2025-11-01"
 WORK = (54.674395, 25.272151)           # Algirdo g. 34, Vilnius
-WORK_RADIUS_M = 500
+WORK_RADIUS_M = 1500
 MAX_DURATION_S = 45 * 60               # 45 minutes
+MIN_DISTANCE_M = 2000                  # at least 2 km — rules out short errand rides
 NEW_NAME = "Commute to work"
 
-EXCLUDE_KEYS = {"indoor_cycling", "virtual_ride", "treadmill_running", "indoor_running"}
+CYCLING_KEYS = {
+    "cycling", "road_biking", "mountain_biking", "gravel_cycling",
+    "cyclocross", "recumbent_cycling", "e_bike_fitness", "e_bike_mountain",
+    "commuting", "bike_commute",
+}
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -45,11 +50,12 @@ def near_work(lat, lon):
     return haversine_m(lat, lon, WORK[0], WORK[1]) <= WORK_RADIUS_M
 
 
-def is_candidate(act):
-    key = (act.get("activityType") or {}).get("typeKey", "")
-    if key in EXCLUDE_KEYS:
-        return False
-    return "indoor" not in key and "virtual" not in key
+def is_cycling(act):
+    t = act.get("activityType") or {}
+    key = t.get("typeKey", "")
+    if key in CYCLING_KEYS:
+        return True
+    return t.get("parentTypeId") == 2 and "indoor" not in key and "virtual" not in key
 
 
 def fetch_all_activities():
@@ -103,23 +109,43 @@ def main():
     print(f"  {len(acts)} total activities\n")
 
     matches, skipped_no_gps, skipped_too_long = [], 0, 0
+    nearby_debug = []  # (dist_m, activity) for cycling activities with GPS
     for a in acts:
-        if not is_candidate(a):
+        if not is_cycling(a):
             continue
         s_lat, s_lon = a.get("startLatitude"), a.get("startLongitude")
         e_lat, e_lon = a.get("endLatitude"), a.get("endLongitude")
         if s_lat is None and e_lat is None:
             skipped_no_gps += 1
             continue
+        # collect closest distance to office for debug
+        dists = []
+        if s_lat is not None: dists.append(haversine_m(s_lat, s_lon, WORK[0], WORK[1]))
+        if e_lat is not None: dists.append(haversine_m(e_lat, e_lon, WORK[0], WORK[1]))
+        min_dist = min(dists) if dists else None
+        if min_dist is not None:
+            nearby_debug.append((min_dist, a))
         if not (near_work(s_lat, s_lon) or near_work(e_lat, e_lon)):
             continue
         duration = a.get("duration", 0) or 0
         if duration > MAX_DURATION_S:
             skipped_too_long += 1
             continue
+        distance = a.get("distance", 0) or 0
+        if distance < MIN_DISTANCE_M:
+            continue
         matches.append(a)
 
     print(f"  (skipped {skipped_no_gps} with no GPS, {skipped_too_long} near-office but >45 min)")
+    # show 20 closest GPS activities to office (regardless of match)
+    nearby_debug.sort(key=lambda x: x[0])
+    print(f"\n  20 closest GPS activities to office ({WORK_RADIUS_M}m threshold):")
+    for dist, a in nearby_debug[:20]:
+        t = (a.get("activityType") or {}).get("typeKey", "?")
+        date = (a.get("startTimeLocal") or "")[:16]
+        mins = int((a.get("duration") or 0) // 60)
+        print(f"    {date}  {mins}min  {int(dist)}m  {t}  '{a.get('activityName','?')}'")
+    print()
     print(f"  {len(matches)} commute matches:\n")
 
     changed = 0
