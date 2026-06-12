@@ -5,7 +5,7 @@ rename_commutes.py
 Finds all activities since CUTOFF where:
   - start or end point is within WORK_RADIUS_M of the office, AND
   - duration is at most MAX_DURATION_S
-and renames them to NEW_NAME with activity type Transportation.
+and renames them to NEW_NAME with event type Transportation.
 
 DRY RUN by default. Pass --apply to write.
 """
@@ -22,7 +22,7 @@ import garth
 
 CUTOFF = "2025-11-01"
 WORK = (54.674395, 25.272151)           # Algirdo g. 34, Vilnius
-WORK_RADIUS_M = 300
+WORK_RADIUS_M = 500
 MAX_DURATION_S = 45 * 60               # 45 minutes
 NEW_NAME = "Commute to work"
 
@@ -68,17 +68,18 @@ def fetch_all_activities():
     return acts
 
 
-def find_transport_type():
+def find_transport_event_type():
     try:
-        types = garth.connectapi("/activity-service/activity/activityTypes")
+        types = garth.connectapi("/activity-service/activity/eventTypes")
     except Exception as e:
-        print(f"  ⚠ Could not fetch activity types: {e}")
+        print(f"  ⚠ Could not fetch event types: {e}")
         return None
+    for t in types:
+        print(f"  event type: {t.get('typeKey')} / {t.get('typeId')}")
     candidates = [
         t for t in types
-        if any(kw in t.get("typeKey", "").lower() for kw in ("transport", "commut"))
+        if "transport" in t.get("typeKey", "").lower()
     ]
-    candidates.sort(key=lambda t: ("transport" not in t["typeKey"], t["typeKey"]))
     return candidates[0] if candidates else None
 
 
@@ -96,11 +97,11 @@ def main():
     except Exception:
         pass
 
-    transport_type = find_transport_type()
+    transport_type = find_transport_event_type()
     if transport_type:
-        print(f"Transport type found: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
+        print(f"Transport event type found: typeKey={transport_type['typeKey']} typeId={transport_type['typeId']}")
     else:
-        print("⚠ No transportation type found — activity type will be left unchanged.")
+        print("⚠ No transportation event type found — event type will be left unchanged.")
 
     print(f"Fetching activities since {CUTOFF} …")
     acts = fetch_all_activities()
@@ -134,7 +135,7 @@ def main():
         date = (a.get("startTimeLocal") or "")[:16]
         mins = int((a.get("duration") or 0) // 60)
         already = old_name == NEW_NAME and (
-            not transport_type or old_type == transport_type["typeKey"]
+            not transport_type or (a.get("eventType") or {}).get("typeKey") == transport_type["typeKey"]
         )
         flag = "✓ already done" if already else ("APPLY" if args.apply else "would rename")
         print(f"  {date}  {mins}min  id={aid}  '{old_name}' ({old_type})  → {flag}")
@@ -144,7 +145,7 @@ def main():
 
         payload = {"activityId": aid, "activityName": NEW_NAME}
         if transport_type:
-            payload["activityTypeDTO"] = {
+            payload["eventType"] = {
                 "typeId": transport_type["typeId"],
                 "typeKey": transport_type["typeKey"],
             }
