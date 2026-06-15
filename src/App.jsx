@@ -48,7 +48,6 @@ const HEALTH_DATA = {
     {date:"2026-06-07",hrv:116,rhr:41,spo2:94,resp:12.0,sleep_score:95},
     {date:"2026-06-09",hrv:98,rhr:39,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-06-11",hrv:106,rhr:39,spo2:97,resp:11.0,sleep_score:95},
-    {date:"2026-06-14",hrv:115,rhr:41,spo2:93,resp:12.0,sleep_score:75},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -87,7 +86,6 @@ const HEALTH_DATA = {
     {date:"2026-06-07",deep:93,rem:115,light:231,awake:1},
     {date:"2026-06-09",deep:151,rem:165,light:222,awake:1},
     {date:"2026-06-11",deep:112,rem:114,light:263,awake:17},
-    {date:"2026-06-14",deep:67,rem:49,light:292,awake:2},
   ],
 };
 
@@ -397,10 +395,10 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-06-14";
+const TODAY = "2026-06-15";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-15T04:07:00Z";
-const LAST_DATA = "2026-06-14T23:07:00Z";
+const LAST_RUN  = "2026-06-15T05:07:00Z";
+const LAST_DATA = "2026-06-15T05:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
