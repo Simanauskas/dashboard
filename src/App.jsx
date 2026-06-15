@@ -239,6 +239,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:698,avgHr:110,maxHr:140,dist:585,role:"run"},{i:2,t:567,avgHr:152,maxHr:168,dist:1055,role:"run"},{i:3,t:683,avgHr:140,maxHr:165,dist:269,role:"station"},{i:4,t:703,avgHr:146,maxHr:165,dist:331,role:"station"},{i:5,t:85,avgHr:128,maxHr:160,dist:101,role:"station"}],
   },
+"23259452744": {
+    date:"2026-06-15", name:"Hyrox group", type:"group",
+    totalTime:2801, avgHR:135, maxHR:167,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:471,avgHr:111,maxHr:137,dist:522,role:"run"},{i:2,t:572,avgHr:125,maxHr:165,dist:936,role:"run"},{i:3,t:263,avgHr:128,maxHr:164,dist:136,role:"station"},{i:4,t:282,avgHr:146,maxHr:155,dist:202,role:"station"},{i:5,t:145,avgHr:146,maxHr:158,dist:53,role:"station"},{i:6,t:146,avgHr:120,maxHr:158,dist:57,role:"station"},{i:7,t:266,avgHr:156,maxHr:167,dist:127,role:"station"},{i:8,t:127,avgHr:151,maxHr:159,dist:49,role:"station"},{i:9,t:165,avgHr:155,maxHr:165,dist:57,role:"station"},{i:10,t:364,avgHr:147,maxHr:167,dist:282,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -293,6 +300,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Indoor Running","2026-06-15 18:59:55","false","Hyrox group","2,42","569","00:46:41","135","167","3,1","68","--","19:17","--","--","--","--","--","--","68,54","10,6","8,0","445","--","--","--","--","--","--","--","--","--","No","--","10","--","--","--","--","--","00:30:35","00:50:55","--","--"
 "Running","2026-06-15 10:03:22","false","Vilnius - Changing Tempo 6x1500","13,17","934","01:07:09","142","168","3,8","168","--","5:05","--","--","--","36","39","--","114,06","6,4","7,4","256","--","--","--","--","--","--","--","--","--","No","--","26","--","--","--","--","--","01:07:01","01:07:09","--","--"
 "Tennis V2","2026-06-14 19:00:44","false","Tennis","0,85","508","01:14:33","107","146","1,6","33","--","88:11","--","--","--","--","--","--","34,59","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:11:56","01:14:33","--","--"
 "Cycling","2026-06-14 14:28:23","false","Vilnius Cycling","8,88","139","00:38:33","77","105","0,1","--","--","4:20","--","--","--","77","73","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:37:14","01:04:38","--","--"
@@ -410,8 +418,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-15";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-15T16:07:00Z";
-const LAST_DATA = "2026-06-15T16:07:00Z";
+const LAST_RUN  = "2026-06-15T17:07:00Z";
+const LAST_DATA = "2026-06-15T17:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
