@@ -44,10 +44,16 @@ const HEALTH_DATA = {
     {date:"2026-05-18",hrv:111,rhr:43,spo2:96,resp:12.0,sleep_score:95},
     {date:"2026-05-22",hrv:117,rhr:44,spo2:97,resp:12.0,sleep_score:95},
     {date:"2026-05-29",hrv:125,rhr:43,spo2:98,resp:12.0,sleep_score:88},
-    {date:"2026-06-05",hrv:126,rhr:41,spo2:98,resp:11.0,sleep_score:88},
-    {date:"2026-06-07",hrv:116,rhr:41,spo2:94,resp:12.0,sleep_score:95},
-    {date:"2026-06-09",hrv:98,rhr:39,spo2:96,resp:11.0,sleep_score:95},
-    {date:"2026-06-11",hrv:106,rhr:39,spo2:97,resp:11.0,sleep_score:95},
+    {date:"2026-06-01",hrv:120,rhr:43,spo2:95,resp:13.0,sleep_score:null},
+    {date:"2026-06-02",hrv:98,rhr:41,spo2:95,resp:11.0,sleep_score:95},
+    {date:"2026-06-03",hrv:113,rhr:44,spo2:94,resp:12.0,sleep_score:null},
+    {date:"2026-06-04",hrv:102,rhr:45,spo2:98,resp:13.0,sleep_score:null},
+    {date:"2026-06-06",hrv:107,rhr:43,spo2:95,resp:12.0,sleep_score:88},
+    {date:"2026-06-08",hrv:121,rhr:41,spo2:95,resp:12.0,sleep_score:95},
+    {date:"2026-06-10",hrv:92,rhr:42,spo2:97,resp:13.0,sleep_score:null},
+    {date:"2026-06-12",hrv:86,rhr:41,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-06-13",hrv:55,rhr:38,spo2:95,resp:11.0,sleep_score:null},
+    {date:"2026-06-14",hrv:115,rhr:41,spo2:93,resp:12.0,sleep_score:75},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -82,10 +88,16 @@ const HEALTH_DATA = {
     {date:"2026-05-22",deep:85,rem:97,light:271,awake:2},
     {date:"2026-05-29",deep:114,rem:84,light:262,awake:2},
     {date:"2026-05-31",deep:127,rem:81,light:305,awake:0},
-    {date:"2026-06-05",deep:114,rem:116,light:296,awake:3},
-    {date:"2026-06-07",deep:93,rem:115,light:231,awake:1},
-    {date:"2026-06-09",deep:151,rem:165,light:222,awake:1},
-    {date:"2026-06-11",deep:112,rem:114,light:263,awake:17},
+    {date:"2026-06-01",deep:109,rem:35,light:186,awake:7},
+    {date:"2026-06-02",deep:108,rem:116,light:239,awake:0},
+    {date:"2026-06-03",deep:113,rem:92,light:237,awake:13},
+    {date:"2026-06-04",deep:110,rem:127,light:208,awake:13},
+    {date:"2026-06-06",deep:137,rem:102,light:235,awake:3},
+    {date:"2026-06-08",deep:120,rem:92,light:230,awake:0},
+    {date:"2026-06-10",deep:113,rem:99,light:216,awake:2},
+    {date:"2026-06-12",deep:117,rem:101,light:279,awake:11},
+    {date:"2026-06-13",deep:188,rem:66,light:197,awake:3},
+    {date:"2026-06-14",deep:67,rem:49,light:292,awake:2},
   ],
 };
 
@@ -398,8 +410,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-15";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-15T10:07:00Z";
-const LAST_DATA = "2026-06-15T10:07:00Z";
+const LAST_RUN  = "2026-06-15T10:28:00Z";
+const LAST_DATA = "2026-06-15T10:28:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1606,7 +1618,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 92; // updated 2026-06-15
+  const hrvBaseline = 94; // updated 2026-06-14
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
