@@ -54,6 +54,7 @@ const HEALTH_DATA = {
     {date:"2026-06-12",hrv:86,rhr:41,spo2:98,resp:12.0,sleep_score:88},
     {date:"2026-06-13",hrv:55,rhr:38,spo2:95,resp:11.0,sleep_score:null},
     {date:"2026-06-14",hrv:115,rhr:41,spo2:93,resp:12.0,sleep_score:75},
+    {date:"2026-06-15",hrv:107,rhr:38,spo2:96,resp:11.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -98,6 +99,7 @@ const HEALTH_DATA = {
     {date:"2026-06-12",deep:117,rem:101,light:279,awake:11},
     {date:"2026-06-13",deep:188,rem:66,light:197,awake:3},
     {date:"2026-06-14",deep:67,rem:49,light:292,awake:2},
+    {date:"2026-06-15",deep:108,rem:153,light:276,awake:0},
   ],
 };
 
@@ -416,10 +418,10 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-06-15";
+const TODAY = "2026-06-16";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-16T04:07:00Z";
-const LAST_DATA = "2026-06-15T23:07:00Z";
+const LAST_RUN  = "2026-06-16T05:07:00Z";
+const LAST_DATA = "2026-06-16T05:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1626,7 +1628,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 94; // updated 2026-06-14
+  const hrvBaseline = 92; // updated 2026-06-15
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
