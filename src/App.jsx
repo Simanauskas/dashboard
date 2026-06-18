@@ -55,6 +55,8 @@ const HEALTH_DATA = {
     {date:"2026-06-13",hrv:55,rhr:38,spo2:95,resp:11.0,sleep_score:null},
     {date:"2026-06-14",hrv:115,rhr:41,spo2:93,resp:12.0,sleep_score:75},
     {date:"2026-06-15",hrv:107,rhr:38,spo2:96,resp:11.0,sleep_score:95},
+    {date:"2026-06-17",hrv:74,rhr:38,spo2:95,resp:11.0,sleep_score:88},
+    {date:"2026-06-18",hrv:52,rhr:41,spo2:94,resp:11.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -100,6 +102,8 @@ const HEALTH_DATA = {
     {date:"2026-06-13",deep:188,rem:66,light:197,awake:3},
     {date:"2026-06-14",deep:67,rem:49,light:292,awake:2},
     {date:"2026-06-15",deep:108,rem:153,light:276,awake:0},
+    {date:"2026-06-17",deep:137,rem:141,light:236,awake:2},
+    {date:"2026-06-18",deep:192,rem:65,light:195,awake:21},
   ],
 };
 
@@ -248,6 +252,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:471,avgHr:111,maxHr:137,dist:522,role:"run"},{i:2,t:572,avgHr:125,maxHr:165,dist:936,role:"run"},{i:3,t:263,avgHr:128,maxHr:164,dist:136,role:"station"},{i:4,t:282,avgHr:146,maxHr:155,dist:202,role:"station"},{i:5,t:145,avgHr:146,maxHr:158,dist:53,role:"station"},{i:6,t:146,avgHr:120,maxHr:158,dist:57,role:"station"},{i:7,t:266,avgHr:156,maxHr:167,dist:127,role:"station"},{i:8,t:127,avgHr:151,maxHr:159,dist:49,role:"station"},{i:9,t:165,avgHr:155,maxHr:165,dist:57,role:"station"},{i:10,t:364,avgHr:147,maxHr:167,dist:282,role:"station"}],
   },
+"23284660742": {
+    date:"2026-06-17", name:"Hyrox group ", type:"group",
+    totalTime:2536, avgHR:118, maxHR:159,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:584,avgHr:100,maxHr:122,dist:498,role:"station"},{i:2,t:565,avgHr:112,maxHr:154,dist:852,role:"run"},{i:3,t:120,avgHr:100,maxHr:151,dist:39,role:"station"},{i:4,t:548,avgHr:134,maxHr:157,dist:256,role:"station"},{i:5,t:146,avgHr:111,maxHr:155,dist:66,role:"station"},{i:6,t:573,avgHr:133,maxHr:159,dist:164,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -302,6 +313,13 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Cycling","2026-06-18 17:44:41","false","Vilnius Cycling","1,41","32","00:06:43","84","114","0,1","--","--","4:46","--","--","--","8","13","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:22","00:06:43","--","--"
+"Tennis V2","2026-06-18 16:05:37","false","Artūras Bartkus🎾 6/3 6/2","0,72","634","01:30:20","106","150","1,9","26","--","124:22","--","--","--","--","--","--","30,58","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:11:05","01:30:20","--","--"
+"Cycling","2026-06-18 15:55:15","false","Vilnius Cycling","1,69","44","00:04:48","112","128","0,3","--","--","2:51","--","--","--","10","23","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:33","00:05:08","--","--"
+"Tennis V2","2026-06-18 12:30:52","false","Tennis training ","0,31","408","01:27:12","89","134","0,6","16","--","282:29","--","--","--","--","--","--","21,44","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:11","01:27:12","--","--"
+"Other","2026-06-17 18:55:16","false","Sauna","0,00","66","00:15:37","87","230","0,2","1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:37","00:15:37","--","--"
+"Indoor Running","2026-06-17 18:01:17","false","Hyrox group ","1,87","414","00:42:16","118","159","2,3","63","--","22:33","--","--","--","--","--","--","70,00","13,0","9,2","504","--","--","--","--","--","--","--","--","--","No","--","6","--","--","--","--","--","00:23:43","00:46:43","--","--"
+"Strength Training","2026-06-17 09:17:29","false","Strength","0,00","121","00:36:23","78","129","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:36:23","00:36:23","--","--"
 "Tennis V2","2026-06-16 10:21:55","false","Tennis","0,30","420","01:51:12","80","124","0,2","12","--","370:22","--","--","--","--","--","--","22,68","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:00","01:51:12","--","--"
 "Indoor Running","2026-06-15 18:59:55","false","Hyrox group","2,42","569","00:46:41","135","167","3,1","68","--","19:17","--","--","--","--","--","--","68,54","10,6","8,0","445","--","--","--","--","--","--","--","--","--","No","--","10","--","--","--","--","--","00:30:35","00:50:55","--","--"
 "Running","2026-06-15 10:03:22","false","Vilnius - Changing Tempo 6x1500","13,17","934","01:07:09","142","168","3,8","168","--","5:05","--","--","--","36","39","--","114,06","6,4","7,4","256","--","--","--","--","--","--","--","--","--","No","--","26","--","--","--","--","--","01:07:01","01:07:09","--","--"
@@ -421,8 +439,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-06-18";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-06-18T16:07:00Z";
-const LAST_DATA = "2026-06-18T09:07:00Z";
+const LAST_RUN  = "2026-06-18T16:27:00Z";
+const LAST_DATA = "2026-06-18T16:27:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1629,7 +1647,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 96; // updated 2026-06-16
+  const hrvBaseline = 84; // updated 2026-06-18
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
