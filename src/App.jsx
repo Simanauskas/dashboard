@@ -56,10 +56,16 @@ const HEALTH_DATA = {
     {date:"2026-06-14",hrv:115,rhr:41,spo2:93,resp:12.0,sleep_score:75},
     {date:"2026-06-15",hrv:107,rhr:38,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-06-17",hrv:74,rhr:38,spo2:95,resp:11.0,sleep_score:88},
-    {date:"2026-06-21",hrv:80,rhr:40,spo2:95,resp:12.0,sleep_score:null},
-    {date:"2026-06-29",hrv:94,rhr:37,spo2:94,resp:11.0,sleep_score:null},
-    {date:"2026-07-01",hrv:120,rhr:38,spo2:96,resp:11.0,sleep_score:75},
-    {date:"2026-07-02",hrv:113,rhr:41,spo2:98,resp:11.0,sleep_score:88},
+    {date:"2026-06-19",hrv:122,rhr:38,spo2:93,resp:11.0,sleep_score:95},
+    {date:"2026-06-20",hrv:80,rhr:38,spo2:95,resp:11.0,sleep_score:null},
+    {date:"2026-06-22",hrv:95,rhr:37,spo2:97,resp:11.0,sleep_score:95},
+    {date:"2026-06-23",hrv:48,rhr:38,spo2:95,resp:11.0,sleep_score:null},
+    {date:"2026-06-24",hrv:107,rhr:44,spo2:96,resp:13.0,sleep_score:null},
+    {date:"2026-06-25",hrv:104,rhr:39,spo2:97,resp:11.0,sleep_score:95},
+    {date:"2026-06-26",hrv:65,rhr:39,spo2:97,resp:11.0,sleep_score:null},
+    {date:"2026-06-27",hrv:92,rhr:38,spo2:97,resp:11.0,sleep_score:95},
+    {date:"2026-06-28",hrv:102,rhr:38,spo2:95,resp:11.0,sleep_score:95},
+    {date:"2026-06-30",hrv:117,rhr:39,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-07-03",hrv:98,rhr:41,spo2:96,resp:12.0,sleep_score:null},
   ],
   sleep: [
@@ -107,10 +113,16 @@ const HEALTH_DATA = {
     {date:"2026-06-14",deep:67,rem:49,light:292,awake:2},
     {date:"2026-06-15",deep:108,rem:153,light:276,awake:0},
     {date:"2026-06-17",deep:137,rem:141,light:236,awake:2},
-    {date:"2026-06-21",deep:152,rem:74,light:191,awake:25},
-    {date:"2026-06-29",deep:109,rem:85,light:285,awake:30},
-    {date:"2026-07-01",deep:113,rem:122,light:175,awake:0},
-    {date:"2026-07-02",deep:143,rem:158,light:236,awake:0},
+    {date:"2026-06-19",deep:58,rem:100,light:385,awake:1},
+    {date:"2026-06-20",deep:181,rem:79,light:150,awake:3},
+    {date:"2026-06-22",deep:157,rem:123,light:245,awake:0},
+    {date:"2026-06-23",deep:174,rem:81,light:248,awake:8},
+    {date:"2026-06-24",deep:65,rem:10,light:325,awake:0},
+    {date:"2026-06-25",deep:130,rem:144,light:247,awake:0},
+    {date:"2026-06-26",deep:114,rem:102,light:238,awake:15},
+    {date:"2026-06-27",deep:132,rem:87,light:229,awake:8},
+    {date:"2026-06-28",deep:121,rem:112,light:197,awake:3},
+    {date:"2026-06-30",deep:103,rem:95,light:261,awake:8},
     {date:"2026-07-03",deep:180,rem:89,light:223,awake:12},
   ],
 };
@@ -267,6 +279,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:584,avgHr:100,maxHr:122,dist:498,role:"station"},{i:2,t:565,avgHr:112,maxHr:154,dist:852,role:"run"},{i:3,t:120,avgHr:100,maxHr:151,dist:39,role:"station"},{i:4,t:548,avgHr:134,maxHr:157,dist:256,role:"station"},{i:5,t:146,avgHr:111,maxHr:155,dist:66,role:"station"},{i:6,t:573,avgHr:133,maxHr:159,dist:164,role:"station"}],
   },
+"23307246989": {
+    date:"2026-06-19", name:"Hyrox group ", type:"group",
+    totalTime:2766, avgHR:132, maxHR:169,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:701,avgHr:104,maxHr:132,dist:637,role:"run"},{i:2,t:558,avgHr:150,maxHr:165,dist:339,role:"station"},{i:3,t:129,avgHr:107,maxHr:157,dist:25,role:"station"},{i:4,t:539,avgHr:154,maxHr:169,dist:1178,role:"run"},{i:5,t:422,avgHr:126,maxHr:167,dist:241,role:"station"},{i:6,t:287,avgHr:134,maxHr:157,dist:124,role:"station"},{i:7,t:130,avgHr:152,maxHr:161,dist:31,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -321,6 +340,17 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Tennis V2","2026-06-28 08:14:05","false","Sparring 🎾Povilas ","1,45","1104","02:48:12","104","160","2,1","28","--","115:44","--","--","--","--","--","--","30,89","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:22:09","02:52:56","--","--"
+"Strength Training","2026-06-27 18:29:43","false","Strength","0,00","39","00:08:43","80","115","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:43","00:08:43","--","--"
+"Cycling","2026-06-27 18:12:12","false","Indoor Cycling","0,00","114","00:10:01","126","136","1,4","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:01","00:10:01","--","--"
+"Indoor Rowing","2026-06-27 17:13:45","false","Indoor Rowing","0,00","353","00:54:12","124","165","2,2","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","13","--","--","--","--","--","00:54:12","00:54:12","--","--"
+"Tennis V2","2026-06-27 08:08:27","false","Povilas🎾training","1,12","862","02:07:50","105","147","2,0","29","--","114:09","--","--","--","--","--","--","30,38","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:17:54","02:07:50","--","--"
+"Tennis V2","2026-06-26 12:57:51","false","Tennis training","0,32","475","01:02:55","108","154","2,1","18","--","198:24","--","--","--","--","--","--","27,78","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:35","01:02:55","--","--"
+"Tennis V2","2026-06-25 10:07:00","false","Tennis training","0,18","560","01:12:23","107","155","2,1","11","--","406:30","--","--","--","--","--","--","22,31","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:03:20","01:12:23","--","--"
+"Tennis V2","2026-06-24 16:46:31","false","Tennis training ","4,54","516","01:36:49","97","141","0,7","74","--","21:20","--","--","--","--","--","--","63,25","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:05:08","01:36:49","--","--"
+"Running","2026-06-23 11:58:41","false","Threshold 3x blocks ","6,67","433","00:28:57","143","161","3,0","181","--","4:20","--","--","--","46","22","--","127,12","5,7","7,5","258","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:28:56","00:51:28","--","--"
+"Treadmill Running","2026-06-19 17:51:52","false","30min Z2 under fatigue ","5,82","385","00:30:10","134","140","2,4","178","--","5:11","--","--","--","--","--","--","111,87","6,4","7,4","263","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:30:10","00:30:10","--","--"
+"Indoor Running","2026-06-19 17:00:03","false","Hyrox group ","2,57","521","00:46:06","132","169","3,1","71","--","17:54","--","--","--","--","--","--","69,95","12,2","8,6","415","--","--","--","--","--","--","--","--","--","No","--","7","--","--","--","--","--","00:29:16","00:49:27","--","--"
 "Tennis V2","2026-07-02 13:16:57","false","Tennis","0,23","188","00:42:10","93","130","0,4","18","--","181:09","--","--","--","--","--","--","31,21","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:03:39","00:42:10","--","--"
 "Running","2026-07-02 09:00:13","false","Palanga Running","5,47","368","00:35:41","104","136","1,7","170","--","6:31","--","--","--","14","7","--","90,60","7,9","7,2","287","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:35:39","00:41:15","--","--"
 "Tennis V2","2026-07-01 08:16:22","false","Tennis","5,22","413","02:05:38","101","151","0,5","66","--","24:03","--","--","--","--","--","--","62,56","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:13:19","02:05:38","--","--"
@@ -460,8 +490,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-03";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-03T11:54:00Z";
-const LAST_DATA = "2026-07-03T11:54:00Z";
+const LAST_RUN  = "2026-07-03T12:04:00Z";
+const LAST_DATA = "2026-07-03T12:04:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1668,7 +1698,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 105; // updated 2026-07-03
+  const hrvBaseline = 99; // updated 2026-07-02
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
