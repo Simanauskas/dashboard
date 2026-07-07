@@ -59,14 +59,12 @@ const HEALTH_DATA = {
     {date:"2026-06-19",hrv:122,rhr:38,spo2:93,resp:11.0,sleep_score:95},
     {date:"2026-06-20",hrv:80,rhr:38,spo2:95,resp:11.0,sleep_score:null},
     {date:"2026-06-22",hrv:95,rhr:37,spo2:97,resp:11.0,sleep_score:95},
-    {date:"2026-06-23",hrv:48,rhr:38,spo2:95,resp:11.0,sleep_score:null},
-    {date:"2026-06-24",hrv:107,rhr:44,spo2:96,resp:13.0,sleep_score:null},
-    {date:"2026-06-25",hrv:104,rhr:39,spo2:97,resp:11.0,sleep_score:95},
-    {date:"2026-06-26",hrv:65,rhr:39,spo2:97,resp:11.0,sleep_score:null},
-    {date:"2026-06-27",hrv:92,rhr:38,spo2:97,resp:11.0,sleep_score:95},
-    {date:"2026-06-28",hrv:102,rhr:38,spo2:95,resp:11.0,sleep_score:95},
-    {date:"2026-06-30",hrv:117,rhr:39,spo2:96,resp:11.0,sleep_score:95},
-    {date:"2026-07-06",hrv:88,rhr:41,spo2:97,resp:12.0,sleep_score:88},
+    {date:"2026-06-29",hrv:94,rhr:37,spo2:94,resp:11.0,sleep_score:null},
+    {date:"2026-07-01",hrv:120,rhr:38,spo2:96,resp:11.0,sleep_score:75},
+    {date:"2026-07-02",hrv:113,rhr:41,spo2:98,resp:11.0,sleep_score:88},
+    {date:"2026-07-03",hrv:98,rhr:41,spo2:96,resp:12.0,sleep_score:null},
+    {date:"2026-07-04",hrv:82,rhr:50,spo2:96,resp:13.0,sleep_score:null},
+    {date:"2026-07-05",hrv:107,rhr:39,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-07-07",hrv:110,rhr:40,spo2:98,resp:12.0,sleep_score:95},
   ],
   sleep: [
@@ -117,14 +115,12 @@ const HEALTH_DATA = {
     {date:"2026-06-19",deep:58,rem:100,light:385,awake:1},
     {date:"2026-06-20",deep:181,rem:79,light:150,awake:3},
     {date:"2026-06-22",deep:157,rem:123,light:245,awake:0},
-    {date:"2026-06-23",deep:174,rem:81,light:248,awake:8},
-    {date:"2026-06-24",deep:65,rem:10,light:325,awake:0},
-    {date:"2026-06-25",deep:130,rem:144,light:247,awake:0},
-    {date:"2026-06-26",deep:114,rem:102,light:238,awake:15},
-    {date:"2026-06-27",deep:132,rem:87,light:229,awake:8},
-    {date:"2026-06-28",deep:121,rem:112,light:197,awake:3},
-    {date:"2026-06-30",deep:103,rem:95,light:261,awake:8},
-    {date:"2026-07-06",deep:136,rem:190,light:240,awake:6},
+    {date:"2026-06-29",deep:109,rem:85,light:285,awake:30},
+    {date:"2026-07-01",deep:113,rem:122,light:175,awake:0},
+    {date:"2026-07-02",deep:143,rem:158,light:236,awake:0},
+    {date:"2026-07-03",deep:180,rem:89,light:223,awake:12},
+    {date:"2026-07-04",deep:87,rem:41,light:315,awake:12},
+    {date:"2026-07-05",deep:90,rem:114,light:242,awake:0},
     {date:"2026-07-07",deep:97,rem:127,light:313,awake:10},
   ],
 };
@@ -342,6 +338,8 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Cycling","2026-07-05 17:48:00","false","Vilnius Cycling","4,44","82","00:18:28","86","110","0,1","--","--","4:09","--","--","--","49","42","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:17:32","00:49:52","--","--"
+"Running","2026-07-05 10:33:36","false","Vilnius - Threshold Endurance","14,33","986","01:09:07","150","172","3,9","180","--","4:49","--","--","--","78","81","--","114,65","6,2","7,3","264","--","--","--","--","--","--","--","--","--","No","--","15","--","--","--","--","--","01:09:03","01:09:07","--","--"
 "Tennis V2","2026-07-07 10:03:53","false","Tennis","0,18","366","01:34:12","87","152","0,3","10","--","520:49","--","--","--","--","--","--","20,32","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:03:18","01:34:12","--","--"
 "Cycling","2026-07-06 13:09:31","false","Vilnius Cycling","5,52","108","00:17:15","100","116","0,4","--","--","3:07","--","--","--","70","80","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:16:51","00:18:19","--","--"
 "Other","2026-07-06 12:29:25","false","Sauna","0,00","43","00:15:45","76","130","0,0","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:45","00:15:45","--","--"
@@ -498,8 +496,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-07";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-07T11:46:00Z";
-const LAST_DATA = "2026-07-07T11:46:00Z";
+const LAST_RUN  = "2026-07-07T11:50:00Z";
+const LAST_DATA = "2026-07-07T11:50:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1706,7 +1704,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 102; // updated 2026-07-07
+  const hrvBaseline = 103; // updated 2026-07-06
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
