@@ -66,6 +66,8 @@ const HEALTH_DATA = {
     {date:"2026-07-04",hrv:82,rhr:50,spo2:96,resp:13.0,sleep_score:null},
     {date:"2026-07-05",hrv:107,rhr:39,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-07-08",hrv:118,rhr:41,spo2:96,resp:12.0,sleep_score:95},
+    {date:"2026-07-12",hrv:115,rhr:45,spo2:98,resp:13.0,sleep_score:null},
+    {date:"2026-07-13",hrv:111,rhr:40,spo2:97,resp:10.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -122,6 +124,8 @@ const HEALTH_DATA = {
     {date:"2026-07-04",deep:87,rem:41,light:315,awake:12},
     {date:"2026-07-05",deep:90,rem:114,light:242,awake:0},
     {date:"2026-07-08",deep:112,rem:109,light:295,awake:2},
+    {date:"2026-07-12",deep:44,rem:0,light:386,awake:2},
+    {date:"2026-07-13",deep:70,rem:100,light:343,awake:2},
   ],
 };
 
@@ -338,6 +342,13 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Cycling","2026-07-12 20:28:42","false","Palanga Cycling","12,78","221","00:49:06","86","114","0,3","--","--","3:50","--","--","--","17","21","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:48:54","03:21:46","--","--"
+"Running","2026-07-12 14:09:28","false","Palanga Running","7,40","497","00:41:23","130","139","2,3","176","--","5:35","--","--","--","12","13","--","102,13","7,0","7,3","274","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:41:19","00:41:38","--","--"
+"Strength Training","2026-07-12 13:13:20","false","Strength","0,00","263","00:51:46","97","158","0,9","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:51:46","00:51:46","--","--"
+"Running","2026-07-12 12:30:52","false","Palanga Running","6,26","415","00:33:04","132","140","2,3","176","--","5:17","--","--","--","13","6","--","106,52","6,3","6,9","272","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:33:02","00:33:12","--","--"
+"Cycling","2026-07-12 10:09:16","false","Palanga Cycling","6,56","123","00:20:48","94","110","0,3","--","--","3:10","--","--","--","11","12","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:41","00:25:48","--","--"
+"Tennis V2","2026-07-12 09:09:33","false","2/6🎾Deividas Mikaliūnas ","0,37","309","00:51:01","104","140","0,6","24","--","138:53","--","--","--","--","--","--","30,30","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:09","00:51:01","--","--"
+"Cycling","2026-07-12 08:39:50","false","Palanga Cycling","6,38","127","00:21:34","96","114","0,3","--","--","3:22","--","--","--","14","9","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:21:31","00:22:53","--","--"
 "Running","2026-07-08 10:17:05","false","Z2 10km","10,11","491","00:50:08","140","156","2,2","180","--","4:57","--","--","--","47","44","--","111,85","6,3","7,3","264","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:50:08","00:50:08","--","--"
 "Tennis V2","2026-07-07 16:30:03","false","Tennis","0,71","544","01:30:32","109","162","1,2","25","--","128:12","--","--","--","--","--","--","31,00","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:50","01:30:32","--","--"
 "Cycling","2026-07-05 17:48:00","false","Vilnius Cycling","4,44","82","00:18:28","86","110","0,1","--","--","4:09","--","--","--","49","42","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:17:32","00:49:52","--","--"
@@ -498,8 +509,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-13";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-13T08:08:00Z";
-const LAST_DATA = "2026-07-13T08:08:00Z";
+const LAST_RUN  = "2026-07-13T08:47:00Z";
+const LAST_DATA = "2026-07-13T08:47:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1706,7 +1717,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 102; // updated 2026-07-08
+  const hrvBaseline = 97; // updated 2026-07-13
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
