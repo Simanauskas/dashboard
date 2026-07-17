@@ -69,8 +69,6 @@ const HEALTH_DATA = {
     {date:"2026-07-13",hrv:111,rhr:40,spo2:97,resp:10.0,sleep_score:95},
     {date:"2026-07-14",hrv:53,rhr:39,spo2:96,resp:11.0,sleep_score:null},
     {date:"2026-07-15",hrv:57,rhr:40,spo2:96,resp:11.0,sleep_score:88},
-    {date:"2026-07-16",hrv:72,rhr:41,spo2:98,resp:12.0,sleep_score:null},
-    {date:"2026-07-17",hrv:46,rhr:42,spo2:96,resp:12.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -130,8 +128,6 @@ const HEALTH_DATA = {
     {date:"2026-07-13",deep:70,rem:100,light:343,awake:2},
     {date:"2026-07-14",deep:213,rem:60,light:108,awake:0},
     {date:"2026-07-15",deep:171,rem:88,light:246,awake:3},
-    {date:"2026-07-16",deep:97,rem:69,light:254,awake:10},
-    {date:"2026-07-17",deep:191,rem:66,light:200,awake:12},
   ],
 };
 
@@ -525,8 +521,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-17";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-17T06:07:00Z";
-const LAST_DATA = "2026-07-17T06:07:00Z";
+const LAST_RUN  = "2026-07-17T07:07:00Z";
+const LAST_DATA = "2026-07-17T07:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
