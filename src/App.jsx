@@ -69,6 +69,8 @@ const HEALTH_DATA = {
     {date:"2026-07-13",hrv:111,rhr:40,spo2:97,resp:10.0,sleep_score:95},
     {date:"2026-07-14",hrv:53,rhr:39,spo2:96,resp:11.0,sleep_score:null},
     {date:"2026-07-15",hrv:57,rhr:40,spo2:96,resp:11.0,sleep_score:88},
+    {date:"2026-07-19",hrv:100,rhr:40,spo2:94,resp:12.0,sleep_score:95},
+    {date:"2026-07-20",hrv:103,rhr:40,spo2:97,resp:11.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -128,6 +130,8 @@ const HEALTH_DATA = {
     {date:"2026-07-13",deep:70,rem:100,light:343,awake:2},
     {date:"2026-07-14",deep:213,rem:60,light:108,awake:0},
     {date:"2026-07-15",deep:171,rem:88,light:246,awake:3},
+    {date:"2026-07-19",deep:90,rem:64,light:343,awake:6},
+    {date:"2026-07-20",deep:98,rem:113,light:267,awake:26},
   ],
 };
 
@@ -344,6 +348,10 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Treadmill Running","2026-07-20 10:49:19","false","Treadmill Running","2,76","135","00:15:18","118","130","0,6","172","--","5:33","--","--","--","--","--","--","105,36","6,8","7,2","277","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:14:56","00:15:18","--","--"
+"Strength Training","2026-07-20 09:56:30","false","Sled push-pull, kettlebells, bench press, WBx100 (3:30min)","0,00","406","00:51:53","116","164","2,0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:48:11","00:51:53","--","--"
+"Treadmill Running","2026-07-20 09:34:17","false","Treadmill Running","4,04","262","00:19:28","143","157","2,3","181","--","4:49","--","--","--","--","--","--","113,41","6,1","7,1","260","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:19:21","00:19:28","--","--"
+"Tennis V2","2026-07-19 09:10:06","false","Povilas🎾4/6 4/6","1,01","646","01:52:11","104","149","0,9","26","--","111:06","--","--","--","--","--","--","34,30","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:14:26","01:52:11","--","--"
 "Running","2026-07-16 17:35:17","false","Palanga - 16x400m Speed","10,72","735","00:55:44","139","170","3,3","164","--","5:12","--","--","--","30","28","--","114,81","6,6","7,5","256","--","--","--","--","--","--","--","--","--","No","--","34","--","--","--","--","--","00:55:27","00:55:44","--","--"
 "Tennis V2","2026-07-16 08:01:06","false","Tennis","0,31","363","01:01:43","104","145","0,9","17","--","198:24","--","--","--","--","--","--","29,42","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:16","01:01:43","--","--"
 "Inline Skating","2026-07-15 19:44:22","false","Palanga Inline Skating","12,00","318","00:52:12","105","146","0,5","--","--","4:21","--","--","--","11","5","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:27:04","01:34:52","--","--"
@@ -521,8 +529,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-20";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-20T13:07:00Z";
-const LAST_DATA = "2026-07-20T09:07:00Z";
+const LAST_RUN  = "2026-07-20T13:44:00Z";
+const LAST_DATA = "2026-07-20T13:44:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1729,7 +1737,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 72; // updated 2026-07-17
+  const hrvBaseline = 62; // updated 2026-07-20
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
