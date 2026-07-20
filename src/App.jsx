@@ -65,11 +65,15 @@ const HEALTH_DATA = {
     {date:"2026-07-03",hrv:98,rhr:41,spo2:96,resp:12.0,sleep_score:null},
     {date:"2026-07-04",hrv:82,rhr:50,spo2:96,resp:13.0,sleep_score:null},
     {date:"2026-07-05",hrv:107,rhr:39,spo2:96,resp:11.0,sleep_score:95},
-    {date:"2026-07-08",hrv:118,rhr:41,spo2:96,resp:12.0,sleep_score:95},
-    {date:"2026-07-13",hrv:111,rhr:40,spo2:97,resp:10.0,sleep_score:95},
-    {date:"2026-07-14",hrv:53,rhr:39,spo2:96,resp:11.0,sleep_score:null},
-    {date:"2026-07-15",hrv:57,rhr:40,spo2:96,resp:11.0,sleep_score:88},
-    {date:"2026-07-19",hrv:100,rhr:40,spo2:94,resp:12.0,sleep_score:95},
+    {date:"2026-07-06",hrv:88,rhr:41,spo2:97,resp:12.0,sleep_score:88},
+    {date:"2026-07-07",hrv:110,rhr:40,spo2:98,resp:12.0,sleep_score:95},
+    {date:"2026-07-09",hrv:107,rhr:40,spo2:95,resp:12.0,sleep_score:95},
+    {date:"2026-07-10",hrv:57,rhr:40,spo2:96,resp:11.0,sleep_score:null},
+    {date:"2026-07-11",hrv:80,rhr:40,spo2:98,resp:11.0,sleep_score:75},
+    {date:"2026-07-12",hrv:115,rhr:45,spo2:98,resp:13.0,sleep_score:null},
+    {date:"2026-07-16",hrv:72,rhr:41,spo2:98,resp:12.0,sleep_score:null},
+    {date:"2026-07-17",hrv:46,rhr:42,spo2:96,resp:12.0,sleep_score:null},
+    {date:"2026-07-18",hrv:35,rhr:43,spo2:95,resp:12.0,sleep_score:null},
     {date:"2026-07-20",hrv:103,rhr:40,spo2:97,resp:11.0,sleep_score:95},
   ],
   sleep: [
@@ -126,11 +130,15 @@ const HEALTH_DATA = {
     {date:"2026-07-03",deep:180,rem:89,light:223,awake:12},
     {date:"2026-07-04",deep:87,rem:41,light:315,awake:12},
     {date:"2026-07-05",deep:90,rem:114,light:242,awake:0},
-    {date:"2026-07-08",deep:112,rem:109,light:295,awake:2},
-    {date:"2026-07-13",deep:70,rem:100,light:343,awake:2},
-    {date:"2026-07-14",deep:213,rem:60,light:108,awake:0},
-    {date:"2026-07-15",deep:171,rem:88,light:246,awake:3},
-    {date:"2026-07-19",deep:90,rem:64,light:343,awake:6},
+    {date:"2026-07-06",deep:136,rem:190,light:240,awake:6},
+    {date:"2026-07-07",deep:97,rem:127,light:313,awake:10},
+    {date:"2026-07-09",deep:121,rem:124,light:202,awake:0},
+    {date:"2026-07-10",deep:161,rem:88,light:213,awake:20},
+    {date:"2026-07-11",deep:70,rem:92,light:249,awake:9},
+    {date:"2026-07-12",deep:44,rem:0,light:386,awake:2},
+    {date:"2026-07-16",deep:97,rem:69,light:254,awake:10},
+    {date:"2026-07-17",deep:191,rem:66,light:200,awake:12},
+    {date:"2026-07-18",deep:206,rem:57,light:173,awake:9},
     {date:"2026-07-20",deep:98,rem:113,light:267,awake:26},
   ],
 };
@@ -348,6 +356,15 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Treadmill Running","2026-07-18 18:55:10","false","Treadmill Running","5,57","322","00:30:24","127","135","1,8","178","--","5:27","--","--","--","--","--","--","103,35","6,4","6,8","274","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:30:17","00:30:24","--","--"
+"Strength Training","2026-07-18 18:13:15","false","Strength","0,00","240","00:37:53","100","158","1,7","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:37:53","00:37:53","--","--"
+"Indoor Rowing","2026-07-18 17:44:00","false","Indoor Rowing","2,00","107","00:08:03","139","153","1,5","--","--","4:01","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:03","00:08:03","--","--"
+"Cycling","2026-07-17 12:33:30","false","Palanga Cycling","3,22","67","00:10:10","99","109","0,2","--","--","3:09","--","--","--","8","12","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:03","00:16:10","--","--"
+"Strength Training","2026-07-17 12:17:30","false","Strength","0,00","74","00:15:03","91","138","0,2","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:03","00:15:03","--","--"
+"Cycling","2026-07-17 12:06:52","false","Palanga Cycling","3,16","54","00:09:40","92","104","0,1","--","--","3:03","--","--","--","10","5","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:09:37","00:09:40","--","--"
+"Inline Skating","2026-07-14 17:21:10","false","Palanga Inline Skating","10,04","208","00:39:45","99","114","0,4","--","--","3:57","--","--","--","11","9","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:39:34","00:39:45","--","--"
+"Cycling","2026-07-11 12:22:43","false","Recovery ride","5,49","84","00:21:03","84","97","0,2","--","--","3:50","--","--","--","32","25","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:20:58","00:35:44","--","--"
+"Cycling","2026-07-11 08:17:54","false","Nida Z2 ride","101,48","2509","03:26:36","128","150","3,7","--","--","2:02","--","--","--","550","545","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","03:26:31","04:00:30","--","--"
 "Treadmill Running","2026-07-20 10:49:19","false","Treadmill Running","2,76","135","00:15:18","118","130","0,6","172","--","5:33","--","--","--","--","--","--","105,36","6,8","7,2","277","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:14:56","00:15:18","--","--"
 "Strength Training","2026-07-20 09:56:30","false","Sled push-pull, kettlebells, bench press, WBx100 (3:30min)","0,00","406","00:51:53","116","164","2,0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:48:11","00:51:53","--","--"
 "Treadmill Running","2026-07-20 09:34:17","false","Treadmill Running","4,04","262","00:19:28","143","157","2,3","181","--","4:49","--","--","--","--","--","--","113,41","6,1","7,1","260","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:19:21","00:19:28","--","--"
@@ -529,8 +546,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-20";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-20T13:44:00Z";
-const LAST_DATA = "2026-07-20T13:44:00Z";
+const LAST_RUN  = "2026-07-20T13:49:00Z";
+const LAST_DATA = "2026-07-20T13:49:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1737,7 +1754,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 62; // updated 2026-07-20
+  const hrvBaseline = 63; // updated 2026-07-19
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
