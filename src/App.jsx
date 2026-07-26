@@ -789,49 +789,58 @@ function readiness(tsb, dsh, hrv, hrvBaseline) {
 }
 
 const SCHEDULE = [
-  { week:1, label:"Apr 27–May 3", theme:"Build the Engine", days:[
-    { date:"2026-04-27", dow:"MON", label:"Apr 27", sessions:[{type:"hyrox",text:"✅ Hyrox group · Ozo g. 18 · DONE · 62min · HR 121/169 · 3×15 wall balls ✓",cal:true}] },
-    { date:"2026-04-28", dow:"TUE", label:"Apr 28", sessions:[{type:"plan",text:"✅ Z2-3 run 9.33km · 5:06/km · HR 140/154 · TE 3.2"},{type:"plan",text:"✅ Cycling 6.7km · morning commute"}] },
-    { date:"2026-04-29", dow:"WED", label:"Apr 29", sessions:[{type:"tennis",text:"Pavel Naidionov 🎾 · 10:30am",cal:true},{type:"hyrox",text:"Hyrox group · 6:00–7:30pm",cal:true},{type:"plan",text:"After: 3×20 wall balls"}] },
-    { date:"2026-04-30", dow:"THU", label:"Apr 30", sessions:[{type:"plan",text:"Intervals: 5×600m @ 4:48/km"},{type:"plan",text:"After: 3×20 wall balls"}] },
-    { date:"2026-05-01", dow:"FRI", label:"May 1", sessions:[{type:"tennis",text:"Mažvydas 🎾 · 9:00am",cal:true},{type:"hyrox",text:"Hyrox group · 5:00–6:30pm",cal:true}] },
-    { date:"2026-05-02", dow:"SAT", label:"May 2", sessions:[{type:"plan",text:"Long run · 45 min"}] },
-    { date:"2026-05-03", dow:"SUN", label:"May 3", sessions:[{type:"rest",text:"Rest"}] },
+  { week:1, label:"Jul 27–Aug 2", theme:"Specificity Restart", days:[
+    { date:"2026-07-27", dow:"MON", label:"Jul 27", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: Ski erg 1000m ALL OUT · baseline · log it (Riga was 4:39)"}] },
+    { date:"2026-07-28", dow:"TUE", label:"Jul 28", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"Row 1000m all-out baseline, then 4×500m @ 2:08/500m · 90s rest"}] },
+    { date:"2026-07-29", dow:"WED", label:"Jul 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
+    { date:"2026-07-30", dow:"THU", label:"Jul 30", sessions:[{type:"plan",text:"Threshold 5×1km @ 4:20/km · 90s jog · HR zone D (146–167)"}] },
+    { date:"2026-07-31", dow:"FRI", label:"Jul 31", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled PULL 6×25m technique + BBJ 5×20m @ 70s + lat pulldown 4×10"}] },
+    { date:"2026-08-01", dow:"SAT", label:"Aug 1", sessions:[{type:"hyrox",text:"HALF SIM · 4×1km @ 4:40 + Ski / Sled Push / Sled Pull / BBJ · JOG every transition"}] },
+    { date:"2026-08-02", dow:"SUN", label:"Aug 2", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
-  { week:2, label:"May 4–10", theme:"Tennis Camp + Full Load", days:[
-    { date:"2026-05-04", dow:"MON", label:"May 4", sessions:[{type:"tennis",text:"🎾 Camp · Klaipėda · 8–9am",cal:true},{type:"hyrox",text:"Hyrox group · 7:00–8:30pm",cal:true}] },
-    { date:"2026-05-05", dow:"TUE", label:"May 5", sessions:[{type:"tennis",text:"🎾 Camp · 8–9am",cal:true},{type:"plan",text:"25 min easy run"}] },
-    { date:"2026-05-06", dow:"WED", label:"May 6", sessions:[{type:"tennis",text:"🎾 Camp · 8–9am",cal:true},{type:"hyrox",text:"Hyrox group · 6:00–7:30pm",cal:true}] },
-    { date:"2026-05-07", dow:"THU", label:"May 7", sessions:[{type:"tennis",text:"🎾 Camp · 8–9am",cal:true},{type:"plan",text:"30 min easy run"}] },
-    { date:"2026-05-08", dow:"FRI", label:"May 8", sessions:[{type:"tennis",text:"🎾 Camp · 8–9am (last day)",cal:true},{type:"hyrox",text:"Hyrox group · 5:00–6:30pm",cal:true}] },
-    { date:"2026-05-09", dow:"SAT", label:"May 9", sessions:[{type:"plan",text:"Long run · 45 min"}] },
-    { date:"2026-05-10", dow:"SUN", label:"May 10", sessions:[{type:"rest",text:"Full rest"}] },
+  { week:2, label:"Aug 3–9", theme:"Erg Engine", days:[
+    { date:"2026-08-03", dow:"MON", label:"Aug 3", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: 3×500m ski @ 2:07/500m"}] },
+    { date:"2026-08-04", dow:"TUE", label:"Aug 4", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"Erg intervals 8×500m alternating ski/row @ 2:05–2:08 · 90s rest"}] },
+    { date:"2026-08-05", dow:"WED", label:"Aug 5", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
+    { date:"2026-08-06", dow:"THU", label:"Aug 6", sessions:[{type:"plan",text:"COMPROMISED: [1000m ski → 1km run @ 4:35] ×3 · this exact pattern cost you Riga"}] },
+    { date:"2026-08-07", dow:"FRI", label:"Aug 7", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled pull 8×25m heavy · lunges 4×50m · wall balls 2×25 (maintain only)"}] },
+    { date:"2026-08-08", dow:"SAT", label:"Aug 8", sessions:[{type:"plan",text:"Long run 70min · last 20min @ 4:40/km · aerobic base + race-pace top-up"}] },
+    { date:"2026-08-09", dow:"SUN", label:"Aug 9", sessions:[{type:"rest",text:"Rest · family day"}] },
   ]},
-  { week:3, label:"May 11–17", theme:"Race Simulation", days:[
-    { date:"2026-05-11", dow:"MON", label:"May 11", sessions:[{type:"hyrox",text:"Hyrox group · 7:00–8:30pm",cal:true},{type:"plan",text:"After: 4×20 wall balls"}] },
-    { date:"2026-05-12", dow:"TUE", label:"May 12", sessions:[{type:"plan",text:"40 min Z2 run"}] },
-    { date:"2026-05-13", dow:"WED", label:"May 13", sessions:[{type:"plan",text:"30 min easy run"},{type:"hyrox",text:"Hyrox group · 6:00–7:30pm",cal:true}] },
-    { date:"2026-05-14", dow:"THU", label:"May 14", sessions:[{type:"plan",text:"Race sim: 1km → 100 wall balls → 1km"}] },
-    { date:"2026-05-15", dow:"FRI", label:"May 15", sessions:[{type:"tennis",text:"Mažvydas 🎾 · 9:00am",cal:true},{type:"hyrox",text:"Hyrox group · 5:00–6:30pm",cal:true}] },
-    { date:"2026-05-16", dow:"SAT", label:"May 16", sessions:[{type:"plan",text:"Long run · 55 min · 3×5min race pace"}] },
-    { date:"2026-05-17", dow:"SUN", label:"May 17", sessions:[{type:"rest",text:"Rest"}] },
+  { week:3, label:"Aug 10–16", theme:"Full Sim #1", days:[
+    { date:"2026-08-10", dow:"MON", label:"Aug 10", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
+    { date:"2026-08-11", dow:"TUE", label:"Aug 11", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Erg endurance 4×1000m ski @ 4:15 · 2min rest · hold the split, don't fade"}] },
+    { date:"2026-08-12", dow:"WED", label:"Aug 12", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"BBJ block 6×20m @ 68s · 75s rest · rhythm over power · + 15min core"}] },
+    { date:"2026-08-13", dow:"THU", label:"Aug 13", sessions:[{type:"plan",text:"Easy 30min Z2 jog · freshen up for Saturday"}] },
+    { date:"2026-08-14", dow:"FRI", label:"Aug 14", sessions:[{type:"tennis",text:"Tennis 🎾 · light only, no sparring",cal:true}] },
+    { date:"2026-08-15", dow:"SAT", label:"Aug 15", sessions:[{type:"hyrox",text:"🏁 FULL RACE SIM #1 · target 1:12–1:13 · log EVERY split incl. roxzone"}] },
+    { date:"2026-08-16", dow:"SUN", label:"Aug 16", sessions:[{type:"rest",text:"Full rest"}] },
   ]},
-  { week:4, label:"May 18–24", theme:"Peak Load — Last Hard Week", days:[
-    { date:"2026-05-18", dow:"MON", label:"May 18", sessions:[{type:"rest",text:"Rest / 20min easy walk · HRV 111ms ✓"},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-05-19", dow:"TUE", label:"May 19", sessions:[{type:"tennis",text:"Tennis sparring · 1h · evening · light intensity",cal:true}] },
-    { date:"2026-05-20", dow:"WED", label:"May 20", sessions:[{type:"tennis",text:"Tennis match 🎾 · 1.5h · morning",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-05-21", dow:"THU", label:"May 21", sessions:[{type:"plan",text:"Z2 run · 50min · HR 125–142 · aerobic top-up. Skip if HRV <85ms"}] },
-    { date:"2026-05-22", dow:"FRI", label:"May 22", sessions:[{type:"plan",text:"Strength 40min · sled push, wall ball form, lunges · 60-70% load · neuro priming"}] },
-    { date:"2026-05-23", dow:"SAT", label:"May 23", sessions:[{type:"tennis",text:"Tennis match 🎾 · 1.5h · afternoon",cal:true}] },
-    { date:"2026-05-24", dow:"SUN", label:"May 24", sessions:[{type:"hyrox",text:"🏁 HYROX SIM · full or half · key prep session"}] },
+  { week:4, label:"Aug 17–23", theme:"Peak Load", days:[
+    { date:"2026-08-17", dow:"MON", label:"Aug 17", sessions:[{type:"rest",text:"Rest / 30min easy walk · sim recovery"}] },
+    { date:"2026-08-18", dow:"TUE", label:"Aug 18", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
+    { date:"2026-08-19", dow:"WED", label:"Aug 19", sessions:[{type:"plan",text:"Erg intervals 10×500m alt ski/row @ 2:05 · 75s rest · biggest erg session of the block"}] },
+    { date:"2026-08-20", dow:"THU", label:"Aug 20", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"🔥 Sauna 20min post-session · heat acclimation starts (Athens will be 30°C+)"}] },
+    { date:"2026-08-21", dow:"FRI", label:"Aug 21", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: sled pull 6×25m + 100 wall balls unbroken-ish"}] },
+    { date:"2026-08-22", dow:"SAT", label:"Aug 22", sessions:[{type:"plan",text:"Compromised long: 5×[1km @ 4:35 + 1 station] continuous · peak specificity"}] },
+    { date:"2026-08-23", dow:"SUN", label:"Aug 23", sessions:[{type:"rest",text:"Rest · family day · 🔥 sauna 20min"}] },
   ]},
-  { week:5, label:"May 25–30", theme:"🏁 Race Week — Taper", days:[
-    { date:"2026-05-25", dow:"MON", label:"May 25", sessions:[{type:"rest",text:"Rest or 30min easy walk"}] },
-    { date:"2026-05-26", dow:"TUE", label:"May 26", sessions:[{type:"plan",text:"25min Z2 run + 4×30s strides · sharpening only"}] },
-    { date:"2026-05-27", dow:"WED", label:"May 27", sessions:[{type:"rest",text:"Rest"}] },
-    { date:"2026-05-28", dow:"THU", label:"May 28", sessions:[{type:"plan",text:"Activation: 20min jog + 3×100m wall ball + 2×sled at race pace · NO fatigue"}] },
-    { date:"2026-05-29", dow:"FRI", label:"May 29", sessions:[{type:"rest",text:"Travel to Riga 🚗 · easy walk only"}] },
-    { date:"2026-05-30", dow:"SAT", label:"May 30", sessions:[{type:"race",text:"🏁 HYROX RIGA · Sub 75 min",cal:true}] },
+  { week:5, label:"Aug 24–30", theme:"Sharpen", days:[
+    { date:"2026-08-24", dow:"MON", label:"Aug 24", sessions:[{type:"hyrox",text:"Hyrox group · evening · moderate, don't race it",cal:true}] },
+    { date:"2026-08-25", dow:"TUE", label:"Aug 25", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Erg 6×500m @ 2:05 · 90s rest · sharp not deep · 🔥 sauna 20min"}] },
+    { date:"2026-08-26", dow:"WED", label:"Aug 26", sessions:[{type:"plan",text:"Run 45min · 4×3min @ 4:30/km · sharpening only"}] },
+    { date:"2026-08-27", dow:"THU", label:"Aug 27", sessions:[{type:"tennis",text:"Tennis 🎾 · light",cal:true},{type:"plan",text:"🔥 Sauna 20min"}] },
+    { date:"2026-08-28", dow:"FRI", label:"Aug 28", sessions:[{type:"rest",text:"Rest or 25min easy jog"}] },
+    { date:"2026-08-29", dow:"SAT", label:"Aug 29", sessions:[{type:"hyrox",text:"🏁 SIM #2 · HALF distance at EXACT Athens splits · 4 runs @ 4:36 + 4 stations · rehearsal not test"}] },
+    { date:"2026-08-30", dow:"SUN", label:"Aug 30", sessions:[{type:"rest",text:"Rest · 🔥 sauna 20min"}] },
+  ]},
+  { week:6, label:"Aug 31–Sep 5", theme:"🏁 Race Week — Taper", days:[
+    { date:"2026-08-31", dow:"MON", label:"Aug 31", sessions:[{type:"rest",text:"Rest / 30min easy walk"}] },
+    { date:"2026-09-01", dow:"TUE", label:"Sep 1", sessions:[{type:"plan",text:"30min Z2 + 4×30s strides · legs only, zero fatigue"},{type:"plan",text:"🔥 Sauna 20min · final heat prep"}] },
+    { date:"2026-09-02", dow:"WED", label:"Sep 2", sessions:[{type:"plan",text:"Activation 25min: jog + 3×20m BBJ + 2×500m ski @ race pace + 25 wall balls · NO fatigue"}] },
+    { date:"2026-09-03", dow:"THU", label:"Sep 3", sessions:[{type:"rest",text:"Rest · hydrate + electrolytes · start carb load"}] },
+    { date:"2026-09-04", dow:"FRI", label:"Sep 4", sessions:[{type:"rest",text:"✈️ Travel to Athens · 20min shakeout · WALK THE ROXZONE ROUTE at the venue"}] },
+    { date:"2026-09-05", dow:"SAT", label:"Sep 5", sessions:[{type:"race",text:"🏁 HYROX ATHENS · Metropolitan Expo · TARGET 1:10:00",cal:true}] },
   ]},
 ];
 
@@ -2557,9 +2566,12 @@ export default function Dashboard() {
           {/* Taper countdown */}
           <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>TAPER PLAN</div>
           {[
-            { week:"May 11–17", theme:"Race Sim",    target:"400–500", note:"3× Hyrox · intervals · long run" },
-            { week:"May 18–24", theme:"Peak Load",   target:"450–520", note:"Highest volume week — push hard" },
-            { week:"May 25–30", theme:"Race Week 🏁", target:"100–200", note:"Cut 40% · activate only · TSB +10→+20" },
+            { week:"Jul 27–Aug 2", theme:"Specificity",  target:"400–460", note:"Rebuild Hyrox specificity · erg baselines" },
+            { week:"Aug 3–9",      theme:"Erg Engine",   target:"440–500", note:"Ski/row volume · compromised running" },
+            { week:"Aug 10–16",    theme:"Full Sim #1",  target:"420–480", note:"Sim at 1:12–1:13 · log all splits" },
+            { week:"Aug 17–23",    theme:"Peak Load",    target:"470–540", note:"Highest week · heat acclimation starts" },
+            { week:"Aug 24–30",    theme:"Sharpen",      target:"300–360", note:"Half sim at exact Athens splits" },
+            { week:"Aug 31–Sep 5", theme:"Race Week 🏁", target:"100–200", note:"Cut 40% · activate only · TSB +10→+20" },
           ].map((row, i) => {
             const isPast = new Date(row.week.split("–")[0] + " 2026") < new Date(TODAY);
             const isCurrent = !isPast && new Date(row.week.split("–")[0] + " 2026") <= new Date(TODAY);
@@ -2581,8 +2593,10 @@ export default function Dashboard() {
           })}
 
           <div style={{ marginTop:16, padding:"12px 14px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:11, color:"#475569", lineHeight:1.9 }}>
-            <strong style={{ color:"#1e293b" }}>Race week target:</strong> TSB +10 to +20 by May 29.<br />
-            <strong style={{ color:"#1e293b" }}>Taper starts:</strong> May 25 — cut volume 40%.<br />
+            <strong style={{ color:"#1e293b" }}>Athens target 1:10:00</strong> — runs 8×4:36 (36:48) · stations 28:45 · roxzone 4:22.<br />
+            <strong style={{ color:"#1e293b" }}>Where the 5 min comes from:</strong> roxzone −56s · sled pull −38s · BBJ −36s · ski −24s · row −23s · runs −2:02.<br />
+            <strong style={{ color:"#1e293b" }}>Race week target:</strong> TSB +10 to +20 by Sep 4.<br />
+            <strong style={{ color:"#1e293b" }}>Taper starts:</strong> Aug 31 — cut volume 40%.<br />
             <strong style={{ color:"#1e293b" }}>TSB {tsb.toFixed(0)}:</strong> {tsb >= 0 ? "Fresh — keep building." : "Normal training fatigue — expected at this stage."}
           </div>
         </div>
