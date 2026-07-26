@@ -371,6 +371,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Running","2026-07-26 14:06:54","false","Vilnius Running","12,84","898","01:08:21","136","145","3,3","180","--","5:19","--","--","--","75","79","--","104,30","6,4","6,9","268","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:08:21","01:08:21","--","--"
 "Walking","2026-07-24 21:45:00","false","Walking","0,00","93","01:00:13","59","74","0,0","4","--","16666:39","--","--","--","--","--","--","1,57","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:00:06","01:00:13","--","--"
 "Indoor Running","2026-07-24 17:05:30","false","Hyrox group ","1,94","471","00:40:56","130","172","3,0","60","--","21:04","--","--","--","--","--","--","73,81","5,6","4,2","448","--","--","--","--","--","--","--","--","--","No","--","5","--","--","--","--","--","00:21:20","00:43:59","--","--"
 "Running","2026-07-24 09:01:06","false","Recovery run 5km","5,50","375","00:30:08","124","139","2,3","176","--","5:28","--","--","--","23","27","--","103,96","7,0","7,5","268","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:30:08","00:30:08","--","--"
@@ -570,8 +571,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-26";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-26T12:07:00Z";
-const LAST_DATA = "2026-07-26T12:07:00Z";
+const LAST_RUN  = "2026-07-26T13:07:00Z";
+const LAST_DATA = "2026-07-26T13:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
