@@ -790,8 +790,8 @@ const RACE = { name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:
 
 const SCHEDULE = [
   { week:1, label:"Jul 27–Aug 2", theme:"Specificity Restart", days:[
-    { date:"2026-07-27", dow:"MON", label:"Jul 27", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: Ski erg 1000m ALL OUT · baseline · log it (Riga was 4:39)"}] },
-    { date:"2026-07-28", dow:"TUE", label:"Jul 28", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"Row 1000m all-out baseline, then 4×500m @ 2:08/500m · 90s rest"}] },
+    { date:"2026-07-27", dow:"MON", label:"Jul 27", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"✅ DONE · ski 2×500m @ 1:56 + row 2×500m @ 1:58 (fatigued) · 1000m TT still owed"}] },
+    { date:"2026-07-28", dow:"TUE", label:"Jul 28", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"BASELINES: ski 1000m + row 1000m all-out, continuous, 5min apart · this is the number the plan needs"}] },
     { date:"2026-07-29", dow:"WED", label:"Jul 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
     { date:"2026-07-30", dow:"THU", label:"Jul 30", sessions:[{type:"plan",text:"Threshold 5×1km @ 4:20/km · 90s jog · HR zone D (146–167)"}] },
     { date:"2026-07-31", dow:"FRI", label:"Jul 31", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled PULL 6×25m technique + BBJ 5×20m @ 70s + lat pulldown 4×10"}] },
@@ -800,7 +800,7 @@ const SCHEDULE = [
   ]},
   { week:2, label:"Aug 3–9", theme:"Erg Engine", days:[
     { date:"2026-08-03", dow:"MON", label:"Aug 3", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: 3×500m ski @ 2:07/500m"}] },
-    { date:"2026-08-04", dow:"TUE", label:"Aug 4", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"Erg intervals 8×500m alternating ski/row @ 2:05–2:08 · 90s rest"}] },
+    { date:"2026-08-04", dow:"TUE", label:"Aug 4", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"4×1000m ski @ 2:03/500m · 2min rest · hold the split the whole 1000m, no fade"}] },
     { date:"2026-08-05", dow:"WED", label:"Aug 5", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
     { date:"2026-08-06", dow:"THU", label:"Aug 6", sessions:[{type:"plan",text:"COMPROMISED: [1000m ski → 1km run @ 4:35] ×3 · this exact pattern cost you Riga"}] },
     { date:"2026-08-07", dow:"FRI", label:"Aug 7", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled pull 8×25m heavy · lunges 4×50m · wall balls 2×25 (maintain only)"}] },
@@ -809,7 +809,7 @@ const SCHEDULE = [
   ]},
   { week:3, label:"Aug 10–16", theme:"Full Sim #1", days:[
     { date:"2026-08-10", dow:"MON", label:"Aug 10", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-08-11", dow:"TUE", label:"Aug 11", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Erg endurance 4×1000m ski @ 4:15 · 2min rest · hold the split, don't fade"}] },
+    { date:"2026-08-11", dow:"TUE", label:"Aug 11", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Erg endurance 4×1000m ski @ 4:10 · 2min rest · revised target, hold it"}] },
     { date:"2026-08-12", dow:"WED", label:"Aug 12", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"BBJ block 6×20m @ 68s · 75s rest · rhythm over power · + 15min core"}] },
     { date:"2026-08-13", dow:"THU", label:"Aug 13", sessions:[{type:"plan",text:"Easy 30min Z2 jog · freshen up for Saturday"}] },
     { date:"2026-08-14", dow:"FRI", label:"Aug 14", sessions:[{type:"tennis",text:"Tennis 🎾 · light only, no sparring",cal:true}] },
@@ -819,7 +819,7 @@ const SCHEDULE = [
   { week:4, label:"Aug 17–23", theme:"Peak Load", days:[
     { date:"2026-08-17", dow:"MON", label:"Aug 17", sessions:[{type:"rest",text:"Rest / 30min easy walk · sim recovery"}] },
     { date:"2026-08-18", dow:"TUE", label:"Aug 18", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-08-19", dow:"WED", label:"Aug 19", sessions:[{type:"plan",text:"Erg intervals 10×500m alt ski/row @ 2:05 · 75s rest · biggest erg session of the block"}] },
+    { date:"2026-08-19", dow:"WED", label:"Aug 19", sessions:[{type:"plan",text:"4×[1000m row @ 2:05/500m + 1km run @ 4:35] continuous · the exact Athens pattern"}] },
     { date:"2026-08-20", dow:"THU", label:"Aug 20", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"🔥 Sauna 20min post-session · heat acclimation starts (Athens will be 30°C+)"}] },
     { date:"2026-08-21", dow:"FRI", label:"Aug 21", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: sled pull 6×25m + 100 wall balls unbroken-ish"}] },
     { date:"2026-08-22", dow:"SAT", label:"Aug 22", sessions:[{type:"plan",text:"Compromised long: 5×[1km @ 4:35 + 1 station] continuous · peak specificity"}] },
@@ -2109,8 +2109,8 @@ export default function Dashboard() {
                 <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", letterSpacing:2, marginBottom:8 }}>VS ATHENS TARGETS · SEP 5</div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6, fontSize:11 }}>
                   {[
-                    { label:"Ski Erg 1000m", now:"Riga 4:39", target:"4:15", gap:"→ −24s · rank 535, worst station" },
-                    { label:"Row 1000m", now:"Riga 4:43", target:"4:20", gap:"→ −23s · rank 447" },
+                    { label:"Ski Erg 1000m", now:"Riga 4:39", target:"4:10", gap:"→ −29s · 1:56/500m fresh Jul 27" },
+                    { label:"Row 1000m", now:"Riga 4:43", target:"4:12", gap:"→ −31s · 1:58/500m fatigued Jul 27" },
                     { label:"Sled Pull 50m", now:"Riga 4:08", target:"3:30", gap:"→ −38s · pure technique" },
                     { label:"Roxzone", now:"Riga 5:18", target:"4:22", gap:"→ −56s · jog every transition" },
                   ].map((r,i) => (
@@ -2596,8 +2596,8 @@ export default function Dashboard() {
           })}
 
           <div style={{ marginTop:16, padding:"12px 14px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:11, color:"#475569", lineHeight:1.9 }}>
-            <strong style={{ color:"#1e293b" }}>Athens target 1:10:00</strong> — runs 8×4:36 (36:48) · stations 28:45 · roxzone 4:22.<br />
-            <strong style={{ color:"#1e293b" }}>Where the 5 min comes from:</strong> roxzone −56s · sled pull −38s · BBJ −36s · ski −24s · row −23s · runs −2:02.<br />
+            <strong style={{ color:"#1e293b" }}>Athens target 1:10:00</strong> — runs 8×4:36 (36:48) · stations 28:32 · roxzone 4:22 = 69:42.<br />
+            <strong style={{ color:"#1e293b" }}>Where the 5 min comes from:</strong> roxzone −56s · sled pull −38s · BBJ −36s · row −31s · ski −29s · lunges −9s · runs −2:02.<br />
             <strong style={{ color:"#1e293b" }}>Race week target:</strong> TSB +10 to +20 by Sep 4.<br />
             <strong style={{ color:"#1e293b" }}>Taper starts:</strong> Aug 31 — cut volume 40%.<br />
             <strong style={{ color:"#1e293b" }}>TSB {tsb.toFixed(0)}:</strong> {tsb >= 0 ? "Fresh — keep building." : "Normal training fatigue — expected at this stage."}
