@@ -790,6 +790,8 @@ function readiness(tsb, dsh, hrv, hrvBaseline) {
   return Math.min(10, Math.max(1, blended));
 }
 
+const RACE = { name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:"1:10:00" };
+
 const SCHEDULE = [
   { week:1, label:"Jul 27–Aug 2", theme:"Specificity Restart", days:[
     { date:"2026-07-27", dow:"MON", label:"Jul 27", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: Ski erg 1000m ALL OUT · baseline · log it (Riga was 4:39)"}] },
@@ -1840,7 +1842,10 @@ export default function Dashboard() {
       {/* HEADER */}
       <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
         <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>HYROX RIGA · MAY 30 · -1 DAYS</div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>{(() => {
+            const d = Math.round((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000);
+            return `${RACE.name} · ${RACE.label} · ${d > 0 ? `${d} DAYS` : d === 0 ? "TODAY 🏁" : "DONE"} · TARGET ${RACE.target}`;
+          })()}</div>
           <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
           {(() => {
             const now = new Date();
@@ -2105,13 +2110,13 @@ export default function Dashboard() {
 
               {/* Hyrox vs Race Comparison */}
               <div style={{ marginTop:12, padding:"12px 14px", background:"#f5f3ff", border:"1.5px solid #c4b5fd", borderRadius:8 }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", letterSpacing:2, marginBottom:8 }}>VS RACE TARGETS · MAY 30 RIGA</div>
+                <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", letterSpacing:2, marginBottom:8 }}>VS ATHENS TARGETS · SEP 5</div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6, fontSize:11 }}>
                   {[
-                    { label:"HR zone", now:"avg 121", target:"avg 145–155", gap:"→ push harder in race" },
-                    { label:"Running pace", now:"~11:00/km", target:"4:48/km", gap:"→ ~6 min/km headroom at race pace" },
-                    { label:"GCT", now:"441ms", target:"<380ms", gap:"→ 61ms to find" },
-                    { label:"Vert ratio", now:"12.1%", target:"<9%", gap:"→ work on forward lean" },
+                    { label:"Ski Erg 1000m", now:"Riga 4:39", target:"4:15", gap:"→ −24s · rank 535, worst station" },
+                    { label:"Row 1000m", now:"Riga 4:43", target:"4:20", gap:"→ −23s · rank 447" },
+                    { label:"Sled Pull 50m", now:"Riga 4:08", target:"3:30", gap:"→ −38s · pure technique" },
+                    { label:"Roxzone", now:"Riga 5:18", target:"4:22", gap:"→ −56s · jog every transition" },
                   ].map((r,i) => (
                     <div key={i} style={{ background:"#fff", border:"1px solid #ddd6fe", borderRadius:6, padding:"8px 10px" }}>
                       <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", marginBottom:3 }}>{r.label}</div>
