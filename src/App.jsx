@@ -803,9 +803,9 @@ const RACE = { name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:
 const SCHEDULE = [
   { week:1, label:"Jul 27–Aug 2", theme:"Specificity Restart", days:[
     { date:"2026-07-27", dow:"MON", label:"Jul 27", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"✅ DONE · ski 2×500m @ 1:56 + row 2×500m @ 1:58 (fatigued) · 1000m TT still owed"}] },
-    { date:"2026-07-28", dow:"TUE", label:"Jul 28", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"BASELINES: ski 1000m + row 1000m all-out, continuous, 5min apart · this is the number the plan needs"}] },
+    { date:"2026-07-28", dow:"TUE", label:"Jul 28", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"✅ SKI 1000m TT = 3:54 (1:57/500m) · 45s faster than Riga's 4:39 · row TT deferred (heavy legs)"}] },
     { date:"2026-07-29", dow:"WED", label:"Jul 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-07-30", dow:"THU", label:"Jul 30", sessions:[{type:"plan",text:"Threshold 5×1km @ 4:20/km · 90s jog · HR zone D (146–167)"}] },
+    { date:"2026-07-30", dow:"THU", label:"Jul 30", sessions:[{type:"plan",text:"ROW 1000m TT first (fresh legs), then threshold 3×1km @ 4:20/km · TT is the priority"}] },
     { date:"2026-07-31", dow:"FRI", label:"Jul 31", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled PULL 6×25m technique + BBJ 5×20m @ 70s + lat pulldown 4×10"}] },
     { date:"2026-08-01", dow:"SAT", label:"Aug 1", sessions:[{type:"hyrox",text:"HALF SIM · 4×1km @ 4:40 + Ski / Sled Push / Sled Pull / BBJ · JOG every transition"}] },
     { date:"2026-08-02", dow:"SUN", label:"Aug 2", sessions:[{type:"rest",text:"Full rest · family day"}] },
@@ -2121,7 +2121,7 @@ export default function Dashboard() {
                 <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", letterSpacing:2, marginBottom:8 }}>VS ATHENS TARGETS · SEP 5</div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6, fontSize:11 }}>
                   {[
-                    { label:"Ski Erg 1000m", now:"Riga 4:39", target:"4:10", gap:"→ −29s · 1:56/500m fresh Jul 27" },
+                    { label:"Ski Erg 1000m", now:"Riga 4:39", target:"4:08", gap:"→ −31s · TT 3:54, so 4:08 is ~85% effort" },
                     { label:"Row 1000m", now:"Riga 4:43", target:"4:12", gap:"→ −31s · 1:58/500m fatigued Jul 27" },
                     { label:"Sled Pull 50m", now:"Riga 4:08", target:"3:30", gap:"→ −38s · pure technique" },
                     { label:"Roxzone", now:"Riga 5:18", target:"4:22", gap:"→ −56s · jog every transition" },
@@ -2608,8 +2608,8 @@ export default function Dashboard() {
           })}
 
           <div style={{ marginTop:16, padding:"12px 14px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:11, color:"#475569", lineHeight:1.9 }}>
-            <strong style={{ color:"#1e293b" }}>Athens target 1:10:00</strong> — runs 8×4:36 (36:48) · stations 28:32 · roxzone 4:22 = 69:42.<br />
-            <strong style={{ color:"#1e293b" }}>Where the 5 min comes from:</strong> roxzone −56s · sled pull −38s · BBJ −36s · row −31s · ski −29s · lunges −9s · runs −2:02.<br />
+            <strong style={{ color:"#1e293b" }}>Athens target 1:10:00</strong> — runs 8×4:36 (36:48) · stations 28:30 · roxzone 4:22 = 69:40.<br />
+            <strong style={{ color:"#1e293b" }}>Where the 5 min comes from:</strong> roxzone −56s · sled pull −38s · BBJ −36s · ski −31s · row −31s · lunges −9s · runs −2:02.<br />
             <strong style={{ color:"#1e293b" }}>Race week target:</strong> TSB +10 to +20 by Sep 4.<br />
             <strong style={{ color:"#1e293b" }}>Taper starts:</strong> Aug 31 — cut volume 40%.<br />
             <strong style={{ color:"#1e293b" }}>TSB {tsb.toFixed(0)}:</strong> {tsb >= 0 ? "Fresh — keep building." : "Normal training fatigue — expected at this stage."}
