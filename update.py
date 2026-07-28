@@ -91,13 +91,18 @@ def get_client():
     # Resume garth tokens
     garth.resume(str(Path.home() / ".garth"))
 
-    # Force refresh the OAuth2 access token immediately — it expires every ~27h
-    # so we can't rely on it being valid. The refresh token lasts 30 days.
+    # Try to refresh the OAuth2 access token — it expires every ~27h.
+    # This reliably FAILS here: Garmin's exchange endpoint returns empty
+    # responses to GitHub Actions' Azure IPs. The Worker refreshes from
+    # Cloudflare egress instead, so by the time we run the token should
+    # already be fresh. Kept as a fallback, but the failure is now logged
+    # rather than silently swallowed — it hid the stale-token bug for months.
     try:
         garth.client.refresh_oauth2()
         print(f"Token refreshed OK (garth {garth.__version__})")
     except Exception as e:
-        pass  # token_refresh.py handles validation; we just use whatever tokens are loaded
+        print(f"⚠ OAuth2 refresh failed here (expected on Azure IPs): {type(e).__name__}: {e}")
+        print("  Falling back to the token the Worker wrote to secrets.")
 
     # Instantiate client after refresh so it picks up the new access token
     client = Garmin()
