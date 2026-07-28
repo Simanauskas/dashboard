@@ -78,6 +78,8 @@ const HEALTH_DATA = {
     {date:"2026-07-21",hrv:48,rhr:38,spo2:96,resp:11.0,sleep_score:null},
     {date:"2026-07-23",hrv:106,rhr:40,spo2:99,resp:11.0,sleep_score:95},
     {date:"2026-07-24",hrv:111,rhr:43,spo2:99,resp:12.0,sleep_score:88},
+    {date:"2026-07-27",hrv:117,rhr:40,spo2:97,resp:11.0,sleep_score:95},
+    {date:"2026-07-28",hrv:97,rhr:40,spo2:97,resp:11.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -146,6 +148,8 @@ const HEALTH_DATA = {
     {date:"2026-07-21",deep:224,rem:78,light:178,awake:2},
     {date:"2026-07-23",deep:91,rem:73,light:315,awake:8},
     {date:"2026-07-24",deep:83,rem:110,light:354,awake:5},
+    {date:"2026-07-27",deep:71,rem:122,light:305,awake:7},
+    {date:"2026-07-28",deep:110,rem:95,light:253,awake:2},
   ],
 };
 
@@ -315,6 +319,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:320,avgHr:93,maxHr:112,dist:110,role:"station"},{i:2,t:571,avgHr:138,maxHr:172,dist:1202,role:"run"},{i:3,t:688,avgHr:128,maxHr:170,dist:186,role:"station"},{i:4,t:701,avgHr:145,maxHr:166,dist:430,role:"station"},{i:5,t:176,avgHr:119,maxHr:161,dist:14,role:"station"}],
   },
+"23752567198": {
+    date:"2026-07-27", name:"Hyrox group ", type:"group",
+    totalTime:2308, avgHR:145, maxHR:170,
+    description:`Row 1:58, skiErg 1:56`,
+    photos:[],
+    laps:[{i:1,t:307,avgHr:123,maxHr:153,dist:269,role:"station"},{i:2,t:417,avgHr:151,maxHr:170,dist:161,role:"station"},{i:3,t:141,avgHr:153,maxHr:169,dist:69,role:"station"},{i:4,t:124,avgHr:119,maxHr:153,dist:58,role:"station"},{i:5,t:146,avgHr:147,maxHr:161,dist:82,role:"station"},{i:6,t:428,avgHr:159,maxHr:169,dist:1030,role:"run"},{i:7,t:124,avgHr:121,maxHr:168,dist:73,role:"station"},{i:8,t:570,avgHr:150,maxHr:166,dist:165,role:"station"},{i:9,t:50,avgHr:149,maxHr:164,dist:22,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -369,6 +380,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Indoor Running","2026-07-27 19:04:26","false","Hyrox group ","1,93","538","00:38:28","145","170","3,4","67","--","19:56","--","--","--","--","--","--","84,07","8,9","8,4","439","--","--","--","--","--","--","--","--","--","No","--","9","--","--","--","--","--","00:23:27","00:44:07","--","--"
 "Running","2026-07-26 14:06:54","false","Vilnius Running","12,84","898","01:08:21","136","145","3,3","180","--","5:19","--","--","--","75","79","--","104,30","6,4","6,9","268","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:08:21","01:08:21","--","--"
 "Walking","2026-07-24 21:45:00","false","Walking","0,00","93","01:00:13","59","74","0,0","4","--","16666:39","--","--","--","--","--","--","1,57","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:00:06","01:00:13","--","--"
 "Indoor Running","2026-07-24 17:05:30","false","Hyrox group ","1,94","471","00:40:56","130","172","3,0","60","--","21:04","--","--","--","--","--","--","73,81","5,6","4,2","448","--","--","--","--","--","--","--","--","--","No","--","5","--","--","--","--","--","00:21:20","00:43:59","--","--"
@@ -569,8 +581,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-28";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-28T14:07:00Z";
-const LAST_DATA = "2026-07-28T09:07:00Z";
+const LAST_RUN  = "2026-07-28T15:07:00Z";
+const LAST_DATA = "2026-07-28T15:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1788,7 +1800,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 91; // updated 2026-07-27
+  const hrvBaseline = 102; // updated 2026-07-28
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
