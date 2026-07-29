@@ -326,6 +326,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:307,avgHr:123,maxHr:153,dist:269,role:"station"},{i:2,t:417,avgHr:151,maxHr:170,dist:161,role:"station"},{i:3,t:141,avgHr:153,maxHr:169,dist:69,role:"station"},{i:4,t:124,avgHr:119,maxHr:153,dist:58,role:"station"},{i:5,t:146,avgHr:147,maxHr:161,dist:82,role:"station"},{i:6,t:428,avgHr:159,maxHr:169,dist:1030,role:"run"},{i:7,t:124,avgHr:121,maxHr:168,dist:73,role:"station"},{i:8,t:570,avgHr:150,maxHr:166,dist:165,role:"station"},{i:9,t:50,avgHr:149,maxHr:164,dist:22,role:"station"}],
   },
+"23777920563": {
+    date:"2026-07-29", name:"Hyrox group ", type:"group",
+    totalTime:2849, avgHR:138, maxHR:175,
+    description:`1km ski, row, run + sled push, trusters, burpees + 100WB`,
+    photos:[],
+    laps:[{i:1,t:563,avgHr:107,maxHr:129,dist:582,role:"run"},{i:2,t:130,avgHr:139,maxHr:158,dist:89,role:"station"},{i:3,t:16,avgHr:153,maxHr:156,dist:2,role:"station"},{i:4,t:414,avgHr:156,maxHr:168,dist:899,role:"run"},{i:5,t:426,avgHr:132,maxHr:167,dist:399,role:"station"},{i:6,t:125,avgHr:149,maxHr:154,dist:290,role:"station"},{i:7,t:139,avgHr:138,maxHr:152,dist:56,role:"station"},{i:8,t:685,avgHr:147,maxHr:167,dist:271,role:"station"},{i:9,t:264,avgHr:157,maxHr:175,dist:240,role:"station"},{i:10,t:89,avgHr:137,maxHr:171,dist:51,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -586,8 +593,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-07-29";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-07-29T16:07:00Z";
-const LAST_DATA = "2026-07-29T16:07:00Z";
+const LAST_RUN  = "2026-07-29T17:07:00Z";
+const LAST_DATA = "2026-07-29T17:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
