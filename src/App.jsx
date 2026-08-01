@@ -602,8 +602,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-01";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-01T16:08:00Z";
-const LAST_DATA = "2026-08-01T16:08:00Z";
+const LAST_RUN  = "2026-08-01T14:08:00Z";
+const LAST_DATA = "2026-08-01T14:08:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -733,14 +733,21 @@ function analyze(raw) {
   const daysSinceHard = hardSessions.length > 0 ? hardSessions[0]._days : 99;
   const weeklyKm = enriched.filter(a => (isRun(a) || isHyrox(a)) && a._days >= 1 && a._days <= 7).reduce((s,a) => s + (a._dist||0), 0);
 
-  // Weekly TRIMP (last 8 weeks)
+  // Weekly TRIMP (last 8 weeks), with real ISO date bounds so the LOAD tab
+  // can match each week against TAPER_PLAN without re-parsing display labels.
+  const fmtShort = (d) => d.toLocaleDateString('en', { month:'short', day:'numeric' });
   const weeklyTrimp = [];
   for (let w = 7; w >= 0; w--) {
     const start = w * 7 + 1, end = (w + 1) * 7;
     const trimp = enriched.filter(a => a._days >= start && a._days <= end).reduce((s,a) => s + a._trimp, 0);
     const weekStart = new Date(TODAY); weekStart.setDate(weekStart.getDate() - end);
-    const wLabel = weekStart.toLocaleDateString('en', { month:'short', day:'numeric' });
-    weeklyTrimp.push({ label: wLabel, trimp: Math.round(trimp), daysAgo: start });
+    const weekEnd = new Date(TODAY); weekEnd.setDate(weekEnd.getDate() - start);
+    const weekStartISO = weekStart.toISOString().slice(0,10);
+    const weekEndISO = weekEnd.toISOString().slice(0,10);
+    const wLabel = weekStart.getMonth() === weekEnd.getMonth()
+      ? `${fmtShort(weekStart)}–${weekEnd.getDate()}`
+      : `${fmtShort(weekStart)}–${fmtShort(weekEnd)}`;
+    weeklyTrimp.push({ label: wLabel, trimp: Math.round(trimp), daysAgo: start, weekStartISO, weekEndISO });
   }
 
   // HR Zone distribution (last 4 weeks) using CPET bike zones +10 for running
@@ -820,6 +827,28 @@ function readiness(tsb, dsh, hrv, hrvBaseline) {
 }
 
 const RACE = { name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:"1:10:00" };
+
+// Single source of truth for weekly TRIMP targets through race day.
+// Used by both the LOAD tab's weekly bars AND the roadmap — replaces the old
+// hardcoded May-30-Riga-date target logic that made every current bar read hi=0.
+const TAPER_PLAN = [
+  { start:"2026-07-27", end:"2026-08-02", theme:"Specificity",  lo:400, hi:460, note:"Rebuild Hyrox specificity · erg baselines" },
+  { start:"2026-08-03", end:"2026-08-09", theme:"Erg Engine",   lo:440, hi:500, note:"Ski/row volume · compromised running" },
+  { start:"2026-08-10", end:"2026-08-16", theme:"Full Sim #1",  lo:420, hi:480, note:"Sim at 1:12–1:13 · log all splits" },
+  { start:"2026-08-17", end:"2026-08-23", theme:"Peak Load",    lo:470, hi:540, note:"Highest week · heat acclimation starts" },
+  { start:"2026-08-24", end:"2026-08-30", theme:"Sharpen",      lo:300, hi:360, note:"Half sim at exact Athens splits" },
+  { start:"2026-08-31", end:"2026-09-05", theme:"Race Week 🏁", lo:100, hi:200, note:"Cut 40% · activate only · TSB +10→+20" },
+];
+
+// Look up the target band for a week given its [startISO, endISO] range.
+// Falls back to a generic base-phase target before the taper plan starts,
+// and to a rest target after race day.
+function getWeekTarget(startISO, endISO) {
+  const hit = TAPER_PLAN.find(b => startISO <= b.end && endISO >= b.start);
+  if (hit) return hit;
+  if (endISO < TAPER_PLAN[0].start) return { theme:"Build phase", lo:350, hi:480, note:"Aerobic base + strength" };
+  return { theme:"Post-race", lo:0, hi:0, note:"Recovery" };
+}
 
 const SCHEDULE = [
   { week:1, label:"Jul 27–Aug 2", theme:"Specificity Restart", days:[
@@ -2486,8 +2515,13 @@ export default function Dashboard() {
       {/* LOAD */}
       {view === "load" && (
         <div style={{ padding:"14px 14px 40px" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:12 }}>TRAINING LOAD (TRIMP)</div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:20 }}>
+          <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:12 }}>
+            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>TRAINING LOAD (TRIMP)</div>
+            <div style={{ fontSize:10, fontWeight:700, color:"#7c3aed" }}>
+              {Math.max(0, Math.ceil((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000))}d to {RACE.name}
+            </div>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
             {[
               { label:"ATL", value:atl.toFixed(0), note:"Acute fatigue (7d)", c:"#dc2626", bg:"#fef2f2", bo:"#fca5a5" },
               { label:"CTL", value:ctl.toFixed(0), note:"Fitness base (42d)", c:"#15803d", bg:"#f0fdf4", bo:"#86efac" },
@@ -2500,6 +2534,13 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+          <div style={{ fontSize:11, color:"#475569", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, padding:"9px 12px", marginBottom:20 }}>
+            {tsb >= 5 ? "🟢 Fresh — green light to push a hard session today."
+              : tsb >= -10 ? "🔵 Optimal training fatigue — normal load is fine."
+              : tsb >= -20 ? "🟠 Accumulating fatigue — protect sleep/nutrition, keep intensity controlled."
+              : "🔴 High fatigue — favor recovery or easy volume today."}
+          </div>
+
           <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>LAST 6 DAYS</div>
           {[6,5,4,3,2,1].map(d => {
             const dayActs = activities.filter(a => a._days === d);
@@ -2520,51 +2561,33 @@ export default function Dashboard() {
               </div>
             );
           })}
-          {/* Weekly TRIMP target bars */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>WEEKLY TRIMP VS TARGET</div>
+
+          {/* Unified weekly load roadmap — past 8 weeks (actual, from Garmin data)
+              plus remaining taper weeks (planned) in one place. Targets come from
+              TAPER_PLAN via getWeekTarget(), matched by real ISO date, not by
+              re-parsing a display label — that fragility + a stale race date is
+              what made the old bars render at 0 width. */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:4, marginTop:22 }}>WEEKLY LOAD ROADMAP</div>
+          <div style={{ fontSize:10, color:"#94a3b8", marginBottom:10 }}>Actual TRIMP vs this phase's target band · rolling 7-day weeks</div>
           <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-          {(() => {
-            const race = new Date("2026-05-30");
-            // Compute weeks-from-race for each entry by parsing label like "May 11–17"
-            // weeklyTrimp is ordered oldest→newest. The LAST entry is the current/most-recent week.
-            const getTarget = (weeksOut) => {
-              if (weeksOut <= 0) return [0, 0, "rest"];                  // post-race
-              if (weeksOut === 1) return [100, 200, "Race week — taper"];
-              if (weeksOut === 2) return [250, 350, "Final hard week"];
-              if (weeksOut === 3) return [400, 520, "Peak load"];
-              return [400, 500, "Build phase"];
-            };
-
-            // Parse start date of each label, e.g. "May 11–17" → Date for May 11 of this year
-            const parseStart = (label) => {
-              const yr = new Date(TODAY).getFullYear();
-              const [monStr, dayStr] = label.split(" ");
-              const monIdx = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].indexOf(monStr);
-              return new Date(yr, monIdx, parseInt(dayStr));
-            };
-
-            return weeklyTrimp.map((w, i) => {
-              const startD = parseStart(w.label);
-              const weekEnd = new Date(startD); weekEnd.setDate(startD.getDate() + 6);
-              const weeksOut = Math.ceil((race - weekEnd) / (7*86400000));
-              const [lo, hi, phase] = getTarget(weeksOut);
-              const isPast = weekEnd < new Date(TODAY);
-              const isCurrent = startD <= new Date(TODAY) && weekEnd >= new Date(TODAY);
-
+            {weeklyTrimp.map((w, i) => {
+              const isCurrent = w.weekStartISO <= TODAY && w.weekEndISO >= TODAY;
+              const isPast = w.weekEndISO < TODAY;
+              const { lo, hi, theme } = getWeekTarget(w.weekStartISO, w.weekEndISO);
               const pct = hi > 0 ? Math.min(100, (w.trimp / hi) * 100) : 0;
-              const status = w.trimp === 0 ? "empty"
+              const status = w.trimp === 0 || hi === 0 ? "empty"
                 : (w.trimp >= lo && w.trimp <= hi) ? "green"
                 : w.trimp > hi ? "amber" : "red";
               const sc = { green:"#16a34a", amber:"#d97706", red:"#dc2626", empty:"#cbd5e1" }[status];
               const loPct = hi > 0 ? (lo/hi)*100 : 0;
 
               return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8, opacity: isPast && !isCurrent ? 0.55 : 1 }}>
-                  <div style={{ minWidth:90 }}>
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10, opacity: isPast && !isCurrent ? 0.6 : 1 }}>
+                  <div style={{ minWidth:96 }}>
                     <div style={{ fontSize:11, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? "#7c3aed" : "#1e293b" }}>
                       {w.label}{isCurrent && " ←"}
                     </div>
-                    <div style={{ fontSize:9, color:"#94a3b8" }}>{phase}</div>
+                    <div style={{ fontSize:9, color:"#94a3b8" }}>{theme}</div>
                   </div>
                   <div style={{ flex:1, background:"#f1f5f9", borderRadius:5, height:22, position:"relative", overflow:"hidden", border:"1px solid #e2e8f0" }}>
                     {/* target zone band */}
@@ -2581,48 +2604,40 @@ export default function Dashboard() {
                       </>
                     )}
                   </div>
-                  <div style={{ fontSize:12, fontWeight:800, color:sc, minWidth:42, textAlign:"right" }}>
+                  <div style={{ fontSize:12, fontWeight:800, color:sc, minWidth:38, textAlign:"right" }}>
                     {w.trimp > 0 ? w.trimp : "—"}
                   </div>
-                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:58 }}>
+                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:56, textAlign:"right" }}>
                     {hi > 0 ? `${lo}–${hi}` : "rest"}
                   </div>
                 </div>
               );
-            });
-          })()}
-          <div style={{ display:"flex", gap:14, marginTop:10, fontSize:10, color:"#94a3b8", flexWrap:"wrap" }}>
-            <span><span style={{ display:"inline-block", width:10, height:10, background:"#16a34a", borderRadius:2, verticalAlign:"middle" }} /> In target zone</span>
-            <span><span style={{ display:"inline-block", width:10, height:10, background:"#d97706", borderRadius:2, verticalAlign:"middle" }} /> Over target</span>
-            <span><span style={{ display:"inline-block", width:10, height:10, background:"#dc2626", borderRadius:2, verticalAlign:"middle" }} /> Under target</span>
-            <span style={{ marginLeft:"auto" }}>Green band = target zone</span>
-          </div>
+            })}
+            <div style={{ display:"flex", gap:14, marginTop:6, fontSize:10, color:"#94a3b8", flexWrap:"wrap" }}>
+              <span><span style={{ display:"inline-block", width:10, height:10, background:"#16a34a", borderRadius:2, verticalAlign:"middle" }} /> In target zone</span>
+              <span><span style={{ display:"inline-block", width:10, height:10, background:"#d97706", borderRadius:2, verticalAlign:"middle" }} /> Over target</span>
+              <span><span style={{ display:"inline-block", width:10, height:10, background:"#dc2626", borderRadius:2, verticalAlign:"middle" }} /> Under target</span>
+              <span style={{ marginLeft:"auto" }}>Green band = target zone</span>
+            </div>
           </div>
 
-          {/* Taper countdown */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:20 }}>TAPER PLAN</div>
-          {[
-            { week:"Jul 27–Aug 2", theme:"Specificity",  target:"400–460", note:"Rebuild Hyrox specificity · erg baselines" },
-            { week:"Aug 3–9",      theme:"Erg Engine",   target:"440–500", note:"Ski/row volume · compromised running" },
-            { week:"Aug 10–16",    theme:"Full Sim #1",  target:"420–480", note:"Sim at 1:12–1:13 · log all splits" },
-            { week:"Aug 17–23",    theme:"Peak Load",    target:"470–540", note:"Highest week · heat acclimation starts" },
-            { week:"Aug 24–30",    theme:"Sharpen",      target:"300–360", note:"Half sim at exact Athens splits" },
-            { week:"Aug 31–Sep 5", theme:"Race Week 🏁", target:"100–200", note:"Cut 40% · activate only · TSB +10→+20" },
-          ].map((row, i) => {
-            const isPast = new Date(row.week.split("–")[0] + " 2026") < new Date(TODAY);
-            const isCurrent = !isPast && new Date(row.week.split("–")[0] + " 2026") <= new Date(TODAY);
+          {/* Remaining taper weeks — planned targets only, no actual data yet */}
+          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:4 }}>UPCOMING · TAPER TO RACE DAY</div>
+          {TAPER_PLAN.filter(b => b.start > TODAY).map((b, i) => {
+            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            const sd = new Date(b.start), ed = new Date(b.end);
+            const label = sd.getMonth() === ed.getMonth()
+              ? `${months[sd.getMonth()]} ${sd.getDate()}–${ed.getDate()}`
+              : `${months[sd.getMonth()]} ${sd.getDate()}–${months[ed.getMonth()]} ${ed.getDate()}`;
             return (
-              <div key={i} style={{ display:"flex", gap:10, padding:"10px 12px", marginBottom:6,
-                background: isCurrent ? "#faf5ff" : "#f8fafc",
-                border: `1px solid ${isCurrent ? "#7c3aed" : "#e2e8f0"}`,
-                borderRadius:8, opacity: isPast ? 0.5 : 1 }}>
+              <div key={i} style={{ display:"flex", gap:10, padding:"10px 12px", marginBottom:6, background:"#f8fafc", border:"1px dashed #cbd5e1", borderRadius:8 }}>
                 <div style={{ minWidth:80 }}>
-                  <div style={{ fontSize:10, fontWeight:700, color: isCurrent ? "#7c3aed" : "#1e293b" }}>{row.week}</div>
-                  <div style={{ fontSize:9, color:"#94a3b8" }}>{row.theme}</div>
+                  <div style={{ fontSize:10, fontWeight:700, color:"#1e293b" }}>{label}</div>
+                  <div style={{ fontSize:9, color:"#94a3b8" }}>{b.theme}</div>
                 </div>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:11, fontWeight:700, color:"#475569" }}>Target: {row.target} TRIMP</div>
-                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{row.note}</div>
+                  <div style={{ fontSize:11, fontWeight:700, color:"#475569" }}>Target: {b.lo}–{b.hi} TRIMP</div>
+                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{b.note}</div>
                 </div>
               </div>
             );
