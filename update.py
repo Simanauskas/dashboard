@@ -205,20 +205,33 @@ def fetch_wellness(client, date_str):
         d = datetime.date.fromisoformat(date_str)
         from_d = (d - datetime.timedelta(days=30)).isoformat()
         wi = client.get_weigh_ins(from_d, date_str)
-        # Structure: { 'dailyWeightSummaries': [{summaryDate, allWeightMetrics: [{weight: grams, ...}]}] }
+        # Structure: { 'dailyWeightSummaries': [{summaryDate, allWeightMetrics: [{weight: grams, calendarDate, ...}]}] }
         latest = None
-        for day in (wi.get('dailyWeightSummaries') or []):
+        summaries = (wi.get('dailyWeightSummaries') or []) if isinstance(wi, dict) else []
+        for day in summaries:
             for entry in (day.get('allWeightMetrics') or []):
                 w_kg = entry.get('weight', 0) / 1000.0 if entry.get('weight') else None
-                if w_kg and w_kg > 30:  # sanity
-                    cand = (day.get('summaryDate'), round(w_kg, 1))
+                # summaryDate isn't always present at the day level — fall back to
+                # the per-entry calendarDate, which Garmin's own API consistently sets.
+                w_date = day.get('summaryDate') or entry.get('calendarDate')
+                if w_kg and w_kg > 30 and w_date:  # sanity
+                    cand = (w_date, round(w_kg, 1))
                     if not latest or cand[0] > latest[0]:
                         latest = cand
         if latest:
             result['weight'] = latest
             print(f"Weight: {latest[1]}kg on {latest[0]}")
+        else:
+            # DIAGNOSTIC: previously this was silent, which is exactly how the
+            # weight sync broke unnoticed since 2026-05-17. Log what we actually
+            # got back so a real failure is visible in the Actions log instead
+            # of looking identical to "no weigh-in that day".
+            print(f"Weight: no entries found for {from_d}..{date_str}. "
+                  f"Raw response type={type(wi).__name__}, "
+                  f"keys={list(wi.keys()) if isinstance(wi, dict) else 'n/a'}, "
+                  f"summaries={len(summaries)}")
     except Exception as e:
-        pass  # no weight log for this period
+        print(f"Weight fetch failed for {date_str}: {type(e).__name__}: {e}")
 
     return result
 
