@@ -389,6 +389,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Rowing V2","2026-08-01 15:29:52","false","Trakai Rowing","2,19","156","00:43:41","77","112","0,1","--","--","19:54","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","5","--","--","--","--","--","00:35:50","00:47:03","--","--"
 "Cycling","2026-08-01 13:05:41","false","Vilnius Cycling","4,98","130","00:13:48","161","230","1,7","--","--","2:46","--","--","--","35","97","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:13:32","00:14:31","--","--"
 "Tennis V2","2026-08-01 11:13:23","false","Tennis","0,53","398","01:25:01","91","145","0,5","22","--","160:15","--","--","--","--","--","--","28,22","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:38","01:27:54","--","--"
 "Cycling","2026-08-01 10:32:47","false","Vilnius Cycling","5,08","141","00:18:16","106","139","0,8","--","--","3:35","--","--","--","92","24","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:18:07","00:18:16","--","--"
@@ -601,8 +602,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-01";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-01T13:08:00Z";
-const LAST_DATA = "2026-08-01T13:08:00Z";
+const LAST_RUN  = "2026-08-01T14:08:00Z";
+const LAST_DATA = "2026-08-01T14:08:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
