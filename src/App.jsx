@@ -80,6 +80,8 @@ const HEALTH_DATA = {
     {date:"2026-07-29",hrv:99,rhr:43,spo2:95,resp:11.0,sleep_score:null},
     {date:"2026-07-31",hrv:77,rhr:41,spo2:96,resp:11.0,sleep_score:88},
     {date:"2026-08-02",hrv:88,rhr:44,spo2:95,resp:12.0,sleep_score:null},
+    {date:"2026-08-04",hrv:121,rhr:39,spo2:96,resp:11.0,sleep_score:75},
+    {date:"2026-08-05",hrv:87,rhr:41,spo2:93,resp:11.0,sleep_score:88},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -150,6 +152,8 @@ const HEALTH_DATA = {
     {date:"2026-07-29",deep:68,rem:71,light:296,awake:22},
     {date:"2026-07-31",deep:160,rem:109,light:179,awake:6},
     {date:"2026-08-02",deep:128,rem:69,light:226,awake:1},
+    {date:"2026-08-04",deep:97,rem:81,light:240,awake:12},
+    {date:"2026-08-05",deep:91,rem:72,light:314,awake:15},
   ],
 };
 
@@ -387,6 +391,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Running","2026-08-05 08:52:48","false","Vilnius - Changing Tempo 6x1500","12,73","912","01:04:38","144","171","3,9","165","--","5:04","--","--","--","40","32","--","115,47","6,2","7,2","262","--","--","--","--","--","--","--","--","--","No","--","26","--","--","--","--","--","01:03:59","01:04:38","--","--"
 "Cycling","2026-08-04 20:00:48","false","Vilnius Cycling","1,98","30","00:06:59","80","99","0,0","--","--","3:31","--","--","--","6","50","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:06:51","00:07:03","--","--"
 "Strength Training","2026-08-04 19:07:06","false","Strength","0,00","84","00:12:07","94","130","0,3","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:12:07","00:12:07","--","--"
 "Indoor Cardio","2026-08-04 18:38:51","false","ROXFIT(3)","0,00","289","00:24:35","130","164","2,5","--","--","--","--","--","--","0","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","9","--","--","--","--","--","00:24:35","00:24:36","--","--"
@@ -608,8 +613,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-05T07:08:00Z";
-const LAST_DATA = "2026-08-05T07:08:00Z";
+const LAST_RUN  = "2026-08-05T08:08:00Z";
+const LAST_DATA = "2026-08-05T08:08:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
@@ -1856,7 +1861,7 @@ export default function Dashboard() {
 
   // Today's HRV from HEALTH_DATA (latest daily entry)
   const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 97; // updated 2026-08-04
+  const hrvBaseline = 95; // updated 2026-08-05
 
   const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
   const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
