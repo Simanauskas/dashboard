@@ -337,6 +337,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:563,avgHr:107,maxHr:129,dist:582,role:"run"},{i:2,t:130,avgHr:139,maxHr:158,dist:89,role:"station"},{i:3,t:16,avgHr:153,maxHr:156,dist:2,role:"station"},{i:4,t:414,avgHr:156,maxHr:168,dist:899,role:"run"},{i:5,t:426,avgHr:132,maxHr:167,dist:399,role:"station"},{i:6,t:125,avgHr:149,maxHr:154,dist:290,role:"station"},{i:7,t:139,avgHr:138,maxHr:152,dist:56,role:"station"},{i:8,t:685,avgHr:147,maxHr:167,dist:271,role:"station"},{i:9,t:264,avgHr:157,maxHr:175,dist:240,role:"station"},{i:10,t:89,avgHr:137,maxHr:171,dist:51,role:"station"}],
   },
+"24039256230": {
+    date:"2026-08-19", name:"Hyrox Full Simulation", type:"sim",
+    totalTime:4256, avgHR:159, maxHR:176,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:272,avgHr:150,maxHr:165,dist:921,role:"run"},{i:2,t:247,avgHr:165,maxHr:169,dist:145,role:"station"},{i:3,t:286,avgHr:166,maxHr:170,dist:880,role:"run"},{i:4,t:136,avgHr:155,maxHr:170,dist:52,role:"station"},{i:5,t:310,avgHr:162,maxHr:167,dist:886,role:"run"},{i:6,t:192,avgHr:160,maxHr:165,dist:99,role:"station"},{i:7,t:327,avgHr:160,maxHr:166,dist:859,role:"run"},{i:8,t:261,avgHr:159,maxHr:164,dist:29,role:"station"},{i:9,t:355,avgHr:159,maxHr:163,dist:890,role:"run"},{i:10,t:263,avgHr:154,maxHr:162,dist:186,role:"station"},{i:11,t:343,avgHr:156,maxHr:161,dist:895,role:"run"},{i:12,t:197,avgHr:144,maxHr:160,dist:323,role:"station"},{i:13,t:325,avgHr:156,maxHr:162,dist:926,role:"run"},{i:14,t:225,avgHr:155,maxHr:160,dist:193,role:"station"},{i:15,t:300,avgHr:164,maxHr:170,dist:888,role:"run"},{i:16,t:216,avgHr:170,maxHr:176,dist:265,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -391,6 +398,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Indoor Running","2026-08-19 19:17:50","false","Hyrox Full Simulation","8,44","1105","01:10:56","159","176","4,8","128","--","8:24","--","--","--","--","--","--","86,89","9,9","8,5","327","--","--","--","--","--","--","--","--","--","No","--","16","--","--","--","--","--","01:00:25","01:10:56","--","--"
 "Cycling","2026-08-19 09:25:08","false","Vilnius Cycling","7,38","162","00:29:12","90","119","0,4","--","--","3:57","--","--","--","83","73","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:28:07","03:35:17","--","--"
 "Tennis V2","2026-08-18 10:08:34","false","Tennis","0,22","491","01:43:25","89","133","0,5","12","--","462:57","--","--","--","--","--","--","18,77","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:22","01:43:25","--","--"
 "Tennis V2","2026-08-17 19:15:41","false","sparring🎾Laurynas Pletkus","0,60","501","01:17:34","103","145","1,4","27","--","129:11","--","--","--","--","--","--","29,03","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:09:38","01:17:34","--","--"
@@ -641,8 +649,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-19";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-19T17:07:00Z";
-const LAST_DATA = "2026-08-19T17:07:00Z";
+const LAST_RUN  = "2026-08-19T18:07:00Z";
+const LAST_DATA = "2026-08-19T18:07:00Z";
 
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
