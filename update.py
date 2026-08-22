@@ -557,7 +557,13 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
         def repl(m):
             nonlocal replaced
             replaced = True
-            return new_daily.strip()
+            # Return the line WITH its four-space indent. .strip() here used to
+            # unindent the row it had just refreshed, and the sort/dedupe step
+            # below only collects indented entries — so refreshing a date
+            # silently deleted it. That is what erased Aug 20-21 and Aug 8-11:
+            # one run inserted the row, the next run "updated" it out of
+            # existence, and the two alternated every full run.
+            return new_daily
         code = re.sub(
             rf'    \{{date:"{date_str}",hrv:[^}}]*\}},',
             repl, code, count=1
@@ -580,7 +586,7 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
         def repl_sleep(m):
             nonlocal replaced_sleep
             replaced_sleep = True
-            return new_sleep_line.strip()
+            return new_sleep_line          # indent preserved — see repl() above
         # tolerate any whitespace between fields (existing entries have spaces like "rem:94, light:259")
         code = re.sub(
             rf'    \{{date:"{date_str}",deep:\s*\d+,\s*rem:\s*\d+,\s*light:\s*\d+,\s*awake:\s*\d+\}},',
@@ -601,14 +607,18 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
         m_arr = re.search(rf'({label}:\s*\[)(.*?)(\n  \],)', code, re.DOTALL)
         if m_arr:
             block = m_arr.group(2)
-            entries = re.findall(r'    \{date:"[\d-]+"[^}]+\},', block)
+            # Match on the entry itself, not on its leading whitespace, and
+            # re-indent on the way out. Requiring exactly four spaces meant any
+            # row written at a different indent was invisible here and vanished
+            # when the block was rebuilt — data loss from a formatting slip.
+            entries = re.findall(r'\{date:"[\d-]+"[^}]+\},', block)
             if len(entries) > 1:
                 # Dedupe by date — keep LAST occurrence (most recently patched)
                 by_date = {}
                 for e in entries:
                     d = re.search(r'date:"([\d-]+)"', e).group(1)
-                    by_date[d] = e
-                entries_sorted = [by_date[d] for d in sorted(by_date.keys())]
+                    by_date[d] = e.strip()
+                entries_sorted = ['    ' + by_date[d] for d in sorted(by_date.keys())]
                 new_block = '\n' + '\n'.join(entries_sorted) + '\n  '
                 code = code.replace(m_arr.group(0), f'{label}: [{new_block}],', 1)
 
