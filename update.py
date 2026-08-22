@@ -235,9 +235,22 @@ def fetch_wellness(client, date_str):
 
     return result
 
-def fetch_activities(client, date_str):
-    """Return properly quoted CSV rows for the given date."""
+# How many days back each run re-checks. Covers two things: an activity renamed
+# after the session is already in the dashboard, and a wellness day Garmin had
+# not finished syncing when the morning run fired.
+REFRESH_DAYS = 4
+
+def fetch_activities(client, dates):
+    """Return properly quoted CSV rows for the given date(s).
+
+    `dates` is an ISO date string or an iterable of them. Passing a window
+    costs nothing extra — get_activities() returns the last 30 activities in a
+    single call regardless — and it is what lets a rename made an hour after
+    the session still reach the dashboard: Garmin returns the activity with its
+    new title, and patch() replaces the stored row in place.
+    """
     import time as _time
+    dates = {dates} if isinstance(dates, str) else set(dates)
     acts = None
     for attempt in range(3):
         try:
@@ -284,7 +297,7 @@ def fetch_activities(client, date_str):
 
     rows = []
     for a in acts:
-        if (a.get('startTimeLocal') or '')[:10] != date_str: continue
+        if (a.get('startTimeLocal') or '')[:10] not in dates: continue
         type_key = a.get('activityType',{}).get('typeKey','other')
         row = [
             TYPE_MAP.get(type_key, type_key.replace('_',' ').title()),
@@ -317,7 +330,7 @@ def fetch_activities(client, date_str):
     activity_ids = {
         (a.get("startTimeLocal") or "")[:10]: a["activityId"]
         for a in (acts or [])
-        if (a.get("startTimeLocal") or "")[:10] == date_str
+        if (a.get("startTimeLocal") or "")[:10] in dates
     }
     # Per-activity summary (used to build HYROX_DATA entries downstream).
     # Indexed by activity_id, not date — multiple activities per day are safe.
@@ -333,7 +346,7 @@ def fetch_activities(client, date_str):
             "calories":     a.get("calories"),
         }
         for a in (acts or [])
-        if (a.get("startTimeLocal") or "")[:10] == date_str
+        if (a.get("startTimeLocal") or "")[:10] in dates
     }
     return rows, activity_ids, activity_summaries
 
@@ -641,33 +654,63 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
     elif wellness.get('weight'):
         print("  ⚠ weight array not found in App.jsx — skipping weight patch")
 
-    # 4. CSV activity rows — deduplicate by startTime (field 1, first 19 chars)
+    # 4. CSV activity rows — upsert, keyed by startTime (field 1, first 19 chars).
+    #
+    # Previously an activity whose startTime was already stored was skipped
+    # outright, so renaming a session in Garmin Connect after it had synced —
+    # which is the normal case, the rename happens an hour or so later — never
+    # reached the dashboard. Now a row that already exists is REPLACED when its
+    # contents changed, so the new title (and anything else Garmin revised)
+    # lands on the next run.
     if csv_rows:
         import csv as _csv
-        # Extract all startTimes already in the dashboard
-        existing_times = set()
-        for line in code.split('\n'):
-            try:
-                fields = list(_csv.reader([line]))[0]
-                if len(fields) > 1 and re.match(r'\d{4}-\d{2}-\d{2}', fields[1]):
-                    existing_times.add(fields[1][:19])
-            except: pass
 
-        idx = code.find('Min Elevation,Max Elevation\n')
-        if idx >= 0:
-            ins = idx + len('Min Elevation,Max Elevation\n')
-            to_add = []
-            for l in csv_rows:
-                if not l.strip(): continue
-                try:
-                    fields = list(_csv.reader([l]))[0]
-                    start = fields[1][:19] if len(fields) > 1 else ''
-                    if start and start not in existing_times:
-                        to_add.append(l)
-                        existing_times.add(start)
-                except: pass
-            if to_add:
+        def _fields(line):
+            try:
+                f = list(_csv.reader([line]))[0]
+                return f if len(f) > 1 and re.match(r'\d{4}-\d{2}-\d{2}', f[1]) else None
+            except Exception:
+                return None
+
+        lines = code.split('\n')
+        existing_at = {}
+        for n, line in enumerate(lines):
+            f = _fields(line)
+            if f:
+                existing_at.setdefault(f[1][:19], n)
+
+        to_add, updated, skipped = [], 0, 0
+        for l in csv_rows:
+            if not l.strip(): continue
+            f = _fields(l)
+            if not f: continue
+            start = f[1][:19]
+            n = existing_at.get(start)
+            if n is None:
+                to_add.append(l)
+                existing_at[start] = -1          # guard against dupes within this batch
+            elif n >= 0 and lines[n].strip() != l.strip():
+                # Only swap rows written in the same layout. Older hand-imported
+                # rows have a different column count and carry fields update.py
+                # does not populate; replacing one would blank them.
+                if len(_fields(lines[n]) or []) == len(f):
+                    lines[n] = l
+                    updated += 1
+                else:
+                    skipped += 1
+
+        if updated:
+            code = '\n'.join(lines)
+            print(f"  ↻ Updated {updated} existing activity row(s) — renamed or revised in Garmin")
+        if skipped:
+            print(f"  ⚠ {skipped} changed row(s) left alone (legacy column layout)")
+
+        if to_add:
+            idx = code.find('Min Elevation,Max Elevation\n')
+            if idx >= 0:
+                ins = idx + len('Min Elevation,Max Elevation\n')
                 code = code[:ins] + '\n'.join(to_add) + '\n' + code[ins:]
+                print(f"  + Added {len(to_add)} new activity row(s)")
 
 
     # 4b. Lap data — store raw laps per activity date for dashboard analysis
@@ -839,6 +882,35 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
     DASHBOARD.write_text(code, encoding='utf-8')
     print(f"✓ Patched {DASHBOARD}")
 
+def missing_wellness_dates(days=REFRESH_DAYS):
+    """Recent dates that have no HRV row or no sleep row in App.jsx.
+
+    Wellness is only fetched in `full` mode, for yesterday and today. If Garmin
+    had not finished syncing the watch when that run fired — or the run failed,
+    or the dispatch was missed — nothing ever revisited that date and the gap
+    became permanent. That is what left Aug 8-11 and Aug 20-21 with no sleep or
+    HRV. Re-checking a short window every run closes a gap as soon as the data
+    shows up upstream, and costs nothing on the normal path where the window is
+    already complete and this returns [].
+    """
+    try:
+        code = DASHBOARD.read_text(encoding='utf-8')
+    except Exception:
+        return []
+
+    def dates_in(label):
+        m = re.search(rf'{label}:\s*\[(.*?)\n  \],', code, re.DOTALL)
+        return set(re.findall(r'\{date:"([\d-]+)"', m.group(1))) if m else set()
+
+    have_daily, have_sleep = dates_in('daily'), dates_in('sleep')
+    today = datetime.date.today()
+    gaps = []
+    for i in range(1, days + 1):            # skip today: last night's sleep lands under today, but
+        d = (today - datetime.timedelta(days=i)).isoformat()   # today is handled by the normal path
+        if d not in have_daily or d not in have_sleep:
+            gaps.append(d)
+    return gaps
+
 def stamp_run(got_fresh_data: bool):
     """Write LAST_RUN (always) and LAST_DATA (only when fresh Garmin data was ingested)
     so the dashboard can tell the user when the workflow last attempted a sync and
@@ -875,23 +947,40 @@ if __name__ == '__main__':
 
     try:
         if args.mode == 'full':
-            # Full update: fetch wellness + activities for yesterday AND today
-            for date_str in [yesterday, today]:
+            # Activities for the whole refresh window in one call, so renames on
+            # recent sessions are picked up alongside the new ones.
+            window = [(datetime.date.today() - datetime.timedelta(days=i)).isoformat()
+                      for i in range(0, REFRESH_DAYS + 1)]
+            csv_rows, activity_ids, activity_summaries = fetch_activities(client, window)
+            hyrox_sessions = {}
+            for act_id, summary in activity_summaries.items():
+                detail = fetch_hyrox_session_data(client, act_id, summary["name"])
+                if detail:
+                    hyrox_sessions[act_id] = {**summary, **detail}
+
+            # Wellness for yesterday and today, plus any recent day still missing it.
+            targets = [yesterday, today]
+            for d in missing_wellness_dates():
+                if d not in targets:
+                    targets.append(d)
+                    print(f"  ↻ {d} has no HRV/sleep row — retrying")
+            targets.sort()
+
+            first = True
+            for date_str in targets:
                 wellness = fetch_wellness(client, date_str)
                 has_wellness = bool(wellness.get('hrv') or wellness.get('sleep'))
                 print(f"  {'✓' if has_wellness else '✗'} Wellness data for {date_str}")
-                csv_rows, activity_ids, activity_summaries = fetch_activities(client, date_str)
-                if has_wellness or csv_rows:
+                if has_wellness or (first and csv_rows):
                     got_fresh_data = True
-                # Fetch Hyrox session detail (laps + description + photos) per activity
-                hyrox_sessions = {}
-                for act_id, summary in activity_summaries.items():
-                    detail = fetch_hyrox_session_data(client, act_id, summary["name"])
-                    if detail:
-                        hyrox_sessions[act_id] = {**summary, **detail}
                 advance = (date_str == yesterday)
-                patch(date_str, wellness, csv_rows, advance_today=advance,
-                      hyrox_sessions=hyrox_sessions)
+                # Activity rows and Hyrox detail are date-independent, so they go
+                # in on the first patch only rather than once per target date.
+                patch(date_str, wellness,
+                      csv_rows if first else [],
+                      advance_today=advance,
+                      hyrox_sessions=hyrox_sessions if first else {})
+                first = False
 
         elif args.mode == 'backfill':
             # Backfill: fetch wellness + activities for last N days
@@ -919,8 +1008,13 @@ if __name__ == '__main__':
                     print(f"    ⚠ Skipped {date_str}: {e}")
 
         else:
-            # Activities-only: fetch today's new workouts
-            csv_rows, activity_ids, activity_summaries = fetch_activities(client, today)
+            # Activities-only (hourly). Re-fetch the last few days rather than
+            # only today: get_activities() returns the same 30 activities either
+            # way, so this is free, and it is what lets a session renamed after
+            # it synced still update in the dashboard.
+            window = [(datetime.date.today() - datetime.timedelta(days=i)).isoformat()
+                      for i in range(0, REFRESH_DAYS + 1)]
+            csv_rows, activity_ids, activity_summaries = fetch_activities(client, window)
             if csv_rows:
                 got_fresh_data = True
             hyrox_sessions = {}
@@ -930,6 +1024,14 @@ if __name__ == '__main__':
                     hyrox_sessions[act_id] = {**summary, **detail}
             patch(today, {}, csv_rows, advance_today=False,
                   hyrox_sessions=hyrox_sessions)
+
+            # Top up any recent day whose HRV/sleep never landed. Normally no-op.
+            for date_str in missing_wellness_dates():
+                print(f"  ↻ {date_str} has no HRV/sleep row — retrying")
+                wellness = fetch_wellness(client, date_str)
+                if wellness.get('hrv') or wellness.get('sleep'):
+                    got_fresh_data = True
+                    patch(date_str, wellness, [], advance_today=False)
     finally:
         # Always stamp LAST_RUN (so the dashboard can show 'scheduler is alive')
         # even on partial failures, and stamp LAST_DATA only when we actually
