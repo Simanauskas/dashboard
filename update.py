@@ -599,35 +599,47 @@ def patch(date_str, wellness, csv_rows, advance_today=True, hyrox_sessions=None)
                 new_block = '\n' + '\n'.join(entries_sorted) + '\n  '
                 code = code.replace(m_arr.group(0), f'{label}: [{new_block}],', 1)
 
-    # Sort + dedupe weight array (same approach but tuple-style entries)
+    # 3c. Weight — parse the array, upsert today's reading, sort, re-emit.
+    #
+    # This replaces three separate bugs in the old add/replace approach:
+    #
+    #  * The append regex, (weight:\s*\[(?:[^\]]|\][^,])*?)(\n  \],), could
+    #    never match. Its alternation steps over "]" only when NOT followed by
+    #    a comma — but "]," is exactly what separates two entries, so it could
+    #    not reach the array close. A genuinely new weigh-in date was silently
+    #    dropped on every run; only dates already present ever updated.
+    #
+    #  * Had it matched, it inserted "," before the new entry — after a body the
+    #    sort step already leaves trailing-comma'd. That yields "],,[" , a JS
+    #    array elision, so HEALTH_DATA.weight gains an `undefined` hole that
+    #    throws in the dashboard's weight chart.
+    #
+    #  * The replace path searched the WHOLE file for ["<date>",<number>] — a
+    #    shape the vo2max array shares. For a date present in vo2max but not in
+    #    weight (11 such dates today) it overwrote that VO2max reading with a
+    #    body weight and never recorded the weight at all.
+    #
+    # Working inside the array's own span, keyed by date, avoids all three.
+    # Runs unconditionally so the sort/dedupe still happens on days with no
+    # weigh-in, which is what the old separate sort block was for.
     m_w = re.search(r'(weight:\s*\[)(.*?)(\n  \],)', code, re.DOTALL)
     if m_w:
-        w_block = m_w.group(2)
-        w_entries = re.findall(r'\["[\d-]+",[\d.]+\]', w_block)
-        if w_entries:
-            by_date = {}
-            for e in w_entries:
-                d = re.search(r'\["([\d-]+)"', e).group(1)
-                by_date[d] = e
-            sorted_entries = [by_date[d] for d in sorted(by_date.keys())]
-            new_w_block = '\n    ' + ','.join(sorted_entries) + ',\n  '
-            code = code.replace(m_w.group(0), f'weight: [{new_w_block}],', 1)
-
-    # 3c. Weight entry — simple: replace if date exists, else add to end (sort step dedupes/sorts)
-    w = wellness.get('weight')
-    if w:
-        w_date, w_kg = w
-        new_entry = f'["{w_date}",{w_kg}]'
-        if re.search(rf'\["{w_date}",[\d.]+\]', code):
-            # Replace existing entry for this date
-            code = re.sub(rf'\["{w_date}",[\d.]+\]', new_entry, code, count=1)
-        else:
-            # Append before the array close — match \n  ], end-of-weight-array
-            code = re.sub(
-                r'(weight:\s*\[(?:[^\]]|\][^,])*?)(\n  \],)',
-                rf'\g<1>,\n    {new_entry}\g<2>',
-                code, count=1
+        by_date = dict(re.findall(r'\["(\d{4}-\d{2}-\d{2})",([\d.]+)\]', m_w.group(2)))
+        w = wellness.get('weight')
+        if w:
+            w_date, w_kg = w
+            by_date[w_date] = str(w_kg)
+        if by_date:
+            items = [f'["{d}",{by_date[d]}]' for d in sorted(by_date)]
+            # Wrapped at 8 per line so adding one weigh-in touches one line
+            # instead of rewriting a single 3000-character line.
+            body = '\n' + '\n'.join(
+                '    ' + ','.join(items[i:i+8]) + ','
+                for i in range(0, len(items), 8)
             )
+            code = code[:m_w.start(2)] + body + code[m_w.end(2):]
+    elif wellness.get('weight'):
+        print("  ⚠ weight array not found in App.jsx — skipping weight patch")
 
     # 4. CSV activity rows — deduplicate by startTime (field 1, first 19 chars)
     if csv_rows:
