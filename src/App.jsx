@@ -658,19 +658,45 @@ const TODAY = "2026-08-22";
 const LAST_RUN  = "2026-08-22T14:07:00Z";
 const LAST_DATA = "2026-08-22T09:07:00Z";
 
+// Column layout that update.py's fetch_activities() actually writes: 44 fields.
+// The header row embedded in CSV_DATA is the older 42-column Garmin export
+// layout, so mapping bot-written rows through it shifts every running-dynamics
+// column by two — that is what used to surface as "GCT 109ms" (really the
+// stride length) and "vertical ratio 53%" (really the elevation loss).
+// Rows are therefore mapped by field count: 44 → this layout, anything else →
+// the embedded header, which still describes the older hand-imported rows.
+// Positions update.py leaves as "--" are named _spare so nothing reads them.
+const COLS_BOT = [
+  "Activity Type","Date","Favorite","Title","Distance","Calories","Time",
+  "Avg HR","Max HR","Aerobic TE","Avg Run Cadence","Max Run Cadence",
+  "Avg Speed","Max Speed","_spare14","_spare15","Total Ascent","Total Descent",
+  "_spare18","Avg Stride Length","Avg Vertical Ratio","Avg Vertical Oscillation",
+  "Avg Ground Contact Time","_spare23","_spare24","_spare25","_spare26",
+  "_spare27","_spare28","_spare29","_spare30","Body Battery Drain",
+  "Decompression","Best Lap Time","Number of Laps","_spare35","_spare36",
+  "_spare37","_spare38","_spare39","Moving Time","Elapsed Time",
+  "Min Elevation","Max Elevation",
+];
+
+function splitCsvLine(line) {
+  const vals = []; let cur = "", inQ = false;
+  for (const ch of line) {
+    if (ch === '"') inQ = !inQ;
+    else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ""; }
+    else cur += ch;
+  }
+  vals.push(cur.trim().replace(/\r/g,""));
+  return vals.map(v => v.replace(/"/g,"").trim());
+}
+
 function parseCSV(raw) {
   const lines = raw.trim().split("\n");
-  const headers = lines[0].split(",").map(h => h.replace(/\r/g,"").trim().replace(/"/g,""));
+  const headers = splitCsvLine(lines[0]).map(h => h.replace(/\r/g,""));
   return lines.slice(1).map(line => {
-    const vals = []; let cur = "", inQ = false;
-    for (const ch of line) {
-      if (ch === '"') inQ = !inQ;
-      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ""; }
-      else cur += ch;
-    }
-    vals.push(cur.trim().replace(/\r/g,""));
+    const vals = splitCsvLine(line);
+    const cols = vals.length === COLS_BOT.length ? COLS_BOT : headers;
     const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] || "").replace(/"/g,"").trim());
+    cols.forEach((h, i) => obj[h] = vals[i] || "");
     return obj;
   });
 }
@@ -711,7 +737,7 @@ const isTennis = a => (a["Activity Type"] || "").toLowerCase() === "tennis";
 const isStrength = a => (a["Activity Type"] || "").toLowerCase() === "strength training";
 const isRecovery = a => { const t = (a.Title || "").toLowerCase(); return t.includes("sauna") || t.includes("massage"); };
 
-const COLORS = { run:"#c2410c", hyrox:"#6d28d9", tennis:"#0369a1", strength:"#15803d", cycling:"#a16207", recovery:"#be185d", other:"#475569" };
+const COLORS = { run:"#fb923c", hyrox:"#a78bfa", tennis:"#38bdf8", strength:"#34d399", cycling:"#fbbf24", recovery:"#f472b6", other:"#94a3b8" };
 
 function getColor(a) {
   if (isRecovery(a)) return COLORS.recovery;
@@ -959,131 +985,660 @@ const SCHEDULE = [
   ]},
 ];
 
-const SS = {
-  hyrox:  { bg:"#ede9fe", border:"#7c3aed", text:"#4c1d95", dot:"#7c3aed" },
-  tennis: { bg:"#e0f2fe", border:"#0284c7", text:"#0c4a6e", dot:"#0284c7" },
-  plan:   { bg:"#f8fafc", border:"#cbd5e1", text:"#475569", dot:"#94a3b8" },
-  rest:   { bg:"#f8fafc", border:"#e2e8f0", text:"#94a3b8", dot:"#e2e8f0" },
-  race:   { bg:"#fef3c7", border:"#d97706", text:"#92400e", dot:"#d97706" },
-  other:  { bg:"#f0fdf4", border:"#16a34a", text:"#14532d", dot:"#16a34a" },
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — dark athletic cockpit
+   One accent (violet). Colour is reserved for STATUS, never for decoration:
+   green = good / on target, amber = watch, red = act. Everything else is
+   ink on slate. Numbers are the loudest thing on the screen.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const T = {
+  bg:      "#0b0f19",   // canvas
+  bgSoft:  "#0e1422",   // sticky chrome
+  panel:   "#121a2b",   // card surface
+  panelHi: "#172136",   // raised / hovered surface
+  line:    "#232e45",   // card border
+  lineDim: "#1a2436",   // inner dividers
+  ink:     "#eef2fb",   // primary text
+  ink2:    "#97a4bd",   // secondary text
+  ink3:    "#5f6b85",   // labels / axis
+  accent:  "#8b5cf6",
+  accentIn:"#c4b5fd",
+  accentBg:"rgba(139,92,246,0.12)",
+  ok:      "#34d399",
+  okBg:    "rgba(52,211,153,0.10)",
+  warn:    "#fbbf24",
+  warnBg:  "rgba(251,191,36,0.10)",
+  bad:     "#f87171",
+  badBg:   "rgba(248,113,113,0.10)",
+  info:    "#38bdf8",
+  infoBg:  "rgba(56,189,248,0.10)",
+  run:     "#fb923c",
 };
 
-function Sparkline({ data, color = "#7c3aed", height = 110 }) {
-  if (!data || data.length < 2) return null;
-  // Normalize entries to {date, val}
-  const entries = data.map(d => {
-    if (Array.isArray(d)) return { date: d[0], val: d[1] };
-    if (d.bf !== undefined) return { date: d.date, val: d.bf };
-    return { date: d.date, val: d.val };
-  }).filter(e => e.val != null && !isNaN(e.val));
+// Session-type styling for the plan (same keys update-time code expects)
+const SS = {
+  hyrox:  { bg:"rgba(139,92,246,0.11)", border:"rgba(139,92,246,0.35)", text:"#cbbcff", dot:"#8b5cf6" },
+  tennis: { bg:"rgba(56,189,248,0.10)",  border:"rgba(56,189,248,0.30)", text:"#a5dcf7", dot:"#38bdf8" },
+  plan:   { bg:"rgba(255,255,255,0.03)", border:"#232e45",               text:"#b7c2d6", dot:"#5f6b85" },
+  rest:   { bg:"transparent",            border:"#1c2637",               text:"#6d7992", dot:"#2c3850" },
+  race:   { bg:"rgba(251,191,36,0.12)",  border:"rgba(251,191,36,0.40)", text:"#f5cf6d", dot:"#fbbf24" },
+  other:  { bg:"rgba(52,211,153,0.10)",  border:"rgba(52,211,153,0.30)", text:"#8fe3c4", dot:"#34d399" },
+};
 
-  if (entries.length < 2) return null;
-  const vals = entries.map(e => e.val);
-  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
+const GLOBAL_CSS = `
+:root { color-scheme: dark; }
+* , *::before, *::after { box-sizing: border-box; }
+html, body { background:${T.bg}; }
+body {
+  margin:0; color:${T.ink};
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+::selection { background:rgba(139,92,246,0.35); }
+button, input, textarea { font-family:inherit; }
+a { color:${T.accentIn}; }
 
-  // Wider viewBox so sparkline renders bigger on desktop while staying responsive
-  const w = 800, h = height;
-  const padL = 4, padR = 24, padT = 8, padB = 14;
-  const innerW = w - padL - padR, innerH = h - padT - padB;
-  const xAt = i => padL + (i / (entries.length - 1)) * innerW;
-  const yAt = v => padT + innerH - ((v - min) / range) * innerH;
+.wrap { max-width:1280px; margin:0 auto; padding:0 22px; }
+@media (max-width:640px){ .wrap { padding:0 14px; } }
 
-  // Smooth path
-  const pts = entries.map((e, i) => [xAt(i), yAt(e.val)]);
-  let path = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-  for (let i = 1; i < pts.length; i++) {
-    const [x1, y1] = pts[i-1], [x2, y2] = pts[i];
-    const midX = (x1 + x2) / 2;
-    path += ` Q ${midX.toFixed(1)},${y1.toFixed(1)} ${midX.toFixed(1)},${((y1+y2)/2).toFixed(1)} T ${x2.toFixed(1)},${y2.toFixed(1)}`;
-  }
+.grid { display:grid; gap:12px; }
+.g2 { grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+.g3 { grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); }
+.g4 { grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); }
+.g5 { grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); }
+.split { display:grid; gap:16px; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); align-items:start; }
+.split-even { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); align-items:start; }
+@media (max-width:920px){ .split { grid-template-columns:minmax(0,1fr); } }
 
-  const lastIdx = entries.length - 1;
-  const labelIdx = entries.length <= 3
-    ? entries.map((_, i) => i)
-    : [0, Math.floor(entries.length / 2), lastIdx];
+.weekgrid { display:grid; gap:10px; grid-template-columns:repeat(7,minmax(0,1fr)); align-items:start; }
+@media (max-width:1080px){ .weekgrid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media (max-width:760px){ .weekgrid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:480px){ .weekgrid { grid-template-columns:1fr; } }
 
-  const fmtDate = (s) => {
-    const parts = s.split("-");
-    return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1])-1]} ${parseInt(parts[2])}`;
-  };
+.card {
+  background:${T.panel}; border:1px solid ${T.line}; border-radius:16px;
+  transition:border-color .18s ease, background .18s ease;
+}
+.card-lift:hover { border-color:#31405f; background:${T.panelHi}; }
+.num { font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
 
+.scroll-x { overflow-x:auto; scrollbar-width:thin; scrollbar-color:#2a3752 transparent; -webkit-overflow-scrolling:touch; }
+.scroll-x::-webkit-scrollbar { height:6px; }
+.scroll-x::-webkit-scrollbar-thumb { background:#2a3752; border-radius:99px; }
+.scroll-x::-webkit-scrollbar-track { background:transparent; }
+.no-bar::-webkit-scrollbar { display:none; }
+.no-bar { scrollbar-width:none; }
+
+.tap { cursor:pointer; border:none; background:none; padding:0; color:inherit; }
+.fade { animation:fadeUp .3s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes breathe { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+.live { animation:breathe 2.6s ease-in-out infinite; }
+@media (prefers-reduced-motion:reduce) { .fade, .live { animation:none; } }
+`;
+
+function GlobalStyle() {
+  return <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />;
+}
+
+/* ── tiny helpers ────────────────────────────────────────────────────────── */
+let _uid = 0;
+function useUid(prefix) {
+  const r = useRef(null);
+  if (r.current === null) r.current = `${prefix}${++_uid}`;
+  return r.current;
+}
+
+// mm:ss is right for a split; anything past an hour needs h:mm:ss.
+const fmtHMS = (s) => {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.round(s % 60);
+  return h > 0 ? `${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}` : fmtMMSS(s);
+};
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmtISO = (s) => { const p = String(s).split("-"); return `${MON[+p[1]-1]} ${+p[2]}`; };
+const fmtMin = (m) => `${Math.floor(m/60)}h${String(Math.round(m%60)).padStart(2,"0")}m`;
+const pct = (n, d) => (d > 0 ? (n / d) * 100 : 0);
+const TONE = { ok:T.ok, warn:T.warn, bad:T.bad, info:T.info, accent:T.accent, mute:T.ink3, ink:T.ink };
+const TONE_BG = { ok:T.okBg, warn:T.warnBg, bad:T.badBg, info:T.infoBg, accent:T.accentBg, mute:"rgba(255,255,255,0.03)", ink:"rgba(255,255,255,0.03)" };
+const avgOf = (arr) => {
+  const v = arr.filter(x => x != null && !isNaN(x));
+  return v.length ? Math.round(v.reduce((s, x) => s + x, 0) / v.length) : "—";
+};
+const toneOf = (v, good, warn) => (v >= good ? "ok" : v >= warn ? "warn" : "bad");
+
+/* ── primitives ──────────────────────────────────────────────────────────── */
+function Card({ children, pad = 16, style, lift = true, className = "" }) {
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} style={{ width:"100%", height:"auto", display:"block", maxHeight: height*1.5 }} preserveAspectRatio="xMidYMid meet">
-      <line x1={padL} x2={w-padR} y1={padT} y2={padT} stroke="#e2e8f0" strokeDasharray="2,3" />
-      <line x1={padL} x2={w-padR} y1={padT+innerH} y2={padT+innerH} stroke="#e2e8f0" strokeDasharray="2,3" />
-      <text x={w-padR+2} y={padT+3} fill="#94a3b8" fontSize="8" textAnchor="start">{max}</text>
-      <text x={w-padR+2} y={padT+innerH+3} fill="#94a3b8" fontSize="8" textAnchor="start">{min}</text>
-
-      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={xAt(lastIdx).toFixed(1)} cy={yAt(entries[lastIdx].val).toFixed(1)} r="2.5" fill={color} stroke="#fff" strokeWidth="1.5" />
-
-      {labelIdx.map(i => (
-        <text key={i} x={xAt(i).toFixed(1)} y={h-2} fill="#94a3b8" fontSize="9"
-          textAnchor={i === 0 ? "start" : i === lastIdx ? "end" : "middle"}>
-          {fmtDate(entries[i].date)}
-        </text>
-      ))}
-    </svg>
+    <div className={`card ${lift ? "card-lift" : ""} ${className}`} style={{ padding:pad, ...style }}>
+      {children}
+    </div>
   );
 }
 
-function ScheduleView({ activities }) {
-  const todayWk = SCHEDULE.findIndex(w => w.days.some(d => d.date === TODAY));
-  const [activeWeek, setActiveWeek] = useState(Math.max(0, todayWk));
-  const week = SCHEDULE[activeWeek];
+// Section heading: small caps label + optional right-hand slot.
+function Sec({ title, sub, right, children, style }) {
   return (
-    <div>
-      <div style={{ display:"flex", overflowX:"auto", borderBottom:"2px solid #f1f5f9", padding:"0 14px" }}>
-        {SCHEDULE.map((w, i) => (
-          <button key={i} onClick={() => setActiveWeek(i)} style={{
-            background:"none", border:"none",
-            borderBottom: activeWeek === i ? "2px solid #7c3aed" : "2px solid transparent",
-            color: activeWeek === i ? "#7c3aed" : "#94a3b8",
-            padding:"10px 12px 8px", fontSize:11, fontWeight:700,
-            cursor:"pointer", whiteSpace:"nowrap", fontFamily:"inherit", marginBottom:-2,
-          }}>
-            WK{w.week}{w.week === 5 ? " 🏁" : ""}
-          </button>
+    <section style={{ marginBottom:22, ...style }}>
+      {(title || right) && (
+        <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", gap:12, marginBottom:10, flexWrap:"wrap" }}>
+          <div>
+            <h2 style={{ margin:0, fontSize:11, fontWeight:800, letterSpacing:"0.14em", textTransform:"uppercase", color:T.ink2 }}>{title}</h2>
+            {sub && <div style={{ fontSize:11.5, color:T.ink3, marginTop:3 }}>{sub}</div>}
+          </div>
+          {right && <div style={{ fontSize:11, color:T.ink3 }}>{right}</div>}
+        </div>
+      )}
+      {children}
+    </section>
+  );
+}
+
+// The workhorse metric tile. Tone colours the VALUE only — the tile itself
+// stays neutral, which is what stops the old rainbow-card effect.
+function Stat({ label, value, unit, sub, tone = "ink", accentBar = false, pad = 14 }) {
+  const c = TONE[tone] || T.ink;
+  return (
+    <Card pad={pad} style={{ position:"relative", overflow:"hidden", minWidth:0 }}>
+      {accentBar && <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:c, opacity:0.8 }} />}
+      <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase", color:T.ink3 }}>{label}</div>
+      <div className="num" style={{ fontSize:23, fontWeight:800, color:c, lineHeight:1.15, marginTop:5, letterSpacing:"-0.02em", wordBreak:"break-word" }}>
+        {value}{unit && <span style={{ fontSize:12, fontWeight:600, color:T.ink3, marginLeft:4 }}>{unit}</span>}
+      </div>
+      {sub && <div style={{ fontSize:10.5, color:T.ink3, marginTop:4, lineHeight:1.45 }}>{sub}</div>}
+    </Card>
+  );
+}
+
+function Chip({ children, tone = "mute", active = false, onClick, title }) {
+  const c = TONE[tone] || T.ink3;
+  return (
+    <button className="tap" onClick={onClick} title={title} style={{
+      padding:"6px 12px", borderRadius:99, fontSize:11, fontWeight:700, whiteSpace:"nowrap",
+      border:`1px solid ${active ? c : T.line}`,
+      background: active ? TONE_BG[tone] || T.accentBg : "transparent",
+      color: active ? c : T.ink3,
+      cursor: onClick ? "pointer" : "default",
+      transition:"all .16s ease",
+    }}>{children}</button>
+  );
+}
+
+function Tag({ children, tone = "mute" }) {
+  const c = TONE[tone] || T.ink3;
+  return (
+    <span style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.08em", textTransform:"uppercase",
+      color:c, background:TONE_BG[tone], border:`1px solid ${c}33`, padding:"2px 7px", borderRadius:5, whiteSpace:"nowrap" }}>
+      {children}
+    </span>
+  );
+}
+
+// Horizontal bar used for splits, load, zones.
+function Bar({ value, tone = "accent", height = 10, track = T.lineDim, radius = 99, children }) {
+  const c = TONE[tone] || T.accent;
+  return (
+    <div style={{ flex:1, background:track, borderRadius:radius, height, overflow:"hidden", position:"relative", minWidth:20 }}>
+      <div style={{ height:"100%", width:`${Math.max(0, Math.min(100, value))}%`, background:c, borderRadius:radius,
+                    transition:"width .5s cubic-bezier(.2,.7,.3,1)", display:"flex", alignItems:"center", gap:2, paddingLeft:4 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ── Ring gauge — the readiness centrepiece ──────────────────────────────── */
+function Ring({ value, max = 10, size = 132, stroke = 10, tone = "ok", label, sub }) {
+  const c = TONE[tone] || T.ok;
+  const uid = useUid("ring");
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const frac = Math.max(0, Math.min(1, value / max));
+  return (
+    <div style={{ position:"relative", width:size, height:size, flexShrink:0 }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display:"block", transform:"rotate(-90deg)" }}>
+        <defs>
+          <linearGradient id={uid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={c} stopOpacity="0.55" />
+            <stop offset="100%" stopColor={c} stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={T.lineDim} strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`url(#${uid})`} strokeWidth={stroke}
+          strokeLinecap="round" strokeDasharray={`${circ*frac} ${circ}`}
+          style={{ transition:"stroke-dasharray .8s cubic-bezier(.2,.7,.3,1)" }} />
+      </svg>
+      <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+        <div className="num" style={{ fontSize:size*0.33, fontWeight:800, color:c, lineHeight:1, letterSpacing:"-0.03em" }}>{value}</div>
+        {label && <div style={{ fontSize:9.5, color:T.ink3, letterSpacing:"0.1em", marginTop:2 }}>{label}</div>}
+        {sub && <div style={{ fontSize:9, color:T.ink3, marginTop:1 }}>{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+// Catmull-Rom → cubic bezier. Passes through every point without the flat
+// shelves the quadratic Q…T shorthand leaves between them.
+function smoothPath(pts) {
+  if (!pts.length) return "";
+  if (pts.length < 3) return pts.map((p, i) => `${i ? "L" : "M"} ${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C ${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+
+/* ── Sparkline ────────────────────────────────────────────────────────────
+   The plot area is an SVG stretched to fill its box (preserveAspectRatio
+   "none"), so the chart is as tall as the CSS says at every screen width —
+   a fixed-aspect viewBox collapsed to an unreadable 20px sliver on a phone.
+   Stroke width is held with vectorEffect, and every label is real HTML so
+   nothing gets horizontally stretched with the geometry.
+   ───────────────────────────────────────────────────────────────────────── */
+function Sparkline({ data, color = T.accent, height = 110, area = true, fmt, showAxis = true }) {
+  const uid = useUid("spark");
+  if (!data || data.length < 2) return null;
+  const entries = data.map(d => {
+    if (Array.isArray(d)) return { date:d[0], val:d[1] };
+    if (d.bf !== undefined) return { date:d.date, val:d.bf };
+    return { date:d.date, val:d.val };
+  }).filter(e => e.val != null && !isNaN(e.val));
+  if (entries.length < 2) return null;
+
+  const vals = entries.map(e => e.val);
+  const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
+  const W = 1000, H = 100, padT = 6, padB = 6;
+  const innerH = H - padT - padB;
+  const xAt = i => (i / (entries.length - 1)) * W;
+  const yAt = v => padT + innerH - ((v - min) / range) * innerH;
+
+  const pts = entries.map((e, i) => [xAt(i), yAt(e.val)]);
+  const path = smoothPath(pts);
+  const areaPath = `${path} L ${W},${H} L 0,${H} Z`;
+  const last = entries.length - 1;
+  const labelIdx = entries.length <= 3 ? entries.map((_, i) => i) : [0, Math.floor(entries.length / 2), last];
+  const fv = fmt || (v => v);
+  const lastTopPct = (yAt(entries[last].val) / H) * 100;
+
+  return (
+    <div style={{ width:"100%" }}>
+      <div style={{ position:"relative", height, paddingRight: showAxis ? 34 : 0 }}>
+        <div style={{ position:"relative", height:"100%" }}>
+          <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
+            style={{ display:"block", overflow:"visible" }}>
+            <defs>
+              <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="0.30" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <line x1="0" x2={W} y1={padT} y2={padT} stroke={T.lineDim} strokeDasharray="4,5" vectorEffect="non-scaling-stroke" />
+            <line x1="0" x2={W} y1={H - padB} y2={H - padB} stroke={T.lineDim} strokeDasharray="4,5" vectorEffect="non-scaling-stroke" />
+            {area && <path d={areaPath} fill={`url(#${uid})`} />}
+            <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"
+              vectorEffect="non-scaling-stroke" />
+          </svg>
+          {/* end marker as HTML so the "none" scaling can't turn it into an ellipse */}
+          <div style={{ position:"absolute", right:0, top:`${lastTopPct}%`, width:7, height:7, marginTop:-3.5, marginRight:-3.5,
+            borderRadius:"50%", background:color, boxShadow:`0 0 0 2px ${T.panel}` }} />
+        </div>
+        {showAxis && (
+          <div className="num" style={{ position:"absolute", right:0, top:0, bottom:0, width:32,
+            display:"flex", flexDirection:"column", justifyContent:"space-between", fontSize:9.5, color:T.ink3, paddingLeft:5 }}>
+            <span>{fv(max)}</span><span>{fv(min)}</span>
+          </div>
+        )}
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", marginTop:5, paddingRight: showAxis ? 34 : 0,
+        fontSize:9.5, color:T.ink3 }}>
+        {labelIdx.map((i, k) => (
+          <span key={i} className="num" style={{ textAlign: k === 0 ? "left" : k === labelIdx.length - 1 ? "right" : "center" }}>
+            {fmtISO(entries[i].date)}
+          </span>
         ))}
       </div>
-      <div style={{ padding:"10px 14px 6px", background:"#faf5ff", borderBottom:"1px solid #ede9fe" }}>
-        <div style={{ fontSize:14, fontWeight:800, color:"#1e1b4b" }}>Week {week.week}: {week.theme}</div>
-        <div style={{ fontSize:11, color:"#7c3aed", marginTop:2 }}>{week.label}</div>
+    </div>
+  );
+}
+
+// Note / callout line. Left rule instead of a filled pastel box.
+function Note({ children, tone = "mute", icon }) {
+  const c = TONE[tone] || T.ink3;
+  return (
+    <div style={{ display:"flex", gap:9, padding:"9px 12px", background:TONE_BG[tone], borderLeft:`2px solid ${c}`,
+                  borderRadius:"0 8px 8px 0", fontSize:12, color:T.ink2, lineHeight:1.55, marginBottom:6 }}>
+      {icon && <span style={{ flexShrink:0 }}>{icon}</span>}
+      <span style={{ minWidth:0 }}>{children}</span>
+    </div>
+  );
+}
+
+function Empty({ children }) {
+  return <div style={{ padding:"28px 14px", textAlign:"center", color:T.ink3, fontSize:12 }}>{children}</div>;
+}
+
+// HRV baseline (rolling weekly average). Rewritten by update.py — keep this
+// declaration on one line and in this exact shape.
+const hrvBaseline = 95; // updated 2026-08-22
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SESSION ANALYSIS — derived, never hardcoded.
+   Every tile reads a real CSV column and is dropped when that column is empty,
+   so the panel can't drift into quoting numbers from a session months old.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function sessionMetrics(a) {
+  if (!a) return [];
+  const n = k => parseNum(a[k]);
+  const out = [];
+  const push = (label, value, note, tone) => out.push({ label, value, note, tone });
+
+  push("Duration", fmtDur(a._dur), a._dist > 0 ? `${a._dist.toFixed(2)} km covered` : "total session", "ink");
+  if (a._avgHR > 0) {
+    const t = a._avgHR > 167 ? "bad" : a._avgHR > 146 ? "warn" : "ok";
+    push("Avg HR", `${a._avgHR}`, `bpm · zone ${a._avgHR > 167 ? "E" : a._avgHR > 146 ? "D" : a._avgHR > 132 ? "C" : a._avgHR > 115 ? "B" : "A"}`, t);
+  }
+  if (n("Max HR")) push("Max HR", `${n("Max HR")}`, `bpm · ${Math.round(n("Max HR")/177*100)}% of ceiling`, "ink");
+  if (n("Aerobic TE")) {
+    const te = n("Aerobic TE");
+    push("Aerobic TE", te.toFixed(1), te >= 4 ? "high — needs recovery" : te >= 3 ? "maintaining/improving" : "easy stimulus", te >= 4 ? "warn" : "ok");
+  }
+  const gct = n("Avg Ground Contact Time");
+  if (gct) push("GCT", `${Math.round(gct)}`, gct < 380 ? "ms · under race target ✓" : "ms · target <380 at race pace", gct < 380 ? "ok" : "warn");
+  const vr = n("Avg Vertical Ratio");
+  if (vr) push("Vert ratio", `${vr}`, vr < 9 ? "% · efficient ✓" : "% · lean forward, drive hips", vr < 9 ? "ok" : "warn");
+  const bal = a["Avg GCT Balance"];
+  if (bal && bal !== "--") {
+    const l = parseFloat(String(bal).replace(",", "."));
+    const off = Math.abs(l - 50) > 2;
+    push("GCT balance", bal, off ? "asymmetric — monitor" : "balanced ✓", off ? "warn" : "ok");
+  }
+  const np = n("Normalized Power® (NP®)");
+  if (np) push("Norm power", `${Math.round(np)}`, "W · running power output", "ink");
+  const resp = n("Avg Resp");
+  if (resp) push("Avg resp", `${resp}`, n("Max Resp") ? `br/min · peak ${n("Max Resp")}` : "br/min", "ink");
+  const bb = n("Body Battery Drain");
+  if (bb) push("Body battery", `−${Math.round(bb)}`, bb < 20 ? "light drain — well paced ✓" : "significant drain", bb < 20 ? "ok" : "warn");
+  const speed = a["Avg Speed"];
+  if (speed && speed !== "--" && isRun(a)) push("Avg pace", speedToPace(speed).replace("/km",""), "min/km", "ink");
+  return out;
+}
+
+/* ── coaching notes, generated from the actual data in view ──────────────── */
+function buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, sleepMin, rhr }) {
+  const notes = [];
+  const hy = yesterday.find(isHyrox), rn = yesterday.find(a => isRun(a) && a._avgHR > 120);
+  const key = hy || rn;
+  if (key) {
+    notes.push({ tone:"accent", text:`${key.Title || key["Activity Type"]}: ${fmtDur(key._dur)}${key._avgHR ? ` · HR ${key._avgHR} avg` : ""}${parseNum(key["Max HR"]) ? `/${parseNum(key["Max HR"])} max` : ""}${key._dist > 0 ? ` · ${key._dist.toFixed(2)} km` : ""}.` });
+    const gct = parseNum(key["Avg Ground Contact Time"]);
+    if (gct) notes.push({ tone: gct < 380 ? "ok" : "warn", text:`Ground contact ${Math.round(gct)}ms — ${gct < 380 ? "inside the sub-380ms race-pace target." : "above the 380ms race target: raise cadence, cut the bounce."}` });
+    const vr = parseNum(key["Avg Vertical Ratio"]);
+    if (vr) notes.push({ tone: vr < 9 ? "ok" : "warn", text:`Vertical ratio ${vr}% — ${vr < 9 ? "efficient mechanics." : "too much vertical travel; lean forward and drive the hips."}` });
+  }
+  if (yesterday.some(isRecovery)) notes.push({ tone:"ok", text:"Sauna logged — speeds glycogen resynthesis and parasympathetic rebound, and doubles as Athens heat prep." });
+  if (hrv && hrvBaseline) {
+    const d = hrv - hrvBaseline;
+    notes.push({ tone: d >= 0 ? "ok" : d > -10 ? "warn" : "bad",
+      text:`HRV ${hrv}ms vs ${hrvBaseline}ms baseline (${d >= 0 ? "+" : ""}${d}). ${d >= 10 ? "Strongly recovered — the hard session is on." : d >= 0 ? "Recovered and absorbing load well." : d > -10 ? "Slightly suppressed — keep intensity honest." : "Suppressed — favour easy volume or rest."}${rhr ? ` RHR ${rhr}bpm.` : ""}` });
+  }
+  if (sleepMin) notes.push({ tone: sleepMin >= 420 ? "ok" : sleepMin >= 360 ? "warn" : "bad", text:`Slept ${fmtMin(sleepMin)} last night — ${sleepMin >= 420 ? "enough to support a quality session." : sleepMin >= 360 ? "short of ideal; protect tonight." : "well short. Cut intensity, not volume."}` });
+  notes.push({ tone:"mute", text:`Running ${weeklyKm.toFixed(1)} km logged over the last 7 days · ATL ${atl.toFixed(0)} · CTL ${ctl.toFixed(0)} · form ${tsb >= 0 ? "+" : ""}${tsb.toFixed(0)}.` });
+  return notes;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TODAY
+   ═══════════════════════════════════════════════════════════════════════════ */
+function TodayView({ ana, health }) {
+  const { yesterday, tsb, atl, ctl, daysSinceHard, weeklyKm } = ana;
+  const daily = health.daily;
+  const today = daily[daily.length - 1] || {};
+  const lastSleep = health.sleep[health.sleep.length - 1];
+  const sleepMin = lastSleep ? lastSleep.deep + lastSleep.rem + lastSleep.light : null;
+  const hrv = today.hrv || null;
+
+  const R = readiness(tsb, daysSinceHard, hrv, hrvBaseline);
+  const tone = R >= 7 ? "ok" : R >= 4 ? "warn" : "bad";
+  const label = R >= 7 ? "READY TO PUSH" : R >= 4 ? "TRAIN SMART" : "TAKE IT EASY";
+  const headline = R >= 7
+    ? "Recovery is ahead of load — take the quality session as written."
+    : R >= 4
+    ? "Recovered enough for controlled work. Hold the prescribed paces, skip the extras."
+    : "Load is stacking faster than you're clearing it. Easy volume or rest.";
+
+  const todaySched = SCHEDULE.flatMap(w => w.days).find(d => d.date === TODAY);
+  const keyAct = yesterday.find(isHyrox) || yesterday.find(a => isRun(a) && a._avgHR > 120) || yesterday[0];
+  const metrics = sessionMetrics(keyAct);
+  const notes = buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, sleepMin, rhr:today.rhr });
+
+  const hrvPct = hrv && hrvBaseline ? Math.min(140, (hrv / hrvBaseline) * 100) : 0;
+  const recent = daily.slice(-21);
+
+  return (
+    <div className="fade">
+      {/* ── READINESS HERO ────────────────────────────────────────────── */}
+      <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
+        <div style={{ display:"flex", gap:22, padding:"20px 22px", flexWrap:"wrap", alignItems:"center",
+                      background:`linear-gradient(135deg, ${TONE_BG[tone]}, transparent 60%)` }}>
+          <Ring value={R} max={10} tone={tone} label="/10" size={128} stroke={10} />
+          <div style={{ flex:1, minWidth:240 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:9, flexWrap:"wrap" }}>
+              <span style={{ fontSize:15, fontWeight:800, letterSpacing:"0.11em", color:TONE[tone] }}>{label}</span>
+              <Tag tone={tsb >= 5 ? "ok" : tsb >= -10 ? "info" : tsb >= -20 ? "warn" : "bad"}>
+                FORM {tsb >= 0 ? "+" : ""}{tsb.toFixed(0)}
+              </Tag>
+            </div>
+            <p style={{ margin:"8px 0 0", fontSize:14, color:T.ink, lineHeight:1.55, maxWidth:560 }}>{headline}</p>
+            {hrv && (
+              <div style={{ marginTop:14, maxWidth:400 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", fontSize:10.5, color:T.ink3, marginBottom:5 }}>
+                  <span>HRV vs baseline</span>
+                  <span className="num" style={{ color:TONE[tone], fontWeight:700 }}>{hrv}ms / {hrvBaseline}ms</span>
+                </div>
+                <div style={{ position:"relative" }}>
+                  <Bar value={(hrvPct / 140) * 100} tone={tone} height={7} />
+                  <div style={{ position:"absolute", left:`${(100/140)*100}%`, top:-3, width:2, height:13, background:T.ink3, borderRadius:1 }} title="baseline" />
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="grid g4" style={{ flex:"1 1 300px", minWidth:260 }}>
+            <Stat pad={12} label="HRV" value={hrv ?? "—"} unit="ms" sub={`base ${hrvBaseline}`} tone={hrv ? (hrv >= hrvBaseline ? "ok" : hrv >= hrvBaseline - 10 ? "warn" : "bad") : "mute"} />
+            <Stat pad={12} label="RHR" value={today.rhr ?? "—"} unit="bpm" sub="40–46 typical" tone={today.rhr && today.rhr <= 46 ? "ok" : "warn"} />
+            <Stat pad={12} label="Sleep" value={sleepMin ? fmtMin(sleepMin) : "—"} sub={today.sleep_score != null ? `score ${today.sleep_score}` : "last night"} tone={sleepMin ? (sleepMin >= 420 ? "ok" : sleepMin >= 360 ? "warn" : "bad") : "mute"} />
+            <Stat pad={12} label="Load" value={atl.toFixed(0)} sub={`fitness ${ctl.toFixed(0)}`} tone="info" />
+          </div>
+        </div>
+        {recent.length > 3 && (
+          <div style={{ borderTop:`1px solid ${T.lineDim}`, padding:"10px 22px 6px" }}>
+            <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3, marginBottom:2 }}>HRV · LAST 3 WEEKS</div>
+            <Sparkline data={recent.map(d => [d.date, d.hrv])} color={T.accent} height={54} />
+          </div>
+        )}
+      </Card>
+
+      <div className="split">
+        {/* ── LEFT: what to do, what was done ─────────────────────────── */}
+        <div>
+          <Sec title="Today's plan" sub={new Date(TODAY).toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" })}>
+            {(todaySched?.sessions || []).length === 0 && <Card><Empty>Nothing scheduled — the plan has you free today.</Empty></Card>}
+            {(todaySched?.sessions || []).map((s, i) => {
+              const st = SS[s.type] || SS.plan;
+              return (
+                <div key={i} style={{ display:"flex", gap:11, padding:"13px 15px", marginBottom:8, background:st.bg,
+                                      border:`1px solid ${st.border}`, borderRadius:12 }}>
+                  <div style={{ width:8, height:8, borderRadius:"50%", background:st.dot, marginTop:6, flexShrink:0 }} />
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ fontSize:13.5, fontWeight:600, color:st.text, lineHeight:1.5 }}>{s.text}</div>
+                    {s.cal && <div style={{ fontSize:9, fontWeight:800, letterSpacing:"0.1em", color:st.dot, marginTop:5 }}>IN CALENDAR</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </Sec>
+
+          <Sec title="Yesterday" right={yesterday.length ? `${yesterday.length} session${yesterday.length > 1 ? "s" : ""}` : null}>
+            {yesterday.length === 0 && <Card><Empty>No activity recorded yesterday.</Empty></Card>}
+            {yesterday.map((a, i) => (
+              <Card key={i} pad={13} style={{ marginBottom:8, display:"flex", alignItems:"center", gap:12 }}>
+                <span style={{ fontSize:20, width:26, textAlign:"center", flexShrink:0 }}>{getEmoji(a)}</span>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:getColor(a) }}>{a.Title || a["Activity Type"]}</div>
+                  <div className="num" style={{ fontSize:11.5, color:T.ink3, marginTop:3 }}>
+                    {fmtDur(a._dur)}
+                    {a._avgHR > 0 ? ` · ♥ ${a._avgHR}${parseNum(a["Max HR"]) ? `/${parseNum(a["Max HR"])}` : ""}` : ""}
+                    {a._dist > 0 ? ` · ${a._dist.toFixed(1)} km` : ""}
+                    {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
+                  </div>
+                </div>
+                {a._trimp > 0 && <Tag tone={a._trimp > 80 ? "bad" : a._trimp > 40 ? "warn" : "ok"}>TRIMP {a._trimp.toFixed(0)}</Tag>}
+              </Card>
+            ))}
+          </Sec>
+
+          {metrics.length > 0 && (
+            <Sec title="Session analysis" sub={keyAct ? `${keyAct.Title || keyAct["Activity Type"]} · ${keyAct._date}` : null}>
+              <div className="grid g4">
+                {metrics.map((m, i) => (
+                  <Stat key={i} pad={12} label={m.label} value={m.value} sub={m.note} tone={m.tone} accentBar />
+                ))}
+              </div>
+            </Sec>
+          )}
+
+          <Sec title="Next up" sub="Rest of this week">
+            <Card pad={13}>
+              {SCHEDULE.flatMap(w => w.days).filter(d => d.date > TODAY).slice(0, 5).map((d, i) => (
+                <div key={i} style={{ display:"flex", gap:11, padding:"8px 0", borderBottom: i < 4 ? `1px solid ${T.lineDim}` : "none" }}>
+                  <div style={{ minWidth:38, fontSize:10, fontWeight:800, letterSpacing:"0.08em", color:T.ink3, paddingTop:2 }}>{d.dow}</div>
+                  <div style={{ flex:1, minWidth:0, fontSize:11.5, color:T.ink2, lineHeight:1.5 }}>
+                    {d.sessions.map((s, si) => <div key={si} style={{ marginBottom: si < d.sessions.length - 1 ? 3 : 0 }}>{s.text}</div>)}
+                  </div>
+                </div>
+              ))}
+            </Card>
+          </Sec>
+        </div>
+
+        {/* ── RIGHT RAIL: coaching ────────────────────────────────────── */}
+        <div>
+          <Sec title="Coach notes">
+            <Card pad={13}>
+              {notes.map((n, i) => <Note key={i} tone={n.tone}>{n.text}</Note>)}
+              <div style={{ fontSize:10.5, color:T.ink3, marginTop:6, lineHeight:1.5 }}>
+                Generated from the last sync — no fixed text, so it moves with the data.
+              </div>
+            </Card>
+          </Sec>
+
+          <Sec title="Recovery snapshot" sub="Overnight, from Garmin">
+            <div className="grid g2">
+              <Stat label="HRV" value={today.hrv ?? "—"} unit="ms" sub={`7d avg ${avgOf(daily.slice(-7).map(d => d.hrv))} · baseline ${hrvBaseline}`} tone={hrv >= hrvBaseline ? "ok" : "warn"} />
+              <Stat label="Resting HR" value={today.rhr ?? "—"} unit="bpm" sub="athlete range 40–46" tone={today.rhr <= 46 ? "ok" : "warn"} />
+              <Stat label="SpO₂" value={today.spo2 != null ? `${today.spo2}%` : "—"} sub="normal >95%" tone={today.spo2 >= 95 ? "ok" : "warn"} />
+              <Stat label="Respiration" value={today.resp ?? "—"} unit="br/min" sub="baseline 10.7–13.7" tone={today.resp && today.resp <= 14 ? "ok" : "warn"} />
+            </div>
+          </Sec>
+
+        </div>
       </div>
-      <div style={{ padding:"12px 14px 40px" }}>
+    </div>
+  );
+}
+
+/* ── segmented sub-navigation ────────────────────────────────────────────── */
+function SubNav({ items, value, onChange }) {
+  return (
+    <div className="scroll-x no-bar" style={{ display:"flex", gap:4, padding:3, background:T.bgSoft,
+      border:`1px solid ${T.line}`, borderRadius:11, marginBottom:18, width:"fit-content", maxWidth:"100%" }}>
+      {items.map(([k, l]) => (
+        <button key={k} className="tap" onClick={() => onChange(k)} style={{
+          padding:"7px 15px", borderRadius:8, fontSize:11.5, fontWeight:700, whiteSpace:"nowrap",
+          letterSpacing:"0.04em", cursor:"pointer", transition:"all .16s ease",
+          background: value === k ? T.accent : "transparent",
+          color: value === k ? "#fff" : T.ink3,
+        }}>{l}</button>
+      ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRAIN — plan · load · log
+   ═══════════════════════════════════════════════════════════════════════════ */
+function PlanBoard({ activities }) {
+  const todayWk = SCHEDULE.findIndex(w => w.days.some(d => d.date === TODAY));
+  const [wk, setWk] = useState(Math.max(0, todayWk));
+  const week = SCHEDULE[wk];
+  const raceIdx = SCHEDULE.findIndex(w => w.days.some(d => d.sessions.some(s => s.type === "race")));
+
+  return (
+    <div>
+      <div className="scroll-x no-bar" style={{ display:"flex", gap:7, marginBottom:14 }}>
+        {SCHEDULE.map((w, i) => (
+          <Chip key={i} active={wk === i} tone={i === raceIdx ? "warn" : "accent"} onClick={() => setWk(i)}>
+            WK{w.week}{i === raceIdx ? " 🏁" : ""}{i === todayWk ? " ●" : ""}
+          </Chip>
+        ))}
+      </div>
+
+      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", gap:12, flexWrap:"wrap", marginBottom:14 }}>
+        <div>
+          <div style={{ fontSize:18, fontWeight:800, color:T.ink, letterSpacing:"-0.01em" }}>{week.theme}</div>
+          <div style={{ fontSize:11.5, color:T.ink3, marginTop:2 }}>Week {week.week} · {week.label}</div>
+        </div>
+        {(() => {
+          const t = getWeekTarget(week.days[0].date, week.days[week.days.length-1].date);
+          return t.hi > 0 ? <Tag tone="accent">TARGET {t.lo}–{t.hi} TRIMP</Tag> : null;
+        })()}
+      </div>
+
+      <div className="weekgrid">
         {week.days.map((day, di) => {
           const isToday = day.date === TODAY, isPast = day.date < TODAY;
           const done = activities.filter(a => a._date === day.date);
           return (
-            <div key={di} style={{ display:"flex", gap:10, marginBottom:10, opacity: isPast && !isToday ? 0.5 : 1 }}>
-              <div style={{ minWidth:44, textAlign:"right", paddingTop:5 }}>
-                <div style={{ fontSize:10, fontWeight:700, letterSpacing:1, color: isToday ? "#7c3aed" : "#94a3b8" }}>{day.dow}</div>
-                <div style={{ fontSize:9, color:"#cbd5e1", marginTop:1 }}>{day.label.replace("May ","").replace("Apr ","")}</div>
+            <div key={di} style={{
+              background: isToday ? "rgba(139,92,246,0.07)" : T.panel,
+              border:`1px solid ${isToday ? T.accent : T.line}`,
+              borderRadius:13, padding:"11px 12px", opacity: isPast && !isToday ? 0.55 : 1,
+              display:"flex", flexDirection:"column", gap:7, minWidth:0,
+            }}>
+              <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", gap:6 }}>
+                <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.1em", color: isToday ? T.accentIn : T.ink2 }}>{day.dow}</span>
+                <span style={{ fontSize:10, color:T.ink3 }}>{day.label}</span>
               </div>
-              <div style={{ flex:1 }}>
-                {isToday && <div style={{ fontSize:9, fontWeight:800, color:"#7c3aed", letterSpacing:2, marginBottom:5 }}>● TODAY</div>}
-                {done.map((a, ai) => (
-                  <div key={ai} style={{ padding:"6px 10px", marginBottom:4, background:getColor(a)+"18", border:`1.5px solid ${getColor(a)}44`, borderRadius:6, display:"flex", alignItems:"center", gap:8 }}>
-                    <span style={{ fontSize:14 }}>{getEmoji(a)}</span>
-                    <div>
-                      <span style={{ fontSize:11, color:getColor(a), fontWeight:700 }}>✓ {a.Title || a["Activity Type"]}</span>
-                      <span style={{ fontSize:10, color:"#64748b", marginLeft:8 }}>{fmtDur(a._dur)}{a._avgHR > 0 ? ` · HR ${a._avgHR}` : ""}</span>
+              {isToday && <div style={{ fontSize:9, fontWeight:800, letterSpacing:"0.14em", color:T.accent }}>● TODAY</div>}
+
+              {done.map((a, ai) => (
+                <div key={ai} style={{ display:"flex", alignItems:"center", gap:7, padding:"6px 8px",
+                  background:"rgba(52,211,153,0.08)", border:`1px solid ${T.ok}33`, borderRadius:8 }}>
+                  <span style={{ fontSize:12 }}>{getEmoji(a)}</span>
+                  <div style={{ minWidth:0, flex:1 }}>
+                    <div style={{ fontSize:10.5, fontWeight:700, color:T.ok, lineHeight:1.35, overflowWrap:"anywhere" }}>
+                      ✓ {a.Title || a["Activity Type"]}
+                    </div>
+                    <div className="num" style={{ fontSize:9.5, color:T.ink3 }}>{fmtDur(a._dur)}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""}</div>
+                  </div>
+                </div>
+              ))}
+
+              {day.sessions.map((s, si) => {
+                const st = SS[s.type] || SS.plan;
+                return (
+                  <div key={si} style={{ display:"flex", gap:7, padding:"7px 9px", background:st.bg,
+                                         border:`1px solid ${st.border}`, borderRadius:8 }}>
+                    <div style={{ width:6, height:6, borderRadius:"50%", background:st.dot, marginTop:5, flexShrink:0 }} />
+                    <div style={{ fontSize:11, color:st.text, lineHeight:1.5, minWidth:0 }}>
+                      {s.text}
+                      {s.cal && <span style={{ fontSize:8.5, fontWeight:800, color:st.dot, marginLeft:6, letterSpacing:"0.08em" }}>CAL</span>}
                     </div>
                   </div>
-                ))}
-                {day.sessions.map((s, si) => {
-                  const st = SS[s.type] || SS.plan;
-                  return (
-                    <div key={si} style={{ padding:"6px 10px", marginBottom:4, background:st.bg, border:`1px solid ${st.border}`, borderRadius:6, display:"flex", alignItems:"flex-start", gap:8 }}>
-                      <div style={{ width:7, height:7, borderRadius:"50%", background:st.dot, marginTop:4, flexShrink:0 }} />
-                      <span style={{ fontSize:11, color:st.text, lineHeight:1.55 }}>
-                        {s.text}
-                        {s.cal && <span style={{ fontSize:8, color:st.dot, opacity:0.7, marginLeft:6, fontWeight:700 }}>CAL</span>}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+                );
+              })}
             </div>
           );
         })}
@@ -1092,1619 +1647,1356 @@ function ScheduleView({ activities }) {
   );
 }
 
-function HyroxView() {
-  // Convert HYROX_DATA map to a date-sorted array for picker UX
-  const sessions = Object.entries(HYROX_DATA)
-    .map(([id, s]) => ({ id, ...s }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+function LoadPanel({ ana, activities }) {
+  const { atl, ctl, tsb, weeklyTrimp, zoneMinutes, totalZoneMin, paceTrend } = ana;
+  const formTone = tsb >= 5 ? "ok" : tsb >= -10 ? "info" : tsb >= -20 ? "warn" : "bad";
+  const formWord = tsb >= 5 ? "fresh" : tsb >= -10 ? "optimal" : tsb >= -20 ? "tired" : "fatigued";
+  const formMsg = tsb >= 5 ? "Fresh — green light for a hard session."
+    : tsb >= -10 ? "Normal training fatigue. Prescribed load is fine."
+    : tsb >= -20 ? "Fatigue accumulating — protect sleep and keep intensity controlled."
+    : "High fatigue — favour recovery or easy volume.";
 
-  const [tab, setTab] = useState("session");        // 'session' | 'trends' | 'notes'
-  const [selIdx, setSelIdx] = useState(Math.max(0, sessions.length - 1));
-
-  if (!sessions.length) return (
-    <div style={{ padding:"40px 14px", textAlign:"center", color:"#94a3b8", fontSize:13 }}>
-      No Hyrox sessions yet. They'll auto-appear here when you do an activity named with "hyrox" or "race simulation".
-    </div>
-  );
-
-  const s = sessions[selIdx];
-
-  // ── Derived: runs / stations / warmup / cooldown from classified laps ────────
-  // Lap structure: { i, t, avgHr?, maxHr?, dist?, role }
-  // role is auto-set by update.py; baseline session has manual roles.
-  const allLaps    = s.laps || [];
-  const runLaps    = allLaps.filter(l => l.role === "run");
-  const stationLaps= allLaps.filter(l => l.role === "station");
-  const warmupLaps = allLaps.filter(l => l.role === "warmup" || l.role === "cooldown");
-
-  const runTimes   = runLaps.map(l => l.t);
-  const stationT   = stationLaps.map(l => l.t);
-  const totalRun   = runTimes.reduce((a,b)=>a+b, 0);
-  const totalStat  = stationT.reduce((a,b)=>a+b, 0);
-  const avgRunPace = runTimes.length ? totalRun / runTimes.length : 0;
-  const fastestRun = runTimes.length ? Math.min(...runTimes) : 0;
-  const slowestRun = runTimes.length ? Math.max(...runTimes) : 0;
-  const maxRunSec  = slowestRun || 1;
-  const minRunSec  = fastestRun || 0;
-  const runRange   = (maxRunSec - minRunSec) || 1;
-  const maxStTime  = stationT.length ? Math.max(...stationT) : 1;
-
-  // Station display name: stationNames[lap.i] if set, else "Station N" (numbered in order)
-  const stationDisplay = (lap, idx) => (s.stationNames && s.stationNames[lap.i]) || `Station ${idx + 1}`;
-
-  // ── Official-results override ────────────────────────────────────────────────
-  // If s.official is present (e.g. uploaded from a Hyrox/ROXFIT result), it is the
-  // source of truth for TIMES and RANKS. Garmin laps still supply HR (avg/max),
-  // since official results carry no heart-rate data. Structure:
-  //   official: {
-  //     finishTime: 4496,                        // seconds (optional; overrides s.totalTime)
-  //     roxzone: { time: 318, rank: 355 },       // optional
-  //     runs:     [{ time: 327, rank: 296 }, ...],        // in race order, R1..Rn
-  //     stations: [{ name:"Ski Erg 1000 m", time: 279, rank: 535 }, ...],  // in race order
-  //   }
-  // Matching to Garmin laps for HR: runs match by order (i-th official run ↔ i-th run lap);
-  // stations match by name (official.stations[k].name ↔ stationNames[lap.i]), falling back
-  // to order if names don't line up. Missing HR just renders blank — never blocks the time.
-  const official = s.official || null;
-  const hasOfficial = !!official;
-
-  // Build HR lookup from Garmin laps
-  const runHrByOrder = runLaps.map(l => ({ avgHr: l.avgHr, maxHr: l.maxHr }));
-  const stationHrByName = {};
-  stationLaps.forEach((l, idx) => {
-    const nm = (s.stationNames && s.stationNames[l.i]) || null;
-    if (nm) stationHrByName[nm] = { avgHr: l.avgHr, maxHr: l.maxHr };
-  });
-  const stationHrByOrder = stationLaps.map(l => ({ avgHr: l.avgHr, maxHr: l.maxHr }));
-
-  // Merged views: official time/rank + Garmin HR. Fall back to raw laps when no official.
-  const mergedRuns = hasOfficial && official.runs
-    ? official.runs.map((r, i) => ({
-        i: i + 1, t: r.time, rank: r.rank ?? null,
-        avgHr: (runHrByOrder[i] || {}).avgHr ?? null,
-        maxHr: (runHrByOrder[i] || {}).maxHr ?? null,
-      }))
-    : runLaps.map((l, i) => ({ i: i + 1, t: l.t, rank: null, avgHr: l.avgHr ?? null, maxHr: l.maxHr ?? null }));
-
-  const mergedStations = hasOfficial && official.stations
-    ? official.stations.map((st, i) => {
-        const hr = stationHrByName[st.name] || stationHrByOrder[i] || {};
-        return { i: i + 1, name: st.name, t: st.time, rank: st.rank ?? null,
-                 avgHr: hr.avgHr ?? null, maxHr: hr.maxHr ?? null };
-      })
-    : stationLaps.map((l, i) => ({ i: i + 1, name: stationDisplay(l, i), t: l.t, rank: null,
-                                   avgHr: l.avgHr ?? null, maxHr: l.maxHr ?? null, dist: l.dist }));
-
-  // Recompute totals from merged (official) data when present
-  const mRunTimes  = mergedRuns.map(r => r.t);
-  const mStatTimes = mergedStations.map(st => st.t);
-  const mTotalRun  = mRunTimes.reduce((a,b)=>a+b, 0);
-  const mTotalStat = mStatTimes.reduce((a,b)=>a+b, 0);
-  const mAvgRun    = mRunTimes.length ? mTotalRun / mRunTimes.length : 0;
-  const mFastRun   = mRunTimes.length ? Math.min(...mRunTimes) : 0;
-  const mSlowRun   = mRunTimes.length ? Math.max(...mRunTimes) : 0;
-  const mMaxStTime = mStatTimes.length ? Math.max(...mStatTimes) : 1;
-  const mMaxRunSec = mSlowRun || 1;
-  const mRunRange  = (mSlowRun - mFastRun) || 1;
-  const displayTotal = hasOfficial && official.finishTime ? official.finishTime : s.totalTime;
-  const hrColorFor = (hr) => hr ? (hr > 167 ? "#dc2626" : hr > 146 ? "#ea580c" : hr > 132 ? "#d97706" : "#16a34a") : "#94a3b8";
-
-  // ── Notes (manual, persisted to localStorage per session) ───────────────────
-  const noteKey = `hyrox-notes-${s.id}`;
-  const [noteText, setNoteText] = useState(() => {
-    if (typeof window === "undefined") return s.notes || "";
-    return window.localStorage.getItem(noteKey) || s.notes || "";
-  });
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(noteKey, noteText);
-  }, [noteText, noteKey]);
-
-  const Stat = ({ label, value, sub, color, bg, border }) => (
-    <div style={{ padding:"10px 12px", background: bg || "#f8fafc", border:`1.5px solid ${border || "#e2e8f0"}`, borderRadius:10, flex:1, minWidth:0 }}>
-      <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1, textTransform:"uppercase" }}>{label}</div>
-      <div style={{ fontSize:18, fontWeight:900, color: color || "#1e293b", lineHeight:1.1, marginTop:3 }}>{value}</div>
-      {sub && <div style={{ fontSize:10, color:"#64748b", marginTop:2 }}>{sub}</div>}
-    </div>
-  );
-
-  // ── Tab navigation ───────────────────────────────────────────────────────────
-  const TabBtn = ({ id, label }) => (
-    <button onClick={() => setTab(id)} style={{
-      padding:"7px 14px", borderRadius:7, fontSize:11, fontWeight:700,
-      cursor:"pointer", border:"1.5px solid",
-      borderColor: tab === id ? "#7c3aed" : "#e2e8f0",
-      background:  tab === id ? "#ede9fe" : "#fff",
-      color:       tab === id ? "#4c1d95" : "#64748b",
-      fontFamily:"inherit",
-    }}>{label}</button>
-  );
+  const days = [];
+  for (let d = 13; d >= 0; d--) {
+    const acts = activities.filter(a => a._days === d);
+    const base = new Date(TODAY); base.setDate(base.getDate() - d);
+    days.push({ d, acts, total: acts.reduce((s, a) => s + a._trimp, 0), date: base });
+  }
+  const maxDay = Math.max(...days.map(x => x.total), 60);
+  // Shared x-scale for the weekly roadmap: the biggest actual week or target,
+  // whichever is larger, plus a little headroom.
+  const roadmapMax = Math.max(
+    ...weeklyTrimp.map(w => w.trimp),
+    ...weeklyTrimp.map(w => getWeekTarget(w.weekStartISO, w.weekEndISO).hi),
+    1) * 1.05;
 
   return (
-    <div style={{ padding:"14px 14px 60px" }}>
-
-      {/* Tab switcher */}
-      <div style={{ display:"flex", gap:6, marginBottom:14 }}>
-        <TabBtn id="session" label="Session" />
-        <TabBtn id="trends" label="Trends" />
-        <TabBtn id="notes"  label="Notes" />
+    <div>
+      <div className="grid g3" style={{ marginBottom:12 }}>
+        <Stat label="ATL · fatigue" value={atl.toFixed(0)} sub="7-day acute load" tone="bad" accentBar />
+        <Stat label="CTL · fitness" value={ctl.toFixed(0)} sub="42-day chronic load" tone="ok" accentBar />
+        <Stat label="Form · TSB" value={`${tsb >= 0 ? "+" : ""}${tsb.toFixed(0)}`} sub={formWord} tone={formTone} accentBar />
       </div>
+      <Note tone={formTone}>{formMsg}</Note>
 
-      {/* Session picker (always visible — switching sessions while on Trends still useful) */}
-      {sessions.length > 1 && (
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:14, overflowX:"auto" }}>
-          {sessions.map((sess, i) => (
-            <button key={sess.id} onClick={() => setSelIdx(i)} style={{
-              padding:"4px 12px", borderRadius:6, fontSize:11, fontWeight:700,
-              cursor:"pointer", border:"1.5px solid",
-              borderColor: i === selIdx ? "#7c3aed" : "#e2e8f0",
-              background:  i === selIdx ? "#ede9fe" : "#f8fafc",
-              color:       i === selIdx ? "#4c1d95" : "#94a3b8",
-              fontFamily:"inherit", whiteSpace:"nowrap",
-            }}>
-              {sess.date} · {sess.type || "?"}
-            </button>
-          ))}
+      <Sec title="Daily load" sub="Last 14 days · TRIMP per day" style={{ marginTop:22 }}>
+        <Card pad={16}>
+          <div style={{ display:"flex", alignItems:"flex-end", gap:4, height:130 }}>
+            {days.map((x, i) => {
+              const h = Math.max(2, (x.total / maxDay) * 100);
+              const tone = x.total > 90 ? "bad" : x.total > 45 ? "warn" : x.total > 0 ? "ok" : "mute";
+              return (
+                <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:0 }}
+                     title={`${x.date.toDateString()} — TRIMP ${x.total.toFixed(0)}`}>
+                  <div className="num" style={{ fontSize:9, color: x.total > 0 ? TONE[tone] : "transparent" }}>{x.total.toFixed(0)}</div>
+                  <div style={{ width:"100%", height:78, display:"flex", alignItems:"flex-end" }}>
+                    <div style={{ width:"100%", height:`${h}%`, background:TONE[tone], opacity: x.d === 0 ? 1 : 0.75,
+                                  borderRadius:"4px 4px 2px 2px", transition:"height .5s ease" }} />
+                  </div>
+                  <div style={{ fontSize:11, height:14 }}>{x.acts.slice(0,1).map((a, ai) => <span key={ai}>{getEmoji(a)}</span>)}</div>
+                  <div style={{ fontSize:8.5, color: x.d === 0 ? T.accentIn : T.ink3, whiteSpace:"nowrap" }}>
+                    {x.d === 0 ? "today" : x.date.toLocaleDateString("en", { day:"numeric" })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </Sec>
+
+      <Sec title="Weekly roadmap" sub="Actual TRIMP against this phase's target band · rolling 7-day weeks">
+        <Card pad={16}>
+          {weeklyTrimp.map((w, i) => {
+            const isCurrent = w.weekStartISO <= TODAY && w.weekEndISO >= TODAY;
+            const isPast = w.weekEndISO < TODAY;
+            const { lo, hi, theme } = getWeekTarget(w.weekStartISO, w.weekEndISO);
+            // One shared scale across every row. Capping each bar at its own
+            // target made a 703 week and a 500 week both render as a full bar.
+            const p = roadmapMax > 0 ? (w.trimp / roadmapMax) * 100 : 0;
+            const status = w.trimp === 0 || hi === 0 ? "mute" : (w.trimp >= lo && w.trimp <= hi) ? "ok" : w.trimp > hi ? "warn" : "bad";
+            const loPct = roadmapMax > 0 ? (lo / roadmapMax) * 100 : 0;
+            const hiPct = roadmapMax > 0 ? (hi / roadmapMax) * 100 : 0;
+            return (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:11, marginBottom:11, opacity: isPast && !isCurrent ? 0.6 : 1 }}>
+                <div style={{ minWidth:104 }}>
+                  <div style={{ fontSize:11.5, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? T.accentIn : T.ink }}>
+                    {w.label}{isCurrent && " ←"}
+                  </div>
+                  <div style={{ fontSize:9.5, color:T.ink3 }}>{theme}</div>
+                </div>
+                <div style={{ flex:1, background:T.lineDim, borderRadius:6, height:22, position:"relative", overflow:"hidden", minWidth:60 }}>
+                  {hi > 0 && <div style={{ position:"absolute", left:`${loPct}%`, width:`${Math.max(0, hiPct - loPct)}%`,
+                    top:0, bottom:0, background:"rgba(52,211,153,0.12)" }} />}
+                  <div style={{ height:"100%", width:`${p}%`, background:TONE[status], opacity:0.85, borderRadius:6, transition:"width .5s ease" }} />
+                  {hi > 0 && <>
+                    <div style={{ position:"absolute", left:`${loPct}%`, top:0, bottom:0, width:2, background:T.ok, opacity:0.75 }} />
+                    <div style={{ position:"absolute", left:`${hiPct}%`, top:0, bottom:0, width:2, background:T.warn, opacity:0.75 }} />
+                  </>}
+                </div>
+                <div className="num" style={{ fontSize:12.5, fontWeight:800, color:TONE[status], minWidth:36, textAlign:"right" }}>
+                  {w.trimp > 0 ? w.trimp : "—"}
+                </div>
+                <div className="num" style={{ fontSize:9.5, color:T.ink3, minWidth:54, textAlign:"right" }}>{hi > 0 ? `${lo}–${hi}` : "rest"}</div>
+              </div>
+            );
+          })}
+          <div style={{ display:"flex", gap:14, marginTop:10, paddingTop:10, borderTop:`1px solid ${T.lineDim}`, fontSize:10, color:T.ink3, flexWrap:"wrap" }}>
+            {[["ok","In target band"],["warn","Over target"],["bad","Under target"]].map(([t, l]) => (
+              <span key={l} style={{ display:"flex", alignItems:"center", gap:5 }}>
+                <span style={{ width:9, height:9, borderRadius:3, background:TONE[t] }} />{l}
+              </span>
+            ))}
+          </div>
+        </Card>
+      </Sec>
+
+      <Sec title="Upcoming phases" sub="Planned targets through race day">
+        <div className="grid g2">
+          {TAPER_PLAN.filter(b => b.start > TODAY).map((b, i) => {
+            const sd = new Date(b.start), ed = new Date(b.end);
+            const lbl = sd.getMonth() === ed.getMonth()
+              ? `${MON[sd.getMonth()]} ${sd.getDate()}–${ed.getDate()}`
+              : `${MON[sd.getMonth()]} ${sd.getDate()}–${MON[ed.getMonth()]} ${ed.getDate()}`;
+            return (
+              <Card key={i} pad={14} style={{ borderStyle:"dashed" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8 }}>
+                  <span style={{ fontSize:12.5, fontWeight:800, color:T.ink }}>{b.theme}</span>
+                  <span style={{ fontSize:10, color:T.ink3 }}>{lbl}</span>
+                </div>
+                <div className="num" style={{ fontSize:11.5, color:T.accentIn, marginTop:6, fontWeight:700 }}>{b.lo}–{b.hi} TRIMP</div>
+                <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>{b.note}</div>
+              </Card>
+            );
+          })}
         </div>
-      )}
+      </Sec>
 
-      {/* ── SESSION TAB ───────────────────────────────────────────────────── */}
-      {tab === "session" && (
-        <>
-          {/* official-source badge */}
-          {hasOfficial && (
-            <div style={{ marginBottom:12, padding:"7px 12px", background:"#ecfdf5", border:"1.5px solid #6ee7b7", borderRadius:8, display:"flex", alignItems:"center", gap:8 }}>
-              <span style={{ fontSize:13 }}>🏁</span>
-              <span style={{ fontSize:11, fontWeight:700, color:"#065f46" }}>Official results</span>
-              <span style={{ fontSize:10, color:"#047857" }}>— times &amp; ranks from official data; HR from Garmin</span>
-            </div>
-          )}
-
-          {/* top stats */}
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:14 }}>
-            <Stat label="Total time"  value={fmtMMSS(displayTotal)} sub={s.date} color="#1e293b" />
-            <Stat label={`Running ×${mergedRuns.length}`} value={fmtMMSS(mTotalRun)} sub={mAvgRun ? `avg ${fmtMMSS(mAvgRun)}` : "—"} color="#c2410c" bg="#fff7ed" border="#fdba74" />
-            <Stat label="Stations"    value={fmtMMSS(mTotalStat)} sub={`${mergedStations.length} stations`} color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:18 }}>
-            <Stat label="Avg HR"     value={s.avgHR ? `${s.avgHR} bpm` : "—"} sub={s.maxHR ? `max ${s.maxHR}` : "whole session"} color="#dc2626" bg="#fef2f2" border="#fca5a5" />
-            <Stat label="Run range"  value={mergedRuns.length ? `${fmtMMSS(mFastRun)}–${fmtMMSS(mSlowRun)}` : "—"} sub="fastest → slowest" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
-          </div>
-
-          {/* Description from Garmin Connect */}
-          {s.description && (
-            <div style={{ marginBottom:14, padding:"10px 12px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:2, marginBottom:4 }}>DESCRIPTION</div>
-              <div style={{ fontSize:12, color:"#334155", whiteSpace:"pre-wrap" }}>{s.description}</div>
-            </div>
-          )}
-
-          {/* Photos from Garmin Connect */}
-          {s.photos && s.photos.length > 0 && (
-            <div style={{ marginBottom:14 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:2, marginBottom:6 }}>PHOTOS ({s.photos.length})</div>
-              <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:4 }}>
-                {s.photos.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ flexShrink:0 }}>
-                    <img src={url} alt={`session photo ${i+1}`} style={{ height:120, borderRadius:8, border:"1px solid #e2e8f0" }} />
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* run splits */}
-          {mergedRuns.length > 0 && (
-            <>
-              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN SPLITS — {mergedRuns.length} laps{hasOfficial ? " · official" : ""}</div>
-              <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
-                {mergedRuns.map((run, i) => {
-                  const t = run.t;
-                  const barW = Math.round(((mMaxRunSec - t) / mRunRange) * 60 + 35);
-                  const isF = t === mFastRun, isS = t === mSlowRun && mFastRun !== mSlowRun;
-                  const hr = run.avgHr;
-                  const maxHr = run.maxHr;
-                  const hrColor = hrColorFor(hr);
-                  return (
-                    <div key={run.i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
-                      <div style={{ fontSize:10, color:"#94a3b8", minWidth:22, textAlign:"right" }}>R{i+1}</div>
-                      <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:20, overflow:"hidden" }}>
-                        <div style={{ height:"100%", width:`${barW}%`, background: isF ? "#16a34a99" : isS ? "#dc262699" : "#c2410c66", borderRadius:4 }} />
-                      </div>
-                      <div style={{ fontSize:11, fontWeight:700, color: isF ? "#15803d" : isS ? "#dc2626" : "#c2410c", minWidth:40, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
-                        {fmtMMSS(t)}
-                      </div>
-                      {hr && (
-                        <div style={{ fontSize:10, color: hrColor, minWidth:48, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>
-                          ♥ {hr}{maxHr ? <span style={{color:"#94a3b8"}}> /{maxHr}</span> : null}
-                        </div>
-                      )}
-                      {run.rank != null && (
-                        <div style={{ fontSize:9, color:"#94a3b8", minWidth:34, textAlign:"right", fontVariantNumeric:"tabular-nums" }}>#{run.rank}</div>
-                      )}
-                    </div>
-                  );
-                })}
-                <div style={{ marginTop:8, padding:"6px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:10, color:"#9a3412", display:"flex", gap:16, flexWrap:"wrap" }}>
-                  {mAvgRun > 0 && <span>avg <strong>{fmtMMSS(mAvgRun)}</strong></span>}
-                  {mFastRun !== mSlowRun && <span>drift <strong>+{fmtMMSS(mSlowRun - mFastRun)}</strong> fast→slow</span>}
-                  <span>total running <strong>{fmtMMSS(mTotalRun)}</strong></span>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* station breakdown */}
-          {mergedStations.length > 0 && (
-            <>
-              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION BREAKDOWN{hasOfficial ? " · official" : ""}</div>
-              <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"14px", marginBottom:16 }}>
-                {mergedStations.map((st, i) => {
-                  const barW = Math.round((st.t / mMaxStTime) * 85 + 10);
-                  const named = hasOfficial ? true : !!(s.stationNames && s.stationNames[stationLaps[i] && stationLaps[i].i]);
-                  return (
-                    <div key={i} style={{ marginBottom:10 }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-                        <span style={{ fontSize:11, fontWeight:600, color: named ? "#4c1d95" : "#94a3b8", fontStyle: named ? "normal" : "italic" }}>{st.name}</span>
-                        <span style={{ fontSize:12, fontWeight:800, color:"#6d28d9", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(st.t)}</span>
-                      </div>
-                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                        <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:14, overflow:"hidden" }}>
-                          <div style={{ height:"100%", width:`${barW}%`, background:"#7c3aed88", borderRadius:4 }} />
-                        </div>
-                        <div style={{ fontSize:10, color:"#94a3b8", minWidth:74, textAlign:"right" }}>
-                          {st.avgHr ? `♥ ${st.avgHr}` : ""}
-                          {st.rank != null ? `${st.avgHr ? " · " : ""}#${st.rank}` : (st.dist ? ` · ${st.dist}m` : "")}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {!hasOfficial && !s.stationNames && (
-                  <div style={{ marginTop:8, padding:"8px 10px", background:"#fef3c7", border:"1px solid #fde68a", borderRadius:6, fontSize:10, color:"#92400e" }}>
-                    💡 Add station names in HYROX_DATA.{s.id}.stationNames to enable cross-session trends.
-                  </div>
-                )}
-                {hasOfficial && official.roxzone && (
-                  <div style={{ marginTop:8, padding:"8px 10px", background:"#eef2ff", border:"1px solid #c7d2fe", borderRadius:6, fontSize:10, color:"#3730a3", display:"flex", justifyContent:"space-between" }}>
-                    <span>Roxzone (transitions)</span>
-                    <span style={{ fontWeight:700, fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(official.roxzone.time)}{official.roxzone.rank != null ? ` · #${official.roxzone.rank}` : ""}</span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* warmup/cooldown */}
-          {warmupLaps.length > 0 && (
-            <div style={{ marginBottom:14, fontSize:10, color:"#94a3b8", textAlign:"center" }}>
-              Ignoring {warmupLaps.length} warmup/cooldown lap{warmupLaps.length>1?"s":""} ({warmupLaps.map(l => fmtMMSS(l.t)).join(", ")}) — anomalous distance, likely treadmill drift.
-            </div>
-          )}
-
-          {/* projected finish */}
-          {s.estimateMin && (
-            <div style={{ background:"linear-gradient(135deg,#4c1d95,#6d28d9)", borderRadius:12, padding:"16px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12, marginBottom:14 }}>
-              <div>
-                <div style={{ fontSize:10, color:"rgba(255,255,255,0.65)", fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase" }}>Projected finish</div>
-                <div style={{ fontSize:32, fontWeight:900, color:"#ffffff", lineHeight:1.1, marginTop:2 }}>~{s.estimateMin} min</div>
-              </div>
-              <div style={{ textAlign:"right" }}>
-                <div style={{ fontSize:11, color:"rgba(255,255,255,0.65)" }}>based on this session</div>
-                <div style={{ fontSize:10, color:"rgba(255,255,255,0.5)", marginTop:4 }}>Set estimateMin: null after racing</div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* ── TRENDS TAB ────────────────────────────────────────────────────── */}
-      {tab === "trends" && (() => {
-        // Helper: official-aware accessors so trends use official times when present.
-        const sessRuns = (sess) => {
-          const laps = (sess.laps || []).filter(l => l.role === "run");
-          if (sess.official && sess.official.runs)
-            return sess.official.runs.map((r, i) => ({ t: r.time, avgHr: (laps[i]||{}).avgHr || null }));
-          return laps.map(l => ({ t: l.t, avgHr: l.avgHr || null }));
-        };
-        const sessStations = (sess) => {
-          const laps = (sess.laps || []).filter(l => l.role === "station");
-          if (sess.official && sess.official.stations) {
-            const hrByName = {};
-            laps.forEach(l => { const n = sess.stationNames && sess.stationNames[l.i]; if (n) hrByName[n] = l.avgHr || null; });
-            return sess.official.stations.map((st, i) => ({ name: st.name, t: st.time, hr: hrByName[st.name] ?? ((laps[i]||{}).avgHr || null) }));
-          }
-          return laps.map(l => ({ name: sess.stationNames && sess.stationNames[l.i], t: l.t, hr: l.avgHr || null }));
-        };
-        const sessTotal = (sess) => (sess.official && sess.official.finishTime) ? sess.official.finishTime : sess.totalTime;
-
-        // Aggregate across all sessions: per-station and per-run trends
-        const tot = sessions.map(sess => ({
-          date: sess.date,
-          id: sess.id,
-          totalTime: sessTotal(sess),
-          runTime: sessRuns(sess).reduce((a,b)=>a+b.t, 0),
-          stationTime: sessStations(sess).reduce((a,b)=>a+b.t, 0),
-          avgHR: sess.avgHR,
-        }));
-        // Per-station time series: { stationName: [{date, time, hr, id}] }
-        const byStation = {};
-        sessions.forEach(sess => {
-          sessStations(sess).forEach(st => {
-            if (!st.name) return;
-            (byStation[st.name] = byStation[st.name] || []).push({
-              date: sess.date, time: st.t, hr: st.hr, id: sess.id,
-            });
-          });
-        });
-        // Per-run-index time series (R1 across all sessions, R2 across all, etc.)
-        const runIndexSeries = {};
-        sessions.forEach(sess => {
-          sessRuns(sess).forEach((r, i) => {
-            const k = `R${i+1}`;
-            (runIndexSeries[k] = runIndexSeries[k] || []).push({
-              date: sess.date, time: r.t, hr: r.avgHr || null,
-            });
-          });
-        });
-
-        const stationNames = Object.keys(byStation).filter(n => byStation[n].length >= 1);
-
-        return (
-          <>
-            {/* Total time trend */}
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>TOTAL TIME — ACROSS SESSIONS</div>
-            <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-              {tot.length >= 2 ? (
-                <Sparkline data={tot.map(t => [t.date, t.totalTime])} color="#7c3aed" height={60} />
-              ) : (
-                <div style={{ fontSize:11, color:"#94a3b8", textAlign:"center", padding:"20px 0" }}>
-                  Need at least 2 sessions to show a trend. ({tot.length} so far)
-                </div>
-              )}
-              <div style={{ marginTop:10, display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:8 }}>
-                {tot.map(t => (
-                  <div key={t.id} style={{ padding:"8px 10px", background:"#fff", border:"1px solid #e2e8f0", borderRadius:6, fontSize:11 }}>
-                    <div style={{ color:"#64748b", fontSize:10 }}>{t.date}</div>
-                    <div style={{ fontWeight:800, color:"#1e293b" }}>{fmtMMSS(t.totalTime)}</div>
-                    <div style={{ color:"#94a3b8", fontSize:10 }}>
-                      run {fmtMMSS(t.runTime)} · stn {fmtMMSS(t.stationTime)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Per-station trends */}
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>STATION TIMES — TREND</div>
-            {stationNames.length === 0 ? (
-              <div style={{ background:"#fef3c7", border:"1px solid #fde68a", borderRadius:8, padding:"12px 14px", marginBottom:16, fontSize:11, color:"#92400e" }}>
-                No stations are named across sessions yet. Add <code>stationNames</code> in HYROX_DATA entries to enable per-station trend lines.
-              </div>
-            ) : (
-              <div style={{ marginBottom:16 }}>
-                {stationNames.map(name => {
-                  const series = byStation[name];
-                  const times = series.map(s => s.time);
-                  const best = Math.min(...times);
-                  const worst = Math.max(...times);
-                  const latest = series[series.length - 1];
-                  const first = series[0];
-                  const delta = latest.time - first.time;
-                  const trend = series.length < 2 ? "—" : delta < -5 ? "↓ faster" : delta > 5 ? "↑ slower" : "≈ same";
-                  const trendColor = series.length < 2 ? "#94a3b8" : delta < -5 ? "#16a34a" : delta > 5 ? "#dc2626" : "#64748b";
-                  return (
-                    <div key={name} style={{ marginBottom:12, background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:"10px 12px" }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:6 }}>
-                        <div style={{ fontSize:12, fontWeight:700, color:"#4c1d95" }}>{name}</div>
-                        <div style={{ fontSize:11, fontWeight:700, color: trendColor }}>{trend} ({series.length} sess.)</div>
-                      </div>
-                      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                        {series.map((p, i) => {
-                          const barH = Math.round(((p.time - best) / (worst - best || 1)) * 30 + 6);
-                          const isLatest = i === series.length - 1;
-                          return (
-                            <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center" }}>
-                              <div style={{ fontSize:10, fontWeight:700, color: isLatest ? "#6d28d9" : "#94a3b8", fontVariantNumeric:"tabular-nums" }}>{fmtMMSS(p.time)}</div>
-                              <div style={{ width:"100%", marginTop:3, height:40, display:"flex", alignItems:"flex-end" }}>
-                                <div style={{ width:"100%", height:`${barH}px`, background: isLatest ? "#7c3aed" : "#c4b5fd", borderRadius:"3px 3px 0 0" }} />
-                              </div>
-                              <div style={{ fontSize:9, color:"#94a3b8", marginTop:3 }}>{p.date.slice(5)}</div>
-                              {p.hr && <div style={{ fontSize:9, color:"#dc2626" }}>♥{p.hr}</div>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Per-run-index trends */}
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>RUN TIMES BY POSITION — TREND</div>
-            <div style={{ marginBottom:16 }}>
-              {Object.entries(runIndexSeries).filter(([_,arr]) => arr.length >= 2).map(([k, series]) => {
-                const times = series.map(s => s.time);
-                const best = Math.min(...times), worst = Math.max(...times);
-                const latest = series[series.length-1].time, first = series[0].time;
-                const delta = latest - first;
-                const trend = delta < -3 ? "↓ faster" : delta > 3 ? "↑ slower" : "≈ same";
-                const trendColor = delta < -3 ? "#16a34a" : delta > 3 ? "#dc2626" : "#64748b";
+      <div className="split-even">
+        <Sec title="HR zone distribution" sub="Last 28 days, by session average">
+          <Card pad={16}>
+            {totalZoneMin > 0 ? <>
+              {[["E","VO₂max","bad"],["D","Development","warn"],["C","Intensive","warn"],["B","Aerobic","ok"],["A","Recovery","mute"]].map(([z, name, tone]) => {
+                const mins = Math.round(zoneMinutes[z]);
+                const p = pct(mins, totalZoneMin);
                 return (
-                  <div key={k} style={{ marginBottom:8, background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:"8px 12px", display:"flex", alignItems:"center", gap:10 }}>
-                    <div style={{ fontSize:11, fontWeight:700, color:"#c2410c", minWidth:30 }}>{k}</div>
-                    <div style={{ flex:1, display:"flex", alignItems:"center", gap:4 }}>
-                      {series.map((p, i) => (
-                        <div key={i} style={{ flex:1, fontSize:10, color: i === series.length-1 ? "#c2410c" : "#94a3b8", fontWeight: i === series.length-1 ? 700 : 400, textAlign:"center" }}>
-                          {fmtMMSS(p.time)}
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ fontSize:10, fontWeight:700, color: trendColor, minWidth:60, textAlign:"right" }}>{trend}</div>
+                  <div key={z} style={{ display:"flex", alignItems:"center", gap:9, marginBottom:9 }}>
+                    <div style={{ width:22, height:22, borderRadius:"50%", background:TONE_BG[tone], border:`1px solid ${TONE[tone]}55`,
+                                  color:TONE[tone], fontSize:10, fontWeight:900, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{z}</div>
+                    <Bar value={p} tone={tone} height={16} radius={5} />
+                    <div className="num" style={{ fontSize:11, fontWeight:700, color:TONE[tone], minWidth:34, textAlign:"right" }}>{p.toFixed(0)}%</div>
+                    <div className="num" style={{ fontSize:10, color:T.ink3, minWidth:74 }}>{mins}m · {name}</div>
                   </div>
                 );
               })}
-              {Object.values(runIndexSeries).every(arr => arr.length < 2) && (
-                <div style={{ fontSize:11, color:"#94a3b8", textAlign:"center", padding:"10px" }}>
-                  Need ≥2 sessions with runs to show a trend.
+              <Note tone="accent" icon="◆">Ideal Hyrox split: ~40% zone B/C aerobic · ~35% zone D/E race intensity · ~25% recovery.</Note>
+            </> : <Empty>No HR data in the last 28 days.</Empty>}
+          </Card>
+        </Sec>
+
+        <Sec title="Aerobic efficiency" sub="Pace at comparable heart rate">
+          <Card pad={16}>
+            {paceTrend.length < 2 ? <Empty>Need at least 2 Z2/Z3 runs to show a trend.</Empty> : (() => {
+              const maxSec = Math.max(...paceTrend.map(p => p.paceSec));
+              const minSec = Math.min(...paceTrend.map(p => p.paceSec));
+              const fmtPace = s => `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,"0")}`;
+              const first = paceTrend[0], last = paceTrend[paceTrend.length-1];
+              const diff = first.paceSec - last.paceSec;
+              return <>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10, marginBottom:14, flexWrap:"wrap" }}>
+                  <div>
+                    <div className="num" style={{ fontSize:19, fontWeight:800, color: diff > 0 ? T.ok : diff < -10 ? T.bad : T.ink }}>
+                      {diff > 0 ? `↑ ${fmtPace(Math.abs(diff))}/km faster` : diff < 0 ? `↓ ${fmtPace(Math.abs(diff))}/km slower` : "→ stable"}
+                    </div>
+                    <div style={{ fontSize:10.5, color:T.ink3, marginTop:2 }}>vs first recorded run in range</div>
+                  </div>
+                  <div className="num" style={{ textAlign:"right", fontSize:11, color:T.ink2 }}>
+                    <div>{fmtPace(first.paceSec)} → {fmtPace(last.paceSec)}/km</div>
+                    <div style={{ fontSize:10, color:T.ink3 }}>♥ {first.hr} → {last.hr} bpm</div>
+                  </div>
                 </div>
-              )}
-            </div>
-          </>
-        );
-      })()}
-
-      {/* ── NOTES TAB ─────────────────────────────────────────────────────── */}
-      {tab === "notes" && (
-        <>
-          <div style={{ marginBottom:8, fontSize:10, color:"#64748b" }}>
-            <strong>{s.date}</strong> · {s.name}
-          </div>
-          <div style={{ marginBottom:6, fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>PRESCRIBED WORKOUT (notes)</div>
-          <textarea
-            value={noteText}
-            onChange={e => setNoteText(e.target.value)}
-            placeholder="Type the prescribed workout here (e.g. from the coach's whiteboard photo). Saved locally in this browser only."
-            style={{
-              width:"100%", minHeight:200, padding:"10px 12px",
-              border:"1.5px solid #e2e8f0", borderRadius:8,
-              fontSize:13, fontFamily:"inherit", color:"#334155",
-              resize:"vertical", boxSizing:"border-box",
-            }}
-          />
-          <div style={{ marginTop:8, display:"flex", gap:8, alignItems:"center", justifyContent:"space-between" }}>
-            <div style={{ fontSize:10, color:"#94a3b8" }}>
-              Saved locally in this browser only · {noteText.length} chars
-            </div>
-            <button
-              onClick={() => { if (typeof navigator !== "undefined" && navigator.clipboard) navigator.clipboard.writeText(noteText); }}
-              style={{ padding:"6px 12px", borderRadius:6, fontSize:11, fontWeight:700, cursor:"pointer", border:"1.5px solid #c4b5fd", background:"#ede9fe", color:"#4c1d95", fontFamily:"inherit" }}
-            >📋 Copy</button>
-          </div>
-
-          {s.description && (
-            <>
-              <div style={{ marginTop:18, marginBottom:6, fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>GARMIN DESCRIPTION (read-only)</div>
-              <div style={{ padding:"10px 12px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:12, color:"#475569", whiteSpace:"pre-wrap" }}>
-                {s.description}
-              </div>
-            </>
-          )}
-
-          {s.photos && s.photos.length > 0 && (
-            <>
-              <div style={{ marginTop:18, marginBottom:6, fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>PHOTOS ({s.photos.length})</div>
-              <div style={{ display:"flex", gap:8, overflowX:"auto" }}>
-                {s.photos.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ flexShrink:0 }}>
-                    <img src={url} alt={`photo ${i+1}`} style={{ height:150, borderRadius:8, border:"1px solid #e2e8f0" }} />
-                  </a>
+                {paceTrend.map((p, i) => (
+                  <div key={i} style={{ display:"flex", alignItems:"center", gap:9, marginBottom:6 }}>
+                    <div className="num" style={{ fontSize:9.5, color:T.ink3, minWidth:62 }}>{fmtISO(p.date)}</div>
+                    <Bar value={(p.paceSec / (maxSec || 1)) * 88 + 12}
+                      tone={p.paceSec <= minSec + (maxSec - minSec) * 0.34 ? "ok" : p.paceSec >= maxSec - (maxSec - minSec) * 0.2 ? "bad" : "warn"}
+                      height={14} radius={5} />
+                    <div className="num" style={{ fontSize:10.5, fontWeight:700, color:T.run, minWidth:46, textAlign:"right" }}>{fmtPace(p.paceSec)}</div>
+                    <div className="num" style={{ fontSize:9.5, color:T.ink3, minWidth:34, textAlign:"right" }}>{p.hr}</div>
+                  </div>
                 ))}
-              </div>
-            </>
-          )}
-        </>
-      )}
-
+                <Note tone="accent" icon="◆">Longer bar = slower pace. Faster at the same HR means the aerobic engine is adapting; race target is sub-5:00/km at HR 140.</Note>
+              </>;
+            })()}
+          </Card>
+        </Sec>
+      </div>
     </div>
   );
 }
 
-function HealthView() {
+const LOG_FILTERS = [
+  ["all", "All"],
+  ["hyrox", "🦘 Hyrox"],
+  ["run", "🏃 Run"],
+  ["tennis", "🎾 Tennis"],
+  ["strength", "💪 Strength"],
+];
+
+function LogPanel({ activities }) {
+  const [f, setF] = useState("all");
+  const match = (a) => f === "all" || (f === "hyrox" && isHyrox(a)) || (f === "run" && isRun(a) && !isHyrox(a))
+    || (f === "tennis" && isTennis(a)) || (f === "strength" && isStrength(a));
+  const list = activities.filter(match).slice(0, 40);
+  const totalTrimp = list.reduce((s, a) => s + a._trimp, 0);
+
+  return (
+    <div>
+      <div className="scroll-x no-bar" style={{ display:"flex", gap:7, marginBottom:14, alignItems:"center" }}>
+        {LOG_FILTERS.map(([k, l]) => <Chip key={k} active={f === k} onClick={() => setF(k)}>{l}</Chip>)}
+        <span className="num" style={{ fontSize:10.5, color:T.ink3, marginLeft:6, whiteSpace:"nowrap" }}>
+          {list.length} sessions · {totalTrimp.toFixed(0)} TRIMP
+        </span>
+      </div>
+      {list.length === 0 && <Card><Empty>Nothing logged in this category yet.</Empty></Card>}
+      <div className="grid g2">
+        {list.map((a, i) => (
+          <Card key={i} pad={13} style={{ display:"flex", gap:12, alignItems:"center" }}>
+            <span style={{ fontSize:19, width:26, textAlign:"center", flexShrink:0 }}>{getEmoji(a)}</span>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", gap:8, alignItems:"baseline" }}>
+                <span style={{ fontSize:12.5, fontWeight:700, color:getColor(a), overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                  {a.Title || a["Activity Type"]}
+                </span>
+                <span style={{ fontSize:9.5, color:T.ink3, whiteSpace:"nowrap" }}>
+                  {a._days === 0 ? "today" : a._days === 1 ? "yesterday" : `${a._days}d ago`}
+                </span>
+              </div>
+              <div className="num" style={{ fontSize:11, color:T.ink3, marginTop:3 }}>
+                {fmtDur(a._dur)}
+                {a._avgHR > 0 ? ` · ♥ ${a._avgHR}` : ""}
+                {a._dist > 0 ? ` · ${a._dist.toFixed(1)}km` : ""}
+                {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
+                {a._trimp > 0 ? ` · TRIMP ${a._trimp.toFixed(0)}` : ""}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TrainView({ ana, activities }) {
+  const [tab, setTab] = useState("plan");
+  return (
+    <div className="fade">
+      <SubNav items={[["plan","PLAN"],["load","LOAD"],["log","LOG"]]} value={tab} onChange={setTab} />
+      {tab === "plan" && <PlanBoard activities={activities} />}
+      {tab === "load" && <LoadPanel ana={ana} activities={activities} />}
+      {tab === "log"  && <LogPanel activities={activities} />}
+    </div>
+  );
+}
+
+/* ── dual-axis line chart (load vs recovery) ─────────────────────────────── */
+function DualLine({ points, aKey, bKey, aColor, bColor, aLabel, bLabel, height = 210 }) {
+  if (!points || points.length < 2) return <Empty>Not enough data yet.</Empty>;
+  const aVals = points.map(p => p[aKey]).filter(v => v != null);
+  const bVals = points.map(p => p[bKey]).filter(v => v != null);
+  if (!aVals.length || !bVals.length) return <Empty>Not enough data yet.</Empty>;
+  const aMax = Math.max(...aVals, 1);
+  const bMin = Math.min(...bVals), bMax = Math.max(...bVals);
+  const W = 1000, H = 100, padT = 6, padB = 6;
+  const innerH = H - padT - padB;
+  const xAt = i => (i / (points.length - 1)) * W;
+  const yA = v => padT + innerH - (v / aMax) * innerH;
+  const yB = v => padT + innerH - ((v - bMin) / (bMax - bMin || 1)) * innerH;
+  const aPath = smoothPath(points.map((p, i) => [xAt(i), yA(p[aKey] ?? 0)]));
+  const bPath = smoothPath(points.map((p, i) => p[bKey] != null ? [xAt(i), yB(p[bKey])] : null).filter(Boolean));
+  const labelIdx = [0, Math.floor(points.length / 3), Math.floor(2 * points.length / 3), points.length - 1];
+
+  return (
+    <div>
+      <div style={{ display:"flex", gap:16, marginBottom:10, fontSize:10.5, flexWrap:"wrap" }}>
+        <span style={{ color:aColor, fontWeight:700 }}>━ {aLabel}</span>
+        <span style={{ color:bColor, fontWeight:700 }}>━ {bLabel}</span>
+      </div>
+      <div style={{ position:"relative", height, paddingRight:36 }}>
+        <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display:"block" }}>
+          {[padT, H/2, H - padB].map((y, i) => (
+            <line key={i} x1="0" x2={W} y1={y} y2={y} stroke={T.lineDim} strokeDasharray="4,5" vectorEffect="non-scaling-stroke" />
+          ))}
+          <path d={aPath} fill="none" stroke={aColor} strokeWidth="2" strokeLinejoin="round" opacity="0.9" vectorEffect="non-scaling-stroke" />
+          <path d={bPath} fill="none" stroke={bColor} strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div className="num" style={{ position:"absolute", right:0, top:0, bottom:0, width:34, paddingLeft:6,
+          display:"flex", flexDirection:"column", justifyContent:"space-between", fontSize:9.5 }}>
+          <span style={{ color:bColor }}>{Math.round(bMax)}</span>
+          <span style={{ color:bColor }}>{Math.round(bMin)}</span>
+        </div>
+        <div className="num" style={{ position:"absolute", left:0, top:-2, fontSize:9.5, color:aColor }}>{Math.round(aMax)}</div>
+      </div>
+      <div className="num" style={{ display:"flex", justifyContent:"space-between", marginTop:5, paddingRight:36, fontSize:9.5, color:T.ink3 }}>
+        {labelIdx.map(i => <span key={i}>{fmtISO(points[i].date)}</span>)}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BODY — recovery · composition · reference
+   ═══════════════════════════════════════════════════════════════════════════ */
+function RecoveryPanel({ ana }) {
+  const daily = HEALTH_DATA.daily;
+  const today = daily[daily.length - 1] || {};
+  const last7 = HEALTH_DATA.sleep.slice(-7);
+  const avgTotal = last7.length ? Math.round(last7.reduce((s, x) => s + x.deep + x.rem + x.light, 0) / last7.length) : 0;
+  const lastSleep = HEALTH_DATA.sleep[HEALTH_DATA.sleep.length - 1];
+  const lastTotal = lastSleep ? lastSleep.deep + lastSleep.rem + lastSleep.light : 0;
+  const scores = daily.filter(d => d.sleep_score != null);
+  const latestScore = scores[scores.length - 1];
+  const hrvByDate = {};
+  daily.forEach(d => { if (d.hrv > 0) hrvByDate[d.date] = d.hrv; });
+  const overlay = ana.atlHistory.filter(d => d.atl > 0).slice(-42)
+    .map(d => ({ date:d.date, atl:Math.round(d.atl), hrv:hrvByDate[d.date] || null }));
+  const readinessSeries = daily.filter(d => d.hrv > 0).slice(-30).map(d => {
+    const h = ana.atlHistory.find(a => a.date === d.date);
+    return { date:d.date, val: readiness(h ? h.ctl - h.atl : 0, 99, d.hrv, hrvBaseline) };
+  });
+
+  return (
+    <div>
+      <div className="grid g4" style={{ marginBottom:20 }}>
+        <Stat label="HRV" value={today.hrv ?? "—"} unit="ms" sub={`7d avg ${avgOf(daily.slice(-7).map(d => d.hrv))} · base ${hrvBaseline}`}
+          tone={today.hrv >= hrvBaseline ? "ok" : "warn"} accentBar />
+        <Stat label="Resting HR" value={today.rhr ?? "—"} unit="bpm" sub="athlete range 40–46" tone={today.rhr <= 46 ? "ok" : "warn"} accentBar />
+        <Stat label="SpO₂" value={today.spo2 != null ? `${today.spo2}%` : "—"} sub="normal >95%" tone={today.spo2 >= 95 ? "ok" : "warn"} accentBar />
+        <Stat label="Respiration" value={today.resp ?? "—"} unit="br/min" sub="baseline 10.7–13.7" tone={today.resp <= 14 ? "ok" : "warn"} accentBar />
+      </div>
+
+      <div className="split-even">
+        <Sec title="HRV trend" sub={`${daily.length} days of overnight readings`}>
+          <Card pad={16}>
+            <Sparkline data={daily.map(d => [d.date, d.hrv])} color={T.accent} height={120} />
+            <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:10.5, color:T.ink3 }}>
+              <span>Higher = better recovered</span>
+              <span className="num" style={{ color:T.accentIn, fontWeight:700 }}>today {today.hrv}ms</span>
+            </div>
+          </Card>
+        </Sec>
+
+        {latestScore && (
+          <Sec title="Sleep score" sub="Garmin nightly score">
+            <Card pad={16}>
+              <div style={{ display:"flex", gap:16, alignItems:"center", marginBottom:12, flexWrap:"wrap" }}>
+                <Ring value={latestScore.sleep_score} max={100} size={92} stroke={8}
+                  tone={toneOf(latestScore.sleep_score, 80, 60)} label={fmtISO(latestScore.date)} />
+                <div style={{ flex:1, minWidth:150 }}>
+                  <div className="num" style={{ fontSize:13, color:T.ink }}>
+                    7-night average <strong style={{ color:TONE[toneOf(avgOf(scores.slice(-7).map(s => s.sleep_score)), 80, 60)] }}>
+                      {avgOf(scores.slice(-7).map(s => s.sleep_score))}
+                    </strong>
+                  </div>
+                  <div style={{ fontSize:10.5, color:T.ink3, marginTop:6, lineHeight:1.7 }}>
+                    ≥80 good · 60–79 fair · &lt;60 poor
+                  </div>
+                </div>
+              </div>
+              <Sparkline data={scores.map(d => [d.date, d.sleep_score])} color={TONE[toneOf(latestScore.sleep_score, 80, 60)]} height={70} />
+            </Card>
+          </Sec>
+        )}
+      </div>
+
+      <Sec title="Sleep architecture" sub="Last 7 nights · deep / REM / light">
+        <Card pad={16}>
+          <div className="grid g4" style={{ marginBottom:16 }}>
+            <Stat pad={12} label="Last night" value={fmtMin(lastTotal)} sub={lastSleep ? `awake ${lastSleep.awake}m` : ""} tone={lastTotal >= 420 ? "ok" : "warn"} />
+            <Stat pad={12} label="Deep" value={lastSleep ? `${lastSleep.deep}m` : "—"} sub="target 60–110m" tone={lastSleep && lastSleep.deep >= 60 ? "ok" : "warn"} />
+            <Stat pad={12} label="REM" value={lastSleep ? `${lastSleep.rem}m` : "—"} sub="target 90–150m" tone={lastSleep && lastSleep.rem >= 90 ? "ok" : "warn"} />
+            <Stat pad={12} label="7-night avg" value={fmtMin(avgTotal)} sub="total sleep" tone={avgTotal >= 420 ? "ok" : "warn"} />
+          </div>
+          {(() => {
+            // Bars are scaled against the longest night in the window, so a 6h
+            // night reads visibly shorter than a 9h one. Segments stay
+            // proportional inside each bar.
+            const maxNight = Math.max(...last7.map(s => s.deep + s.rem + s.light), 1);
+            return last7.map((s, i) => {
+              const total = s.deep + s.rem + s.light || 1;
+              return (
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:7 }}>
+                  <div className="num" style={{ fontSize:10, color:T.ink3, width:44, textAlign:"right" }}>{fmtISO(s.date)}</div>
+                  <div style={{ flex:1, height:13, borderRadius:99, overflow:"hidden", background:T.lineDim }}>
+                    <div style={{ width:`${(total/maxNight)*100}%`, height:"100%", display:"flex", borderRadius:99, overflow:"hidden" }}>
+                      <div style={{ width:`${(s.deep/total)*100}%`, background:"#4f46e5" }} title={`deep ${s.deep}m`} />
+                      <div style={{ width:`${(s.rem/total)*100}%`, background:T.accent }} title={`REM ${s.rem}m`} />
+                      <div style={{ width:`${(s.light/total)*100}%`, background:"#6f8bd6" }} title={`light ${s.light}m`} />
+                    </div>
+                  </div>
+                  <div className="num" style={{ fontSize:10, color: total >= 420 ? T.ok : T.ink3, width:48 }}>{fmtMin(total)}</div>
+                </div>
+              );
+            });
+          })()}
+          <div style={{ display:"flex", gap:14, marginTop:12, paddingTop:10, borderTop:`1px solid ${T.lineDim}` }}>
+            {[["#4f46e5","Deep"],[T.accent,"REM"],["#6f8bd6","Light"]].map(([c, l]) => (
+              <span key={l} style={{ display:"flex", alignItems:"center", gap:5, fontSize:10, color:T.ink3 }}>
+                <span style={{ width:9, height:9, borderRadius:3, background:c }} />{l}
+              </span>
+            ))}
+          </div>
+        </Card>
+      </Sec>
+
+      <div className="split-even">
+        <Sec title="Recovery vs load" sub="HRV falls when acute load spikes — that lag is the signal">
+          <Card pad={16}>
+            <DualLine points={overlay} aKey="atl" bKey="hrv" aColor={T.bad} bColor={T.accent}
+              aLabel="ATL — fatigue" bLabel="HRV — recovery" height={200} />
+          </Card>
+        </Sec>
+
+        <Sec title="Readiness history" sub="Last 30 days, same formula as the daily score">
+          <Card pad={16}>
+            {readinessSeries.length < 2 ? <Empty>Not enough data yet.</Empty> : <>
+              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
+                <span className="num" style={{ fontSize:14, fontWeight:800, color:T.ink }}>
+                  avg {(readinessSeries.reduce((s, o) => s + o.val, 0) / readinessSeries.length).toFixed(1)}/10
+                </span>
+                <span style={{ fontSize:10.5, color:T.ink3 }}>{readinessSeries.length} days</span>
+              </div>
+              <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:110 }}>
+                {readinessSeries.map((s, i) => (
+                  <div key={i} title={`${s.date} — ${s.val}/10`} style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"flex-end", height:"100%" }}>
+                    <div style={{ height:`${(s.val/10)*100}%`, background:TONE[toneOf(s.val, 7, 4)],
+                                  borderRadius:"3px 3px 1px 1px", opacity: i === readinessSeries.length-1 ? 1 : 0.7 }} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:"flex", gap:14, marginTop:12, fontSize:10, color:T.ink3, flexWrap:"wrap" }}>
+                {[["ok","7–10 push"],["warn","4–6 smart"],["bad","1–3 rest"]].map(([t, l]) => (
+                  <span key={l} style={{ display:"flex", alignItems:"center", gap:5 }}>
+                    <span style={{ width:9, height:9, borderRadius:3, background:TONE[t] }} />{l}
+                  </span>
+                ))}
+              </div>
+            </>}
+          </Card>
+        </Sec>
+      </div>
+    </div>
+  );
+}
+
+function CompositionPanel() {
   const [bfEntries, setBfEntries] = useState(BF_FALLBACK);
   const [bfStatus, setBfStatus] = useState("loading");
 
   useEffect(() => {
+    let alive = true;
     fetch(SHEET_URL)
       .then(r => r.text())
-      .then(csv => {
-        const parsed = parseSheetBf(csv);
-        setBfEntries(parsed);
-        setBfStatus("live");
-      })
-      .catch(() => {
-        setBfStatus("fallback");
-      });
+      .then(csv => { if (!alive) return; setBfEntries(parseSheetBf(csv)); setBfStatus("live"); })
+      .catch(() => { if (alive) setBfStatus("fallback"); });
+    return () => { alive = false; };
   }, []);
 
-  const today = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1];
-  const todaySleep = HEALTH_DATA.sleep[HEALTH_DATA.sleep.length - 1];
-  const latestWeight = HEALTH_DATA.weight[HEALTH_DATA.weight.length - 1];
+  const weights = HEALTH_DATA.weight;
+  const latestWeight = weights[weights.length - 1];
+  const wVals = weights.map(w => w[1]);
   const latestVo2 = HEALTH_DATA.vo2max[HEALTH_DATA.vo2max.length - 1];
-  const { fitnessAge: fa } = HEALTH_DATA;
-  const last7sleep = HEALTH_DATA.sleep.slice(-7);
-  const avgTotal = Math.round(last7sleep.reduce((s,x) => s + x.deep + x.rem + x.light, 0) / last7sleep.length);
-  const latestBf = bfEntries.length > 0 ? bfEntries[bfEntries.length - 1].bf : null;
-  const leanMass = latestBf && latestWeight ? (latestWeight[1] * (1 - latestBf / 100)).toFixed(1) : null;
-
-  const Stat = ({ label, value, sub, color, bg, border }) => (
-    <div style={{ padding:"12px 14px", background: bg || "#f8fafc", border:`1.5px solid ${border || "#e2e8f0"}`, borderRadius:10, flex:1, minWidth:0 }}>
-      <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>{label}</div>
-      <div style={{ fontSize:20, fontWeight:900, color, lineHeight:1.1, marginTop:4 }}>{value}</div>
-      {sub && <div style={{ fontSize:10, color:"#64748b", marginTop:3 }}>{sub}</div>}
-    </div>
-  );
+  const fa = HEALTH_DATA.fitnessAge;
+  const latestBf = bfEntries.length ? bfEntries[bfEntries.length - 1] : null;
+  const firstBf = bfEntries.length ? bfEntries[0] : null;
+  const leanMass = latestBf && latestWeight ? (latestWeight[1] * (1 - latestBf.bf / 100)).toFixed(1) : null;
 
   return (
-    <div style={{ padding:"14px 14px 60px" }}>
+    <div>
       {/* BIO AGE HERO */}
-      <div style={{ background:"linear-gradient(135deg,#ede9fe,#dbeafe)", border:"1.5px solid #a5b4fc", borderRadius:12, padding:"16px", marginBottom:16, display:"flex", alignItems:"center", gap:16 }}>
-        <div style={{ textAlign:"center", minWidth:64 }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#6d28d9", letterSpacing:1 }}>BIO AGE</div>
-          <div style={{ fontSize:40, fontWeight:900, color:"#4c1d95", lineHeight:1 }}>{fa.bio}</div>
-          <div style={{ fontSize:10, color:"#7c3aed" }}>vs 35 chrono</div>
-        </div>
-        <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:700, color:"#1e1b4b", marginBottom:6 }}>Biologically 7 years younger 🔥</div>
-          <div style={{ fontSize:11, color:"#4338ca", lineHeight:1.8 }}>
-            VO₂Max <strong>{latestVo2[1]}</strong> · Resting HR <strong>{fa.rhr} bpm</strong> · BMI <strong>{fa.bmi}</strong>
+      <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
+        <div style={{ display:"flex", gap:22, alignItems:"center", flexWrap:"wrap", padding:"20px 22px",
+                      background:`linear-gradient(135deg, ${T.accentBg}, transparent 62%)` }}>
+          <div style={{ textAlign:"center", minWidth:96 }}>
+            <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>BIO AGE</div>
+            <div className="num" style={{ fontSize:46, fontWeight:800, color:T.accentIn, lineHeight:1.05, letterSpacing:"-0.03em" }}>{fa.bio}</div>
+            <div style={{ fontSize:10.5, color:T.ink3 }}>vs {fa.chrono} chronological</div>
+          </div>
+          <div style={{ flex:1, minWidth:220 }}>
+            <div style={{ fontSize:15, fontWeight:700, color:T.ink }}>
+              {(fa.chrono - fa.bio).toFixed(1)} years younger than the calendar
+            </div>
+            <div style={{ fontSize:12, color:T.ink2, marginTop:7, lineHeight:1.8 }}>
+              Garmin VO₂max <strong style={{ color:T.ink }}>{fa.vo2max}</strong> · resting HR <strong style={{ color:T.ink }}>{fa.rhr} bpm</strong> · BMI <strong style={{ color:T.ink }}>{fa.bmi}</strong>
+            </div>
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* TODAY'S VITALS */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>TODAY'S VITALS</div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:16 }}>
-        <Stat label="HRV" value={`${today.hrv} ms`} sub="baseline 100–130 · in range" color="#6d28d9" bg="#faf5ff" border="#c4b5fd" />
-        <Stat label="RESTING HR" value={`${today.rhr} bpm`} sub="baseline 36–45 · excellent" color="#15803d" bg="#f0fdf4" border="#86efac" />
-        <Stat label="SpO₂" value={`${today.spo2}%`} sub="normal >95%" color="#0369a1" bg="#e0f2fe" border="#7dd3fc" />
-        <Stat label="RESPIRATION" value={`${today.resp} br/min`} sub="baseline 10.7–13.7" color="#d97706" bg="#fffbeb" border="#fcd34d" />
-      </div>
-
-      {/* SLEEP SCORE */}
-      {(() => {
-        const scores = HEALTH_DATA.daily.filter(d => d.sleep_score != null);
-        if (scores.length === 0) return null;
-        const latest = scores[scores.length - 1];
-        const scoreColor = latest.sleep_score >= 80 ? "#15803d" : latest.sleep_score >= 60 ? "#d97706" : "#dc2626";
-        const scoreBg   = latest.sleep_score >= 80 ? "#f0fdf4" : latest.sleep_score >= 60 ? "#fffbeb" : "#fef2f2";
-        const scoreBo   = latest.sleep_score >= 80 ? "#86efac" : latest.sleep_score >= 60 ? "#fcd34d" : "#fca5a5";
-        const scoreLabel = latest.sleep_score >= 80 ? "Good" : latest.sleep_score >= 60 ? "Fair" : "Poor";
-        const avg7 = Math.round(scores.slice(-7).reduce((s,d) => s + d.sleep_score, 0) / Math.min(7, scores.length));
-        return (
-          <div style={{ marginBottom:16 }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>SLEEP SCORE</div>
-            <div style={{ background:scoreBg, border:`1.5px solid ${scoreBo}`, borderRadius:10, padding:"14px" }}>
-              <div style={{ display:"flex", gap:12, marginBottom:10 }}>
-                <div style={{ textAlign:"center", minWidth:64 }}>
-                  <div style={{ fontSize:36, fontWeight:900, color:scoreColor, lineHeight:1 }}>{latest.sleep_score}</div>
-                  <div style={{ fontSize:10, color:scoreColor, fontWeight:700 }}>{scoreLabel}</div>
-                  <div style={{ fontSize:9, color:"#94a3b8", marginTop:2 }}>{latest.date.slice(5)}</div>
+      <div className="split-even">
+        <Sec title="Weight" sub={`${weights.length} readings · last ${latestWeight[0]}`}>
+          <Card pad={16}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12, gap:12, flexWrap:"wrap" }}>
+              <div>
+                <div className="num" style={{ fontSize:30, fontWeight:800, color:T.ink, letterSpacing:"-0.02em" }}>
+                  {latestWeight[1]}<span style={{ fontSize:14, fontWeight:600, color:T.ink3, marginLeft:4 }}>kg</span>
                 </div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:11, color:"#475569", marginBottom:4 }}>
-                    7-day avg: <strong style={{ color:scoreColor }}>{avg7}</strong>
-                  </div>
-                  <div style={{ fontSize:10, color:"#94a3b8", lineHeight:1.7 }}>
-                    ≥80 Good · 60–79 Fair · &lt;60 Poor<br />
-                    Score 33 on May 3 = post-late-night nap only
-                  </div>
-                </div>
+                <div style={{ fontSize:10.5, color:T.ink3, marginTop:2 }}>last logged {latestWeight[0]}</div>
               </div>
-              <Sparkline data={scores.map(d => [d.date, d.sleep_score])} color={scoreColor} height={44} />
-              <div style={{ display:"flex", justifyContent:"space-between", marginTop:4, fontSize:9, color:"#94a3b8" }}>
-                <span>{scores[0]?.date?.slice(5)}</span>
-                <span>{scores[scores.length-1]?.date?.slice(5)}</span>
+              <div className="num" style={{ textAlign:"right", fontSize:11.5, color:T.ink2 }}>
+                <div>range {Math.min(...wVals).toFixed(1)}–{Math.max(...wVals).toFixed(1)} kg</div>
+                <div style={{ fontSize:10.5, color:T.ink3, marginTop:2 }}>race target 72–73 kg</div>
               </div>
             </div>
-          </div>
-        );
-      })()}
+            <Sparkline data={weights} color={T.info} height={110} fmt={v => v.toFixed(1)} />
+          </Card>
+        </Sec>
 
-      {/* HRV TREND */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>HRV — TREND</div>
-      <div style={{ background:"#faf5ff", border:"1px solid #ede9fe", borderRadius:10, padding:"12px 14px", marginBottom:16 }}>
-        <Sparkline data={HEALTH_DATA.daily.map(d => [d.date, d.hrv])} color="#7c3aed" height={48} />
-        <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
-          <span style={{ fontSize:9, color:"#94a3b8" }}>{HEALTH_DATA.daily[0]?.date?.slice(5)}</span>
-          <span style={{ fontSize:10, fontWeight:700, color:"#7c3aed" }}>Today: {today.hrv}ms</span>
-          <span style={{ fontSize:9, color:"#94a3b8" }}>{HEALTH_DATA.daily[HEALTH_DATA.daily.length-1]?.date?.slice(5)}</span>
-        </div>
+        <Sec title="Body fat" right={
+          <span style={{ color: bfStatus === "live" ? T.ok : T.ink3 }}>
+            {bfStatus === "loading" ? "⟳ fetching sheet…" : bfStatus === "live" ? "● live from Google Sheet" : "○ cached (sheet unavailable)"}
+          </span>
+        }>
+          <Card pad={16}>
+            <div className="grid g3" style={{ marginBottom:14 }}>
+              <Stat pad={12} label="Latest" value={latestBf ? `${latestBf.bf}%` : "—"} sub={latestBf ? latestBf.date : ""} tone="ok" />
+              {leanMass && <Stat pad={12} label="Lean mass" value={leanMass} unit="kg" sub="est. from last weight" tone="ok" />}
+              {firstBf && latestBf && (
+                <Stat pad={12} label={`Since ${firstBf.date.slice(0,7)}`}
+                  value={`${latestBf.bf <= firstBf.bf ? "↓" : "↑"} ${Math.abs(latestBf.bf - firstBf.bf).toFixed(1)}%`}
+                  sub={`${firstBf.bf}% → ${latestBf.bf}%`} tone={latestBf.bf <= firstBf.bf ? "ok" : "warn"} />
+              )}
+            </div>
+            {bfEntries.length > 1 && <Sparkline data={bfEntries} color={T.ok} height={110} fmt={v => v.toFixed(1)} />}
+            <div style={{ fontSize:10, color:T.ink3, marginTop:8, lineHeight:1.5 }}>
+              Readings outside 9–20% are treated as scale outliers and excluded.
+            </div>
+          </Card>
+        </Sec>
       </div>
 
-      {/* SLEEP */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>SLEEP — LAST 7 NIGHTS</div>
-      <div style={{ background:"#f0f9ff", border:"1px solid #7dd3fc", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        <div style={{ display:"flex", gap:10, marginBottom:14, flexWrap:"wrap" }}>
-          {[
-            { label:"Last night", value:`${Math.floor((todaySleep.deep+todaySleep.rem+todaySleep.light)/60)}h${(todaySleep.deep+todaySleep.rem+todaySleep.light)%60}m`, color:"#1e40af" },
-            { label:"Deep", value:`${todaySleep.deep}m`, color:"#1d4ed8" },
-            { label:"REM", value:`${todaySleep.rem}m`, color:"#7c3aed" },
-            { label:"7d avg", value:`${Math.floor(avgTotal/60)}h${avgTotal%60}m`, color:"#0369a1" },
-          ].map((m, i) => (
-            <div key={i} style={{ flex:1, minWidth:56, textAlign:"center" }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>{m.label}</div>
-              <div style={{ fontSize:16, fontWeight:800, color:m.color, marginTop:3 }}>{m.value}</div>
-            </div>
-          ))}
-        </div>
-        {last7sleep.map((s, i) => {
-          const total = s.deep + s.rem + s.light || 1;
-          const date = s.date.slice(5).replace("-","/");
-          return (
-            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
-              <div style={{ fontSize:9, color:"#64748b", width:32, textAlign:"right" }}>{date}</div>
-              <div style={{ flex:1, height:10, borderRadius:5, overflow:"hidden", display:"flex" }}>
-                <div style={{ width:`${(s.deep/total)*100}%`, background:"#1d4ed8" }} />
-                <div style={{ width:`${(s.rem/total)*100}%`, background:"#7c3aed" }} />
-                <div style={{ width:`${(s.light/total)*100}%`, background:"#93c5fd" }} />
+      <Sec title="VO₂max" sub="Garmin running estimate vs lab CPET">
+        <Card pad={16}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:14, marginBottom:12, flexWrap:"wrap" }}>
+            <div>
+              <div className="num" style={{ fontSize:30, fontWeight:800, color:T.run, letterSpacing:"-0.02em" }}>
+                {latestVo2[1]}<span style={{ fontSize:13, fontWeight:600, color:T.ink3, marginLeft:5 }}>mL/kg/min</span>
               </div>
-              <div style={{ fontSize:9, color:"#64748b", width:36 }}>{Math.floor((s.deep+s.rem+s.light)/60)}h{(s.deep+s.rem+s.light)%60}m</div>
+              <div style={{ fontSize:10.5, color:T.ink3, marginTop:2 }}>Garmin estimate · {latestVo2[0]}</div>
             </div>
-          );
-        })}
-        <div style={{ display:"flex", gap:12, marginTop:8 }}>
-          {[["#1d4ed8","Deep"],["#7c3aed","REM"],["#93c5fd","Light"]].map(([c,l]) => (
-            <div key={l} style={{ display:"flex", alignItems:"center", gap:4 }}>
-              <div style={{ width:8, height:8, borderRadius:2, background:c }} />
-              <span style={{ fontSize:9, color:"#64748b" }}>{l}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* WEIGHT */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>WEIGHT TREND (2026)</div>
-      <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
-          <div>
-            <div style={{ fontSize:9, color:"#94a3b8", letterSpacing:1 }}>LAST LOGGED</div>
-            <div style={{ fontSize:22, fontWeight:900, color:"#1e293b" }}>
-              {latestWeight[1]} <span style={{ fontSize:13, fontWeight:500, color:"#64748b" }}>kg</span>
-            </div>
-            <div style={{ fontSize:10, color:"#94a3b8" }}>{latestWeight[0]}</div>
-          </div>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ fontSize:9, color:"#94a3b8", letterSpacing:1 }}>RANGE</div>
-            <div style={{ fontSize:13, fontWeight:700, color:"#475569" }}>72.3–75.5 kg</div>
-            <div style={{ fontSize:10, color:"#94a3b8" }}>target: 72–73 kg</div>
-          </div>
-        </div>
-        <Sparkline data={HEALTH_DATA.weight} color="#0369a1" height={64} />
-        
-      </div>
-
-      {/* BODY FAT */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>
-        BODY FAT % <span style={{ fontWeight:400, color: bfStatus === "live" ? "#15803d" : "#94a3b8" }}>
-          {bfStatus === "loading" ? "⟳ fetching from Google Sheet…" : bfStatus === "live" ? "● live from Google Sheet" : "○ cached data (sheet unavailable)"}
-        </span>
-      </div>
-      <div style={{ background:"#f0fdf4", border:"1px solid #86efac", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        <div style={{ display:"flex", gap:12, marginBottom:12, flexWrap:"wrap" }}>
-          <div style={{ flex:1, minWidth:72 }}>
-            <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>LATEST</div>
-            <div style={{ fontSize:22, fontWeight:900, color:"#15803d" }}>{latestBf}%</div>
-            <div style={{ fontSize:10, color:"#64748b" }}>Mar 25 2026</div>
-          </div>
-          {leanMass && (
-            <div style={{ flex:1, minWidth:72 }}>
-              <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>LEAN MASS</div>
-              <div style={{ fontSize:22, fontWeight:900, color:"#15803d" }}>{leanMass}<span style={{ fontSize:13, fontWeight:500 }}> kg</span></div>
-              <div style={{ fontSize:10, color:"#64748b" }}>est. from last weight</div>
-            </div>
-          )}
-          <div style={{ flex:1, minWidth:72 }}>
-            <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>SINCE JAN 25</div>
-            <div style={{ fontSize:22, fontWeight:900, color:"#15803d" }}>↓ 7.1%</div>
-            <div style={{ fontSize:10, color:"#64748b" }}>14.7% → 7.6%</div>
-          </div>
-        </div>
-        {bfEntries.length > 1 && <Sparkline data={bfEntries} color="#15803d" height={64} />}
-        <div style={{ fontSize:9, color: bfStatus === "live" ? "#15803d" : "#94a3b8", marginTop:6 }}>
-          {bfStatus === "live"
-            ? "✓ Live from your Google Sheet — updates automatically when you add a new column."
-            : bfStatus === "loading"
-            ? "Fetching from Google Sheet…"
-            : "⚠ Sheet unavailable — showing cached data. Check that the sheet is publicly shared."}
-          {" "}Readings outside 9–20% excluded as outliers.
-        </div>
-      </div>
-
-      {/* VO2MAX */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>VO₂MAX TREND</div>
-      <div style={{ background:"#fff7ed", border:"1px solid #fdba74", borderRadius:10, padding:"14px", marginBottom:16 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
-          <div>
-            <div style={{ fontSize:22, fontWeight:900, color:"#c2410c" }}>
-              {latestVo2[1]} <span style={{ fontSize:13, fontWeight:500, color:"#64748b" }}>mL/kg/min</span>
-            </div>
-            <div style={{ fontSize:10, color:"#64748b", marginTop:2 }}>Garmin estimate · 52 → 56 since March</div>
-          </div>
-          <div style={{ textAlign:"right", fontSize:11, color:"#64748b", lineHeight:1.9 }}>
-            <div>Elite (35M): &gt;55 ✓</div>
-            <div>Hyrox sub-75: 50+ ✓</div>
-          </div>
-        </div>
-        <Sparkline data={HEALTH_DATA.vo2max} color="#c2410c" height={64} />
-        <div style={{ marginTop:10, padding:"8px 10px", background:"#fff", border:"1px solid #fed7aa", borderRadius:6, fontSize:11, color:"#9a3412" }}>
-          🏆 <strong>Lab-tested CPET (Nov 2024): 60 ml/kg/min</strong> — 152% of predicted, classified as <strong>EXCELLENT</strong>
-        </div>
-      </div>
-
-      {/* CPET HR ZONES */}
-      <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>HR TRAINING ZONES <span style={{ fontWeight:400, color:"#94a3b8" }}>(from CPET, Nov 2024)</span></div>
-      <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px" }}>
-        {[
-          { z:"E", name:"Top / VO₂max", hr:">167", w:">262W", color:"#dc2626", bg:"#fef2f2" },
-          { z:"D", name:"Development", hr:"146–167", w:"206–262W", color:"#ea580c", bg:"#fff7ed" },
-          { z:"C", name:"Intensive Endurance", hr:"132–146", w:"154–206W", color:"#eab308", bg:"#fefce8" },
-          { z:"B", name:"Extensive Endurance", hr:"115–132", w:"112–154W", color:"#16a34a", bg:"#f0fdf4" },
-          { z:"A", name:"Compensation", hr:"<115", w:"<112W", color:"#94a3b8", bg:"#f8fafc" },
-        ].map((z,i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 10px", marginBottom:4, background:z.bg, border:`1px solid ${z.color}33`, borderRadius:6 }}>
-            <div style={{ width:24, height:24, borderRadius:"50%", background:z.color, color:"#fff", fontSize:12, fontWeight:900, display:"flex", alignItems:"center", justifyContent:"center" }}>{z.z}</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:z.color }}>{z.name}</div>
-              <div style={{ fontSize:10, color:"#64748b" }}>HR {z.hr} bpm · {z.w}</div>
+            <div style={{ textAlign:"right", fontSize:11, color:T.ink2, lineHeight:1.9 }}>
+              <div>Elite for 35M: &gt;55 <span style={{ color:T.ok }}>✓</span></div>
+              <div>Hyrox sub-75: 50+ <span style={{ color:T.ok }}>✓</span></div>
             </div>
           </div>
-        ))}
-        <div style={{ fontSize:10, color:"#64748b", marginTop:8, textAlign:"center", fontStyle:"italic" }}>
-          Adjust: <strong>+10 running</strong> · <strong>+5 walking</strong> · <strong>−10 swimming</strong>
-        </div>
-      </div>
+          <Sparkline data={HEALTH_DATA.vo2max} color={T.run} height={100} />
+          <Note tone="ok" icon="🏆">
+            <strong>Lab CPET (Nov 2024): 60 ml/kg/min</strong> — 152% of predicted, classified EXCELLENT. The Garmin figure runs conservative.
+          </Note>
+        </Card>
+      </Sec>
     </div>
   );
 }
+
+function ReferencePanel() {
+  const zones = [
+    { z:"E", name:"Top / VO₂max",        hr:">167",    w:">262W",     tone:"bad" },
+    { z:"D", name:"Development",         hr:"146–167", w:"206–262W",  tone:"warn" },
+    { z:"C", name:"Intensive endurance", hr:"132–146", w:"154–206W",  tone:"warn" },
+    { z:"B", name:"Extensive endurance", hr:"115–132", w:"112–154W",  tone:"ok" },
+    { z:"A", name:"Compensation",        hr:"<115",    w:"<112W",     tone:"mute" },
+  ];
+  return (
+    <div className="split-even">
+      <Sec title="HR training zones" sub="From CPET, Nov 2024">
+        <Card pad={16}>
+          {zones.map(z => (
+            <div key={z.z} style={{ display:"flex", alignItems:"center", gap:11, padding:"9px 11px", marginBottom:6,
+              background:TONE_BG[z.tone], border:`1px solid ${TONE[z.tone]}2e`, borderRadius:9 }}>
+              <div style={{ width:26, height:26, borderRadius:"50%", background:TONE[z.tone], color:T.bg,
+                            fontSize:11, fontWeight:900, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{z.z}</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:12, fontWeight:700, color:TONE[z.tone] }}>{z.name}</div>
+                <div className="num" style={{ fontSize:10.5, color:T.ink3 }}>HR {z.hr} bpm · {z.w}</div>
+              </div>
+            </div>
+          ))}
+          <Note tone="mute">Adjust: <strong>+10 running</strong> · <strong>+5 walking</strong> · <strong>−10 swimming</strong>.</Note>
+        </Card>
+      </Sec>
+
+      <Sec title="Athlete profile" sub="Fixed reference values">
+        <Card pad={16}>
+          {[
+            ["Age / height / weight", "35 · 176 cm · ~75 kg"],
+            ["Lab VO₂max (CPET 2024)", "60 mL/kg/min — excellent"],
+            ["HRV baseline", `${hrvBaseline} ms (rolling weekly)`],
+            ["Resting HR range", "40–46 bpm"],
+            ["Devices", "Garmin Epix 2 Pro · HRM-Pro Plus"],
+            ["Last race", "Hyrox Riga · 30 May 2026 · 1:14:56"],
+            ["Next race", `${RACE.name} · ${RACE.label} · target ${RACE.target}`],
+          ].map(([k, v], i, arr) => (
+            <div key={k} style={{ display:"flex", justifyContent:"space-between", gap:12, padding:"10px 0",
+              borderBottom: i < arr.length - 1 ? `1px solid ${T.lineDim}` : "none" }}>
+              <span style={{ fontSize:11.5, color:T.ink3 }}>{k}</span>
+              <span style={{ fontSize:11.5, color:T.ink, fontWeight:600, textAlign:"right" }}>{v}</span>
+            </div>
+          ))}
+        </Card>
+      </Sec>
+    </div>
+  );
+}
+
+function BodyView({ ana }) {
+  const [tab, setTab] = useState("recovery");
+  return (
+    <div className="fade">
+      <SubNav items={[["recovery","RECOVERY"],["composition","COMPOSITION"],["reference","REFERENCE"]]} value={tab} onChange={setTab} />
+      {tab === "recovery" && <RecoveryPanel ana={ana} />}
+      {tab === "composition" && <CompositionPanel />}
+      {tab === "reference" && <ReferencePanel />}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RACE — targets · sessions · trends
+   ═══════════════════════════════════════════════════════════════════════════ */
+const RACE_BUDGET = [
+  { part:"8 × 1 km runs",  target:36*60+48, note:"4:36 per km, every km" },
+  { part:"8 × stations",   target:28*60+30, note:"including sled work" },
+  { part:"Roxzone",        target: 4*60+22, note:"jog every transition" },
+];
+// Where the five minutes from Riga (1:14:56) actually come from.
+const RACE_GAINS = [
+  { name:"Runs",      sec:122, how:"8 × 4:36 instead of drifting past 5:00" },
+  { name:"Roxzone",   sec: 56, how:"jog every transition, no walking" },
+  { name:"Sled pull", sec: 38, how:"pure technique — hand-over-hand rhythm" },
+  { name:"Burpee BJ", sec: 36, how:"6×20m blocks at 68s, rhythm over power" },
+  { name:"Ski erg",   sec: 31, how:"TT already at 3:54, so 4:08 is ~85% effort" },
+  { name:"Row",       sec: 31, how:"hold 2:05/500m off tired legs" },
+  { name:"Lunges",    sec:  9, how:"stop resetting mid-lane" },
+];
+const RIGA_SPLITS = [
+  { label:"Ski erg 1000m",  riga:"4:39", target:"4:08" },
+  { label:"Row 1000m",      riga:"4:43", target:"4:12" },
+  { label:"Sled pull 50m",  riga:"4:08", target:"3:30" },
+  { label:"Roxzone",        riga:"5:18", target:"4:22" },
+];
+
+function RaceTargets({ ana }) {
+  const days = Math.max(0, Math.ceil((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000));
+  const budgetTotal = RACE_BUDGET.reduce((s, b) => s + b.target, 0);
+  const gainTotal = RACE_GAINS.reduce((s, g) => s + g.sec, 0);
+  const maxGain = Math.max(...RACE_GAINS.map(g => g.sec));
+  const blockStart = new Date(TAPER_PLAN[0].start);
+  const raceDay = new Date(RACE.dateISO);
+  const progress = Math.min(100, Math.max(0, ((new Date(TODAY) - blockStart) / (raceDay - blockStart)) * 100));
+  const { tsb } = ana;
+
+  return (
+    <div>
+      {/* countdown hero */}
+      <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
+        <div style={{ padding:"22px", background:`linear-gradient(135deg, ${T.accentBg}, transparent 60%)` }}>
+          <div style={{ display:"flex", gap:22, alignItems:"center", flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.18em", color:T.ink3 }}>{RACE.name} · {RACE.label}</div>
+              <div className="num" style={{ display:"flex", alignItems:"baseline", gap:9, marginTop:4 }}>
+                <span style={{ fontSize:54, fontWeight:800, color:T.ink, lineHeight:1, letterSpacing:"-0.04em" }}>{days}</span>
+                <span style={{ fontSize:15, fontWeight:700, color:T.ink3 }}>{days === 1 ? "day" : "days"} out</span>
+              </div>
+            </div>
+            <div style={{ marginLeft:"auto", textAlign:"right" }}>
+              <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>TARGET</div>
+              <div className="num" style={{ fontSize:36, fontWeight:800, color:T.accentIn, letterSpacing:"-0.03em" }}>{RACE.target}</div>
+              <div className="num" style={{ fontSize:11, color:T.ink3 }}>Riga was 1:14:56</div>
+            </div>
+          </div>
+          <div style={{ marginTop:20 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:T.ink3, marginBottom:6 }}>
+              <span>{TAPER_PLAN[0].theme} · block start</span>
+              <span>{progress.toFixed(0)}% through the block</span>
+              <span>Race day</span>
+            </div>
+            <Bar value={progress} tone="accent" height={8} />
+          </div>
+        </div>
+      </Card>
+
+      <div className="split-even">
+        <Sec title="Race-day budget" sub={`Adds up to ${fmtHMS(budgetTotal)} — 20s of headroom on ${RACE.target}`}>
+          <Card pad={16}>
+            {RACE_BUDGET.map((b, i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:11, marginBottom:12 }}>
+                <div style={{ minWidth:118 }}>
+                  <div style={{ fontSize:12, fontWeight:700, color:T.ink }}>{b.part}</div>
+                  <div style={{ fontSize:10, color:T.ink3 }}>{b.note}</div>
+                </div>
+                <Bar value={pct(b.target, budgetTotal)} tone={i === 0 ? "warn" : i === 1 ? "accent" : "info"} height={18} radius={6} />
+                <div className="num" style={{ fontSize:13, fontWeight:800, color:T.ink, minWidth:52, textAlign:"right" }}>{fmtMMSS(b.target)}</div>
+              </div>
+            ))}
+            <div style={{ display:"flex", justifyContent:"space-between", paddingTop:11, borderTop:`1px solid ${T.lineDim}` }}>
+              <span style={{ fontSize:11.5, fontWeight:700, color:T.ink2 }}>Total</span>
+              <span className="num" style={{ fontSize:13, fontWeight:800, color:T.accentIn }}>{fmtHMS(budgetTotal)}</span>
+            </div>
+          </Card>
+        </Sec>
+
+        <Sec title="Where the 5 minutes comes from" sub={`${fmtMMSS(gainTotal)} of identified gains vs Riga`}>
+          <Card pad={16}>
+            {RACE_GAINS.map((g, i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:11, marginBottom:10 }}>
+                <div style={{ minWidth:78, fontSize:11.5, fontWeight:700, color:T.ink }}>{g.name}</div>
+                <Bar value={(g.sec / maxGain) * 100} tone="ok" height={15} radius={5} />
+                <div className="num" style={{ fontSize:11.5, fontWeight:800, color:T.ok, minWidth:44, textAlign:"right" }}>−{fmtMMSS(g.sec)}</div>
+              </div>
+            ))}
+            <div style={{ marginTop:8, paddingTop:10, borderTop:`1px solid ${T.lineDim}` }}>
+              {RACE_GAINS.slice(0, 3).map(g => (
+                <div key={g.name} style={{ fontSize:10.5, color:T.ink3, marginBottom:4, lineHeight:1.5 }}>
+                  <strong style={{ color:T.ink2 }}>{g.name}:</strong> {g.how}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </Sec>
+      </div>
+
+      <Sec title="Station targets" sub="Riga result → Athens target">
+        <div className="grid g4">
+          {RIGA_SPLITS.map((r, i) => (
+            <Stat key={i} label={r.label} value={r.target} sub={`Riga ${r.riga}`} tone="accent" accentBar />
+          ))}
+        </div>
+      </Sec>
+
+      <Sec title="Race week">
+        <div className="grid g2">
+          <Card pad={14}>
+            <Tag tone={tsb >= 10 ? "ok" : "warn"}>FORM TARGET</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>TSB +10 → +20</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>by Sep 4 · currently {tsb >= 0 ? "+" : ""}{tsb.toFixed(0)}</div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="accent">TAPER</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>Aug 31 · −40%</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>cut volume, keep intensity touches</div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="warn">HEAT</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>30°C+ in Athens</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>sauna 20min blocks from Aug 20</div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="info">VENUE</Tag>
+            <div style={{ fontSize:15, fontWeight:800, color:T.ink, marginTop:8 }}>Metropolitan Expo</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>walk the roxzone route on Sep 4</div>
+          </Card>
+        </div>
+      </Sec>
+    </div>
+  );
+}
+
+/* ── one Hyrox session, in detail ────────────────────────────────────────── */
+function SessionDetail({ s }) {
+  const allLaps = s.laps || [];
+  const runLaps = allLaps.filter(l => l.role === "run");
+  const stationLaps = allLaps.filter(l => l.role === "station");
+  const warmupLaps = allLaps.filter(l => l.role === "warmup" || l.role === "cooldown");
+  const stationDisplay = (lap, idx) => (s.stationNames && s.stationNames[lap.i]) || `Station ${idx + 1}`;
+
+  // Official results (when uploaded) are the source of truth for times and ranks;
+  // Garmin laps still supply heart rate, which official data never carries.
+  const official = s.official || null;
+  const hasOfficial = !!official;
+  const runHrByOrder = runLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr }));
+  const stationHrByName = {};
+  stationLaps.forEach(l => {
+    const nm = (s.stationNames && s.stationNames[l.i]) || null;
+    if (nm) stationHrByName[nm] = { avgHr:l.avgHr, maxHr:l.maxHr };
+  });
+  const stationHrByOrder = stationLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr }));
+
+  const runs = hasOfficial && official.runs
+    ? official.runs.map((r, i) => ({ i:i+1, t:r.time, rank:r.rank ?? null,
+        avgHr:(runHrByOrder[i] || {}).avgHr ?? null, maxHr:(runHrByOrder[i] || {}).maxHr ?? null }))
+    : runLaps.map((l, i) => ({ i:i+1, t:l.t, rank:null, avgHr:l.avgHr ?? null, maxHr:l.maxHr ?? null }));
+
+  const stations = hasOfficial && official.stations
+    ? official.stations.map((st, i) => {
+        const hr = stationHrByName[st.name] || stationHrByOrder[i] || {};
+        return { i:i+1, name:st.name, t:st.time, rank:st.rank ?? null, avgHr:hr.avgHr ?? null, named:true };
+      })
+    : stationLaps.map((l, i) => ({ i:i+1, name:stationDisplay(l, i), t:l.t, rank:null, avgHr:l.avgHr ?? null,
+        dist:l.dist, named: !!(s.stationNames && s.stationNames[l.i]) }));
+
+  const runTimes = runs.map(r => r.t), statTimes = stations.map(x => x.t);
+  const totalRun = runTimes.reduce((a, b) => a + b, 0);
+  const totalStat = statTimes.reduce((a, b) => a + b, 0);
+  const avgRun = runTimes.length ? totalRun / runTimes.length : 0;
+  const fastRun = runTimes.length ? Math.min(...runTimes) : 0;
+  const slowRun = runTimes.length ? Math.max(...runTimes) : 0;
+  const maxStat = statTimes.length ? Math.max(...statTimes) : 1;
+  const displayTotal = hasOfficial && official.finishTime ? official.finishTime : s.totalTime;
+  const hrTone = hr => !hr ? "mute" : hr > 167 ? "bad" : hr > 146 ? "warn" : "ok";
+
+  return (
+    <div>
+      <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:14 }}>
+        <h3 style={{ margin:0, fontSize:17, fontWeight:800, color:T.ink, letterSpacing:"-0.01em" }}>{s.name}</h3>
+        <span className="num" style={{ fontSize:11.5, color:T.ink3 }}>{s.date}</span>
+        {hasOfficial && <Tag tone="ok">🏁 OFFICIAL RESULTS</Tag>}
+        {s.type && <Tag tone="accent">{s.type}</Tag>}
+      </div>
+
+      <div className="grid g3" style={{ marginBottom:16 }}>
+        <Stat label="Total time" value={fmtHMS(displayTotal)} sub={hasOfficial ? "official finish" : "session total"} tone="ink" accentBar />
+        <Stat label={`Running ×${runs.length}`} value={fmtMMSS(totalRun)} sub={avgRun ? `avg ${fmtMMSS(avgRun)}` : "—"} tone="warn" accentBar />
+        <Stat label={`Stations ×${stations.length}`} value={fmtMMSS(totalStat)} sub={`${pct(totalStat, displayTotal).toFixed(0)}% of session`} tone="accent" accentBar />
+        <Stat label="Avg HR" value={s.avgHR ? `${s.avgHR}` : "—"} unit="bpm" sub={s.maxHR ? `max ${s.maxHR}` : "whole session"} tone={hrTone(s.avgHR)} accentBar />
+        <Stat label="Run range" value={runs.length ? `${fmtMMSS(fastRun)}–${fmtMMSS(slowRun)}` : "—"} sub="fastest → slowest" tone="info" accentBar />
+        {runs.length > 1 && <Stat label="Run drift" value={`+${fmtMMSS(slowRun - fastRun)}`} sub="first → worst split" tone={slowRun - fastRun > 25 ? "warn" : "ok"} accentBar />}
+      </div>
+
+      {s.estimateMin && (
+        <Card pad={18} lift={false} style={{ marginBottom:16, background:`linear-gradient(135deg, ${T.accentBg}, transparent 65%)`,
+          display:"flex", justifyContent:"space-between", alignItems:"center", gap:14, flexWrap:"wrap" }}>
+          <div>
+            <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>PROJECTED FINISH</div>
+            <div className="num" style={{ fontSize:34, fontWeight:800, color:T.accentIn, letterSpacing:"-0.03em", marginTop:2 }}>~{s.estimateMin} min</div>
+          </div>
+          <div style={{ textAlign:"right", fontSize:11, color:T.ink3 }}>
+            <div>extrapolated from this session</div>
+            <div style={{ marginTop:3 }}>target {RACE.target} in {RACE.label}</div>
+          </div>
+        </Card>
+      )}
+
+      <div className="split-even">
+        {runs.length > 0 && (
+          <Sec title={`Run splits · ${runs.length} laps${hasOfficial ? " · official" : ""}`}>
+            <Card pad={16}>
+              {runs.map((run, i) => {
+                const isF = run.t === fastRun, isS = run.t === slowRun && fastRun !== slowRun;
+                const tone = isF ? "ok" : isS ? "bad" : "warn";
+                return (
+                  <div key={i} style={{ display:"flex", alignItems:"center", gap:9, marginBottom:6 }}>
+                    <div className="num" style={{ fontSize:10, color:T.ink3, minWidth:24, textAlign:"right" }}>R{i+1}</div>
+                    <Bar value={(run.t / (slowRun || 1)) * 86 + 14} tone={tone} height={18} radius={5} />
+                    <div className="num" style={{ fontSize:12, fontWeight:800, color:TONE[tone], minWidth:44, textAlign:"right" }}>{fmtMMSS(run.t)}</div>
+                    {run.avgHr && (
+                      <div className="num" style={{ fontSize:10, color:TONE[hrTone(run.avgHr)], minWidth:46, textAlign:"right" }}>
+                        ♥{run.avgHr}{run.maxHr ? <span style={{ color:T.ink3 }}>/{run.maxHr}</span> : null}
+                      </div>
+                    )}
+                    {run.rank != null && <div className="num" style={{ fontSize:9.5, color:T.ink3, minWidth:34, textAlign:"right" }}>#{run.rank}</div>}
+                  </div>
+                );
+              })}
+              <div className="num" style={{ display:"flex", gap:16, flexWrap:"wrap", marginTop:11, paddingTop:10,
+                borderTop:`1px solid ${T.lineDim}`, fontSize:10.5, color:T.ink3 }}>
+                {avgRun > 0 && <span>avg <strong style={{ color:T.ink }}>{fmtMMSS(avgRun)}</strong></span>}
+                {fastRun !== slowRun && <span>drift <strong style={{ color:T.warn }}>+{fmtMMSS(slowRun - fastRun)}</strong></span>}
+                <span>total <strong style={{ color:T.ink }}>{fmtMMSS(totalRun)}</strong></span>
+              </div>
+            </Card>
+          </Sec>
+        )}
+
+        {stations.length > 0 && (
+          <Sec title={`Station breakdown${hasOfficial ? " · official" : ""}`}>
+            <Card pad={16}>
+              {stations.map((st, i) => (
+                <div key={i} style={{ marginBottom:11 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8, marginBottom:4 }}>
+                    <span style={{ fontSize:11.5, fontWeight:600, color: st.named ? T.ink : T.ink3, fontStyle: st.named ? "normal" : "italic" }}>{st.name}</span>
+                    <span className="num" style={{ fontSize:12.5, fontWeight:800, color:T.accentIn }}>{fmtMMSS(st.t)}</span>
+                  </div>
+                  <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+                    <Bar value={(st.t / maxStat) * 88 + 12} tone="accent" height={13} radius={5} />
+                    <div className="num" style={{ fontSize:9.5, color:T.ink3, minWidth:72, textAlign:"right" }}>
+                      {st.avgHr ? `♥${st.avgHr}` : ""}
+                      {st.rank != null ? `${st.avgHr ? " · " : ""}#${st.rank}` : (st.dist ? ` · ${st.dist}m` : "")}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {hasOfficial && official.roxzone && (
+                <div style={{ display:"flex", justifyContent:"space-between", marginTop:10, paddingTop:10, borderTop:`1px solid ${T.lineDim}` }}>
+                  <span style={{ fontSize:11, color:T.ink2 }}>Roxzone (transitions)</span>
+                  <span className="num" style={{ fontSize:12, fontWeight:800, color:T.info }}>
+                    {fmtMMSS(official.roxzone.time)}{official.roxzone.rank != null ? ` · #${official.roxzone.rank}` : ""}
+                  </span>
+                </div>
+              )}
+              {!hasOfficial && !s.stationNames && (
+                <Note tone="warn" icon="💡">Add <code>stationNames</code> to this entry in HYROX_DATA to unlock per-station trends.</Note>
+              )}
+            </Card>
+          </Sec>
+        )}
+      </div>
+
+      {warmupLaps.length > 0 && (
+        <div className="num" style={{ fontSize:10, color:T.ink3, textAlign:"center", marginBottom:16 }}>
+          Ignoring {warmupLaps.length} warm-up/cool-down lap{warmupLaps.length > 1 ? "s" : ""} ({warmupLaps.map(l => fmtMMSS(l.t)).join(", ")}) — anomalous distance, likely treadmill drift.
+        </div>
+      )}
+
+      {s.description && (
+        <Sec title="Garmin description">
+          <Card pad={16}><div style={{ fontSize:12.5, color:T.ink2, whiteSpace:"pre-wrap", lineHeight:1.6 }}>{s.description}</div></Card>
+        </Sec>
+      )}
+
+      {s.photos && s.photos.length > 0 && (
+        <Sec title={`Photos · ${s.photos.length}`}>
+          <div className="scroll-x" style={{ display:"flex", gap:10, paddingBottom:6 }}>
+            {s.photos.map((url, i) => (
+              <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ flexShrink:0 }}>
+                <img src={url} alt={`session photo ${i+1}`} style={{ height:150, borderRadius:11, border:`1px solid ${T.line}`, display:"block" }} />
+              </a>
+            ))}
+          </div>
+        </Sec>
+      )}
+
+      <SessionNotes s={s} />
+    </div>
+  );
+}
+
+function SessionNotes({ s }) {
+  const key = `hyrox-notes-${s.id}`;
+  const [text, setText] = useState(() => {
+    if (typeof window === "undefined") return s.notes || "";
+    try { return window.localStorage.getItem(key) || s.notes || ""; } catch { return s.notes || ""; }
+  });
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { window.localStorage.setItem(key, text); } catch { /* private mode — notes stay in-session */ }
+  }, [text, key]);
+
+  return (
+    <Sec title="Session notes" right={
+      <button className="tap" onClick={() => setOpen(o => !o)} style={{ fontSize:11, fontWeight:700, color:T.accentIn, cursor:"pointer" }}>
+        {open ? "Hide" : text ? "Edit" : "Add notes"}
+      </button>
+    }>
+      {!open && text && (
+        <Card pad={16}><div style={{ fontSize:12.5, color:T.ink2, whiteSpace:"pre-wrap", lineHeight:1.6 }}>{text}</div></Card>
+      )}
+      {!open && !text && <Card pad={16}><Empty>No notes for this session yet.</Empty></Card>}
+      {open && (
+        <Card pad={16}>
+          <textarea value={text} onChange={e => setText(e.target.value)}
+            placeholder="Prescribed workout, conditions, how it felt…"
+            style={{ width:"100%", minHeight:170, padding:"11px 13px", background:T.bg, color:T.ink,
+              border:`1px solid ${T.line}`, borderRadius:10, fontSize:13, lineHeight:1.6, resize:"vertical", outline:"none" }} />
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, marginTop:10, flexWrap:"wrap" }}>
+            <span style={{ fontSize:10, color:T.ink3 }}>Saved in this browser only · {text.length} chars</span>
+            <Chip tone="accent" active onClick={() => { try { navigator.clipboard.writeText(text); } catch {} }}>📋 Copy</Chip>
+          </div>
+        </Card>
+      )}
+    </Sec>
+  );
+}
+
+/* ── cross-session trends ────────────────────────────────────────────────── */
+function HyroxTrends({ sessions, ana }) {
+  const sessRuns = (sess) => {
+    const laps = (sess.laps || []).filter(l => l.role === "run");
+    if (sess.official && sess.official.runs)
+      return sess.official.runs.map((r, i) => ({ t:r.time, avgHr:(laps[i] || {}).avgHr || null }));
+    return laps.map(l => ({ t:l.t, avgHr:l.avgHr || null }));
+  };
+  const sessStations = (sess) => {
+    const laps = (sess.laps || []).filter(l => l.role === "station");
+    if (sess.official && sess.official.stations) {
+      const hrByName = {};
+      laps.forEach(l => { const n = sess.stationNames && sess.stationNames[l.i]; if (n) hrByName[n] = l.avgHr || null; });
+      return sess.official.stations.map((st, i) => ({ name:st.name, t:st.time, hr:hrByName[st.name] ?? ((laps[i] || {}).avgHr || null) }));
+    }
+    return laps.map(l => ({ name: sess.stationNames && sess.stationNames[l.i], t:l.t, hr:l.avgHr || null }));
+  };
+  const sessTotal = (sess) => (sess.official && sess.official.finishTime) ? sess.official.finishTime : sess.totalTime;
+
+  const tot = sessions.map(s => ({
+    date:s.date, id:s.id, totalTime:sessTotal(s),
+    runTime:sessRuns(s).reduce((a, b) => a + b.t, 0),
+    stationTime:sessStations(s).reduce((a, b) => a + b.t, 0),
+  }));
+  const byStation = {};
+  sessions.forEach(s => sessStations(s).forEach(st => {
+    if (!st.name) return;
+    (byStation[st.name] = byStation[st.name] || []).push({ date:s.date, time:st.t, hr:st.hr });
+  }));
+  const runIdx = {};
+  sessions.forEach(s => sessRuns(s).forEach((r, i) => {
+    (runIdx[`R${i+1}`] = runIdx[`R${i+1}`] || []).push({ date:s.date, time:r.t });
+  }));
+  const stationNames = Object.keys(byStation);
+  const sims = ana.hyroxSims;
+
+  return (
+    <div>
+      <Sec title="Total time across sessions">
+        <Card pad={16}>
+          {tot.length >= 2
+            ? <Sparkline data={tot.map(t => [t.date, t.totalTime])} color={T.accent} height={110} fmt={v => fmtHMS(v)} />
+            : <Empty>Need at least 2 sessions to draw a trend ({tot.length} so far).</Empty>}
+          <div className="grid g3" style={{ marginTop:14 }}>
+            {tot.map(t => (
+              <Card key={t.id} pad={12}>
+                <div className="num" style={{ fontSize:10, color:T.ink3 }}>{t.date}</div>
+                <div className="num" style={{ fontSize:17, fontWeight:800, color:T.ink, marginTop:3 }}>{fmtHMS(t.totalTime)}</div>
+                <div className="num" style={{ fontSize:10, color:T.ink3, marginTop:3 }}>run {fmtMMSS(t.runTime)} · stn {fmtMMSS(t.stationTime)}</div>
+              </Card>
+            ))}
+          </div>
+        </Card>
+      </Sec>
+
+      <Sec title="Station times" sub="Same station, session over session">
+        {stationNames.length === 0
+          ? <Card><Empty>No stations named across sessions yet — add <code>stationNames</code> in HYROX_DATA to unlock this.</Empty></Card>
+          : <div className="grid g2">
+              {stationNames.map(name => {
+                const series = byStation[name];
+                const times = series.map(x => x.time);
+                const best = Math.min(...times), worst = Math.max(...times);
+                const delta = series[series.length-1].time - series[0].time;
+                const tone = series.length < 2 ? "mute" : delta < -5 ? "ok" : delta > 5 ? "bad" : "mute";
+                const trend = series.length < 2 ? "single session" : delta < -5 ? `↓ ${fmtMMSS(Math.abs(delta))} faster` : delta > 5 ? `↑ ${fmtMMSS(delta)} slower` : "≈ holding";
+                return (
+                  <Card key={name} pad={14}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8, marginBottom:10 }}>
+                      <span style={{ fontSize:12.5, fontWeight:700, color:T.ink }}>{name}</span>
+                      <span style={{ fontSize:11, fontWeight:700, color:TONE[tone] }}>{trend}</span>
+                    </div>
+                    <div style={{ display:"flex", alignItems:"flex-end", gap:8, height:74 }}>
+                      {series.map((p, i) => {
+                        const h = ((p.time - best) / (worst - best || 1)) * 62 + 16;
+                        const isLast = i === series.length - 1;
+                        return (
+                          <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-end", height:"100%" }}>
+                            <div className="num" style={{ fontSize:10, fontWeight:700, color: isLast ? T.accentIn : T.ink3 }}>{fmtMMSS(p.time)}</div>
+                            <div style={{ width:"100%", height:h, background: isLast ? T.accent : "#4c3a86", borderRadius:"4px 4px 0 0", marginTop:4 }} />
+                            <div className="num" style={{ fontSize:9, color:T.ink3, marginTop:4 }}>{fmtISO(p.date)}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>}
+      </Sec>
+
+      <Sec title="Run times by position" sub="Does the drift show up in the same lap every time?">
+        <Card pad={16}>
+          {Object.entries(runIdx).filter(([, arr]) => arr.length >= 2).length === 0
+            ? <Empty>Need ≥2 sessions with run laps.</Empty>
+            : Object.entries(runIdx).filter(([, arr]) => arr.length >= 2).map(([k, series]) => {
+                const delta = series[series.length-1].time - series[0].time;
+                const tone = delta < -3 ? "ok" : delta > 3 ? "bad" : "mute";
+                return (
+                  <div key={k} style={{ display:"flex", alignItems:"center", gap:11, padding:"8px 0",
+                    borderBottom:`1px solid ${T.lineDim}` }}>
+                    <div style={{ fontSize:11.5, fontWeight:800, color:T.run, minWidth:30 }}>{k}</div>
+                    <div className="num" style={{ flex:1, display:"flex", gap:6 }}>
+                      {series.map((p, i) => (
+                        <span key={i} style={{ flex:1, fontSize:10.5, textAlign:"center",
+                          color: i === series.length-1 ? T.ink : T.ink3, fontWeight: i === series.length-1 ? 700 : 400 }}>
+                          {fmtMMSS(p.time)}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ fontSize:10.5, fontWeight:700, color:TONE[tone], minWidth:64, textAlign:"right" }}>
+                      {delta < -3 ? "↓ faster" : delta > 3 ? "↑ slower" : "≈ same"}
+                    </div>
+                  </div>
+                );
+              })}
+        </Card>
+      </Sec>
+
+      {sims.length > 0 && (
+        <Sec title="Simulation log" sub="Sessions titled as a Hyrox sim or race">
+          <Card pad={16}>
+            {sims.map((a, i) => (
+              <div key={i} style={{ padding:"11px 0", borderBottom: i < sims.length-1 ? `1px solid ${T.lineDim}` : "none" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", gap:8, alignItems:"baseline" }}>
+                  <span style={{ fontSize:12.5, fontWeight:700, color:T.accentIn }}>🦘 {a.Title}</span>
+                  <span className="num" style={{ fontSize:10, color:T.ink3 }}>{a._date}</span>
+                </div>
+                <div className="num" style={{ display:"flex", gap:13, flexWrap:"wrap", fontSize:10.5, color:T.ink3, marginTop:5 }}>
+                  <span>{fmtDur(a._dur)}</span>
+                  <span>♥ {a._avgHR}</span>
+                  {a._dist > 0 && <span>{a._dist.toFixed(1)} km</span>}
+                  {parseNum(a["Avg Ground Contact Time"]) && <span>GCT {Math.round(parseNum(a["Avg Ground Contact Time"]))}ms</span>}
+                  <span style={{ color: a._trimp > 80 ? T.bad : T.accentIn, fontWeight:700 }}>TRIMP {a._trimp.toFixed(0)}</span>
+                </div>
+              </div>
+            ))}
+            {sims.length > 1 && (() => {
+              const d = sims[sims.length-1]._avgHR - sims[0]._avgHR;
+              return <Note tone={d < 0 ? "ok" : "warn"}>
+                {d < 0
+                  ? `Average HR down ${Math.abs(d)} bpm across ${sims.length} sims — aerobic efficiency improving.`
+                  : `Average HR up ${d} bpm across ${sims.length} sims — either accumulated fatigue or genuinely harder efforts.`}
+              </Note>;
+            })()}
+          </Card>
+        </Sec>
+      )}
+    </div>
+  );
+}
+
+function RaceView({ ana }) {
+  const sessions = Object.entries(HYROX_DATA).map(([id, s]) => ({ id, ...s })).sort((a, b) => a.date.localeCompare(b.date));
+  const [tab, setTab] = useState("targets");
+  const [sel, setSel] = useState(Math.max(0, sessions.length - 1));
+
+  return (
+    <div className="fade">
+      <SubNav items={[["targets","TARGETS"],["sessions","SESSIONS"],["trends","TRENDS"]]} value={tab} onChange={setTab} />
+      {tab === "targets" && <RaceTargets ana={ana} />}
+      {tab === "sessions" && (sessions.length === 0
+        ? <Card><Empty>No Hyrox sessions yet. They appear automatically when an activity is named with “hyrox” or “race simulation”.</Empty></Card>
+        : <>
+            {sessions.length > 1 && (
+              <div className="scroll-x no-bar" style={{ display:"flex", gap:7, marginBottom:18 }}>
+                {sessions.map((s, i) => (
+                  <Chip key={s.id} active={sel === i} onClick={() => setSel(i)}>
+                    {fmtISO(s.date)}{s.official ? " 🏁" : ""}
+                  </Chip>
+                ))}
+              </div>
+            )}
+            <SessionDetail s={sessions[sel]} />
+          </>)}
+      {tab === "trends" && (sessions.length === 0
+        ? <Card><Empty>No Hyrox sessions to compare yet.</Empty></Card>
+        : <HyroxTrends sessions={sessions} ana={ana} />)}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHELL — header, sync state, auth controls, navigation
+   ═══════════════════════════════════════════════════════════════════════════ */
+const WORKER = "https://auth.simas.fit";
+
+// Sync freshness. LAST_RUN = update.py attempted a sync (any outcome).
+// LAST_DATA = fresh Garmin data actually landed. The gap between them is what
+// tells you whether the scheduler or the tokens are the thing that broke.
+function syncState() {
+  const now = new Date();
+  const lastRun = new Date(LAST_RUN), lastData = new Date(LAST_DATA);
+  const clock = d => d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
+  const day = d => {
+    const t = new Date(); t.setHours(0,0,0,0);
+    const y = new Date(t); y.setDate(y.getDate() - 1);
+    const dd = new Date(d); dd.setHours(0,0,0,0);
+    if (dd.getTime() === t.getTime()) return "today";
+    if (dd.getTime() === y.getTime()) return "yesterday";
+    return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+  };
+  const ago = d => {
+    const m = Math.floor((now - d) / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ${m % 60}m ago`;
+    return `${Math.floor(h / 24)}d ago`;
+  };
+  const runMin = (now - lastRun) / 60000, dataMin = (now - lastData) / 60000;
+  if (dataMin > 28 * 60) return { tone:"bad", short:"tokens expired",
+    msg:`Last data ${day(lastData)} ${clock(lastData)} (${ago(lastData)}) — OAuth1 likely expired, tap Renew.` };
+  if (runMin > 90) return { tone:"warn", short:"scheduler stuck",
+    msg:`Last run ${clock(lastRun)} (${ago(lastRun)}) — the hourly cron may have stopped, tap Refresh.` };
+  return { tone:"ok", short:`synced ${ago(lastRun)}`, msg:`Synced ${clock(lastRun)} · data through ${day(lastData)}.` };
+}
+
+function AuthControls() {
+  const [refresh, setRefresh] = useState({ state:"idle", msg:"" });
+  const [renew, setRenew] = useState({ state:"idle", msg:"", session:null });
+  const [code, setCode] = useState("");
+
+  async function doRefresh() {
+    setRefresh({ state:"busy", msg:"" });
+    try {
+      const res = await fetch(`${WORKER}/refresh`, {
+        method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ mode:"activities" }),
+      });
+      const data = await res.json();
+      if (data.status === "triggered") {
+        setRefresh({ state:"ok", msg:"sync running" });
+        setTimeout(() => setRefresh({ state:"idle", msg:"" }), 8000);
+      } else setRefresh({ state:"err", msg:data.error || "failed" });
+    } catch (e) { setRefresh({ state:"err", msg:e.message }); }
+  }
+
+  async function startRenew() {
+    setRenew({ state:"busy", msg:"", session:null });
+    try {
+      const res = await fetch(`${WORKER}/auth/start`, { method:"POST" });
+      const data = await res.json();
+      if (data.status === "mfa_required") setRenew({ state:"mfa", msg:"code sent to your email", session:data.session });
+      else if (data.error) setRenew({ state:"err", msg:data.error, session:null });
+      else { setRenew({ state:"ok", msg:"credentials renewed" }); }
+    } catch { setRenew({ state:"err", msg:"worker unreachable", session:null }); }
+  }
+
+  async function verify() {
+    if (!code.trim()) return;
+    setRenew(r => ({ ...r, state:"verifying" }));
+    try {
+      const res = await fetch(`${WORKER}/auth/verify`, {
+        method:"POST", headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ code:code.trim(), session:renew.session }),
+      });
+      const data = await res.json();
+      if (data.status === "success") { setRenew({ state:"ok", msg:"renewed — sync running", session:null }); setCode(""); }
+      else setRenew(r => ({ ...r, state:"mfa", msg:data.error || "wrong code" }));
+    } catch { setRenew(r => ({ ...r, state:"mfa", msg:"verify failed" })); }
+  }
+
+  const btn = (bg, border, color) => ({
+    padding:"8px 13px", borderRadius:9, fontSize:11, fontWeight:700, cursor:"pointer",
+    background:bg, border:`1px solid ${border}`, color, whiteSpace:"nowrap", transition:"all .16s ease",
+  });
+
+  return (
+    <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+      {renew.state === "mfa" || renew.state === "verifying" ? (
+        <div style={{ display:"flex", gap:7, alignItems:"center", flexWrap:"wrap" }}>
+          <span style={{ fontSize:10.5, color:T.ink3 }}>Code from email:</span>
+          <input value={code} onChange={e => setCode(e.target.value)} autoFocus inputMode="numeric" maxLength={8}
+            placeholder="123456" onKeyDown={e => { if (e.key === "Enter") verify(); }}
+            className="num"
+            style={{ width:92, padding:"7px 10px", borderRadius:8, border:`1px solid ${T.accent}`, background:T.bg,
+              color:T.ink, fontSize:14, fontWeight:700, letterSpacing:"0.16em", textAlign:"center", outline:"none" }} />
+          <button className="tap" onClick={verify} disabled={renew.state === "verifying"} style={btn(T.accent, T.accent, "#fff")}>
+            {renew.state === "verifying" ? "Verifying…" : "Submit"}
+          </button>
+          <button className="tap" onClick={() => { setRenew({ state:"idle", msg:"", session:null }); setCode(""); }}
+            style={btn("transparent", T.line, T.ink3)}>Cancel</button>
+          {renew.msg && <span style={{ fontSize:10.5, color: renew.msg.includes("sent") ? T.ink3 : T.bad }}>{renew.msg}</span>}
+        </div>
+      ) : (
+        <>
+          <button className="tap" onClick={doRefresh} disabled={refresh.state === "busy"}
+            style={btn(refresh.state === "err" ? T.badBg : T.accent, refresh.state === "err" ? T.bad : T.accent,
+                       refresh.state === "err" ? T.bad : "#fff")}>
+            {refresh.state === "busy" ? "Refreshing…" : refresh.state === "ok" ? "✓ Running…" : refresh.state === "err" ? `✗ ${refresh.msg}` : "⟳ Refresh"}
+          </button>
+          <button className="tap" onClick={startRenew} disabled={renew.state === "busy"}
+            style={btn("transparent", renew.state === "err" ? T.bad : T.line, renew.state === "err" ? T.bad : T.ink2)}>
+            {renew.state === "busy" ? "Connecting…" : renew.state === "ok" ? "✓ Renewed" : renew.state === "err" ? `✗ ${renew.msg}` : "🔑 Renew"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+const TABS = [
+  ["today", "Today",  "◎"],
+  ["train", "Train",  "▤"],
+  ["body",  "Body",   "♡"],
+  ["race",  "Race",   "🏁"],
+];
 
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
   const [ana, setAna] = useState(null);
   const [view, setView] = useState("today");
-  const fileRef = useRef();
 
   useEffect(() => {
-    const p = parseCSV(CSV_DATA);
-    const a = analyze(p);
+    const a = analyze(parseCSV(CSV_DATA));
     setActivities(a.enriched);
     setAna(a);
   }, []);
 
-  function handleUpload(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-      const p = parseCSV(ev.target.result);
-      const a = analyze(p);
-      setActivities(a.enriched);
-      setAna(a);
-    };
-    r.readAsText(f);
-  }
+  useEffect(() => { window.scrollTo({ top:0, behavior:"smooth" }); }, [view]);
 
-  if (!ana) return <div style={{ padding:40, color:"#333" }}>Loading…</div>;
-
-  const { yesterday, tsb, daysSinceHard, weeklyKm, atl, ctl,
-          weeklyTrimp, zoneMinutes, totalZoneMin, hyroxSims, paceTrend,
-          readinessHistory, atlHistory } = ana;
-
-  // Today's HRV from HEALTH_DATA (latest daily entry)
-  const todayHrv = HEALTH_DATA.daily[HEALTH_DATA.daily.length - 1]?.hrv || null;
-  const hrvBaseline = 95; // updated 2026-08-22
-
-  const R = readiness(tsb, daysSinceHard, todayHrv, hrvBaseline);
-  const rC = R >= 7 ? "#15803d" : R >= 4 ? "#b45309" : "#dc2626";
-  const rBg = R >= 7 ? "#f0fdf4" : R >= 4 ? "#fffbeb" : "#fef2f2";
-  const rBo = R >= 7 ? "#86efac" : R >= 4 ? "#fcd34d" : "#fca5a5";
-  const rLbl = R >= 7 ? "READY TO PUSH" : R >= 4 ? "TRAIN SMART" : "TAKE IT EASY";
-  const coachMsg = R >= 7 ? "HRV 135ms (↑ trend, weekly avg 100ms). Sleep 7h17m: deep 102 / REM 152 min. Green light." : R >= 4 ? "Good recovery. Controlled effort today." : "Load stacking. Rest or very easy only.";
-
-  const todaySched = SCHEDULE.flatMap(w => w.days).find(d => d.date === TODAY);
-  const hyroxAct = yesterday.find(a => isHyrox(a));
-  const runAct = yesterday.find(a => isRun(a) && a._avgHR > 120);
-  const saunaAct = yesterday.find(a => isRecovery(a));
-
-  const notes = [];
-  if (hyroxAct) {
-    notes.push(`Hyrox group: ${fmtDur(hyroxAct._dur)} · HR avg ${hyroxAct._avgHR}/max 169 · TE ${hyroxAct["Aerobic TE"]} · ${hyroxAct._dist?.toFixed(1)}km running`);
-    notes.push(`Session: warm-up → 400m run + 450m row → chest press 20p / shoulder press 20p → box jump over (35-40) → sled push + burpee to plate (20-25p) · 2min on/2min rest`);
-    const gct = parseNum(hyroxAct["Avg Ground Contact Time"]);
-    const vr = parseNum(hyroxAct["Avg Vertical Ratio"]);
-    const gctBalance = hyroxAct["Avg GCT Balance"];
-    const np = parseNum(hyroxAct["Normalized Power® (NP®)"]);
-    if (gct) notes.push(`GCT: ${gct}ms — target <380ms at race pace ${gct < 380 ? "✓ good" : "→ work on cadence & stiffness"}`);
-    if (vr) notes.push(`Vert ratio: ${vr}% — ${vr < 9 ? "✓ efficient" : "→ too much vertical bounce · lean forward, drive hips"} (target <9%)`);
-    if (gctBalance) notes.push(`GCT balance: ${gctBalance} — ${gctBalance.includes("52") || gctBalance.includes("53") ? "slight left bias · monitor over next sessions" : "✓ balanced"}`);
-    if (np) notes.push(`Normalized Power: ${np}W · body battery drain only −8 — excellent pacing ✓`);
-    notes.push(`Respiration: avg 30 / peak 44 brpm during session — expected at Hyrox intensity`);
-  } else if (runAct) {
-    const gct = parseNum(runAct["Avg Ground Contact Time"]);
-    const vr = parseNum(runAct["Avg Vertical Ratio"]);
-    const cadence = parseNum(runAct["Avg Run Cadence"]);
-    const pace = runAct["Avg Pace"] || runAct["Avg Speed"];
-    notes.push(`${runAct.Title}: ${runAct._dist?.toFixed(2)}km · ${pace}/km · HR avg ${runAct._avgHR}/max ${runAct["Max HR"]} · TE ${runAct["Aerobic TE"]}`);
-    if (gct) notes.push(`GCT: ${gct}ms — ${gct < 280 ? "✓ excellent for road run" : gct < 300 ? "✓ good" : "→ work on cadence"} (Hyrox target <380ms)`);
-    if (vr) notes.push(`Vert ratio: ${vr}% — ${vr < 7 ? "✓ excellent efficiency" : vr < 9 ? "✓ good" : "→ lean forward more"}`);
-    if (cadence) notes.push(`Cadence: ${cadence} spm — ${cadence >= 180 ? "✓ optimal" : "→ target 180+ spm"}`);
-    notes.push(`Pace 5:06/km = well within Z2/Z3 · good aerobic builder for Hyrox base`);
-  }
-  if (saunaAct) notes.push("Post-session sauna ✓ — accelerates glycogen resynthesis & parasympathetic recovery");
-  notes.push(`Week running km so far: ${weeklyKm.toFixed(1)} km · 3 Hyrox sessions this week · on track`);
-  notes.push(`HRV 128ms today (7d avg: Balanced) — outstanding recovery after Hyrox. RHR 40bpm. Body battery +66. Green light to train hard.`);
-
-  const TABS = [["today","TODAY"],["schedule","SCHEDULE"],["hyrox","🏃 HYROX"],["health","HEALTH"],["history","HISTORY"],["load","LOAD"],["insights","INSIGHTS"]];
+  const daysOut = Math.round((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000);
+  const sync = syncState();
 
   return (
-    <div style={{ minHeight:"100vh", background:"#ffffff", fontFamily:"'Inter',system-ui,sans-serif", color:"#1e293b", fontSize:13 }}>
+    <>
+      <GlobalStyle />
+      <div style={{ minHeight:"100vh", background:T.bg, color:T.ink, fontSize:13 }}>
 
-      {/* HEADER */}
-      <div style={{ padding:"16px 14px 12px", borderBottom:"2px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
-        <div>
-          <div style={{ fontSize:9, fontWeight:700, letterSpacing:3, color:"#94a3b8", marginBottom:3 }}>{(() => {
-            const d = Math.round((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000);
-            return `${RACE.name} · ${RACE.label} · ${d > 0 ? `${d} DAYS` : d === 0 ? "TODAY 🏁" : "DONE"} · TARGET ${RACE.target}`;
-          })()}</div>
-          <div style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", letterSpacing:-0.5 }}>Training Coach</div>
-          {(() => {
-            const now = new Date();
-            const lastRun  = new Date(LAST_RUN);
-            const lastData = new Date(LAST_DATA);
-            const fmtClock = d => d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
-            const fmtDay = d => {
-              const today = new Date(); today.setHours(0,0,0,0);
-              const yest = new Date(today); yest.setDate(yest.getDate()-1);
-              const dd = new Date(d); dd.setHours(0,0,0,0);
-              if (dd.getTime() === today.getTime()) return "today";
-              if (dd.getTime() === yest.getTime()) return "yesterday";
-              return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
-            };
-            const ago = d => {
-              const m = Math.floor((now - d) / 60000);
-              if (m < 1) return "just now";
-              if (m < 60) return `${m} min ago`;
-              const h = Math.floor(m / 60);
-              if (h < 24) return `${h}h ${m % 60}m ago`;
-              return `${Math.floor(h / 24)}d ago`;
-            };
-            const runMin  = (now - lastRun)  / 60000;
-            const dataMin = (now - lastData) / 60000;
-            // Tokens die ~27h after last refresh. If LAST_DATA is older than ~28h → likely expired.
-            const tokensLikelyDead = dataMin > 28 * 60;
-            // Workflow runs hourly. If LAST_RUN is older than ~90 min → scheduler missed runs.
-            const schedulerStuck = runMin > 90;
-            let color, msg;
-            if (tokensLikelyDead) {
-              color = "#dc2626";
-              msg = `⚠ Last data: ${fmtDay(lastData)} ${fmtClock(lastData)} (${ago(lastData)}). Tokens likely expired — tap 🔑 Renew.`;
-            } else if (schedulerStuck) {
-              color = "#d97706";
-              msg = `⚠ Last run: ${fmtClock(lastRun)} (${ago(lastRun)}). Scheduler may be stuck — tap ⟳ Refresh.`;
-            } else {
-              color = "#64748b";
-              msg = `Synced ${fmtClock(lastRun)} (${ago(lastRun)}) · data through ${fmtDay(lastData)}`;
-            }
-            return <div style={{ fontSize:11, color, marginTop:2, fontWeight: (tokensLikelyDead || schedulerStuck) ? 700 : 400 }}>{msg}</div>;
-          })()}
-        </div>
-        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }} id="auth-controls">
-          {/* ⟳ Refresh button — calls Worker which has the PAT */}
-          <button id="refresh-btn" onClick={async () => {
-            const WORKER = "https://auth.simas.fit";
-            const btn = document.getElementById("refresh-btn");
-            btn.textContent = "Refreshing…"; btn.disabled = true;
-            try {
-              const res = await fetch(`${WORKER}/refresh`, {
-                method:"POST",
-                headers:{ "Content-Type":"application/json" },
-                body: JSON.stringify({ mode: "activities" })
-              });
-              const data = await res.json();
-              if (data.status === "triggered") {
-                btn.textContent = "✓ Running…";
-                setTimeout(() => { btn.textContent = "⟳ Refresh"; btn.disabled = false; }, 8000);
-              } else {
-                btn.textContent = `✗ ${data.error || "Error"}`; btn.disabled = false;
-              }
-            } catch(e) { btn.textContent = "✗ " + e.message; btn.disabled = false; }
-          }} style={{ background:"#7c3aed", border:"none", borderRadius:8, padding:"8px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
-            ⟳ Refresh
-          </button>
-
-          {/* 🔑 Renew Credentials button + MFA flow */}
-          <button id="renew-btn" onClick={async () => {
-            const WORKER = "https://auth.simas.fit";
-            const btn = document.getElementById("renew-btn");
-            const mfaArea = document.getElementById("mfa-area");
-
-            btn.textContent = "Connecting…"; btn.disabled = true;
-            try {
-              const res = await fetch(`${WORKER}/auth/start`, { method:"POST" });
-              const data = await res.json();
-              if (data.status === "mfa_required") {
-                mfaArea.style.display = "flex";
-                mfaArea.dataset.session = data.session;
-                document.getElementById("mfa-input").focus();
-                btn.textContent = "Check your email →";
-              } else if (data.error) {
-                btn.textContent = `✗ ${data.error}`;
-                btn.disabled = false;
-              }
-            } catch(e) {
-              btn.textContent = "✗ Worker unreachable"; btn.disabled = false;
-            }
-          }} style={{ background:"#0f172a", border:"1px solid #334155", borderRadius:8, padding:"8px 14px", color:"#94a3b8", fontSize:11, fontWeight:700, cursor:"pointer" }}>
-            🔑 Renew
-          </button>
-        </div>
-
-        {/* MFA input area — hidden until needed */}
-        <div id="mfa-area" style={{ display:"none", alignItems:"center", gap:8, marginTop:8, width:"100%", flexWrap:"wrap" }}>
-          <span style={{ fontSize:11, color:"#94a3b8" }}>Enter the code from your email:</span>
-          <input id="mfa-input" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={8}
-            placeholder="123456"
-            style={{ width:90, padding:"6px 10px", borderRadius:7, border:"1.5px solid #7c3aed",
-                     fontSize:14, fontWeight:700, letterSpacing:3, textAlign:"center", outline:"none" }}
-            onKeyDown={async (e) => {
-              if (e.key === "Enter") document.getElementById("mfa-submit").click();
-            }}
-          />
-          <button id="mfa-submit" onClick={async () => {
-            const WORKER = "https://auth.simas.fit";
-            const code = document.getElementById("mfa-input").value.trim();
-            const btn  = document.getElementById("mfa-submit");
-            if (!code) return;
-            btn.textContent = "Verifying…"; btn.disabled = true;
-            try {
-              const session = document.getElementById("mfa-area").dataset.session;
-              const res  = await fetch(`${WORKER}/auth/verify`, {
-                method:"POST", headers:{ "Content-Type":"application/json" },
-                body: JSON.stringify({ code, session })
-              });
-              const data = await res.json();
-              if (data.status === "success") {
-                document.getElementById("mfa-area").style.display = "none";
-                document.getElementById("renew-btn").textContent = "✓ Done — updating…";
-                setTimeout(() => {
-                  document.getElementById("renew-btn").textContent = "🔑 Renew";
-                  document.getElementById("renew-btn").disabled = false;
-                }, 60000);
-              } else {
-                btn.textContent = "✗ " + (data.error || "Failed");
-                btn.disabled = false;
-              }
-            } catch(e) { btn.textContent = "✗ Error"; btn.disabled = false; }
-          }} style={{ background:"#7c3aed", border:"none", borderRadius:7, padding:"6px 14px", color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer" }}>
-            Submit
-          </button>
-          <button onClick={() => {
-            document.getElementById("mfa-area").style.display = "none";
-            document.getElementById("renew-btn").textContent = "🔑 Renew";
-            document.getElementById("renew-btn").disabled = false;
-          }} style={{ background:"none", border:"none", color:"#94a3b8", fontSize:11, cursor:"pointer" }}>
-            Cancel
-          </button>
-        </div>
-      </div>
-
-      {/* READINESS */}
-      <div style={{ margin:"12px 14px 0", padding:"12px 16px", background:rBg, border:`1.5px solid ${rBo}`, borderRadius:10, display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
-        <div style={{ textAlign:"center", minWidth:48 }}>
-          <div style={{ fontSize:32, fontWeight:900, color:rC, lineHeight:1 }}>{R}</div>
-          <div style={{ fontSize:9, color:rC, opacity:0.6, letterSpacing:1 }}>/10</div>
-        </div>
-        <div style={{ flex:1, minWidth:160 }}>
-          <div style={{ fontSize:11, fontWeight:800, color:rC, letterSpacing:2 }}>{rLbl}</div>
-          <div style={{ fontSize:12, color:"#475569", marginTop:3, lineHeight:1.5 }}>{coachMsg}</div>
-          <div style={{ fontSize:10, color:"#94a3b8", marginTop:4 }}>
-            HRV {todayHrv}ms (baseline {hrvBaseline}ms) · ATL {atl?.toFixed(0)} · CTL {ctl?.toFixed(0)} · Form {tsb?.toFixed(0)}
-          </div>
-        </div>
-      </div>
-
-      {/* TABS */}
-      <div style={{ display:"flex", borderBottom:"2px solid #f1f5f9", margin:"12px 0 0", padding:"0 14px", overflowX:"auto" }}>
-        {TABS.map(([k, l]) => (
-          <button key={k} onClick={() => setView(k)} style={{
-            background:"none", border:"none",
-            borderBottom: view === k ? "2px solid #7c3aed" : "2px solid transparent",
-            color: view === k ? "#7c3aed" : "#94a3b8",
-            padding:"8px 12px 8px", fontSize:11, fontWeight:700, letterSpacing:1,
-            cursor:"pointer", fontFamily:"inherit", marginBottom:-2, whiteSpace:"nowrap",
-          }}>
-            {l}
-          </button>
-        ))}
-      </div>
-
-      {/* TODAY */}
-      {view === "today" && (
-        <div style={{ padding:"14px 14px 40px" }}>
-          <div style={{ marginBottom:18 }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#7c3aed", letterSpacing:2, marginBottom:8 }}>TODAY'S SESSIONS</div>
-            {(todaySched?.sessions || []).map((s, i) => {
-              const st = SS[s.type] || SS.plan;
-              return (
-                <div key={i} style={{ padding:"10px 13px", marginBottom:7, background:st.bg, border:`1.5px solid ${st.border}`, borderRadius:8 }}>
-                  <div style={{ fontSize:12, fontWeight:700, color:st.text }}>{s.text}</div>
-                  {s.type === "hyrox" && (
-                    <div style={{ fontSize:11, color:"#64748b", marginTop:5, lineHeight:1.6 }}>
-                      → {R >= 7 ? "HRV 128ms + body battery +66 — fully recovered. Push hard." : R >= 4 ? "Good recovery. Controlled effort today." : "Rest day. Let the adaptation stick."}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div style={{ marginBottom:18 }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>YESTERDAY (APR 28)</div>
-            {yesterday.map((a, i) => (
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 12px", marginBottom:6, background:getColor(a)+"0d", border:`1.5px solid ${getColor(a)}33`, borderRadius:8 }}>
-                <span style={{ fontSize:18 }}>{getEmoji(a)}</span>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:12, fontWeight:700, color:getColor(a) }}>{a.Title || a["Activity Type"]}</div>
-                  <div style={{ fontSize:11, color:"#64748b", marginTop:2 }}>
-                    {fmtDur(a._dur)}
-                    {a._avgHR > 0 ? ` · HR ${a._avgHR}/${parseNum(a["Max HR"]) || "—"}bpm` : ""}
-                    {a._dist > 0 ? ` · ${a._dist.toFixed(1)}km` : ""}
-                    {a["Total Reps"] && a["Total Reps"] !== "--" && isStrength(a) ? ` · ${a["Total Reps"]} reps` : ""}
-                    {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
-                  </div>
-                </div>
+        {/* ── HEADER ──────────────────────────────────────────────────── */}
+        <header style={{ position:"sticky", top:0, zIndex:20, background:`${T.bgSoft}f2`,
+          backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderBottom:`1px solid ${T.line}` }}>
+          <div className="wrap" style={{ display:"flex", alignItems:"center", gap:14, padding:"13px 22px", flexWrap:"wrap" }}>
+            <div style={{ minWidth:0 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:9, flexWrap:"wrap" }}>
+                <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em", color:T.ink }}>Training</span>
+                <span style={{ width:1, height:14, background:T.line }} />
+                <span className="num" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.accentIn }}>
+                  {RACE.name} · {daysOut > 0 ? `${daysOut} DAYS` : daysOut === 0 ? "TODAY 🏁" : "DONE"} · {RACE.target}
+                </span>
               </div>
-            ))}
-          </div>
-
-          <div style={{ marginBottom:18 }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>COACHING NOTES</div>
-            {notes.map((n, i) => (
-              <div key={i} style={{ padding:"8px 12px", marginBottom:5, background:"#f8fafc", borderLeft:"3px solid #7c3aed", borderRadius:"0 6px 6px 0", fontSize:12, color:"#334155", lineHeight:1.5 }}>
-                {n}
-              </div>
-            ))}
-          </div>
-
-          {hyroxAct && (            <div>
-              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>YESTERDAY'S HYROX SESSION ANALYSIS</div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
-                {[
-                  { label:"Duration",      value:fmtDur(hyroxAct._dur),              note:"62min full session ✓", ok:true },
-                  { label:"Running dist",  value:`${hyroxAct._dist?.toFixed(2)} km`, note:"2.84 km in 33:39 moving", ok:true },
-                  { label:"Avg HR",        value:`${hyroxAct._avgHR} bpm`,           note:"Z2/Z3 · good aerobic base", ok:true },
-                  { label:"Max HR",        value:`169 bpm`,                           note:"97% max — hit top zone ✓", ok:true },
-                  { label:"GCT",           value:`441 ms`,                            note:"→ target <380ms at race pace", ok:false },
-                  { label:"Vert Ratio",    value:`12.1 %`,                            note:"→ high bounce · lean forward more", ok:false },
-                  { label:"GCT Balance",   value:`52.6L / 47.4R`,                    note:"→ slight left bias · monitor", ok:false },
-                  { label:"Norm Power",    value:`218 W`,                             note:"solid mixed-format output ✓", ok:true },
-                  { label:"Avg Resp",      value:`30 br/min`,                         note:"peak 44 · expected at intensity", ok:true },
-                  { label:"Body Batt",     value:`−8`,                                note:"light drain → excellent pacing ✓", ok:true },
-                ].map((m, i) => (
-                  <div key={i} style={{ padding:"10px 12px", background: m.ok ? "#f0fdf4" : "#fffbeb", border:`1px solid ${m.ok ? "#86efac" : "#fcd34d"}`, borderRadius:8 }}>
-                    <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>{m.label}</div>
-                    <div style={{ fontSize:15, fontWeight:800, color: m.ok ? "#15803d" : "#a16207", marginTop:2 }}>{m.value}</div>
-                    <div style={{ fontSize:10, color:"#64748b", marginTop:2 }}>{m.note}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Recovery quality after session */}
-              <div style={{ marginTop:10, padding:"10px 14px", background:"#f0fdf4", border:"1.5px solid #86efac", borderRadius:8, display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, textAlign:"center" }}>
-                {[
-                  { label:"Overnight HRV", value:"128 ms", sub:"7d: Balanced" },
-                  { label:"RHR", value:"40 bpm", sub:"athlete baseline" },
-                  { label:"Body Battery", value:"+66", sub:"bed→wake" },
-                  { label:"SpO2", value:"99%", sub:"lowest 95%" },
-                ].map((s,i) => (
-                  <div key={i}>
-                    <div style={{ fontSize:9, color:"#64748b", letterSpacing:1 }}>{s.label}</div>
-                    <div style={{ fontSize:14, fontWeight:800, color:"#15803d" }}>{s.value}</div>
-                    <div style={{ fontSize:9, color:"#94a3b8" }}>{s.sub}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop:6, padding:"8px 12px", background:"#f0fdf4", border:"1px solid #86efac", borderRadius:6, fontSize:11, color:"#15803d" }}>
-                ✓ <strong>Outstanding recovery.</strong> HRV 128ms despite Hyrox session — your aerobic base is absorbing this load very well. Sleep 7h27m, 22 restless moments. Green light for full effort today.
-              </div>
-
-              {/* Hyrox vs Race Comparison */}
-              <div style={{ marginTop:12, padding:"12px 14px", background:"#f5f3ff", border:"1.5px solid #c4b5fd", borderRadius:8 }}>
-                <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", letterSpacing:2, marginBottom:8 }}>VS ATHENS TARGETS · SEP 5</div>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6, fontSize:11 }}>
-                  {[
-                    { label:"Ski Erg 1000m", now:"Riga 4:39", target:"4:08", gap:"→ −31s · TT 3:54, so 4:08 is ~85% effort" },
-                    { label:"Row 1000m", now:"Riga 4:43", target:"4:12", gap:"→ −31s · 1:58/500m fatigued Jul 27" },
-                    { label:"Sled Pull 50m", now:"Riga 4:08", target:"3:30", gap:"→ −38s · pure technique" },
-                    { label:"Roxzone", now:"Riga 5:18", target:"4:22", gap:"→ −56s · jog every transition" },
-                  ].map((r,i) => (
-                    <div key={i} style={{ background:"#fff", border:"1px solid #ddd6fe", borderRadius:6, padding:"8px 10px" }}>
-                      <div style={{ fontSize:9, fontWeight:700, color:"#7c3aed", marginBottom:3 }}>{r.label}</div>
-                      <div style={{ fontSize:11, fontWeight:700, color:"#1e1b4b" }}>{r.now}</div>
-                      <div style={{ fontSize:10, color:"#64748b" }}>target: {r.target}</div>
-                      <div style={{ fontSize:10, color:"#a16207", marginTop:2 }}>{r.gap}</div>
-                    </div>
-                  ))}
-                </div>
+              <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
+                <span className={sync.tone === "ok" ? "live" : ""} style={{ width:6, height:6, borderRadius:"50%", background:TONE[sync.tone], flexShrink:0 }} />
+                <span style={{ fontSize:10.5, color: sync.tone === "ok" ? T.ink3 : TONE[sync.tone], fontWeight: sync.tone === "ok" ? 400 : 700 }}>
+                  {sync.msg}
+                </span>
               </div>
             </div>
+            <div style={{ marginLeft:"auto" }}><AuthControls /></div>
+          </div>
+
+          {/* ── NAV ───────────────────────────────────────────────────── */}
+          <nav className="wrap scroll-x no-bar" style={{ display:"flex", gap:2, padding:"0 22px" }}>
+            {TABS.map(([k, l, icon]) => (
+              <button key={k} className="tap" onClick={() => setView(k)} style={{
+                position:"relative", padding:"10px 15px 11px", fontSize:12.5, fontWeight:700, letterSpacing:"0.01em",
+                color: view === k ? T.ink : T.ink3, cursor:"pointer", whiteSpace:"nowrap",
+                display:"flex", alignItems:"center", gap:7, transition:"color .16s ease",
+              }}>
+                <span style={{ fontSize:11, opacity: view === k ? 1 : 0.6 }}>{icon}</span>
+                {l}
+                {view === k && <span style={{ position:"absolute", left:12, right:12, bottom:0, height:2,
+                  background:T.accent, borderRadius:"2px 2px 0 0" }} />}
+              </button>
+            ))}
+          </nav>
+        </header>
+
+        {/* ── CONTENT ─────────────────────────────────────────────────── */}
+        <main className="wrap" style={{ padding:"22px 22px 72px" }}>
+          {!ana ? (
+            <Card pad={40}><Empty>Loading training data…</Empty></Card>
+          ) : (
+            <>
+              {view === "today" && <TodayView ana={ana} health={HEALTH_DATA} />}
+              {view === "train" && <TrainView ana={ana} activities={activities} />}
+              {view === "body"  && <BodyView ana={ana} />}
+              {view === "race"  && <RaceView ana={ana} />}
+            </>
           )}
+        </main>
 
-          {!hyroxAct && runAct && (
-            <div>
-              <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:8 }}>YESTERDAY'S RUN ANALYSIS</div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
-                {[
-                  { label:"Distance",    value:`${runAct._dist?.toFixed(2)} km`,       note:"solid base volume ✓",                ok:true },
-                  { label:"Avg Pace",    value:runAct["Avg Pace"] ? `${runAct["Avg Pace"]}/km` : speedToPace(runAct["Avg Speed"]), note:"Z2/Z3 aerobic zone ✓", ok:true },
-                  { label:"Avg HR",      value:`${runAct._avgHR} bpm`,                 note:`${Math.round(runAct._avgHR/174*100)}% of max · aerobic`, ok:true },
-                  { label:"Max HR",      value:`${runAct["Max HR"]} bpm`,              note:"well controlled ceiling ✓",          ok:true },
-                  { label:"GCT",         value:`${parseNum(runAct["Avg Ground Contact Time"])}ms`, note:`${parseNum(runAct["Avg Ground Contact Time"]) < 280 ? "✓ excellent" : "✓ good"} — vs Hyrox 441ms`, ok:true },
-                  { label:"Vert Ratio",  value:`${parseNum(runAct["Avg Vertical Ratio"])}%`,       note:`${parseNum(runAct["Avg Vertical Ratio"]) < 7 ? "✓ very efficient" : "✓ good"}`,                  ok:true },
-                  { label:"Cadence",     value:`${parseNum(runAct["Avg Run Cadence"])} spm`,       note:`${parseNum(runAct["Avg Run Cadence"]) >= 180 ? "✓ optimal" : "→ target 180+"}`,                   ok:parseNum(runAct["Avg Run Cadence"]) >= 178 },
-                  { label:"Body Batt",   value:`−11`,                                  note:"moderate drain · well paced",        ok:true },
-                ].map((m, i) => (
-                  <div key={i} style={{ padding:"10px 12px", background: m.ok ? "#f0fdf4" : "#fffbeb", border:`1px solid ${m.ok ? "#86efac" : "#fcd34d"}`, borderRadius:8 }}>
-                    <div style={{ fontSize:9, fontWeight:700, color:"#94a3b8", letterSpacing:1 }}>{m.label}</div>
-                    <div style={{ fontSize:15, fontWeight:800, color: m.ok ? "#15803d" : "#a16207", marginTop:2 }}>{m.value}</div>
-                    <div style={{ fontSize:10, color:"#64748b", marginTop:2 }}>{m.note}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop:10, padding:"10px 14px", background:"#f0fdf4", border:"1.5px solid #86efac", borderRadius:8, fontSize:11, color:"#15803d" }}>
-                ✓ <strong>Key win vs Hyrox session:</strong> GCT 269ms vs 441ms — when fresh and running continuously, your mechanics are excellent. The Hyrox GCT penalty comes from fatigue accumulation across stations. Target: maintain sub-300ms GCT even in the final 2km of Hyrox.
-              </div>
-            </div>
-          )}
-
-        </div>
-      )}
-
-      {/* INSIGHTS */}
-      {view === "insights" && (
-        <div style={{ padding:"14px 14px 40px" }}>
-
-          {/* HRV + ATL overlay */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HRV vs TRAINING LOAD (42 DAYS)</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            {(() => {
-              const data = atlHistory.filter(d => d.atl > 0).slice(-42);
-              const hrvByDate = {};
-              HEALTH_DATA.daily.forEach(d => { if (d.hrv > 0) hrvByDate[d.date] = d.hrv; });
-              const points = data.map(d => ({ date: d.date, atl: d.atl, hrv: hrvByDate[d.date] || null }));
-              const maxAtl = Math.max(...points.map(p => p.atl), 1);
-              const validHrv = points.filter(p => p.hrv).map(p => p.hrv);
-              const minHrv = Math.min(...validHrv, 100);
-              const maxHrv = Math.max(...validHrv, 150);
-
-              const W = 800, H = 200;
-              const padL = 6, padR = 24, padT = 12, padB = 22;
-              const innerW = W - padL - padR, innerH = H - padT - padB;
-              const xAt = i => padL + (i / (points.length - 1)) * innerW;
-              const yAtl = v => padT + innerH - (v / maxAtl) * innerH;
-              const yHrv = v => padT + innerH - ((v - minHrv) / (maxHrv - minHrv || 1)) * innerH;
-
-              const smooth = (pts) => {
-                if (pts.length < 2) return "";
-                let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-                for (let i = 1; i < pts.length; i++) {
-                  const [x1,y1] = pts[i-1], [x2,y2] = pts[i];
-                  const mx = (x1+x2)/2;
-                  d += ` Q ${mx.toFixed(1)},${y1.toFixed(1)} ${mx.toFixed(1)},${((y1+y2)/2).toFixed(1)} T ${x2.toFixed(1)},${y2.toFixed(1)}`;
-                }
-                return d;
-              };
-
-              const atlPath = smooth(points.map((p,i) => [xAt(i), yAtl(p.atl)]));
-              const hrvPts = points.map((p,i) => p.hrv ? [xAt(i), yHrv(p.hrv)] : null).filter(Boolean);
-              const hrvPath = smooth(hrvPts);
-
-              // Pick 4 date labels evenly
-              const labelIdx = [0, Math.floor(points.length/3), Math.floor(2*points.length/3), points.length-1];
-              const fmt = (s) => { const p = s.split("-"); return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+p[1]-1]} ${+p[2]}`; };
-
-              return (
-                <div>
-                  <div style={{ display:"flex", gap:16, marginBottom:8, fontSize:10 }}>
-                    <span style={{ color:"#dc2626", fontWeight:600 }}>━ ATL (fatigue)</span>
-                    <span style={{ color:"#7c3aed", fontWeight:600 }}>━ HRV (recovery)</span>
-                    <span style={{ color:"#94a3b8", marginLeft:"auto" }}>HRV falls when ATL spikes → recovery needed</span>
-                  </div>
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block", maxHeight: 280 }} preserveAspectRatio="xMidYMid meet">
-                    <line x1={padL} x2={W-padR} y1={padT} y2={padT} stroke="#e2e8f0" strokeDasharray="2,3" />
-                    <line x1={padL} x2={W-padR} y1={padT+innerH/2} y2={padT+innerH/2} stroke="#f1f5f9" strokeDasharray="2,3" />
-                    <line x1={padL} x2={W-padR} y1={padT+innerH} y2={padT+innerH} stroke="#e2e8f0" strokeDasharray="2,3" />
-
-                    {/* Right axis: HRV range */}
-                    <text x={W-padR+2} y={padT+4} fill="#7c3aed" fontSize="9" textAnchor="start">{Math.round(maxHrv)}</text>
-                    <text x={W-padR+2} y={padT+innerH+3} fill="#7c3aed" fontSize="9" textAnchor="start">{Math.round(minHrv)}</text>
-                    {/* Left axis: ATL range */}
-                    <text x={padL} y={padT-2} fill="#dc2626" fontSize="9" textAnchor="start">{Math.round(maxAtl)}</text>
-
-                    <path d={atlPath} fill="none" stroke="#dc2626" strokeWidth="2" strokeLinejoin="round" opacity="0.85" />
-                    <path d={hrvPath} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinejoin="round" opacity="0.9" />
-
-                    {labelIdx.map(i => (
-                      <text key={i} x={xAt(i).toFixed(1)} y={H-4} fill="#94a3b8" fontSize="10"
-                        textAnchor={i===0?"start":i===points.length-1?"end":"middle"}>
-                        {fmt(points[i].date)}
-                      </text>
-                    ))}
-                  </svg>
-                </div>
-              );
-            })()}
+        <footer className="wrap" style={{ padding:"0 22px 34px", fontSize:10.5, color:T.ink3, lineHeight:1.7 }}>
+          <div style={{ borderTop:`1px solid ${T.lineDim}`, paddingTop:16, display:"flex", gap:14, flexWrap:"wrap", justifyContent:"space-between" }}>
+            <span>Garmin data synced hourly · {activities.length} activities · {HEALTH_DATA.daily.length} days of wellness</span>
+            <span className="num">Last run {LAST_RUN.replace("T", " ").replace("Z", " UTC")}</span>
           </div>
-
-          {/* Readiness history sparkline */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>READINESS HISTORY (30 DAYS)</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            {(() => {
-              const daily30 = HEALTH_DATA.daily.filter(d => d.hrv > 0).slice(-30);
-              const scores = daily30.map(d => {
-                const atlD = atlHistory.find(a => a.date === d.date);
-                const tsbD = atlD ? (atlD.ctl - atlD.atl) : 0;
-                return { date: d.date, val: readiness(tsbD, 99, d.hrv, 88) };
-              });
-              if (scores.length < 2) return <div style={{ color:"#94a3b8", fontSize:11 }}>Not enough data yet</div>;
-
-              const W = 800, H = 180;
-              const padL = 6, padR = 24, padT = 14, padB = 22;
-              const innerW = W - padL - padR, innerH = H - padT - padB;
-              const min = 1, max = 10;
-              const xAt = i => padL + (i / (scores.length - 1)) * innerW;
-              const yAt = v => padT + innerH - ((v - min) / (max - min)) * innerH;
-
-              const pts = scores.map((s,i) => [xAt(i), yAt(s.val)]);
-              let path = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-              for (let i = 1; i < pts.length; i++) {
-                const [x1,y1] = pts[i-1], [x2,y2] = pts[i];
-                const mx = (x1+x2)/2;
-                path += ` Q ${mx.toFixed(1)},${y1.toFixed(1)} ${mx.toFixed(1)},${((y1+y2)/2).toFixed(1)} T ${x2.toFixed(1)},${y2.toFixed(1)}`;
-              }
-
-              const avg = (scores.reduce((s,o)=>s+o.val,0)/scores.length).toFixed(1);
-              const trend = scores[scores.length-1].val > scores[0].val ? "↑" : "↓";
-              const fmt = (s) => { const p = s.split("-"); return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+p[1]-1]} ${+p[2]}`; };
-              const labelIdx = [0, Math.floor(scores.length/3), Math.floor(2*scores.length/3), scores.length-1];
-
-              return (
-                <div>
-                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-                    <span style={{ fontSize:13, fontWeight:700, color:"#1e293b" }}>Avg: {avg}/10 {trend}</span>
-                    <span style={{ fontSize:11, color:"#94a3b8" }}>Last {scores.length} days</span>
-                  </div>
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block", maxHeight: 260 }} preserveAspectRatio="xMidYMid meet">
-                    {[3, 5, 7].map(v => (
-                      <line key={v} x1={padL} x2={W-padR} y1={yAt(v)} y2={yAt(v)} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2,3" />
-                    ))}
-                    <text x={W-padR+2} y={yAt(10)+3} fill="#94a3b8" fontSize="9" textAnchor="start">10</text>
-                    <text x={W-padR+2} y={yAt(5)+3} fill="#94a3b8" fontSize="9" textAnchor="start">5</text>
-                    <text x={W-padR+2} y={yAt(1)+3} fill="#94a3b8" fontSize="9" textAnchor="start">1</text>
-
-                    <path d={path} fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-
-                    {scores.map((s,i) => {
-                      const c = s.val >= 7 ? "#16a34a" : s.val >= 4 ? "#d97706" : "#dc2626";
-                      return <circle key={i} cx={xAt(i).toFixed(1)} cy={yAt(s.val).toFixed(1)} r="3.5" fill={c} stroke="#fff" strokeWidth="1.5" />;
-                    })}
-
-                    {labelIdx.map(i => (
-                      <text key={i} x={xAt(i).toFixed(1)} y={H-4} fill="#94a3b8" fontSize="10"
-                        textAnchor={i===0?"start":i===scores.length-1?"end":"middle"}>
-                        {fmt(scores[i].date)}
-                      </text>
-                    ))}
-                  </svg>
-                  <div style={{ display:"flex", gap:14, marginTop:8, fontSize:11 }}>
-                    <span style={{ color:"#16a34a" }}>● 7–10 push hard</span>
-                    <span style={{ color:"#d97706" }}>● 4–6 train smart</span>
-                    <span style={{ color:"#dc2626" }}>● 1–3 rest</span>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* HR Zone distribution */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HR ZONE DISTRIBUTION (28 DAYS)</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            {totalZoneMin > 0 ? (
-              <div>
-                {[
-                  { z:"E", name:"VO₂max", c:"#dc2626", bg:"#fef2f2" },
-                  { z:"D", name:"Development", c:"#ea580c", bg:"#fff7ed" },
-                  { z:"C", name:"Intensive", c:"#eab308", bg:"#fefce8" },
-                  { z:"B", name:"Aerobic", c:"#16a34a", bg:"#f0fdf4" },
-                  { z:"A", name:"Recovery", c:"#94a3b8", bg:"#f8fafc" },
-                ].map(({ z, name, c, bg }) => {
-                  const mins = Math.round(zoneMinutes[z]);
-                  const pct = totalZoneMin > 0 ? (mins / totalZoneMin * 100) : 0;
-                  return (
-                    <div key={z} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                      <div style={{ width:20, height:20, borderRadius:"50%", background:c, color:"#fff", fontSize:10, fontWeight:900, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{z}</div>
-                      <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:18, overflow:"hidden" }}>
-                        <div style={{ height:"100%", width:`${pct}%`, background:c+"cc", borderRadius:4, transition:"width 0.5s" }} />
-                      </div>
-                      <div style={{ fontSize:10, fontWeight:600, color:c, minWidth:32, textAlign:"right" }}>{pct.toFixed(0)}%</div>
-                      <div style={{ fontSize:10, color:"#94a3b8", minWidth:52 }}>{Math.round(mins)}m · {name}</div>
-                    </div>
-                  );
-                })}
-                <div style={{ marginTop:10, padding:"8px 10px", background:"#fffbeb", border:"1px solid #fcd34d", borderRadius:6, fontSize:10, color:"#92400e" }}>
-                  💡 Ideal Hyrox split: ~40% Zone B/C aerobic + ~35% Zone D/E race intensity + ~25% recovery
-                </div>
-              </div>
-            ) : <div style={{ color:"#94a3b8", fontSize:11 }}>No HR data in last 28 days</div>}
-          </div>
-
-          {/* Hyrox simulation tracker */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>HYROX SIMULATION SESSIONS</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            {hyroxSims.length === 0
-              ? <div style={{ color:"#94a3b8", fontSize:11 }}>No Hyrox sessions found yet</div>
-              : hyroxSims.map((a, i) => {
-                  const gct = parseNum(a["Avg Ground Contact Time"]);
-                  const vr = parseNum(a["Avg Vertical Ratio"]);
-                  const np = parseNum(a["Normalized Power® (NP®)"]);
-                  const improving = i > 0 && a._avgHR < hyroxSims[i-1]._avgHR;
-                  return (
-                    <div key={i} style={{ padding:"10px 12px", marginBottom:6, background: i === hyroxSims.length-1 ? "#faf5ff" : "#fff", border:`1px solid ${i === hyroxSims.length-1 ? "#7c3aed" : "#e2e8f0"}`, borderRadius:8 }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                        <span style={{ fontSize:12, fontWeight:700, color:"#4c1d95" }}>🦘 {a.Title}</span>
-                        <span style={{ fontSize:10, color:"#94a3b8" }}>{a._date}</span>
-                      </div>
-                      <div style={{ fontSize:11, color:"#64748b", marginTop:4, display:"flex", gap:12, flexWrap:"wrap" }}>
-                        <span>⏱ {fmtDur(a._dur)}</span>
-                        <span>❤️ {a._avgHR} bpm avg</span>
-                        {a._dist > 0 && <span>📏 {a._dist.toFixed(1)}km</span>}
-                        {gct && <span>GCT {gct}ms {gct < 380 ? "✓" : "↑"}</span>}
-                        {vr && <span>VR {vr}% {vr < 9 ? "✓" : "↑"}</span>}
-                        {np && <span>NP {np}W</span>}
-                        <span style={{ fontWeight:700, color: a._trimp > 80 ? "#dc2626" : "#7c3aed" }}>TRIMP {a._trimp.toFixed(0)}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-            {hyroxSims.length > 1 && (() => {
-              const first = hyroxSims[0], last = hyroxSims[hyroxSims.length-1];
-              const hrDiff = last._avgHR - first._avgHR;
-              return (
-                <div style={{ marginTop:8, padding:"8px 10px", background: hrDiff < 0 ? "#f0fdf4" : "#fffbeb", border:`1px solid ${hrDiff < 0 ? "#86efac" : "#fcd34d"}`, borderRadius:6, fontSize:11, color: hrDiff < 0 ? "#15803d" : "#92400e" }}>
-                  {hrDiff < 0 ? `✓ HR trending down ${Math.abs(hrDiff)} bpm over ${hyroxSims.length} sessions — aerobic efficiency improving` : `→ HR up ${hrDiff} bpm — fatigue accumulation or higher intensity`}
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* Running pace trend */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>AEROBIC EFFICIENCY (PACE AT SAME HR)</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            {paceTrend.length < 2
-              ? <div style={{ color:"#94a3b8", fontSize:11 }}>Need more Z2/Z3 runs for trend (min 2)</div>
-              : (() => {
-                  const maxSec = Math.max(...paceTrend.map(p => p.paceSec));
-                  const minSec = Math.min(...paceTrend.map(p => p.paceSec));
-                  const fmtPace = s => `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,"0")}`;
-                  const first = paceTrend[0], last = paceTrend[paceTrend.length-1];
-                  const diff = first.paceSec - last.paceSec; // positive = faster = better
-                  return (
-                    <div>
-                      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
-                        <div>
-                          <div style={{ fontSize:18, fontWeight:900, color: diff > 0 ? "#15803d" : diff < -10 ? "#dc2626" : "#1e293b" }}>
-                            {diff > 0 ? `↑ ${fmtPace(Math.abs(diff))}/km faster` : diff < 0 ? `↓ ${fmtPace(Math.abs(diff))}/km slower` : "→ stable"}
-                          </div>
-                          <div style={{ fontSize:10, color:"#94a3b8" }}>vs first recorded run · same HR range</div>
-                        </div>
-                        <div style={{ textAlign:"right", fontSize:11, color:"#64748b" }}>
-                          <div>{fmtPace(first.paceSec)}/km → {fmtPace(last.paceSec)}/km</div>
-                          <div style={{ fontSize:10, color:"#94a3b8" }}>HR {first.hr} → {last.hr} bpm</div>
-                        </div>
-                      </div>
-                      {paceTrend.map((p, i) => (
-                        <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
-                          <div style={{ fontSize:9, color:"#94a3b8", minWidth:72 }}>{p.date}</div>
-                          <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:16, overflow:"hidden" }}>
-                            <div style={{ height:"100%", width:`${((maxSec-p.paceSec)/(maxSec-minSec||1)*80+20)}%`, background:"#c2410c99", borderRadius:4 }} />
-                          </div>
-                          <div style={{ fontSize:10, fontWeight:600, color:"#c2410c", minWidth:44, textAlign:"right" }}>{fmtPace(p.paceSec)}/km</div>
-                          <div style={{ fontSize:9, color:"#94a3b8", minWidth:36 }}>{p.hr}bpm</div>
-                        </div>
-                      ))}
-                      <div style={{ marginTop:8, fontSize:10, color:"#64748b" }}>
-                        💡 Improving pace at same HR = aerobic adaptation working. Target: sub 5:00/km at HR 140 by race day.
-                      </div>
-                    </div>
-                  );
-                })()}
-          </div>
-
-        </div>
-      )}
-
-      {view === "schedule" && <ScheduleView activities={activities} />}
-      {view === "health" && <HealthView />}
-      {view === "hyrox" && <HyroxView />}
-
-      {/* HISTORY */}
-      {view === "history" && (
-        <div style={{ padding:"14px 14px 40px" }}>
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>RECENT ACTIVITIES</div>
-          {activities.slice(0, 15).map((a, i) => (
-            <div key={i} style={{ display:"flex", gap:10, alignItems:"flex-start", padding:"10px 12px", marginBottom:6, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8 }}>
-              <span style={{ fontSize:18, minWidth:24 }}>{getEmoji(a)}</span>
-              <div style={{ flex:1 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <span style={{ fontSize:12, fontWeight:700, color:getColor(a) }}>{a.Title || a["Activity Type"]}</span>
-                  <span style={{ fontSize:10, color:"#94a3b8" }}>{a._days === 0 ? "today" : a._days === 1 ? "yesterday" : `${a._days}d ago`}</span>
-                </div>
-                <div style={{ fontSize:11, color:"#64748b", marginTop:2 }}>
-                  {fmtDur(a._dur)}
-                  {a._avgHR > 0 ? ` · ❤️ ${a._avgHR}bpm` : ""}
-                  {a._dist > 0 ? ` · ${a._dist.toFixed(1)}km` : ""}
-                  {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
-                </div>
-              </div>
-              <div style={{ fontSize:10, fontWeight:700, color:getColor(a), background:getColor(a)+"15", padding:"2px 7px", borderRadius:4, alignSelf:"center", whiteSpace:"nowrap" }}>
-                {a._trimp > 0 ? `TRIMP ${a._trimp.toFixed(0)}` : "—"}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* LOAD */}
-      {view === "load" && (
-        <div style={{ padding:"14px 14px 40px" }}>
-          <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", marginBottom:12 }}>
-            <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2 }}>TRAINING LOAD (TRIMP)</div>
-            <div style={{ fontSize:10, fontWeight:700, color:"#7c3aed" }}>
-              {Math.max(0, Math.ceil((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000))}d to {RACE.name}
-            </div>
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
-            {[
-              { label:"ATL", value:atl.toFixed(0), note:"Acute fatigue (7d)", c:"#dc2626", bg:"#fef2f2", bo:"#fca5a5" },
-              { label:"CTL", value:ctl.toFixed(0), note:"Fitness base (42d)", c:"#15803d", bg:"#f0fdf4", bo:"#86efac" },
-              { label:"Form", value:tsb.toFixed(0), note: tsb >= 5 ? "fresh" : tsb >= -10 ? "optimal" : tsb >= -20 ? "tired" : "fatigued", c: tsb >= 5 ? "#15803d" : tsb >= -10 ? "#0369a1" : tsb >= -20 ? "#d97706" : "#dc2626", bg: tsb >= -10 ? "#f0fdf4" : "#fef2f2", bo: tsb >= -10 ? "#86efac" : "#fca5a5" },
-            ].map((m, i) => (
-              <div key={i} style={{ padding:"12px 8px", textAlign:"center", background:m.bg, border:`1.5px solid ${m.bo}`, borderRadius:10 }}>
-                <div style={{ fontSize:9, fontWeight:700, color:m.c, opacity:0.7, letterSpacing:1 }}>{m.label}</div>
-                <div style={{ fontSize:22, fontWeight:900, color:m.c, lineHeight:1.1, marginTop:4 }}>{m.value}</div>
-                <div style={{ fontSize:9, color:"#64748b", marginTop:3 }}>{m.note}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ fontSize:11, color:"#475569", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, padding:"9px 12px", marginBottom:20 }}>
-            {tsb >= 5 ? "🟢 Fresh — green light to push a hard session today."
-              : tsb >= -10 ? "🔵 Optimal training fatigue — normal load is fine."
-              : tsb >= -20 ? "🟠 Accumulating fatigue — protect sleep/nutrition, keep intensity controlled."
-              : "🔴 High fatigue — favor recovery or easy volume today."}
-          </div>
-
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10 }}>LAST 6 DAYS</div>
-          {[6,5,4,3,2,1].map(d => {
-            const dayActs = activities.filter(a => a._days === d);
-            const total = dayActs.reduce((s,a) => s + a._trimp, 0);
-            const pct = Math.min(100, (total/80)*100);
-            const bc = total > 50 ? "#dc2626" : total > 25 ? "#d97706" : "#16a34a";
-            const base = new Date(TODAY); base.setDate(base.getDate() - d);
-            const lbl = d === 1 ? "Yesterday" : base.toLocaleDateString("en", { weekday:"short", month:"short", day:"numeric" });
-            return (
-              <div key={d} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-                <div style={{ fontSize:10, color:"#64748b", minWidth:90, textAlign:"right" }}>{lbl}</div>
-                <div style={{ flex:1, background:"#f1f5f9", borderRadius:4, height:26, overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:`${pct}%`, background:bc, borderRadius:4, display:"flex", alignItems:"center", paddingLeft: pct > 10 ? 8 : 0, transition:"width 0.4s ease", minWidth: dayActs.length > 0 ? 28 : 0 }}>
-                    {dayActs.map((a, ai) => <span key={ai} style={{ fontSize:13 }}>{getEmoji(a)}</span>)}
-                  </div>
-                </div>
-                <div style={{ fontSize:10, fontWeight:600, color:bc, minWidth:28, textAlign:"right" }}>{total > 0 ? total.toFixed(0) : "—"}</div>
-              </div>
-            );
-          })}
-
-          {/* Unified weekly load roadmap — past 8 weeks (actual, from Garmin data)
-              plus remaining taper weeks (planned) in one place. Targets come from
-              TAPER_PLAN via getWeekTarget(), matched by real ISO date, not by
-              re-parsing a display label — that fragility + a stale race date is
-              what made the old bars render at 0 width. */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:4, marginTop:22 }}>WEEKLY LOAD ROADMAP</div>
-          <div style={{ fontSize:10, color:"#94a3b8", marginBottom:10 }}>Actual TRIMP vs this phase's target band · rolling 7-day weeks</div>
-          <div style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"14px", marginBottom:16 }}>
-            {weeklyTrimp.map((w, i) => {
-              const isCurrent = w.weekStartISO <= TODAY && w.weekEndISO >= TODAY;
-              const isPast = w.weekEndISO < TODAY;
-              const { lo, hi, theme } = getWeekTarget(w.weekStartISO, w.weekEndISO);
-              const pct = hi > 0 ? Math.min(100, (w.trimp / hi) * 100) : 0;
-              const status = w.trimp === 0 || hi === 0 ? "empty"
-                : (w.trimp >= lo && w.trimp <= hi) ? "green"
-                : w.trimp > hi ? "amber" : "red";
-              const sc = { green:"#16a34a", amber:"#d97706", red:"#dc2626", empty:"#cbd5e1" }[status];
-              const loPct = hi > 0 ? (lo/hi)*100 : 0;
-
-              return (
-                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10, opacity: isPast && !isCurrent ? 0.6 : 1 }}>
-                  <div style={{ minWidth:96 }}>
-                    <div style={{ fontSize:11, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? "#7c3aed" : "#1e293b" }}>
-                      {w.label}{isCurrent && " ←"}
-                    </div>
-                    <div style={{ fontSize:9, color:"#94a3b8" }}>{theme}</div>
-                  </div>
-                  <div style={{ flex:1, background:"#f1f5f9", borderRadius:5, height:22, position:"relative", overflow:"hidden", border:"1px solid #e2e8f0" }}>
-                    {/* target zone band */}
-                    {hi > 0 && (
-                      <div style={{ position:"absolute", left:`${loPct}%`, width:`${100-loPct}%`, top:0, height:"100%", background:"#16a34a14" }} />
-                    )}
-                    {/* actual bar */}
-                    <div style={{ height:"100%", width:`${pct}%`, background:sc, borderRadius:5, transition:"width 0.4s", opacity:0.85 }} />
-                    {/* target markers */}
-                    {hi > 0 && (
-                      <>
-                        <div style={{ position:"absolute", left:`${loPct}%`, top:0, width:2, height:"100%", background:"#16a34a" }} />
-                        <div style={{ position:"absolute", left:`100%`, top:0, width:2, height:"100%", background:"#d97706", transform:"translateX(-2px)" }} />
-                      </>
-                    )}
-                  </div>
-                  <div style={{ fontSize:12, fontWeight:800, color:sc, minWidth:38, textAlign:"right" }}>
-                    {w.trimp > 0 ? w.trimp : "—"}
-                  </div>
-                  <div style={{ fontSize:9, color:"#94a3b8", minWidth:56, textAlign:"right" }}>
-                    {hi > 0 ? `${lo}–${hi}` : "rest"}
-                  </div>
-                </div>
-              );
-            })}
-            <div style={{ display:"flex", gap:14, marginTop:6, fontSize:10, color:"#94a3b8", flexWrap:"wrap" }}>
-              <span><span style={{ display:"inline-block", width:10, height:10, background:"#16a34a", borderRadius:2, verticalAlign:"middle" }} /> In target zone</span>
-              <span><span style={{ display:"inline-block", width:10, height:10, background:"#d97706", borderRadius:2, verticalAlign:"middle" }} /> Over target</span>
-              <span><span style={{ display:"inline-block", width:10, height:10, background:"#dc2626", borderRadius:2, verticalAlign:"middle" }} /> Under target</span>
-              <span style={{ marginLeft:"auto" }}>Green band = target zone</span>
-            </div>
-          </div>
-
-          {/* Remaining taper weeks — planned targets only, no actual data yet */}
-          <div style={{ fontSize:10, fontWeight:700, color:"#64748b", letterSpacing:2, marginBottom:10, marginTop:4 }}>UPCOMING · TAPER TO RACE DAY</div>
-          {TAPER_PLAN.filter(b => b.start > TODAY).map((b, i) => {
-            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-            const sd = new Date(b.start), ed = new Date(b.end);
-            const label = sd.getMonth() === ed.getMonth()
-              ? `${months[sd.getMonth()]} ${sd.getDate()}–${ed.getDate()}`
-              : `${months[sd.getMonth()]} ${sd.getDate()}–${months[ed.getMonth()]} ${ed.getDate()}`;
-            return (
-              <div key={i} style={{ display:"flex", gap:10, padding:"10px 12px", marginBottom:6, background:"#f8fafc", border:"1px dashed #cbd5e1", borderRadius:8 }}>
-                <div style={{ minWidth:80 }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:"#1e293b" }}>{label}</div>
-                  <div style={{ fontSize:9, color:"#94a3b8" }}>{b.theme}</div>
-                </div>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:11, fontWeight:700, color:"#475569" }}>Target: {b.lo}–{b.hi} TRIMP</div>
-                  <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{b.note}</div>
-                </div>
-              </div>
-            );
-          })}
-
-          <div style={{ marginTop:16, padding:"12px 14px", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:8, fontSize:11, color:"#475569", lineHeight:1.9 }}>
-            <strong style={{ color:"#1e293b" }}>Athens target 1:10:00</strong> — runs 8×4:36 (36:48) · stations 28:30 · roxzone 4:22 = 69:40.<br />
-            <strong style={{ color:"#1e293b" }}>Where the 5 min comes from:</strong> roxzone −56s · sled pull −38s · BBJ −36s · ski −31s · row −31s · lunges −9s · runs −2:02.<br />
-            <strong style={{ color:"#1e293b" }}>Race week target:</strong> TSB +10 to +20 by Sep 4.<br />
-            <strong style={{ color:"#1e293b" }}>Taper starts:</strong> Aug 31 — cut volume 40%.<br />
-            <strong style={{ color:"#1e293b" }}>TSB {tsb.toFixed(0)}:</strong> {tsb >= 0 ? "Fresh — keep building." : "Normal training fatigue — expected at this stage."}
-          </div>
-        </div>
-      )}
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }
