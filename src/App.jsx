@@ -1084,6 +1084,61 @@ a { color:${T.accentIn}; }
 .no-bar { scrollbar-width:none; }
 
 .tap { cursor:pointer; border:none; background:none; padding:0; color:inherit; }
+
+/* ── Primary navigation ──────────────────────────────────────────────────
+   Desktop: a row beneath the header. Phone: pinned to the bottom edge,
+   inside thumb reach, the way a native app does it.
+
+   The nav is a SIBLING of the blurred header bar, never a child: an ancestor
+   with backdrop-filter becomes the containing block for position:fixed, so a
+   fixed bar nested inside the header would anchor to the header instead of
+   the viewport. Its own backdrop-filter is fine — that only affects its
+   descendants.                                                              */
+.chrome { position:sticky; top:0; z-index:30; }
+.chrome-bar {
+  background:${T.bgSoft}f2; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid ${T.line};
+}
+.chrome-inner { display:flex; align-items:center; gap:14px; padding-top:13px; padding-bottom:13px; flex-wrap:wrap; }
+
+.mainnav { background:${T.bgSoft}f2; border-bottom:1px solid ${T.line}; }
+.mainnav-inner { display:flex; gap:2px; }
+.navbtn {
+  position:relative; display:flex; align-items:center; gap:7px;
+  padding:10px 15px 11px; font-size:12.5px; font-weight:700;
+  color:${T.ink3}; white-space:nowrap; cursor:pointer;
+  transition:color .16s ease;
+}
+.navbtn.is-active { color:${T.ink}; }
+.navicon { font-size:11px; opacity:.6; transition:opacity .16s ease, color .16s ease; }
+.navbtn.is-active .navicon { opacity:1; color:${T.accent}; }
+.navdot { position:absolute; left:12px; right:12px; bottom:0; height:2px; background:${T.accent}; border-radius:2px 2px 0 0; }
+
+.main-pad { padding-top:22px; padding-bottom:72px; }
+.foot-pad { padding-bottom:34px; }
+
+@media (max-width:760px) {
+  .mainnav {
+    position:fixed; left:0; right:0; bottom:0; top:auto; z-index:60;
+    background:${T.bgSoft}fa; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-top:1px solid ${T.line}; border-bottom:none;
+    box-shadow:0 -10px 28px rgba(0,0,0,.42);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  /* full-bleed grid: four equal targets, no .wrap gutter */
+  .mainnav-inner { display:grid; grid-template-columns:repeat(4,1fr); gap:0; padding-left:0; padding-right:0; max-width:none; }
+  .navbtn {
+    flex-direction:column; justify-content:center; gap:4px;
+    padding:8px 4px 7px; min-height:54px;
+    font-size:10.5px; letter-spacing:.03em;
+  }
+  .navicon { font-size:18px; }
+  /* active marker moves to the top edge, where the bar meets the content */
+  .navdot { top:0; bottom:auto; left:26%; right:26%; border-radius:0 0 2px 2px; }
+  /* keep content clear of the bar */
+  .main-pad { padding-bottom:22px; }
+  .foot-pad { padding-bottom:calc(78px + env(safe-area-inset-bottom, 0px)); }
+}
 .fade { animation:fadeUp .3s cubic-bezier(.2,.7,.3,1) both; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 @keyframes breathe { 0%,100% { opacity:1; } 50% { opacity:.3; } }
@@ -2927,7 +2982,7 @@ const TABS = [
   ["today", "Today",  "◎"],
   ["train", "Train",  "▤"],
   ["body",  "Body",   "♡"],
-  ["race",  "Race",   "🏁"],
+  ["race",  "Race",   "⚑"],
 ];
 
 export default function Dashboard() {
@@ -2952,46 +3007,46 @@ export default function Dashboard() {
       <div style={{ minHeight:"100vh", background:T.bg, color:T.ink, fontSize:13 }}>
 
         {/* ── HEADER ──────────────────────────────────────────────────── */}
-        <header style={{ position:"sticky", top:0, zIndex:20, background:`${T.bgSoft}f2`,
-          backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderBottom:`1px solid ${T.line}` }}>
-          <div className="wrap" style={{ display:"flex", alignItems:"center", gap:14, padding:"13px 22px", flexWrap:"wrap" }}>
-            <div style={{ minWidth:0 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:9, flexWrap:"wrap" }}>
-                <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em", color:T.ink }}>Training</span>
-                <span style={{ width:1, height:14, background:T.line }} />
-                <span className="num" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.accentIn }}>
-                  {RACE.name} · {daysOut > 0 ? `${daysOut} DAYS` : daysOut === 0 ? "TODAY 🏁" : "DONE"} · {RACE.target}
-                </span>
+        <div className="chrome">
+          <header className="chrome-bar">
+            <div className="wrap chrome-inner">
+              <div style={{ minWidth:0 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:9, flexWrap:"wrap" }}>
+                  <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em", color:T.ink }}>Training</span>
+                  <span style={{ width:1, height:14, background:T.line }} />
+                  <span className="num" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.accentIn }}>
+                    {RACE.name} · {daysOut > 0 ? `${daysOut} DAYS` : daysOut === 0 ? "TODAY 🏁" : "DONE"} · {RACE.target}
+                  </span>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
+                  <span className={sync.tone === "ok" ? "live" : ""} style={{ width:6, height:6, borderRadius:"50%", background:TONE[sync.tone], flexShrink:0 }} />
+                  <span style={{ fontSize:10.5, color: sync.tone === "ok" ? T.ink3 : TONE[sync.tone], fontWeight: sync.tone === "ok" ? 400 : 700 }}>
+                    {sync.msg}
+                  </span>
+                </div>
               </div>
-              <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
-                <span className={sync.tone === "ok" ? "live" : ""} style={{ width:6, height:6, borderRadius:"50%", background:TONE[sync.tone], flexShrink:0 }} />
-                <span style={{ fontSize:10.5, color: sync.tone === "ok" ? T.ink3 : TONE[sync.tone], fontWeight: sync.tone === "ok" ? 400 : 700 }}>
-                  {sync.msg}
-                </span>
-              </div>
+              <div style={{ marginLeft:"auto" }}><AuthControls /></div>
             </div>
-            <div style={{ marginLeft:"auto" }}><AuthControls /></div>
-          </div>
+          </header>
 
-          {/* ── NAV ───────────────────────────────────────────────────── */}
-          <nav className="wrap scroll-x no-bar" style={{ display:"flex", gap:2, padding:"0 22px" }}>
-            {TABS.map(([k, l, icon]) => (
-              <button key={k} className="tap" onClick={() => setView(k)} style={{
-                position:"relative", padding:"10px 15px 11px", fontSize:12.5, fontWeight:700, letterSpacing:"0.01em",
-                color: view === k ? T.ink : T.ink3, cursor:"pointer", whiteSpace:"nowrap",
-                display:"flex", alignItems:"center", gap:7, transition:"color .16s ease",
-              }}>
-                <span style={{ fontSize:11, opacity: view === k ? 1 : 0.6 }}>{icon}</span>
-                {l}
-                {view === k && <span style={{ position:"absolute", left:12, right:12, bottom:0, height:2,
-                  background:T.accent, borderRadius:"2px 2px 0 0" }} />}
-              </button>
-            ))}
+          {/* ── NAV — header row on desktop, bottom bar on phone ───────── */}
+          <nav className="mainnav" aria-label="Sections">
+            <div className="wrap mainnav-inner">
+              {TABS.map(([k, l, icon]) => (
+                <button key={k} onClick={() => setView(k)}
+                  className={`tap navbtn${view === k ? " is-active" : ""}`}
+                  aria-current={view === k ? "page" : undefined}>
+                  <span className="navicon" aria-hidden="true">{icon}</span>
+                  <span>{l}</span>
+                  {view === k && <span className="navdot" />}
+                </button>
+              ))}
+            </div>
           </nav>
-        </header>
+        </div>
 
         {/* ── CONTENT ─────────────────────────────────────────────────── */}
-        <main className="wrap" style={{ padding:"22px 22px 72px" }}>
+        <main className="wrap main-pad">
           {!ana ? (
             <Card pad={40}><Empty>Loading training data…</Empty></Card>
           ) : (
@@ -3004,7 +3059,7 @@ export default function Dashboard() {
           )}
         </main>
 
-        <footer className="wrap" style={{ padding:"0 22px 34px", fontSize:10.5, color:T.ink3, lineHeight:1.7 }}>
+        <footer className="wrap foot-pad" style={{ fontSize:10.5, color:T.ink3, lineHeight:1.7 }}>
           <div style={{ borderTop:`1px solid ${T.lineDim}`, paddingTop:16, display:"flex", gap:14, flexWrap:"wrap", justifyContent:"space-between" }}>
             <span>Garmin data synced hourly · {activities.length} activities · {HEALTH_DATA.daily.length} days of wellness</span>
             <span className="num">Last run {LAST_RUN.replace("T", " ").replace("Z", " UTC")}</span>
