@@ -1099,7 +1099,8 @@ a { color:${T.accentIn}; }
   background:${T.bgSoft}f2; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid ${T.line};
 }
-.chrome-inner { display:flex; align-items:center; gap:14px; padding-top:13px; padding-bottom:13px; flex-wrap:wrap; }
+.chrome-inner { display:flex; align-items:center; gap:14px; padding-top:13px; padding-bottom:13px; flex-wrap:nowrap; }
+.race-line { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
 .mainnav { background:${T.bgSoft}f2; border-bottom:1px solid ${T.line}; }
 .mainnav-inner { display:flex; gap:2px; }
@@ -1118,6 +1119,10 @@ a { color:${T.accentIn}; }
 .foot-pad { padding-bottom:34px; }
 
 @media (max-width:760px) {
+  /* the race name is fixed knowledge; the countdown and target are the live
+     part, and dropping the name keeps the whole header on one line */
+  .race-name { display:none; }
+  .chrome-inner { gap:10px; }
   .mainnav {
     position:fixed; left:0; right:0; bottom:0; top:auto; z-index:60;
     background:${T.bgSoft}fa; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
@@ -1614,6 +1619,8 @@ function TodayView({ ana, health }) {
 
         </div>
       </div>
+
+      <SyncPanel />
     </div>
   );
 }
@@ -2978,6 +2985,40 @@ function AuthControls() {
   );
 }
 
+// Sync status and the credential controls. These are read once in a while and
+// tapped rarely, so they sit at the foot of Today rather than occupying the
+// top of every screen. The header keeps only a status dot, which turns amber
+// or red — with a word saying which — when something actually needs attention.
+function SyncPanel() {
+  const sync = syncState();
+  return (
+    <Sec title="Sync" sub="Garmin data updates hourly on its own">
+      <Card pad={16}>
+        <div style={{ display:"flex", gap:14, alignItems:"flex-start", flexWrap:"wrap" }}>
+          <div style={{ flex:"1 1 240px", minWidth:0 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <span className={sync.tone === "ok" ? "live" : ""} style={{ width:7, height:7, borderRadius:"50%",
+                background:TONE[sync.tone], flexShrink:0 }} />
+              <span style={{ fontSize:12.5, color: sync.tone === "ok" ? T.ink2 : TONE[sync.tone],
+                fontWeight: sync.tone === "ok" ? 400 : 700, lineHeight:1.5 }}>{sync.msg}</span>
+            </div>
+            <div className="num" style={{ fontSize:10.5, color:T.ink3, marginTop:7 }}>
+              Last run {LAST_RUN.replace("T", " ").replace("Z", " UTC")}
+            </div>
+          </div>
+          <AuthControls />
+        </div>
+        <div style={{ fontSize:10.5, color:T.ink3, marginTop:12, paddingTop:11,
+          borderTop:`1px solid ${T.lineDim}`, lineHeight:1.6 }}>
+          <strong style={{ color:T.ink2 }}>Refresh</strong> pulls new activities now, instead of waiting for the hour.
+          {" "}<strong style={{ color:T.ink2 }}>Renew</strong> re-authorises Garmin and needs the emailed code — only
+          necessary about once a year, when the long-lived token expires.
+        </div>
+      </Card>
+    </Sec>
+  );
+}
+
 const TABS = [
   ["today", "Today",  "◎"],
   ["train", "Train",  "▤"],
@@ -3010,22 +3051,22 @@ export default function Dashboard() {
         <div className="chrome">
           <header className="chrome-bar">
             <div className="wrap chrome-inner">
-              <div style={{ minWidth:0 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:9, flexWrap:"wrap" }}>
-                  <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em", color:T.ink }}>Training</span>
-                  <span style={{ width:1, height:14, background:T.line }} />
-                  <span className="num" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.accentIn }}>
-                    {RACE.name} · {daysOut > 0 ? `${daysOut} DAYS` : daysOut === 0 ? "TODAY 🏁" : "DONE"} · {RACE.target}
-                  </span>
-                </div>
-                <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:4 }}>
-                  <span className={sync.tone === "ok" ? "live" : ""} style={{ width:6, height:6, borderRadius:"50%", background:TONE[sync.tone], flexShrink:0 }} />
-                  <span style={{ fontSize:10.5, color: sync.tone === "ok" ? T.ink3 : TONE[sync.tone], fontWeight: sync.tone === "ok" ? 400 : 700 }}>
-                    {sync.msg}
-                  </span>
-                </div>
-              </div>
-              <div style={{ marginLeft:"auto" }}><AuthControls /></div>
+              <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em", color:T.ink }}>Training</span>
+              <span style={{ width:1, height:14, background:T.line, flexShrink:0 }} />
+              <span className="num race-line" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.accentIn }}>
+                <span className="race-name">{RACE.name} · </span>
+                {daysOut > 0 ? `${daysOut} DAYS` : daysOut === 0 ? "TODAY 🏁" : "DONE"} · {RACE.target}
+              </span>
+              {/* Only a dot while healthy; it names the problem when there is one,
+                  so moving the detail to Today cannot hide a broken sync. */}
+              <button className="tap" onClick={() => setView("today")} title={sync.msg}
+                style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6, cursor:"pointer", flexShrink:0 }}>
+                <span className={sync.tone === "ok" ? "live" : ""} style={{ width:7, height:7, borderRadius:"50%",
+                  background:TONE[sync.tone], flexShrink:0 }} />
+                {sync.tone !== "ok" && (
+                  <span style={{ fontSize:10.5, fontWeight:700, color:TONE[sync.tone], whiteSpace:"nowrap" }}>{sync.short}</span>
+                )}
+              </button>
             </div>
           </header>
 
@@ -3062,7 +3103,6 @@ export default function Dashboard() {
         <footer className="wrap foot-pad" style={{ fontSize:10.5, color:T.ink3, lineHeight:1.7 }}>
           <div style={{ borderTop:`1px solid ${T.lineDim}`, paddingTop:16, display:"flex", gap:14, flexWrap:"wrap", justifyContent:"space-between" }}>
             <span>Garmin data synced hourly · {activities.length} activities · {HEALTH_DATA.daily.length} days of wellness</span>
-            <span className="num">Last run {LAST_RUN.replace("T", " ").replace("Z", " UTC")}</span>
           </div>
         </footer>
       </div>
