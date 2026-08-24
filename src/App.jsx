@@ -366,6 +366,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:272,avgHr:150,maxHr:165,dist:921,role:"run"},{i:2,t:247,avgHr:165,maxHr:169,dist:145,role:"station"},{i:3,t:286,avgHr:166,maxHr:170,dist:880,role:"run"},{i:4,t:136,avgHr:155,maxHr:170,dist:52,role:"station"},{i:5,t:310,avgHr:162,maxHr:167,dist:886,role:"run"},{i:6,t:192,avgHr:160,maxHr:165,dist:99,role:"station"},{i:7,t:327,avgHr:160,maxHr:166,dist:859,role:"run"},{i:8,t:261,avgHr:159,maxHr:164,dist:29,role:"station"},{i:9,t:355,avgHr:159,maxHr:163,dist:890,role:"run"},{i:10,t:263,avgHr:154,maxHr:162,dist:186,role:"station"},{i:11,t:343,avgHr:156,maxHr:161,dist:895,role:"run"},{i:12,t:197,avgHr:144,maxHr:160,dist:323,role:"station"},{i:13,t:325,avgHr:156,maxHr:162,dist:926,role:"run"},{i:14,t:225,avgHr:155,maxHr:160,dist:193,role:"station"},{i:15,t:300,avgHr:164,maxHr:170,dist:888,role:"run"},{i:16,t:216,avgHr:170,maxHr:176,dist:265,role:"station"}],
   },
+"24099401031": {
+    date:"2026-08-24", name:"Hyrox circle", type:null,
+    totalTime:2582, avgHR:139, maxHR:175,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:517,avgHr:115,maxHr:137,dist:520,role:"run"},{i:2,t:539,avgHr:136,maxHr:154,dist:320,role:"station"},{i:3,t:706,avgHr:144,maxHr:172,dist:1006,role:"run"},{i:4,t:128,avgHr:124,maxHr:157,dist:103,role:"station"},{i:5,t:583,avgHr:160,maxHr:175,dist:999,role:"run"},{i:6,t:102,avgHr:148,maxHr:168,dist:5,role:"station"},{i:7,t:7,avgHr:137,maxHr:138,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -420,7 +427,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Indoor Running","2026-08-24 19:00:15","false","Indoor Running","2,95","557","00:43:01","139","175","3,4","84","--","14:34","--","--","--","--","--","--","79,41","16,1","13,6","409","--","--","--","--","--","--","--","--","--","No","--","7","--","--","--","--","--","00:29:15","00:46:07","--","--"
+"Indoor Running","2026-08-24 19:00:15","false","Hyrox circle","2,95","557","00:43:01","139","175","3,4","84","--","14:34","--","--","--","--","--","--","79,41","16,1","13,6","409","--","--","--","--","--","--","--","--","--","No","--","7","--","--","--","--","--","00:29:15","00:46:07","--","--"
 "Cycling","2026-08-24 07:41:52","false","Vilnius Cycling","7,25","167","00:26:03","95","123","0,5","--","--","3:35","--","--","--","62","55","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:25:37","09:39:26","--","--"
 "Running","2026-08-23 14:56:09","false","Z2 10km","10,45","719","00:52:44","137","148","3,3","180","--","5:02","--","--","--","57","56","--","110,16","6,3","7,2","261","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:52:44","00:53:16","--","--"
 "Cycling","2026-08-23 13:21:48","false","Vilnius Cycling","5,97","131","00:19:12","90","126","0,5","--","--","3:13","--","--","--","54","61","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:16:35","01:06:40","--","--"
@@ -680,8 +687,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-24";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-24T20:07:00Z";
-const LAST_DATA = "2026-08-24T20:07:00Z";
+const LAST_RUN  = "2026-08-24T21:08:00Z";
+const LAST_DATA = "2026-08-24T21:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
