@@ -95,6 +95,7 @@ const HEALTH_DATA = {
     {date:"2026-08-23",hrv:91,rhr:41,spo2:98,resp:11.0,sleep_score:95},
     {date:"2026-08-24",hrv:101,rhr:42,spo2:99,resp:12.0,sleep_score:95},
     {date:"2026-08-25",hrv:102,rhr:43,spo2:97,resp:12.0,sleep_score:88},
+    {date:"2026-08-26",hrv:109,rhr:43,spo2:96,resp:12.0,sleep_score:88},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -178,6 +179,7 @@ const HEALTH_DATA = {
     {date:"2026-08-23",deep:115,rem:197,light:232,awake:0},
     {date:"2026-08-24",deep:106,rem:78,light:251,awake:0},
     {date:"2026-08-25",deep:81,rem:99,light:250,awake:9},
+    {date:"2026-08-26",deep:93,rem:105,light:280,awake:5},
   ],
 };
 
@@ -690,8 +692,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-25";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-26T23:07:00Z";
-const LAST_DATA = "2026-08-26T23:07:00Z";
+const LAST_RUN  = "2026-08-27T00:07:00Z";
+const LAST_DATA = "2026-08-27T00:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1417,7 +1419,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 88; // updated 2026-08-25
+const hrvBaseline = 91; // updated 2026-08-26
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
