@@ -383,6 +383,13 @@ const HYROX_DATA = {
     photos:[],
     laps:[{i:1,t:517,avgHr:115,maxHr:137,dist:520,role:"run"},{i:2,t:539,avgHr:136,maxHr:154,dist:320,role:"station"},{i:3,t:706,avgHr:144,maxHr:172,dist:1006,role:"run"},{i:4,t:128,avgHr:124,maxHr:157,dist:103,role:"station"},{i:5,t:583,avgHr:160,maxHr:175,dist:999,role:"run"},{i:6,t:102,avgHr:148,maxHr:168,dist:5,role:"station"},{i:7,t:7,avgHr:137,maxHr:138,role:"station"}],
   },
+"24159641679": {
+    date:"2026-08-29", name:"Hyrox: 4 runs + skierg, sled push, sled pull", type:null,
+    totalTime:1820, avgHR:162, maxHR:174,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:274,avgHr:152,maxHr:168,dist:944,role:"run"},{i:2,t:250,avgHr:163,maxHr:168,dist:319,role:"station"},{i:3,t:288,avgHr:168,maxHr:173,dist:929,role:"run"},{i:4,t:146,avgHr:152,maxHr:173,dist:76,role:"station"},{i:5,t:295,avgHr:166,maxHr:173,dist:926,role:"run"},{i:6,t:222,avgHr:162,maxHr:174,dist:107,role:"station"},{i:7,t:328,avgHr:165,maxHr:174,dist:913,role:"run"},{i:8,t:17,avgHr:171,maxHr:174,dist:26,role:"station"}],
+  },
 };
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
@@ -437,8 +444,9 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Indoor Running","2026-08-29 15:39:29","false","Indoor Running","0,03","74","00:05:01","147","159","1,7","19","--","148:48","--","--","--","--","--","--","73,93","13,3","42,3","788","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:00:40","00:05:01","--","--"
-"Indoor Running","2026-08-29 15:03:05","false","Indoor Running","4,24","497","00:30:20","162","174","3,9","135","--","7:09","--","--","--","--","--","--","99,45","9,6","9,2","317","--","--","--","--","--","--","--","--","--","No","--","8","--","--","--","--","--","00:26:01","00:30:20","--","--"
+"Cycling","2026-08-29 16:40:59","false","Vilnius Cycling","5,19","62","00:17:46","78","127","0,1","--","--","3:25","--","--","--","49","42","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:17:41","00:22:22","--","--"
+"Indoor Running","2026-08-29 15:39:29","false","50 BBJ","0,03","74","00:05:01","147","159","1,7","19","--","148:48","--","--","--","--","--","--","73,93","13,3","42,3","788","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:00:40","00:05:01","--","--"
+"Indoor Running","2026-08-29 15:03:05","false","Hyrox: 4 runs + skierg, sled push, sled pull","4,24","497","00:30:20","162","174","3,9","135","--","7:09","--","--","--","--","--","--","99,45","9,6","9,2","317","--","--","--","--","--","--","--","--","--","No","--","8","--","--","--","--","--","00:26:01","00:30:20","--","--"
 "Cycling","2026-08-29 14:26:09","false","Vilnius Cycling","5,00","117","00:15:13","109","126","0,5","--","--","3:02","--","--","--","53","48","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:10","00:15:13","--","--"
 "Sky Diving","2026-08-27 11:33:00","false","Skydive Pociūnai 5 jumps","0,00","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","--","--","--","--"
 "Sky Diving","2026-08-26 11:04:00","false","Skydive Pociūnai 5 jumps ","0,00","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","--","--","--","--"
@@ -704,8 +712,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-29";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-29T14:07:00Z";
-const LAST_DATA = "2026-08-29T14:07:00Z";
+const LAST_RUN  = "2026-08-29T15:07:00Z";
+const LAST_DATA = "2026-08-29T15:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
