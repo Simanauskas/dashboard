@@ -437,6 +437,8 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Indoor Running","2026-08-29 15:39:29","false","Indoor Running","0,03","74","00:05:01","147","159","1,7","19","--","148:48","--","--","--","--","--","--","73,93","13,3","42,3","788","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:00:40","00:05:01","--","--"
+"Indoor Running","2026-08-29 15:03:05","false","Indoor Running","4,24","497","00:30:20","162","174","3,9","135","--","7:09","--","--","--","--","--","--","99,45","9,6","9,2","317","--","--","--","--","--","--","--","--","--","No","--","8","--","--","--","--","--","00:26:01","00:30:20","--","--"
 "Cycling","2026-08-29 14:26:09","false","Vilnius Cycling","5,00","117","00:15:13","109","126","0,5","--","--","3:02","--","--","--","53","48","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:10","00:15:13","--","--"
 "Sky Diving","2026-08-27 11:33:00","false","Skydive Pociūnai 5 jumps","0,00","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","--","--","--","--"
 "Sky Diving","2026-08-26 11:04:00","false","Skydive Pociūnai 5 jumps ","0,00","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","--","--","--","--"
@@ -702,8 +704,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-08-29";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-08-29T12:07:00Z";
-const LAST_DATA = "2026-08-29T12:07:00Z";
+const LAST_RUN  = "2026-08-29T13:07:00Z";
+const LAST_DATA = "2026-08-29T13:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
