@@ -2,6 +2,11 @@ name: Create Garmin Workouts
 
 on:
   workflow_dispatch:
+    inputs:
+      only:
+        description: 'Substring of the workout name to create (blank = all 6)'
+        required: false
+        default: 'ATHENS'
 
 jobs:
   create:
@@ -25,4 +30,9 @@ jobs:
           echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
 
       - name: Create workouts
-        run: python create_workouts.py
+        run: |
+          if [ -n "${{ inputs.only }}" ]; then
+            python create_workouts.py --only "${{ inputs.only }}"
+          else
+            python create_workouts.py
+          fi

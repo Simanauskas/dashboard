@@ -2,13 +2,18 @@
 """
 create_workouts.py
 ──────────────────
-One-off script: creates 5 structured running workouts in Garmin Connect
-(workout-service API) so they sync to the Epix 2 Pro under
-Run → Training → Workouts.
+Creates structured running workouts in Garmin Connect (workout-service API)
+so they sync to the Epix 2 Pro under Run → Training → Workouts:
+
+  1-5  the training block (threshold, endurance, tempo, easy, speed)
+  6    HYROX ATHENS race plan — the 16 race splits, lap-button driven
 
 Runs inside GitHub Actions (same token pattern as update.py — garth tokens
 pre-written to ~/.garth/ by the workflow step). Safe to re-run: it first
 deletes any existing workout with the same name, then recreates it.
+
+  python create_workouts.py                 # all six
+  python create_workouts.py --only ATHENS   # just the race plan
 
 ADJUST THE PACE CONFIG BELOW BEFORE RUNNING.
 """
@@ -212,6 +217,90 @@ def build_workouts():
     ]
 
 
+# ── RACE CONFIG · HYROX ATHENS, 5 Sep 2026 ───────────────────────────────────
+# Targets come straight from the dashboard: RACE_BUDGET / RACE_GAINS /
+# RIGA_SPLITS in src/App.jsx. Station targets are Riga's official splits minus
+# the identified gains, so they sum to the 28:30 station budget exactly.
+RACE_RUN = 276                  # 4:36 per km, every run
+RACE_RUN_WINDOW = 5             # +/- sec/km band on the watch
+RACE_ROXZONE_TOTAL = 262        # 4:22 across all transitions (jog every one)
+
+# (station name, target seconds, cue shown on the watch)
+RACE_STATIONS = [
+    ("Ski Erg 1000m",   248, "2:04/500 - long strong pulls, full compression"),
+    ("Sled Push 50m",   136, "Low hips, short steps, do not stop the sled"),
+    ("Sled Pull 50m",   210, "Hand-over-hand rhythm, sit back - 38s to win here"),
+    ("Burpee Broad Jp", 285, "6x20m blocks at 68s - rhythm over power"),
+    ("Row 1000m",       252, "2:06/500 - hold it off tired legs"),
+    ("Farmers Carry",    88, "No set-downs, quick turns"),
+    ("Sandbag Lunge",   245, "Do not reset mid-lane - 100m unbroken"),
+    ("Wall Balls 100",  246, "Sets of 10, breathe at the top, trust the legs"),
+]
+
+
+def pace_target_abs(sec_per_km: int, window: int = RACE_RUN_WINDOW):
+    """Pace target from an absolute pace, independent of THRESHOLD."""
+    return (
+        {"workoutTargetTypeId": 6, "workoutTargetTypeKey": "pace.zone"},
+        round(mps(sec_per_km + window), 3),   # slower bound
+        round(mps(sec_per_km - window), 3),   # faster bound
+    )
+
+
+def build_race_workout():
+    """HYROX Athens race plan as a 16-step, lap-button-driven workout.
+
+    Every step ends on the LAP button rather than on distance. Indoor GPS is
+    unusable for this: in Riga the eight 1 km runs recorded as 895-1234 m, so
+    distance-ended steps would desync from the race within two stations.
+    Pressing lap at each transition is what the user does anyway.
+
+    Each description carries the segment target and the cumulative race clock
+    it should be met at, so the plan can be checked against elapsed time even
+    if a step is skipped by a double-press.
+    """
+    global _order
+    _order = 0
+
+    steps = []
+    clock = 0
+
+    for i, (name, target, cue) in enumerate(RACE_STATIONS, start=1):
+        # Run leg i: the kilometre plus its share of the roxzone. Roxzone is
+        # accumulated on the exact total so rounding cannot drift off 4:22.
+        rox_to_here = round(i * RACE_ROXZONE_TOTAL / len(RACE_STATIONS))
+        rox_prev = round((i - 1) * RACE_ROXZONE_TOTAL / len(RACE_STATIONS))
+        clock += RACE_RUN + (rox_to_here - rox_prev)
+        steps.append(step(
+            "interval",
+            target=pace_target_abs(RACE_RUN),
+            desc=f"RUN {i} - 4:36/km - jog the roxzone - by {fmt(clock)}",
+        ))
+
+        clock += target
+        steps.append(step(
+            "interval",
+            desc=f"{name.upper()} - {fmt(target)} - {cue} - by {fmt(clock)}",
+        ))
+
+    return workout_payload(
+        "HYROX ATHENS - Target 1:10:00",
+        (f"Race plan, 5 Sep 2026. 8x1km at 4:36 ({fmt(8 * RACE_RUN)}) + stations "
+         f"({fmt(sum(s[1] for s in RACE_STATIONS))}) + roxzone "
+         f"({fmt(RACE_ROXZONE_TOTAL)}) = {fmt(clock)}, 20s inside 1:10:00. "
+         "Press LAP at every run/station transition - each press advances one step."),
+        steps,
+    )
+
+
+def fmt(secs: int) -> str:
+    """mm:ss, rolling over to h:mm:ss so the late race-clock checkpoints
+    read 1:00:25 rather than 60:25."""
+    if secs >= 3600:
+        return f"{secs // 3600}:{(secs % 3600) // 60:02d}:{secs % 60:02d}"
+    return f"{secs // 60}:{secs % 60:02d}"
+
+
 def workout_payload(name, description, steps):
     return {
         "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
@@ -225,7 +314,18 @@ def workout_payload(name, description, steps):
     }
 
 
+def build_all():
+    return build_workouts() + [build_race_workout()]
+
+
 def main():
+    # Without --only every workout is rebuilt. The five training workouts are
+    # done with once the race block ends, so pass e.g. --only ATHENS to touch
+    # just the race plan and leave the rest of the Connect library alone.
+    only = None
+    if "--only" in sys.argv:
+        only = sys.argv[sys.argv.index("--only") + 1].lower()
+
     garth.resume(str(Path.home() / ".garth"))
     try:
         garth.client.username  # touch profile to confirm tokens work
@@ -239,8 +339,15 @@ def main():
     ) or []
     by_name = {wo["workoutName"]: wo["workoutId"] for wo in existing}
 
+    payloads = build_all()
+    if only:
+        payloads = [p for p in payloads if only in p["workoutName"].lower()]
+        if not payloads:
+            print(f"❌ --only {only!r} matched no workout")
+            sys.exit(1)
+
     created = []
-    for payload in build_workouts():
+    for payload in payloads:
         name = payload["workoutName"]
         if name in by_name:
             garth.connectapi(f"/workout-service/workout/{by_name[name]}", "DELETE")
