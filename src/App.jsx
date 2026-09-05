@@ -456,14 +456,15 @@ Stations by field position: Farmers Carry #12 (top 2%) — elite. Wall Balls #65
 
 Ski erg is also the biggest gap between tested and raced: 1000m TT on Jul 28 was 3:54, the plan asked 4:08, the race gave 4:18.
 
-Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and the ski erg into one lap and left a 7s ghost lap, and the watch ran 44s past the line. Official splits are the source of truth here; the recording is only used for heart rate on R2–R8.`,
+Watch: originally recorded 1:10:07 because it ran 44s past the line; trimmed in Garmin, so the activity now ends exactly on 1:09:23. A mis-press still merges R1 with the ski erg and leaves a 7s ghost lap, so official splits remain the source of truth and the recording is used only for heart rate on R2–R8.`,
     official: {
     // Source: official HYROX race replay (Athens, Sat 5 Sep 2026, bib 112006).
     // Athens published no per-split ranks, only the two overall ones.
     finishTime: 4163,                       // 1:09:23 — target was 1:10:00
-    // What the watch recorded. Longer than the race: a mis-pressed lap and the
-    // watch left running past the finish line. finishTime is the real one.
-    recordedTime: 4207,                     // 1:10:07 — 44s of it is after the line
+    // The watch originally recorded 4207s (1:10:07) because it was left running
+    // 44s past the line. That has since been trimmed in Garmin and the activity
+    // now ends exactly on 4163s, so there is no recordedTime to disclose — the
+    // recording and the official finish agree. Kept as history, not as data.
     overallRank: 86, agRank: 17, ageGroup: "35-39", bib: "112006",
     division: "HYROX — Saturday", venue: "Metropolitan Expo, Athens",
     roxzone: { time: 347, rank: 117 },      // 5:47
@@ -486,7 +487,8 @@ Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and t
     //   lap 2  = 7s ghost lap from the mis-press
     //   laps 3,5,7,9,11,13,15  = R2…R8, each including its roxzone
     //   laps 4,6,8,10,12,14,16 = Sled Push … Wall Balls
-    //   lap 16 overruns by 44s — the watch was stopped after the finish line
+    //   lap 16 was 44s long over; the trim cut it to 256s, and it is the only
+    //     lap the trim touched, so this mapping still holds
     // Runs are mapped. Stations are deliberately NOT: this trace is wrist
     // optical, and it drops out on the grip-heavy stations (sled push 128,
     // sled pull 125, burpee 119, wall balls 109 bpm are artifacts, not efforts
@@ -3259,7 +3261,11 @@ function SessionDetail({ s }) {
         <Stat label={`Running ×${runs.length}`} value={fmtMMSS(totalRun)} sub={avgRun ? `avg ${fmtMMSS(avgRun)}` : "—"} tone="warn" accentBar />
         <Stat label={`Stations ×${stations.length}`} value={fmtMMSS(totalStat)} sub={`${pct(totalStat, displayTotal).toFixed(0)}% of session`} tone="accent" accentBar />
         <Stat label="Avg HR" value={s.avgHR ? `${s.avgHR}` : "—"} unit="bpm"
-          sub={`${s.maxHR ? `max ${s.maxHR}` : ""}${s.maxHR && hasOfficial ? " · " : ""}${hasOfficial ? "whole recording" : s.maxHR ? "" : "whole session"}`}
+          sub={(() => {
+            const wider = hasOfficial && official.recordedTime && official.recordedTime !== official.finishTime;
+            const tail = wider ? "whole recording, incl. past the line" : hasOfficial ? "across the race" : "whole session";
+            return s.maxHR ? `max ${s.maxHR} · ${tail}` : tail;
+          })()}
           tone={hrTone(s.avgHR)} accentBar />
         <Stat label="Run range" value={runs.length ? `${fmtMMSS(fastRun)}–${fmtMMSS(slowRun)}` : "—"} sub="fastest → slowest" tone="info" accentBar />
         {runs.length > 1 && <Stat label="Run spread" value={`+${fmtMMSS(slowRun - fastRun)}`} sub="slowest − fastest split" tone={slowRun - fastRun > 25 ? "warn" : "ok"} accentBar />}
