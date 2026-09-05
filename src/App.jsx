@@ -421,15 +421,26 @@ const HYROX_DATA = {
     // Source: official HYROX race replay (Athens, Sat 5 Sep 2026, bib 112006).
     // Athens published no per-split ranks, only the two overall ones.
     finishTime: 4163,                       // 1:09:23 — target was 1:10:00
+    // What the watch recorded. Longer than the race: a mis-pressed lap and the
+    // watch left running past the finish line. finishTime is the real one.
+    recordedTime: 4207,                     // 1:10:07 — 44s of it is after the line
     overallRank: 86, agRank: 17, ageGroup: "35-39", bib: "112006",
     division: "HYROX — Saturday", venue: "Metropolitan Expo, Athens",
     // Derived from the replay: finish − runs − stations. HYROX did not publish
     // a roxzone row for Athens, so this is the residual transition time.
     roxzone: { time: 347 },                 // 5:47
-    // The watch was not lapped at every station — Garmin merged R1 into the
-    // warm-up lap and missed one press — so lap HR does NOT line up with these
-    // splits. lapAlign:false keeps the views from printing the wrong HR here.
-    lapAlign: false,
+    // Lap reconstruction. Cumulative lap times land on the official replay
+    // markers to within seconds, so the watch data IS usable once remapped:
+    //   lap 1  = R1 + roxzone + Ski Erg, merged (309+34+257 = 600s vs 599 recorded)
+    //   lap 2  = 7s ghost lap from the mis-press
+    //   laps 3,5,7,9,11,13,15  = R2…R8, each including its roxzone
+    //   laps 4,6,8,10,12,14,16 = Sled Push … Wall Balls
+    //   lap 16 overruns by 44s — the watch was stopped after the finish line
+    // Runs are mapped. Stations are deliberately NOT: this trace is wrist
+    // optical, and it drops out on the grip-heavy stations (sled push 128,
+    // sled pull 125, burpee 119, wall balls 109 bpm are artifacts, not efforts
+    // — Riga's chest strap never read below 152 at any station).
+    lapAlign: { runs: [null, 3, 5, 7, 9, 11, 13, 15] },
     runs: [
       { time: 309 },   // R1 5:09 — includes the start corral walk-up
       { time: 254 },   // R2 4:14
@@ -456,9 +467,30 @@ const HYROX_DATA = {
 Runs 35:07 (Riga 38:50) — the whole plan was built on 8×4:36 and R2–R8 averaged 4:17 (4:23 including R1, which carries the corral walk-up). Zero fade: R8 (4:10) was the fastest split of the day.
 Stations 28:29 (Riga 30:55) — landed within 1s of the 28:30 budget. Burpee broad jump was the single biggest win: 5:21 → 3:50.
 Roxzone 5:47 (Riga ~5:11) — the one regression, and 1:25 over the 4:22 plan. Transitions after row (0:40), farmers (0:46) and lunges (1:04) are where it went.
-Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.`,
+Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.
+
+Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and the ski erg into one lap and left a 7s ghost lap, and the watch ran 44s past the line. Official splits are the source of truth here; the recording is only used for heart rate on R2–R8.`,
   },
 };
+
+/* ── Official finish time for a raw Garmin activity row ───────────────────
+   The watch is never stopped exactly on the finish line, so a race's recorded
+   duration overstates it (Athens: 1:10:07 recorded, 1:09:23 official). Where a
+   session carries official results those own the duration, and the activity
+   rows in the log, the week board and the sim log show that instead of what
+   the watch happened to capture. Keyed by date + title because update.py
+   writes both from the same Garmin activity, so they always agree. */
+const OFFICIAL_DURATIONS = (() => {
+  const m = {};
+  Object.values(HYROX_DATA).forEach(s => {
+    if (s.official && s.official.finishTime) m[`${s.date}|${(s.name || "").trim()}`] = s.official.finishTime;
+  });
+  return m;
+})();
+// Official finish for this activity row, or null when it has no official result.
+const officialDur = (a) => (a ? OFFICIAL_DURATIONS[`${a._date}|${(a.Title || "").trim()}`] ?? null : null);
+// What to print as this activity's duration: official when there is one.
+const shownDur = (a) => officialDur(a) ?? (a ? a._dur : 0);
 
 // ── Canonical Hyrox station catalog (for plan generation + station matching) ──
 // Use these exact names when assigning stationNames so trend matching works.
@@ -1556,7 +1588,9 @@ function sessionMetrics(a) {
   const out = [];
   const push = (label, value, note, tone) => out.push({ label, value, note, tone });
 
-  push("Duration", fmtDur(a._dur), a._dist > 0 ? `${a._dist.toFixed(2)} km covered` : "total session", "ink");
+  push("Duration", fmtDur(shownDur(a)),
+       officialDur(a) ? `official finish · watch recorded ${fmtDur(a._dur)}`
+                      : a._dist > 0 ? `${a._dist.toFixed(2)} km covered` : "total session", "ink");
   if (a._avgHR > 0) {
     const t = a._avgHR > 167 ? "bad" : a._avgHR > 146 ? "warn" : "ok";
     push("Avg HR", `${a._avgHR}`, `bpm · zone ${a._avgHR > 167 ? "E" : a._avgHR > 146 ? "D" : a._avgHR > 132 ? "C" : a._avgHR > 115 ? "B" : "A"}`, t);
@@ -1593,7 +1627,7 @@ function buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, slee
   const hy = yesterday.find(isHyrox), rn = yesterday.find(a => isRun(a) && a._avgHR > 120);
   const key = hy || rn;
   if (key) {
-    notes.push({ tone:"accent", text:`${key.Title || key["Activity Type"]}: ${fmtDur(key._dur)}${key._avgHR ? ` · HR ${key._avgHR} avg` : ""}${parseNum(key["Max HR"]) ? `/${parseNum(key["Max HR"])} max` : ""}${key._dist > 0 ? ` · ${key._dist.toFixed(2)} km` : ""}.` });
+    notes.push({ tone:"accent", text:`${key.Title || key["Activity Type"]}: ${fmtDur(shownDur(key))}${key._avgHR ? ` · HR ${key._avgHR} avg` : ""}${parseNum(key["Max HR"]) ? `/${parseNum(key["Max HR"])} max` : ""}${key._dist > 0 ? ` · ${key._dist.toFixed(2)} km` : ""}.` });
     const gct = parseNum(key["Avg Ground Contact Time"]);
     if (gct) notes.push({ tone: gct < 380 ? "ok" : "warn", text:`Ground contact ${Math.round(gct)}ms — ${gct < 380 ? "inside the sub-380ms race-pace target." : "above the 380ms race target: raise cadence, cut the bounce."}` });
     const vr = parseNum(key["Avg Vertical Ratio"]);
@@ -1709,7 +1743,7 @@ function TodayView({ ana, health }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:13, fontWeight:700, color:getColor(a) }}>{a.Title || a["Activity Type"]}</div>
                   <div className="num" style={{ fontSize:11.5, color:T.ink3, marginTop:3 }}>
-                    {fmtDur(a._dur)}
+                    {fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}
                     {a._avgHR > 0 ? ` · ♥ ${a._avgHR}${parseNum(a["Max HR"]) ? `/${parseNum(a["Max HR"])}` : ""}` : ""}
                     {a._dist > 0 ? ` · ${a._dist.toFixed(1)} km` : ""}
                     {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
@@ -1844,7 +1878,7 @@ function PlanBoard({ activities }) {
                     <div style={{ fontSize:10.5, fontWeight:700, color:T.ok, lineHeight:1.35, overflowWrap:"anywhere" }}>
                       ✓ {a.Title || a["Activity Type"]}
                     </div>
-                    <div className="num" style={{ fontSize:9.5, color:T.ink3 }}>{fmtDur(a._dur)}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""}</div>
+                    <div className="num" style={{ fontSize:9.5, color:T.ink3 }}>{fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""}</div>
                   </div>
                 </div>
               ))}
@@ -2095,7 +2129,7 @@ function LogPanel({ activities }) {
                 </span>
               </div>
               <div className="num" style={{ fontSize:11, color:T.ink3, marginTop:3 }}>
-                {fmtDur(a._dur)}
+                {fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}
                 {a._avgHR > 0 ? ` · ♥ ${a._avgHR}` : ""}
                 {a._dist > 0 ? ` · ${a._dist.toFixed(1)}km` : ""}
                 {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
@@ -2900,6 +2934,49 @@ function RaceTargets({ ana }) {
   );
 }
 
+/* ── Which Garmin lap backs each official split ───────────────────────────
+   Official results carry times and ranks but never heart rate, so HR is
+   borrowed from the watch. That is only sound when the laps actually line up.
+   `official.lapAlign` says how much to trust them:
+     absent  → the watch was lapped at every station, match by name then order
+     false   → nothing lines up, borrow nothing
+     object  → explicit { runs:[lapI|null], stations:[lapI|null] } for a race
+               where presses were merged, missed, or the trace is unreliable;
+               a null (or a missing array) means that split gets no HR.
+   ───────────────────────────────────────────────────────────────────────── */
+function lapHrResolver(s) {
+  const align = (s.official || {}).lapAlign;
+  const laps = s.laps || [];
+  const byIndex = {};
+  laps.forEach(l => { byIndex[l.i] = l; });
+  const runLaps = laps.filter(l => l.role === "run");
+  const stationLaps = laps.filter(l => l.role === "station");
+
+  const explicit = (arr, i) => {
+    const li = arr ? arr[i] : null;
+    return li == null ? null : (byIndex[li] || null);
+  };
+  const hr = l => (l ? { avgHr:l.avgHr ?? null, maxHr:l.maxHr ?? null } : { avgHr:null, maxHr:null });
+
+  if (align === false) return { run:() => hr(null), station:() => hr(null), anyHr:false };
+  if (align && typeof align === "object") return {
+    run:    i => hr(explicit(align.runs, i)),
+    station:i => hr(explicit(align.stations, i)),
+    anyHr:  !!(align.runs || align.stations),
+  };
+  return {
+    run:    i => hr(runLaps[i]),
+    station:(i, name) => {
+      if (name && s.stationNames) {
+        const hit = stationLaps.find(l => s.stationNames[l.i] === name);
+        if (hit) return hr(hit);
+      }
+      return hr(stationLaps[i]);
+    },
+    anyHr: true,
+  };
+}
+
 /* ── one Hyrox session, in detail ────────────────────────────────────────── */
 function SessionDetail({ s }) {
   const allLaps = s.laps || [];
@@ -2908,32 +2985,20 @@ function SessionDetail({ s }) {
   const warmupLaps = allLaps.filter(l => l.role === "warmup" || l.role === "cooldown");
   const stationDisplay = (lap, idx) => (s.stationNames && s.stationNames[lap.i]) || `Station ${idx + 1}`;
 
-  // Official results (when uploaded) are the source of truth for times and ranks;
-  // Garmin laps still supply heart rate, which official data never carries.
-  // That merge is only valid when the watch was lapped at every station —
-  // official.lapAlign:false says it was not, so HR is left off rather than
-  // printed against the wrong split.
+  // Official results (when uploaded) are the source of truth for times and
+  // ranks; heart rate is borrowed from the watch, but only from laps that
+  // genuinely back the split — see lapHrResolver.
   const official = s.official || null;
   const hasOfficial = !!official;
-  const lapAlign = !hasOfficial || official.lapAlign !== false;
-  const runHrByOrder = lapAlign ? runLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr })) : [];
-  const stationHrByName = {};
-  if (lapAlign) stationLaps.forEach(l => {
-    const nm = (s.stationNames && s.stationNames[l.i]) || null;
-    if (nm) stationHrByName[nm] = { avgHr:l.avgHr, maxHr:l.maxHr };
-  });
-  const stationHrByOrder = lapAlign ? stationLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr })) : [];
+  const lapHr = lapHrResolver(s);
 
   const runs = hasOfficial && official.runs
-    ? official.runs.map((r, i) => ({ i:i+1, t:r.time, rank:r.rank ?? null,
-        avgHr:(runHrByOrder[i] || {}).avgHr ?? null, maxHr:(runHrByOrder[i] || {}).maxHr ?? null }))
+    ? official.runs.map((r, i) => ({ i:i+1, t:r.time, rank:r.rank ?? null, ...lapHr.run(i) }))
     : runLaps.map((l, i) => ({ i:i+1, t:l.t, rank:null, avgHr:l.avgHr ?? null, maxHr:l.maxHr ?? null }));
 
   const stations = hasOfficial && official.stations
-    ? official.stations.map((st, i) => {
-        const hr = stationHrByName[st.name] || stationHrByOrder[i] || {};
-        return { i:i+1, name:st.name, t:st.time, rank:st.rank ?? null, avgHr:hr.avgHr ?? null, named:true };
-      })
+    ? official.stations.map((st, i) => ({ i:i+1, name:st.name, t:st.time, rank:st.rank ?? null,
+        avgHr:lapHr.station(i, st.name).avgHr, named:true }))
     : stationLaps.map((l, i) => ({ i:i+1, name:stationDisplay(l, i), t:l.t, rank:null, avgHr:l.avgHr ?? null,
         dist:l.dist, named: !!(s.stationNames && s.stationNames[l.i]) }));
 
@@ -2983,7 +3048,9 @@ function SessionDetail({ s }) {
         <Stat label="Total time" value={fmtHMS(displayTotal)} sub={hasOfficial ? "official finish" : "session total"} tone="ink" accentBar />
         <Stat label={`Running ×${runs.length}`} value={fmtMMSS(totalRun)} sub={avgRun ? `avg ${fmtMMSS(avgRun)}` : "—"} tone="warn" accentBar />
         <Stat label={`Stations ×${stations.length}`} value={fmtMMSS(totalStat)} sub={`${pct(totalStat, displayTotal).toFixed(0)}% of session`} tone="accent" accentBar />
-        <Stat label="Avg HR" value={s.avgHR ? `${s.avgHR}` : "—"} unit="bpm" sub={s.maxHR ? `max ${s.maxHR}` : "whole session"} tone={hrTone(s.avgHR)} accentBar />
+        <Stat label="Avg HR" value={s.avgHR ? `${s.avgHR}` : "—"} unit="bpm"
+          sub={`${s.maxHR ? `max ${s.maxHR}` : ""}${s.maxHR && hasOfficial ? " · " : ""}${hasOfficial ? "whole recording" : s.maxHR ? "" : "whole session"}`}
+          tone={hrTone(s.avgHR)} accentBar />
         <Stat label="Run range" value={runs.length ? `${fmtMMSS(fastRun)}–${fmtMMSS(slowRun)}` : "—"} sub="fastest → slowest" tone="info" accentBar />
         {runs.length > 1 && <Stat label="Run spread" value={`+${fmtMMSS(slowRun - fastRun)}`} sub="slowest − fastest split" tone={slowRun - fastRun > 25 ? "warn" : "ok"} accentBar />}
       </div>
@@ -3067,11 +3134,17 @@ function SessionDetail({ s }) {
         )}
       </div>
 
-      {warmupLaps.length > 0 && (
+      {hasOfficial && official.recordedTime && official.recordedTime !== official.finishTime ? (
+        <Note tone="mute" icon="⌚">
+          The watch recorded {fmtHMS(official.recordedTime)} against an official {fmtHMS(official.finishTime)} —
+          it was not stopped on the line. Times and splits above are the official ones;
+          the recording is used only for heart rate, and only on the laps that line up with a split.
+        </Note>
+      ) : warmupLaps.length > 0 ? (
         <div className="num" style={{ fontSize:10, color:T.ink3, textAlign:"center", marginBottom:16 }}>
           Ignoring {warmupLaps.length} warm-up/cool-down lap{warmupLaps.length > 1 ? "s" : ""} ({warmupLaps.map(l => fmtMMSS(l.t)).join(", ")}) — outside the timed session.
         </div>
-      )}
+      ) : null}
 
       {s.description && (
         <Sec title="Garmin description">
@@ -3136,23 +3209,19 @@ function SessionNotes({ s }) {
 
 /* ── cross-session trends ────────────────────────────────────────────────── */
 function HyroxTrends({ sessions, ana }) {
-  // Same lap-alignment rule as SessionDetail: only borrow Garmin HR for an
-  // official split when the watch was actually lapped at every station.
-  const aligned = (sess) => !sess.official || sess.official.lapAlign !== false;
+  // Same lap-alignment rule as SessionDetail, via the shared resolver.
   const sessRuns = (sess) => {
-    const laps = aligned(sess) ? (sess.laps || []).filter(l => l.role === "run") : [];
+    const lapHr = lapHrResolver(sess);
     if (sess.official && sess.official.runs)
-      return sess.official.runs.map((r, i) => ({ t:r.time, avgHr:(laps[i] || {}).avgHr || null }));
-    return laps.map(l => ({ t:l.t, avgHr:l.avgHr || null }));
+      return sess.official.runs.map((r, i) => ({ t:r.time, avgHr:lapHr.run(i).avgHr }));
+    return (sess.laps || []).filter(l => l.role === "run").map(l => ({ t:l.t, avgHr:l.avgHr || null }));
   };
   const sessStations = (sess) => {
-    const laps = aligned(sess) ? (sess.laps || []).filter(l => l.role === "station") : [];
-    if (sess.official && sess.official.stations) {
-      const hrByName = {};
-      laps.forEach(l => { const n = sess.stationNames && sess.stationNames[l.i]; if (n) hrByName[n] = l.avgHr || null; });
-      return sess.official.stations.map((st, i) => ({ name:st.name, t:st.time, hr:hrByName[st.name] ?? ((laps[i] || {}).avgHr || null) }));
-    }
-    return laps.map(l => ({ name: sess.stationNames && sess.stationNames[l.i], t:l.t, hr:l.avgHr || null }));
+    const lapHr = lapHrResolver(sess);
+    if (sess.official && sess.official.stations)
+      return sess.official.stations.map((st, i) => ({ name:st.name, t:st.time, hr:lapHr.station(i, st.name).avgHr }));
+    return (sess.laps || []).filter(l => l.role === "station")
+      .map(l => ({ name: sess.stationNames && sess.stationNames[l.i], t:l.t, hr:l.avgHr || null }));
   };
   const sessTotal = (sess) => (sess.official && sess.official.finishTime) ? sess.official.finishTime : sess.totalTime;
 
@@ -3266,7 +3335,9 @@ function HyroxTrends({ sessions, ana }) {
                   <span className="num" style={{ fontSize:10, color:T.ink3 }}>{a._date}</span>
                 </div>
                 <div className="num" style={{ display:"flex", gap:13, flexWrap:"wrap", fontSize:10.5, color:T.ink3, marginTop:5 }}>
-                  <span>{fmtDur(a._dur)}</span>
+                  <span title={officialDur(a) ? `official finish · watch recorded ${fmtDur(a._dur)}` : undefined}>
+                    {fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}
+                  </span>
                   <span>♥ {a._avgHR}</span>
                   {a._dist > 0 && <span>{a._dist.toFixed(1)} km</span>}
                   {parseNum(a["Avg Ground Contact Time"]) && <span>GCT {Math.round(parseNum(a["Avg Ground Contact Time"]))}ms</span>}
