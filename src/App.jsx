@@ -412,11 +412,19 @@ const HYROX_DATA = {
     laps:[{i:1,t:598,avgHr:102,maxHr:133,dist:610,role:"run"},{i:2,t:128,avgHr:133,maxHr:154,dist:79,role:"station"},{i:3,t:16,avgHr:148,maxHr:151,dist:4,role:"station"},{i:4,t:126,avgHr:154,maxHr:164,dist:393,role:"station"},{i:5,t:18,avgHr:157,maxHr:163,dist:5,role:"station"},{i:6,t:133,avgHr:152,maxHr:164,dist:62,role:"station"},{i:7,t:19,avgHr:156,maxHr:162,dist:8,role:"station"},{i:8,t:124,avgHr:159,maxHr:170,dist:398,role:"station"},{i:9,t:127,avgHr:118,maxHr:170,dist:35,role:"station"},{i:10,t:561,avgHr:158,maxHr:173,dist:308,role:"station"},{i:11,t:408,avgHr:141,maxHr:163,dist:330,role:"station"},{i:12,t:130,avgHr:151,maxHr:159,dist:7,role:"station"},{i:13,t:149,avgHr:153,maxHr:163,dist:313,role:"station"}],
   },
 "24244349642": {
-    date:"2026-09-05", name:"HYROX ATHENS - Target 1:10:00", type:null,
+    date:"2026-09-05", name:"HYROX ATHENS - 1:09:23", type:null,
     totalTime:4207, avgHR:150, maxHR:177,
     description:``,
     photos:[],
     laps:[{i:1,t:599,avgHr:154,maxHr:169,dist:1660,role:"warmup"},{i:2,t:7,avgHr:168,maxHr:168,role:"station"},{i:3,t:294,avgHr:169,maxHr:177,dist:981,role:"run"},{i:4,t:126,avgHr:128,maxHr:164,dist:16,role:"station"},{i:5,t:317,avgHr:148,maxHr:165,dist:1011,role:"run"},{i:6,t:222,avgHr:125,maxHr:162,dist:68,role:"station"},{i:7,t:300,avgHr:151,maxHr:164,dist:981,role:"run"},{i:8,t:233,avgHr:119,maxHr:159,dist:12,role:"station"},{i:9,t:285,avgHr:153,maxHr:167,dist:916,role:"run"},{i:10,t:251,avgHr:159,maxHr:164,dist:39,role:"station"},{i:11,t:310,avgHr:164,maxHr:175,dist:992,role:"run"},{i:12,t:107,avgHr:161,maxHr:169,dist:203,role:"station"},{i:13,t:301,avgHr:166,maxHr:176,dist:918,role:"run"},{i:14,t:255,avgHr:162,maxHr:167,dist:65,role:"station"},{i:15,t:300,avgHr:168,maxHr:175,dist:1023,role:"run"},{i:16,t:300,avgHr:109,maxHr:164,dist:105,role:"station"}],
+      notes: `HYROX ATHENS — 1:09:23. Target 1:10:00 beaten by 37s; 5:33 faster than Riga (1:14:56). 86th overall, 17th in 35-39.
+
+Runs 35:07 (Riga 38:50) — the whole plan was built on 8×4:36 and R2–R8 averaged 4:17 (4:23 including R1, which carries the corral walk-up). Zero fade: R8 (4:10) was the fastest split of the day.
+Stations 28:29 (Riga 30:55) — landed within 1s of the 28:30 budget. Burpee broad jump was the single biggest win: 5:21 → 3:50.
+Roxzone 5:47 (Riga ~5:11) — the one regression, and 1:25 over the 4:22 plan. Transitions after row (0:40), farmers (0:46) and lunges (1:04) are where it went.
+Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.
+
+Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and the ski erg into one lap and left a 7s ghost lap, and the watch ran 44s past the line. Official splits are the source of truth here; the recording is only used for heart rate on R2–R8.`,
     official: {
     // Source: official HYROX race replay (Athens, Sat 5 Sep 2026, bib 112006).
     // Athens published no per-split ranks, only the two overall ones.
@@ -462,14 +470,6 @@ const HYROX_DATA = {
       { name: "Wall Balls 100",         time: 267 },  // 4:27
     ],
   },
-    notes:`HYROX ATHENS — 1:09:23. Target 1:10:00 beaten by 37s; 5:33 faster than Riga (1:14:56). 86th overall, 17th in 35-39.
-
-Runs 35:07 (Riga 38:50) — the whole plan was built on 8×4:36 and R2–R8 averaged 4:17 (4:23 including R1, which carries the corral walk-up). Zero fade: R8 (4:10) was the fastest split of the day.
-Stations 28:29 (Riga 30:55) — landed within 1s of the 28:30 budget. Burpee broad jump was the single biggest win: 5:21 → 3:50.
-Roxzone 5:47 (Riga ~5:11) — the one regression, and 1:25 over the 4:22 plan. Transitions after row (0:40), farmers (0:46) and lunges (1:04) are where it went.
-Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.
-
-Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and the ski erg into one lap and left a 7s ghost lap, and the watch ran 44s past the line. Official splits are the source of truth here; the recording is only used for heart rate on R2–R8.`,
   },
 };
 
@@ -550,7 +550,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Indoor Running","2026-09-05 11:20:25","false","HYROX ATHENS - Target 1:10:00","8,99","989","01:10:07","150","177","4,4","122","--","7:48","--","--","--","--","--","--","110,50","7,6","8,2","245","--","--","--","--","--","--","--","--","--","No","--","16","--","--","--","--","--","00:48:35","01:10:07","--","--"
+"Indoor Running","2026-09-05 11:20:25","false","HYROX ATHENS - 1:09:23","8,99","989","01:10:07","150","177","4,4","122","--","7:48","--","--","--","--","--","--","110,50","7,6","8,2","245","--","--","--","--","--","--","--","--","--","No","--","16","--","--","--","--","--","00:48:35","01:10:07","--","--"
 "Running","2026-09-04 07:45:51","false","5km Z1 + a few strides","5,17","381","00:29:48","122","150","2,5","172","--","5:45","--","--","--","14","17","--","101,16","8,5","8,6","262","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:29:47","00:29:56","--","--"
 "Tennis V2","2026-09-02 10:11:57","false","Tennis","0,07","404","01:09:12","95","147","1,5","7","--","980:23","--","--","--","--","--","--","14,12","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:01:33","01:09:12","--","--"
 "Cycling","2026-09-01 12:47:34","false","Vilnius Cycling","3,33","108","00:16:54","93","123","0,5","--","--","5:05","--","--","--","55","20","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:12:55","09:48:19","--","--"
@@ -825,8 +825,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-05T14:08:00Z";
-const LAST_DATA = "2026-09-05T14:08:00Z";
+const LAST_RUN  = "2026-09-05T14:35:00Z";
+const LAST_DATA = "2026-09-05T14:35:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
