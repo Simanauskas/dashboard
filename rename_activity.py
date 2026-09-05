@@ -55,15 +55,26 @@ def main() -> int:
 
     summary = act.get("summaryDTO") or {}
     old_name = (act.get("activityName") or "?").strip()
+    old_desc = act.get("description") or ""
     started = (summary.get("startTimeLocal") or "")[:16]
-    dur = summary.get("duration")
+    def clock(d):
+        if d is None: return "?"
+        d = int(d); return f"{d//3600}:{d//60%60:02d}:{d%60:02d}" if d >= 3600 else f"{d//60}:{d%60:02d}"
     print(f"  activity {aid}")
-    print(f"    started : {started}")
-    print(f"    duration: {dur if dur is None else f'{int(dur)//60}:{int(dur)%60:02d}'}")
-    print(f"    name    : '{old_name}'")
-    print(f"    new name: '{args.name}'")
+    print(f"    started  : {started}")
+    # Garmin reports several durations; print each, because they disagree when
+    # an activity has been edited and only one of them is the one you mean.
+    for k in ("duration", "elapsedDuration", "movingDuration"):
+        if summary.get(k) is not None:
+            print(f"    {k:<9}: {clock(summary[k])}  ({int(summary[k])}s)")
+    print(f"    name     : '{old_name}'")
+    print(f"    new name : '{args.name}'")
+    print(f"    description: {len(old_desc)} chars"
+          + (f" — starts '{old_desc[:60].replace(chr(10), ' ')}…'" if old_desc else " (empty)"))
+    if args.description is not None:
+        print(f"    new description: {len(args.description)} chars")
 
-    if old_name == args.name and args.description is None:
+    if old_name == args.name and (args.description is None or old_desc.strip() == args.description.strip()):
         print("\n✓ already named that — nothing to do.")
         return 0
 
@@ -84,15 +95,24 @@ def main() -> int:
     # took, and a rename that silently no-ops is exactly the kind of thing that
     # looks fine in CI and is wrong on the watch.
     try:
-        after = (get_activity(aid).get("activityName") or "").strip()
+        after = get_activity(aid)
     except Exception as e:
         print(f"\n⚠ renamed, but could not read it back to confirm: {e}")
         return 0
-    if after == args.name:
-        print(f"\n✓ renamed to '{after}'")
-        return 0
-    print(f"\n✗ rename did not stick — Garmin still reports '{after}'")
-    return 1
+    ok = True
+    if after.get("activityName", "").strip() == args.name:
+        print(f"\n✓ name is '{args.name}'")
+    else:
+        print(f"\n✗ name did not stick — Garmin reports '{after.get('activityName')}'")
+        ok = False
+    if args.description is not None:
+        got = after.get("description") or ""
+        if got.strip() == args.description.strip():
+            print(f"✓ description written ({len(got)} chars)")
+        else:
+            print(f"✗ description did not stick — Garmin has {len(got)} chars, sent {len(args.description)}")
+            ok = False
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
