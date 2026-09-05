@@ -417,6 +417,46 @@ const HYROX_DATA = {
     description:``,
     photos:[],
     laps:[{i:1,t:599,avgHr:154,maxHr:169,dist:1660,role:"warmup"},{i:2,t:7,avgHr:168,maxHr:168,role:"station"},{i:3,t:294,avgHr:169,maxHr:177,dist:981,role:"run"},{i:4,t:126,avgHr:128,maxHr:164,dist:16,role:"station"},{i:5,t:317,avgHr:148,maxHr:165,dist:1011,role:"run"},{i:6,t:222,avgHr:125,maxHr:162,dist:68,role:"station"},{i:7,t:300,avgHr:151,maxHr:164,dist:981,role:"run"},{i:8,t:233,avgHr:119,maxHr:159,dist:12,role:"station"},{i:9,t:285,avgHr:153,maxHr:167,dist:916,role:"run"},{i:10,t:251,avgHr:159,maxHr:164,dist:39,role:"station"},{i:11,t:310,avgHr:164,maxHr:175,dist:992,role:"run"},{i:12,t:107,avgHr:161,maxHr:169,dist:203,role:"station"},{i:13,t:301,avgHr:166,maxHr:176,dist:918,role:"run"},{i:14,t:255,avgHr:162,maxHr:167,dist:65,role:"station"},{i:15,t:300,avgHr:168,maxHr:175,dist:1023,role:"run"},{i:16,t:300,avgHr:109,maxHr:164,dist:105,role:"station"}],
+    official: {
+    // Source: official HYROX race replay (Athens, Sat 5 Sep 2026, bib 112006).
+    // Athens published no per-split ranks, only the two overall ones.
+    finishTime: 4163,                       // 1:09:23 — target was 1:10:00
+    overallRank: 86, agRank: 17, ageGroup: "35-39", bib: "112006",
+    division: "HYROX — Saturday", venue: "Metropolitan Expo, Athens",
+    // Derived from the replay: finish − runs − stations. HYROX did not publish
+    // a roxzone row for Athens, so this is the residual transition time.
+    roxzone: { time: 347 },                 // 5:47
+    // The watch was not lapped at every station — Garmin merged R1 into the
+    // warm-up lap and missed one press — so lap HR does NOT line up with these
+    // splits. lapAlign:false keeps the views from printing the wrong HR here.
+    lapAlign: false,
+    runs: [
+      { time: 309 },   // R1 5:09 — includes the start corral walk-up
+      { time: 254 },   // R2 4:14
+      { time: 262 },   // R3 4:22
+      { time: 257 },   // R4 4:17
+      { time: 263 },   // R5 4:23
+      { time: 259 },   // R6 4:19
+      { time: 253 },   // R7 4:13
+      { time: 250 },   // R8 4:10 — fastest run of the day, last one
+    ],
+    stations: [
+      { name: "Ski Erg 1000 m",         time: 257 },  // 4:17
+      { name: "Sled Push 50 m",         time: 146 },  // 2:26
+      { name: "Sled Pull 50 m",         time: 231 },  // 3:51
+      { name: "Burpee Broad Jump 80 m", time: 230 },  // 3:50
+      { name: "Row 1000 m",             time: 260 },  // 4:20
+      { name: "Farmers Carry 200 m",    time:  90 },  // 1:30
+      { name: "Sandbag Lunge 100 m",    time: 228 },  // 3:48
+      { name: "Wall Balls 100",         time: 267 },  // 4:27
+    ],
+  },
+    notes:`HYROX ATHENS — 1:09:23. Target 1:10:00 beaten by 37s; 5:33 faster than Riga (1:14:56). 86th overall, 17th in 35-39.
+
+Runs 35:07 (Riga 38:50) — the whole plan was built on 8×4:36 and R2–R8 averaged 4:17 (4:23 including R1, which carries the corral walk-up). Zero fade: R8 (4:10) was the fastest split of the day.
+Stations 28:29 (Riga 30:55) — landed within 1s of the 28:30 budget. Burpee broad jump was the single biggest win: 5:21 → 3:50.
+Roxzone 5:47 (Riga ~5:11) — the one regression, and 1:25 over the 4:22 plan. Transitions after row (0:40), farmers (0:46) and lunges (1:04) are where it went.
+Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.`,
   },
 };
 
@@ -936,8 +976,14 @@ function analyze(raw) {
   const totalZoneMin = Object.values(zoneMinutes).reduce((s,v) => s+v, 0);
 
   // Hyrox simulation sessions (indoor running, >45min, HR avg >110)
+  // Any Hyrox session carrying official results IS a race, whatever Garmin
+  // titled it — the title heuristic alone missed Athens, whose activity name
+  // was "HYROX ATHENS - Target 1:10:00" and matched none of these strings.
+  const officialRaceDates = new Set(
+    Object.values(HYROX_DATA).filter(s => s.official).map(s => s.date));
   const hyroxSims = enriched.filter(a => {
     const t = (a.Title || "").toLowerCase();
+    if (t.includes("hyrox") && officialRaceDates.has(a._date)) return true;
     return t.includes("hyrox sim") || t.includes("hyrox race") || t.includes("hyrox simulation");
   }).slice(0, 6).reverse();
 
@@ -997,7 +1043,18 @@ function readiness(tsb, dsh, hrv, hrvBaseline) {
   return Math.min(10, Math.max(1, blended));
 }
 
-const RACE = { name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:"1:10:00" };
+// The race that owns the countdown. Once `result` is filled in, every view
+// that used to look forward to it flips to looking back at it — see RaceView.
+// Set `hyroxId` to the HYROX_DATA key so the result panel can read the splits
+// rather than repeat them.
+const RACE = {
+  name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:"1:10:00",
+  venue:"Metropolitan Expo", hyroxId:"24244349642",
+  result:"1:09:23", resultSec:4163,
+};
+// The race the Athens plan was built to beat.
+const PREV_RACE = { name:"HYROX RIGA", dateISO:"2026-05-30", label:"MAY 30",
+  result:"1:14:56", resultSec:4496, hyroxId:"23064789093" };
 
 // Single source of truth for weekly TRIMP targets through race day.
 // Used by both the LOAD tab's weekly bars AND the roadmap — replaces the old
@@ -1009,6 +1066,8 @@ const TAPER_PLAN = [
   { start:"2026-08-17", end:"2026-08-23", theme:"Peak Load",    lo:470, hi:540, note:"Highest week · heat acclimation starts" },
   { start:"2026-08-24", end:"2026-08-30", theme:"Sharpen",      lo:300, hi:360, note:"Half sim at exact Athens splits" },
   { start:"2026-08-31", end:"2026-09-05", theme:"Race Week 🏁", lo:100, hi:200, note:"Cut 40% · activate only · TSB +10→+20" },
+  { start:"2026-09-06", end:"2026-09-13", theme:"Decompress",    lo: 80, hi:200, note:"Post-Athens · walk, swim, easy tennis · no erg, no sled" },
+  { start:"2026-09-14", end:"2026-09-27", theme:"Aerobic Reset", lo:280, hi:400, note:"Rebuild base · Z2 volume · strength back in, specificity later" },
 ];
 
 // Look up the target band for a week given its [startISO, endISO] range.
@@ -1073,7 +1132,17 @@ const SCHEDULE = [
     { date:"2026-09-02", dow:"WED", label:"Sep 2", sessions:[{type:"plan",text:"Activation 25min: jog + 3×20m BBJ + 2×500m ski @ race pace + 25 wall balls · NO fatigue"}] },
     { date:"2026-09-03", dow:"THU", label:"Sep 3", sessions:[{type:"rest",text:"Rest · hydrate + electrolytes · start carb load"}] },
     { date:"2026-09-04", dow:"FRI", label:"Sep 4", sessions:[{type:"rest",text:"✈️ Travel to Athens · 20min shakeout · WALK THE ROXZONE ROUTE at the venue"}] },
-    { date:"2026-09-05", dow:"SAT", label:"Sep 5", sessions:[{type:"race",text:"🏁 HYROX ATHENS · Metropolitan Expo · TARGET 1:10:00",cal:true}] },
+    { date:"2026-09-05", dow:"SAT", label:"Sep 5", sessions:[{type:"race",text:"🏁 HYROX ATHENS · 1:09:23 · target beaten by 37s · 86th overall, 17th in 35-39",cal:true}] },
+  ]},
+  { week:7, label:"Sep 6–13", theme:"Decompress", days:[
+    { date:"2026-09-06", dow:"SUN", label:"Sep 6", sessions:[{type:"rest",text:"Full rest · walk only · eat and sleep"}] },
+    { date:"2026-09-07", dow:"MON", label:"Sep 7", sessions:[{type:"rest",text:"Rest · 30min easy walk · no training"}] },
+    { date:"2026-09-08", dow:"TUE", label:"Sep 8", sessions:[{type:"plan",text:"20–30min very easy jog OR swim · Z1 only, purely to move blood"}] },
+    { date:"2026-09-09", dow:"WED", label:"Sep 9", sessions:[{type:"tennis",text:"Tennis 🎾 · social, no sparring"}] },
+    { date:"2026-09-10", dow:"THU", label:"Sep 10", sessions:[{type:"rest",text:"Rest · 🔥 sauna 20min · mobility 15min"}] },
+    { date:"2026-09-11", dow:"FRI", label:"Sep 11", sessions:[{type:"plan",text:"35min Z2 jog · first real aerobic touch since the race"}] },
+    { date:"2026-09-12", dow:"SAT", label:"Sep 12", sessions:[{type:"tennis",text:"Tennis 🎾"},{type:"plan",text:"Debrief: roxzone drills are the next block's headline — see RACE → what Athens says"}] },
+    { date:"2026-09-13", dow:"SUN", label:"Sep 13", sessions:[{type:"rest",text:"Rest · family day"}] },
   ]},
 ];
 
@@ -2388,7 +2457,10 @@ function ReferencePanel() {
             ["Resting HR range", "40–46 bpm"],
             ["Devices", "Garmin Epix 2 Pro · HRM-Pro Plus"],
             ["Last race", "Hyrox Riga · 30 May 2026 · 1:14:56"],
-            ["Next race", `${RACE.name} · ${RACE.label} · target ${RACE.target}`],
+            [RACE.result && TODAY >= RACE.dateISO ? "Last race" : "Next race",
+             RACE.result && TODAY >= RACE.dateISO
+               ? `${RACE.name} · ${RACE.label} · ${RACE.result} (target ${RACE.target})`
+               : `${RACE.name} · ${RACE.label} · target ${RACE.target}`],
           ].map(([k, v], i, arr) => (
             <div key={k} style={{ display:"flex", justifyContent:"space-between", gap:12, padding:"10px 0",
               borderBottom: i < arr.length - 1 ? `1px solid ${T.lineDim}` : "none" }}>
@@ -2422,22 +2494,295 @@ const RACE_BUDGET = [
   { part:"8 × stations",   target:28*60+30, note:"including sled work" },
   { part:"Roxzone",        target: 4*60+22, note:"jog every transition" },
 ];
-// Where the five minutes from Riga (1:14:56) actually come from.
+// Where the five minutes from Riga (1:14:56) were meant to come from.
+// `station` ties a row to its official station name so the delivered saving
+// can be measured instead of asserted — null means it is not one station.
 const RACE_GAINS = [
-  { name:"Runs",      sec:122, how:"8 × 4:36 instead of drifting past 5:00" },
-  { name:"Roxzone",   sec: 56, how:"jog every transition, no walking" },
-  { name:"Sled pull", sec: 38, how:"pure technique — hand-over-hand rhythm" },
-  { name:"Burpee BJ", sec: 36, how:"6×20m blocks at 68s, rhythm over power" },
-  { name:"Ski erg",   sec: 31, how:"TT already at 3:54, so 4:08 is ~85% effort" },
-  { name:"Row",       sec: 31, how:"hold 2:05/500m off tired legs" },
-  { name:"Lunges",    sec:  9, how:"stop resetting mid-lane" },
+  { name:"Runs",      sec:122, station:null,                        how:"8 × 4:36 instead of drifting past 5:00" },
+  { name:"Roxzone",   sec: 56, station:"__roxzone",                 how:"jog every transition, no walking" },
+  { name:"Sled pull", sec: 38, station:"Sled Pull 50 m",            how:"pure technique — hand-over-hand rhythm" },
+  { name:"Burpee BJ", sec: 36, station:"Burpee Broad Jump 80 m",    how:"6×20m blocks at 68s, rhythm over power" },
+  { name:"Ski erg",   sec: 31, station:"Ski Erg 1000 m",            how:"TT already at 3:54, so 4:08 is ~85% effort" },
+  { name:"Row",       sec: 31, station:"Row 1000 m",                how:"hold 2:05/500m off tired legs" },
+  { name:"Lunges",    sec:  9, station:"Sandbag Lunge 100 m",       how:"stop resetting mid-lane" },
 ];
 const RIGA_SPLITS = [
-  { label:"Ski erg 1000m",  riga:"4:39", target:"4:08" },
-  { label:"Row 1000m",      riga:"4:43", target:"4:12" },
-  { label:"Sled pull 50m",  riga:"4:08", target:"3:30" },
-  { label:"Roxzone",        riga:"5:18", target:"4:22" },
+  { label:"Ski erg 1000m",  station:"Ski Erg 1000 m",     riga:"4:39", target:"4:08" },
+  { label:"Row 1000m",      station:"Row 1000 m",         riga:"4:43", target:"4:12" },
+  { label:"Sled pull 50m",  station:"Sled Pull 50 m",     riga:"4:08", target:"3:30" },
+  { label:"Roxzone",        station:"__roxzone",          riga:"5:18", target:"4:22" },
 ];
+
+/* ── Reading a race back out of HYROX_DATA ────────────────────────────────
+   Both races store their splits once, in HYROX_DATA[...].official. Every
+   comparison below is derived from there so the numbers can never drift out
+   of sync with the session detail view.
+   Roxzone is taken as the residual (finish − runs − stations) for BOTH races,
+   even where HYROX published its own roxzone row: the published figure is
+   rounded per split and does not close the arithmetic (Riga's is 7s adrift),
+   and a bucket chart whose parts do not sum to the total is worse than one
+   that disagrees with the official sheet by a few seconds. */
+function raceSummary(hyroxId) {
+  const s = hyroxId && HYROX_DATA[hyroxId];
+  const o = s && s.official;
+  if (!o || !o.runs || !o.stations) return null;
+  const runs = o.runs.map(r => r.time);
+  const stations = o.stations.map(st => ({ name:st.name, t:st.time }));
+  const runTotal = runs.reduce((a, b) => a + b, 0);
+  const stationTotal = stations.reduce((a, b) => a + b.t, 0);
+  const byStation = {};
+  stations.forEach(st => { byStation[st.name] = st.t; });
+  return {
+    finish: o.finishTime, runs, runTotal, stations, stationTotal,
+    roxzone: o.finishTime - runTotal - stationTotal,
+    byStation, overallRank:o.overallRank ?? null, agRank:o.agRank ?? null,
+    ageGroup:o.ageGroup ?? null,
+  };
+}
+
+// "1:10:00" / "4:36" → seconds.
+const parseClock = (str) => String(str || "").split(":").reduce((a, b) => a * 60 + Number(b), 0);
+
+// Signed mm:ss, with the sign carrying the meaning: negative = faster.
+const fmtDelta = (sec) => `${sec > 0 ? "+" : sec < 0 ? "−" : "±"}${fmtMMSS(Math.abs(sec))}`;
+// For a duration, faster is better — so a negative delta is the good tone.
+const deltaTone = (sec, dead = 3) => (sec < -dead ? "ok" : sec > dead ? "bad" : "mute");
+
+/* ── After the race: the same page, looking backwards ─────────────────────
+   Every panel here answers a question the TARGETS tab asked before the race,
+   with the official splits instead of an estimate: did the budget hold, did
+   the identified gains actually show up, and which station is next. */
+function RaceResult({ ana }) {
+  const now = raceSummary(RACE.hyroxId);
+  const prev = raceSummary(PREV_RACE.hyroxId);
+  if (!now) return null;
+
+  const targetSec = parseClock(RACE.target);
+  const vsTarget = now.finish - targetSec;
+  const vsPrev = prev ? now.finish - prev.finish : null;
+  const beat = vsTarget <= 0;
+
+  // Plan (RACE_BUDGET) against what the race actually cost.
+  const actualByPart = [now.runTotal, now.stationTotal, now.roxzone];
+  const budget = RACE_BUDGET.map((b, i) => ({ ...b, actual:actualByPart[i], delta:actualByPart[i] - b.target }));
+  const maxBudget = Math.max(...budget.map(b => Math.max(b.actual, b.target)));
+
+  // Identified gains: what was predicted vs what the clock says was delivered.
+  const savedFor = (station) => {
+    if (!prev) return null;
+    if (station === null) return prev.runTotal - now.runTotal;
+    if (station === "__roxzone") return prev.roxzone - now.roxzone;
+    if (prev.byStation[station] == null || now.byStation[station] == null) return null;
+    return prev.byStation[station] - now.byStation[station];
+  };
+  const gains = RACE_GAINS.map(g => ({ ...g, got:savedFor(g.station) })).filter(g => g.got != null);
+  const maxGain = Math.max(1, ...gains.map(g => Math.abs(g.got)), ...gains.map(g => g.sec));
+
+  // Every station, both races, sorted by where the time actually moved.
+  const stationRows = prev
+    ? now.stations
+        .filter(st => prev.byStation[st.name] != null)
+        .map(st => ({ name:st.name, prev:prev.byStation[st.name], now:st.t, delta:st.t - prev.byStation[st.name] }))
+        .sort((a, b) => a.delta - b.delta)
+    : [];
+  const maxStationRow = Math.max(1, ...stationRows.map(r => Math.max(r.prev, r.now)));
+
+  const runAvg = now.runTotal / now.runs.length;
+  const runAvgAfterFirst = now.runs.length > 1
+    ? (now.runTotal - now.runs[0]) / (now.runs.length - 1) : runAvg;
+  const fastRun = Math.min(...now.runs), slowRun = Math.max(...now.runs);
+  // Excluding R1, which carries the corral walk-up in every HYROX race.
+  const fade = now.runs[now.runs.length - 1] - Math.min(...now.runs.slice(1));
+
+  return (
+    <div>
+      {/* result hero */}
+      <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
+        <div style={{ padding:"22px", background:`linear-gradient(135deg, ${beat ? T.okBg : T.warnBg}, transparent 62%)` }}>
+          <div style={{ display:"flex", gap:22, alignItems:"center", flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.18em", color:T.ink3 }}>
+                {RACE.name} · {RACE.label} · OFFICIAL
+              </div>
+              <div className="num" style={{ display:"flex", alignItems:"baseline", gap:10, marginTop:4 }}>
+                <span style={{ fontSize:52, fontWeight:800, color:beat ? T.ok : T.ink, lineHeight:1, letterSpacing:"-0.04em" }}>
+                  {fmtHMS(now.finish)}
+                </span>
+                <span style={{ fontSize:15, fontWeight:700, color:T.ink3 }}>finish</span>
+              </div>
+              <div style={{ fontSize:11.5, color:T.ink2, marginTop:7 }}>
+                {beat ? `Target ${RACE.target} beaten by ${fmtMMSS(Math.abs(vsTarget))}.`
+                      : `${fmtMMSS(vsTarget)} over the ${RACE.target} target.`}
+                {vsPrev != null && ` ${fmtMMSS(Math.abs(vsPrev))} ${vsPrev < 0 ? "faster" : "slower"} than ${PREV_RACE.name.replace("HYROX ", "")} (${PREV_RACE.result}).`}
+              </div>
+            </div>
+            <div style={{ marginLeft:"auto", display:"flex", gap:20 }}>
+              {now.overallRank != null && (
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>OVERALL</div>
+                  <div className="num" style={{ fontSize:34, fontWeight:800, color:T.ink, letterSpacing:"-0.03em" }}>#{now.overallRank}</div>
+                </div>
+              )}
+              {now.agRank != null && (
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>AG {now.ageGroup || ""}</div>
+                  <div className="num" style={{ fontSize:34, fontWeight:800, color:T.accentIn, letterSpacing:"-0.03em" }}>#{now.agRank}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="grid g4" style={{ marginBottom:20 }}>
+        <Stat label="vs target" value={fmtDelta(vsTarget)} sub={`target ${RACE.target}`} tone={deltaTone(vsTarget, 0)} accentBar />
+        <Stat label={`vs ${PREV_RACE.name.replace("HYROX ", "")}`} value={vsPrev != null ? fmtDelta(vsPrev) : "—"}
+          sub={`${PREV_RACE.label} · ${PREV_RACE.result}`} tone={vsPrev != null ? deltaTone(vsPrev, 0) : "mute"} accentBar />
+        <Stat label="Run average" value={fmtMMSS(runAvgAfterFirst)} sub={`R2–R8 · ${fmtMMSS(runAvg)} incl. R1 start`} tone="warn" accentBar />
+        <Stat label="Run fade" value={fade === 0 ? "none" : fmtDelta(fade)}
+          sub={`last run vs best of R2–R8 · range ${fmtMMSS(fastRun)}–${fmtMMSS(slowRun)}`}
+          tone={fade <= 5 ? "ok" : "warn"} accentBar />
+      </div>
+
+      <div className="split-even">
+        <Sec title="Race-day budget · plan vs actual" sub={`Planned ${fmtHMS(RACE_BUDGET.reduce((s, b) => s + b.target, 0))} · ran ${fmtHMS(now.finish)}`}>
+          <Card pad={16}>
+            {budget.map((b, i) => (
+              <div key={i} style={{ marginBottom:13 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8, marginBottom:5 }}>
+                  <span style={{ fontSize:12, fontWeight:700, color:T.ink }}>{b.part}</span>
+                  <span className="num" style={{ fontSize:11, fontWeight:700, color:TONE[deltaTone(b.delta)] }}>{fmtDelta(b.delta)}</span>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:3 }}>
+                  <span style={{ fontSize:9.5, color:T.ink3, minWidth:36 }}>plan</span>
+                  <Bar value={pct(b.target, maxBudget)} tone="mute" height={9} radius={4} />
+                  <span className="num" style={{ fontSize:10.5, color:T.ink3, minWidth:46, textAlign:"right" }}>{fmtMMSS(b.target)}</span>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+                  <span style={{ fontSize:9.5, fontWeight:700, color:T.ink2, minWidth:36 }}>ran</span>
+                  <Bar value={pct(b.actual, maxBudget)} tone={deltaTone(b.delta)} height={14} radius={5} />
+                  <span className="num" style={{ fontSize:12.5, fontWeight:800, color:T.ink, minWidth:46, textAlign:"right" }}>{fmtMMSS(b.actual)}</span>
+                </div>
+              </div>
+            ))}
+            <Note tone={budget[2].delta > 30 ? "warn" : "ok"}>
+              {budget[0].delta < 0 && budget[1].delta <= 5
+                ? `The running came in ${fmtMMSS(Math.abs(budget[0].delta))} under plan and the stations landed within ${fmtMMSS(Math.abs(budget[1].delta))} of it. `
+                : ""}
+              Roxzone was the only bucket over budget, by {fmtMMSS(Math.abs(budget[2].delta))}.
+            </Note>
+          </Card>
+        </Sec>
+
+        <Sec title="Predicted gains vs delivered" sub={`Planned −${fmtMMSS(RACE_GAINS.reduce((s, g) => s + g.sec, 0))} · delivered ${fmtDelta(vsPrev ?? 0)}`}>
+          <Card pad={16}>
+            {gains.map((g, i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:9 }}>
+                <div style={{ minWidth:72, fontSize:11.5, fontWeight:700, color:T.ink }}>{g.name}</div>
+                <div style={{ flex:1, minWidth:50 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:2 }}>
+                    <Bar value={(g.sec / maxGain) * 100} tone="mute" height={7} radius={3} />
+                    <span className="num" style={{ fontSize:9.5, color:T.ink3, minWidth:34, textAlign:"right" }}>−{fmtMMSS(g.sec)}</span>
+                  </div>
+                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                    <Bar value={(Math.abs(g.got) / maxGain) * 100} tone={g.got > 0 ? "ok" : "bad"} height={12} radius={4} />
+                    <span className="num" style={{ fontSize:11.5, fontWeight:800, color:TONE[g.got > 0 ? "ok" : "bad"], minWidth:34, textAlign:"right" }}>
+                      {g.got > 0 ? "−" : "+"}{fmtMMSS(Math.abs(g.got))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div style={{ marginTop:6, paddingTop:10, borderTop:`1px solid ${T.lineDim}`, fontSize:10, color:T.ink3 }}>
+              Thin bar = predicted saving · thick bar = what the clock gave back.
+            </div>
+          </Card>
+        </Sec>
+      </div>
+
+      {stationRows.length > 0 && (
+        <Sec title={`Station by station · ${PREV_RACE.name.replace("HYROX ", "")} → ${RACE.name.replace("HYROX ", "")}`}
+          sub={`Stations ${fmtMMSS(prev.stationTotal)} → ${fmtMMSS(now.stationTotal)} · ${fmtDelta(now.stationTotal - prev.stationTotal)}`}>
+          <Card pad={16}>
+            {stationRows.map((r, i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 0",
+                borderBottom: i < stationRows.length - 1 ? `1px solid ${T.lineDim}` : "none" }}>
+                <div style={{ flex:"1 1 150px", minWidth:120, fontSize:11.5, fontWeight:600, color:T.ink }}>{r.name}</div>
+                <div className="num" style={{ fontSize:11, color:T.ink3, minWidth:40, textAlign:"right" }}>{fmtMMSS(r.prev)}</div>
+                <div style={{ flex:"2 1 90px", minWidth:60 }}>
+                  <Bar value={pct(r.now, maxStationRow)} tone={deltaTone(r.delta)} height={13} radius={5} />
+                </div>
+                <div className="num" style={{ fontSize:12.5, fontWeight:800, color:T.ink, minWidth:44, textAlign:"right" }}>{fmtMMSS(r.now)}</div>
+                <div className="num" style={{ fontSize:11, fontWeight:700, color:TONE[deltaTone(r.delta)], minWidth:44, textAlign:"right" }}>{fmtDelta(r.delta)}</div>
+              </div>
+            ))}
+          </Card>
+        </Sec>
+      )}
+
+      <Sec title="Run splits" sub={`${fmtMMSS(now.runTotal)} total · ${fmtDelta(prev ? now.runTotal - prev.runTotal : 0)} vs ${PREV_RACE.name.replace("HYROX ", "")}`}>
+        <Card pad={16}>
+          <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:110 }}>
+            {now.runs.map((t, i) => {
+              const h = ((t - fastRun) / (slowRun - fastRun || 1)) * 74 + 20;
+              const tone = t === fastRun ? "ok" : t === slowRun ? "warn" : "info";
+              return (
+                <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-end", height:"100%", minWidth:0 }}>
+                  <div className="num" style={{ fontSize:10, fontWeight:700, color:TONE[tone] }}>{fmtMMSS(t)}</div>
+                  <div style={{ width:"100%", height:h, background:TONE[tone], opacity:0.85, borderRadius:"4px 4px 0 0", marginTop:4 }} />
+                  <div className="num" style={{ fontSize:9, color:T.ink3, marginTop:4 }}>R{i+1}</div>
+                </div>
+              );
+            })}
+          </div>
+          <Note tone="ok">
+            R1 ({fmtMMSS(now.runs[0])}) carries the corral walk-up. Across R2–R8 the average was {fmtMMSS(runAvgAfterFirst)},
+            and the last run ({fmtMMSS(now.runs[now.runs.length - 1])}) was the fastest of the race — the pacing plan held to the finish.
+          </Note>
+        </Card>
+      </Sec>
+
+      <Sec title="What Athens says about the next one" sub="Ranked by seconds still on the table">
+        <div className="grid g3">
+          <Card pad={14}>
+            <Tag tone="warn">ROXZONE</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>{fmtMMSS(now.roxzone)}</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
+              The only bucket over budget and the only one slower than {PREV_RACE.name.replace("HYROX ", "")}.
+              The exits after row (0:40), farmers (0:46) and lunges (1:04) are worth ~50s on their own.
+            </div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="warn">WALL BALLS</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
+              {fmtMMSS(now.byStation["Wall Balls 100"] || 0)}
+            </div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
+              {prev && prev.byStation["Wall Balls 100"]
+                ? `${fmtDelta((now.byStation["Wall Balls 100"] || 0) - prev.byStation["Wall Balls 100"])} on Riga, where it ranked #37. `
+                : ""}
+              A strength that got taxed by the faster running — the fix is compromised wall-ball work, not more wall balls.
+            </div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="ok">RUNNING</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>{fmtMMSS(now.runTotal)}</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
+              {prev ? `${fmtMMSS(Math.abs(now.runTotal - prev.runTotal))} faster than Riga and ` : ""}
+              {fmtMMSS(Math.abs(budget[0].delta))} under plan, with no fade. This is now the strong half of the race.
+            </div>
+          </Card>
+        </div>
+      </Sec>
+
+      <Note tone="info" icon="📄">
+        Splits sourced from the official HYROX race replay. Roxzone is the residual
+        (finish − runs − stations) for both races so the buckets sum to the finish time;
+        HYROX's own rounded roxzone row for Riga reads 5:18.
+      </Note>
+    </div>
+  );
+}
 
 function RaceTargets({ ana }) {
   const days = Math.max(0, Math.ceil((new Date(RACE.dateISO) - new Date(TODAY)) / 86400000));
@@ -2565,15 +2910,19 @@ function SessionDetail({ s }) {
 
   // Official results (when uploaded) are the source of truth for times and ranks;
   // Garmin laps still supply heart rate, which official data never carries.
+  // That merge is only valid when the watch was lapped at every station —
+  // official.lapAlign:false says it was not, so HR is left off rather than
+  // printed against the wrong split.
   const official = s.official || null;
   const hasOfficial = !!official;
-  const runHrByOrder = runLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr }));
+  const lapAlign = !hasOfficial || official.lapAlign !== false;
+  const runHrByOrder = lapAlign ? runLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr })) : [];
   const stationHrByName = {};
-  stationLaps.forEach(l => {
+  if (lapAlign) stationLaps.forEach(l => {
     const nm = (s.stationNames && s.stationNames[l.i]) || null;
     if (nm) stationHrByName[nm] = { avgHr:l.avgHr, maxHr:l.maxHr };
   });
-  const stationHrByOrder = stationLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr }));
+  const stationHrByOrder = lapAlign ? stationLaps.map(l => ({ avgHr:l.avgHr, maxHr:l.maxHr })) : [];
 
   const runs = hasOfficial && official.runs
     ? official.runs.map((r, i) => ({ i:i+1, t:r.time, rank:r.rank ?? null,
@@ -2607,13 +2956,36 @@ function SessionDetail({ s }) {
         {s.type && <Tag tone="accent">{s.type}</Tag>}
       </div>
 
+      {hasOfficial && (official.overallRank != null || official.agRank != null) && (
+        <Card pad={14} lift={false} style={{ marginBottom:16, display:"flex", gap:22, flexWrap:"wrap", alignItems:"baseline" }}>
+          {official.overallRank != null && (
+            <div>
+              <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>OVERALL</div>
+              <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:2 }}>#{official.overallRank}</div>
+            </div>
+          )}
+          {official.agRank != null && (
+            <div>
+              <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>
+                AGE GROUP{official.ageGroup ? ` ${official.ageGroup}` : ""}
+              </div>
+              <div className="num" style={{ fontSize:22, fontWeight:800, color:T.accentIn, marginTop:2 }}>#{official.agRank}</div>
+            </div>
+          )}
+          <div style={{ marginLeft:"auto", textAlign:"right", fontSize:10.5, color:T.ink3, lineHeight:1.6 }}>
+            {official.venue && <div>{official.venue}</div>}
+            {official.division && <div>{official.division}{official.bib ? ` · bib ${official.bib}` : ""}</div>}
+          </div>
+        </Card>
+      )}
+
       <div className="grid g3" style={{ marginBottom:16 }}>
         <Stat label="Total time" value={fmtHMS(displayTotal)} sub={hasOfficial ? "official finish" : "session total"} tone="ink" accentBar />
         <Stat label={`Running ×${runs.length}`} value={fmtMMSS(totalRun)} sub={avgRun ? `avg ${fmtMMSS(avgRun)}` : "—"} tone="warn" accentBar />
         <Stat label={`Stations ×${stations.length}`} value={fmtMMSS(totalStat)} sub={`${pct(totalStat, displayTotal).toFixed(0)}% of session`} tone="accent" accentBar />
         <Stat label="Avg HR" value={s.avgHR ? `${s.avgHR}` : "—"} unit="bpm" sub={s.maxHR ? `max ${s.maxHR}` : "whole session"} tone={hrTone(s.avgHR)} accentBar />
         <Stat label="Run range" value={runs.length ? `${fmtMMSS(fastRun)}–${fmtMMSS(slowRun)}` : "—"} sub="fastest → slowest" tone="info" accentBar />
-        {runs.length > 1 && <Stat label="Run drift" value={`+${fmtMMSS(slowRun - fastRun)}`} sub="first → worst split" tone={slowRun - fastRun > 25 ? "warn" : "ok"} accentBar />}
+        {runs.length > 1 && <Stat label="Run spread" value={`+${fmtMMSS(slowRun - fastRun)}`} sub="slowest − fastest split" tone={slowRun - fastRun > 25 ? "warn" : "ok"} accentBar />}
       </div>
 
       {s.estimateMin && (
@@ -2697,7 +3069,7 @@ function SessionDetail({ s }) {
 
       {warmupLaps.length > 0 && (
         <div className="num" style={{ fontSize:10, color:T.ink3, textAlign:"center", marginBottom:16 }}>
-          Ignoring {warmupLaps.length} warm-up/cool-down lap{warmupLaps.length > 1 ? "s" : ""} ({warmupLaps.map(l => fmtMMSS(l.t)).join(", ")}) — anomalous distance, likely treadmill drift.
+          Ignoring {warmupLaps.length} warm-up/cool-down lap{warmupLaps.length > 1 ? "s" : ""} ({warmupLaps.map(l => fmtMMSS(l.t)).join(", ")}) — outside the timed session.
         </div>
       )}
 
@@ -2764,14 +3136,17 @@ function SessionNotes({ s }) {
 
 /* ── cross-session trends ────────────────────────────────────────────────── */
 function HyroxTrends({ sessions, ana }) {
+  // Same lap-alignment rule as SessionDetail: only borrow Garmin HR for an
+  // official split when the watch was actually lapped at every station.
+  const aligned = (sess) => !sess.official || sess.official.lapAlign !== false;
   const sessRuns = (sess) => {
-    const laps = (sess.laps || []).filter(l => l.role === "run");
+    const laps = aligned(sess) ? (sess.laps || []).filter(l => l.role === "run") : [];
     if (sess.official && sess.official.runs)
       return sess.official.runs.map((r, i) => ({ t:r.time, avgHr:(laps[i] || {}).avgHr || null }));
     return laps.map(l => ({ t:l.t, avgHr:l.avgHr || null }));
   };
   const sessStations = (sess) => {
-    const laps = (sess.laps || []).filter(l => l.role === "station");
+    const laps = aligned(sess) ? (sess.laps || []).filter(l => l.role === "station") : [];
     if (sess.official && sess.official.stations) {
       const hrByName = {};
       laps.forEach(l => { const n = sess.stationNames && sess.stationNames[l.i]; if (n) hrByName[n] = l.avgHr || null; });
@@ -2882,7 +3257,7 @@ function HyroxTrends({ sessions, ana }) {
       </Sec>
 
       {sims.length > 0 && (
-        <Sec title="Simulation log" sub="Sessions titled as a Hyrox sim or race">
+        <Sec title="Simulation log" sub="Hyrox sims and races, oldest first">
           <Card pad={16}>
             {sims.map((a, i) => (
               <div key={i} style={{ padding:"11px 0", borderBottom: i < sims.length-1 ? `1px solid ${T.lineDim}` : "none" }}>
@@ -2922,7 +3297,9 @@ function RaceView({ ana }) {
   return (
     <div className="fade">
       <SubNav items={[["targets","TARGETS"],["sessions","SESSIONS"],["trends","TRENDS"]]} value={tab} onChange={setTab} />
-      {tab === "targets" && <RaceTargets ana={ana} />}
+      {tab === "targets" && (RACE.result && TODAY >= RACE.dateISO
+        ? <RaceResult ana={ana} />
+        : <RaceTargets ana={ana} />)}
       {tab === "sessions" && (sessions.length === 0
         ? <Card><Empty>No Hyrox sessions yet. They appear automatically when an activity is named with “hyrox” or “race simulation”.</Empty></Card>
         : <>
@@ -3131,9 +3508,12 @@ export default function Dashboard() {
             <div className="wrap chrome-inner">
               <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em", color:T.ink }}>Training</span>
               <span style={{ width:1, height:14, background:T.line, flexShrink:0 }} />
-              <span className="num race-line" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.accentIn }}>
+              <span className="num race-line" style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em",
+                color: daysOut <= 0 && RACE.result ? T.ok : T.accentIn }}>
                 <span className="race-name">{RACE.name} · </span>
-                {daysOut > 0 ? `${daysOut} DAYS` : daysOut === 0 ? "TODAY 🏁" : "DONE"} · {RACE.target}
+                {daysOut > 0 ? `${daysOut} DAYS · ${RACE.target}`
+                  : RACE.result ? `${RACE.result} 🏁`
+                  : daysOut === 0 ? `TODAY 🏁 · ${RACE.target}` : `DONE · ${RACE.target}`}
               </span>
               {/* Only a dot while healthy; it names the problem when there is one,
                   so moving the detail to Today cannot hide a broken sync. */}
