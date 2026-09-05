@@ -426,7 +426,7 @@ Runs: 5:09 / 4:15 / 4:23 / 4:18 / 4:24 / 4:19 / 4:14 / 4:10
 R1 carries the corral walk-up; R2-R8 averaged 4:18. Zero fade — R8 was the fastest run of the day and the best ranked (#63, top 11%). Rank climbed almost every run from #257 on R1.
 
 Stations, by field position:
-Farmers Carry 1:30 (#12, top 2%) · Wall Balls 4:27 (#65) · Row 4:20 (#67) · Burpee BJ 3:51 (#83) · Sled Push 2:26 (#89) · Sandbag Lunge 3:49 (#89) · Sled Pull 3:51 (#110) · Ski Erg 4:18 (#176)
+Farmers Carry 1:30 (#12, top 2%) · Wall Balls 4:27 (#65, top 11.2%) · Row 4:20 (#67, top 11.4%) · Burpee BJ 3:51 (#83, top 14%) · Sled Push 2:26 (#89, top 15.1%) · Sandbag Lunge 3:49 (#89, top 15.2%) · Sled Pull 3:51 (#110, top 18.6%) · Ski Erg 4:18 (#176, top 29.8%)
 
 VS THE PLAN
 Runs 1:36 under the 36:48 budget. Stations within 2s of the 28:30 budget. Roxzone 1:25 over.
@@ -436,11 +436,11 @@ Runs -3:38 · Stations -2:23 · Roxzone +0:29. Burpee broad jump was the biggest
 
 TAKEAWAYS
 1. Ski erg is the weakest element of the race (top 29.8%) and the biggest gap between tested and raced — the 1000m TT in July was 3:54, the plan asked 4:08, the race gave 4:18.
-2. Running is the weakest block against this field despite being the biggest gain vs Riga.
+2. Running is the weakest block against this field (top 27.7%) despite being the biggest gain vs Riga.
 3. Roxzone is the cheapest time on the board: the exits after row, farmers and lunges cost ~50s.
 4. Farmers carry at top 2% and the stations block at top 9.6% are the assets to protect.
 
-Watch note: recorded 1:10:07 — a mis-press merged R1 with the ski erg and the watch ran 44s past the line. Official splits above are the source of truth.`,
+Note on the file: a mis-pressed lap merged R1 with the ski erg and left a 7s ghost lap, so the watch laps do not line up with the official splits. The official splits above are the source of truth.`,
     photos:[],
     laps:[{i:1,t:599,avgHr:154,maxHr:169,dist:1660,role:"warmup"},{i:2,t:7,avgHr:168,maxHr:168,role:"station"},{i:3,t:294,avgHr:169,maxHr:177,dist:981,role:"run"},{i:4,t:126,avgHr:128,maxHr:164,dist:16,role:"station"},{i:5,t:317,avgHr:148,maxHr:165,dist:1011,role:"run"},{i:6,t:222,avgHr:125,maxHr:162,dist:68,role:"station"},{i:7,t:300,avgHr:151,maxHr:164,dist:981,role:"run"},{i:8,t:233,avgHr:119,maxHr:159,dist:12,role:"station"},{i:9,t:285,avgHr:153,maxHr:167,dist:916,role:"run"},{i:10,t:251,avgHr:159,maxHr:164,dist:39,role:"station"},{i:11,t:310,avgHr:164,maxHr:175,dist:992,role:"run"},{i:12,t:107,avgHr:161,maxHr:169,dist:203,role:"station"},{i:13,t:301,avgHr:166,maxHr:176,dist:918,role:"run"},{i:14,t:255,avgHr:162,maxHr:167,dist:65,role:"station"},{i:15,t:300,avgHr:168,maxHr:175,dist:1023,role:"run"},{i:16,t:256,avgHr:112,maxHr:164,dist:102,role:"station"}],
       notes: `HYROX ATHENS — 1:09:23. Target 1:10:00 beaten by 37s; 5:33 faster than Riga (1:14:56). 86th overall, 17th in 35-39.
@@ -876,8 +876,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-05T15:11:00Z";
-const LAST_DATA = "2026-09-05T15:11:00Z";
+const LAST_RUN  = "2026-09-05T16:08:00Z";
+const LAST_DATA = "2026-09-05T16:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
