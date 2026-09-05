@@ -424,6 +424,8 @@ Stations 28:29 (Riga 30:55) — landed within 1s of the 28:30 budget. Burpee bro
 Roxzone 5:47 (Riga ~5:11) — the one regression, and 1:25 over the 4:22 plan. Transitions after row (0:40), farmers (0:46) and lunges (1:04) are where it went.
 Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.
 
+Against the field (591 finishers): overall #86, top 14.6%. Stations #57, top 9.6% — the strength. Roxzone #117, top 19.8%. Running #164, top 27.7% — the weakest discipline, which inverts the read from the clock alone. Run rank climbs all race: R1 #257 (top 43.8%) to R8 #63 (top 11%).
+
 Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and the ski erg into one lap and left a 7s ghost lap, and the watch ran 44s past the line. Official splits are the source of truth here; the recording is only used for heart rate on R2–R8.`,
     official: {
     // Source: official HYROX race replay (Athens, Sat 5 Sep 2026, bib 112006).
@@ -434,9 +436,20 @@ Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and t
     recordedTime: 4207,                     // 1:10:07 — 44s of it is after the line
     overallRank: 86, agRank: 17, ageGroup: "35-39", bib: "112006",
     division: "HYROX — Saturday", venue: "Metropolitan Expo, Athens",
-    // Derived from the replay: finish − runs − stations. HYROX did not publish
-    // a roxzone row for Athens, so this is the residual transition time.
-    roxzone: { time: 347 },                 // 5:47
+    roxzone: { time: 347, rank: 117 },      // 5:47
+    // Where the result sits in the field, from the HYROX app's Metrics tab.
+    // `top` is the app's own displayed percentile — it differs by a few tenths
+    // from rank/size (HYROX's tie handling), so it is stored, not recomputed.
+    // NOTE: running + stations + roxzone = 4171s against a 4163s finish. HYROX
+    // rounds every split independently and the 8s is that rounding, not a gap
+    // in the race. Riga's published splits are 7s over its finish the same way.
+    field: {
+      size: 591,
+      overall:  { rank: 86,  top: 14.6 },
+      running:  { rank: 164, top: 27.7, time: 2112 },  // 35:12
+      stations: { rank: 57,  top:  9.6, time: 1712 },  // 28:32 — "Functional"
+      roxzone:  { rank: 117, top: 19.8, time:  347 },  // 5:47
+    },
     // Lap reconstruction. Cumulative lap times land on the official replay
     // markers to within seconds, so the watch data IS usable once remapped:
     //   lap 1  = R1 + roxzone + Ski Erg, merged (309+34+257 = 600s vs 599 recorded)
@@ -449,15 +462,19 @@ Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and t
     // sled pull 125, burpee 119, wall balls 109 bpm are artifacts, not efforts
     // — Riga's chest strap never read below 152 at any station).
     lapAlign: { runs: [null, 3, 5, 7, 9, 11, 13, 15] },
+    // Times and ranks from the HYROX app's Metrics tab, which is the published
+    // per-split result. They sit within 1s of what the race-replay PDF implies
+    // (HYROX rounds each split independently), and the app carries the ranks,
+    // so the app wins where they differ.
     runs: [
-      { time: 309 },   // R1 5:09 — includes the start corral walk-up
-      { time: 254 },   // R2 4:14
-      { time: 262 },   // R3 4:22
-      { time: 257 },   // R4 4:17
-      { time: 263 },   // R5 4:23
-      { time: 259 },   // R6 4:19
-      { time: 253 },   // R7 4:13
-      { time: 250 },   // R8 4:10 — fastest run of the day, last one
+      { time: 309, rank: 257, top: 43.8 },   // R1 5:09 — includes the start corral walk-up
+      { time: 255, rank: 179, top: 30.8 },   // R2 4:15
+      { time: 263, rank: 155, top: 26.3 },   // R3 4:23
+      { time: 258, rank: 133, top: 22.7 },   // R4 4:18
+      { time: 264, rank: 137, top: 23.3 },   // R5 4:24
+      { time: 259, rank: 145, top: 24.9 },   // R6 4:19
+      { time: 254, rank: 117, top: 20.0 },   // R7 4:14
+      { time: 250, rank:  63, top: 11.0 },   // R8 4:10 — fastest run, and best-ranked, last
     ],
     stations: [
       { name: "Ski Erg 1000 m",         time: 257 },  // 4:17
@@ -2557,31 +2574,42 @@ const RIGA_SPLITS = [
    Both races store their splits once, in HYROX_DATA[...].official. Every
    comparison below is derived from there so the numbers can never drift out
    of sync with the session detail view.
-   Roxzone is taken as the residual (finish − runs − stations) for BOTH races,
-   even where HYROX published its own roxzone row: the published figure is
-   rounded per split and does not close the arithmetic (Riga's is 7s adrift),
-   and a bucket chart whose parts do not sum to the total is worse than one
-   that disagrees with the official sheet by a few seconds. */
+   Segment totals come from HYROX's own published figures where they exist,
+   because those are what the field ranks are computed against. HYROX rounds
+   every split independently, so the three buckets sum a handful of seconds
+   past the finish time (Athens +8s, Riga +7s) — disclosed in the UI rather
+   than papered over by deriving one bucket as the residual, which would make
+   the arithmetic close but disagree with the official sheet and its ranks. */
 function raceSummary(hyroxId) {
   const s = hyroxId && HYROX_DATA[hyroxId];
   const o = s && s.official;
   if (!o || !o.runs || !o.stations) return null;
+  const f = o.field || null;
   const runs = o.runs.map(r => r.time);
   const stations = o.stations.map(st => ({ name:st.name, t:st.time }));
-  const runTotal = runs.reduce((a, b) => a + b, 0);
-  const stationTotal = stations.reduce((a, b) => a + b.t, 0);
+  // Published total first, sum of splits as the fallback.
+  const runTotal = (f && f.running && f.running.time) || runs.reduce((a, b) => a + b, 0);
+  const stationTotal = (f && f.stations && f.stations.time) || stations.reduce((a, b) => a + b.t, 0);
+  const roxzone = (o.roxzone && o.roxzone.time) != null
+    ? o.roxzone.time
+    : o.finishTime - runs.reduce((a, b) => a + b, 0) - stations.reduce((a, b) => a + b.t, 0);
   const byStation = {};
   stations.forEach(st => { byStation[st.name] = st.t; });
   return {
-    finish: o.finishTime, runs, runTotal, stations, stationTotal,
-    roxzone: o.finishTime - runTotal - stationTotal,
-    byStation, overallRank:o.overallRank ?? null, agRank:o.agRank ?? null,
-    ageGroup:o.ageGroup ?? null,
+    finish: o.finishTime, runs, runTotal, stations, stationTotal, roxzone,
+    byStation, field:f, runRanks:o.runs.map(r => ({ rank:r.rank ?? null, top:r.top ?? null })),
+    // How far the published buckets overshoot the finish, so the UI can say so.
+    roundingGap: runTotal + stationTotal + roxzone - o.finishTime,
+    overallRank:o.overallRank ?? null, agRank:o.agRank ?? null, ageGroup:o.ageGroup ?? null,
   };
 }
 
 // "1:10:00" / "4:36" → seconds.
 const parseClock = (str) => String(str || "").split(":").reduce((a, b) => a * 60 + Number(b), 0);
+
+// mm:ss under an hour, h:mm:ss over it. Race segments are minutes; the finish
+// is not, and printing it as 69:23 reads as a different number entirely.
+const fmtAuto = (s) => (s >= 3600 ? fmtHMS(s) : fmtMMSS(s));
 
 // Signed mm:ss, with the sign carrying the meaning: negative = faster.
 const fmtDelta = (sec) => `${sec > 0 ? "+" : sec < 0 ? "−" : "±"}${fmtMMSS(Math.abs(sec))}`;
@@ -2669,6 +2697,14 @@ function RaceResult({ ana }) {
                   <div className="num" style={{ fontSize:34, fontWeight:800, color:T.accentIn, letterSpacing:"-0.03em" }}>#{now.agRank}</div>
                 </div>
               )}
+              {now.field && (
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>OF {now.field.size}</div>
+                  <div className="num" style={{ fontSize:34, fontWeight:800, color:T.ok, letterSpacing:"-0.03em" }}>
+                    {now.field.overall.top}%
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -2740,6 +2776,92 @@ function RaceResult({ ana }) {
         </Sec>
       </div>
 
+      {now.field && (() => {
+        const F = now.field;
+        // Bars run in the direction of "better": length = share of the field
+        // beaten, so the longest bar is the strongest discipline. Printing the
+        // top-% next to a bar sized by top-% would have read backwards.
+        const rows = [
+          { label:"Overall",   d:F.overall,  time:now.finish },
+          { label:"Stations",  d:F.stations, time:now.stationTotal, note:'HYROX calls this "Functional"' },
+          { label:"Roxzone",   d:F.roxzone,  time:now.roxzone },
+          { label:"Running",   d:F.running,  time:now.runTotal },
+        ].filter(r => r.d);
+        const best = rows.slice(1).reduce((a, b) => (a.d.top <= b.d.top ? a : b));
+        const worst = rows.slice(1).reduce((a, b) => (a.d.top >= b.d.top ? a : b));
+        return (
+          <Sec title="Against the field" sub={`${F.size} finishers in the division · longer bar = more of the field beaten`}>
+            <Card pad={16}>
+              {rows.map((r, i) => {
+                const beat = 100 - r.d.top;
+                const tone = r.d.top <= 12 ? "ok" : r.d.top <= 22 ? "info" : "warn";
+                return (
+                  <div key={i} style={{ marginBottom:12, paddingBottom: i === 0 ? 12 : 0,
+                    borderBottom: i === 0 ? `1px solid ${T.lineDim}` : "none" }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8, marginBottom:4 }}>
+                      <span style={{ fontSize:12, fontWeight:700, color: i === 0 ? T.ink : T.ink2 }}>
+                        {r.label}{r.note && <span style={{ fontSize:10, color:T.ink3, fontWeight:400 }}> · {r.note}</span>}
+                      </span>
+                      <span className="num" style={{ fontSize:11.5, fontWeight:700, color:T.ink3 }}>{fmtAuto(r.time)}</span>
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+                      <Bar value={beat} tone={tone} height={i === 0 ? 18 : 14} radius={5} />
+                      <div className="num" style={{ fontSize:11, color:T.ink3, minWidth:66, textAlign:"right" }}>
+                        #{r.d.rank}<span style={{ color:T.ink3 }}>/{F.size}</span>
+                      </div>
+                      <div className="num" style={{ fontSize:12, fontWeight:800, color:TONE[tone], minWidth:52, textAlign:"right" }}>
+                        top {r.d.top}%
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <Note tone="warn">
+                Against the clock the running was the big win. Against the field it is the
+                weakest discipline: <strong>{worst.label.toLowerCase()} top {worst.d.top}%</strong> versus{" "}
+                <strong>{best.label.toLowerCase()} top {best.d.top}%</strong>. The stations are already
+                near the sharp end of this field; the running is what holds the overall rank back.
+              </Note>
+            </Card>
+          </Sec>
+        );
+      })()}
+
+      {now.runRanks && now.runRanks.some(r => r.rank != null) && (() => {
+        const pts = now.runs.map((t, i) => ({ i:i+1, t, ...now.runRanks[i] })).filter(r => r.top != null);
+        if (pts.length < 2) return null;
+        const first = pts[0], last = pts[pts.length - 1];
+        return (
+          <Sec title="Run rank through the race" sub="Field position on each run — bar height is the share of the field beaten">
+            <Card pad={16}>
+              <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:120 }}>
+                {pts.map((r, i) => {
+                  const beat = 100 - r.top;
+                  const h = ((beat - 50) / 45) * 78 + 20;   // 50–95% of the field mapped to the plot
+                  const tone = r.top <= 15 ? "ok" : r.top <= 28 ? "info" : "warn";
+                  return (
+                    <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center",
+                      justifyContent:"flex-end", height:"100%", minWidth:0 }}>
+                      <div className="num" style={{ fontSize:10, fontWeight:700, color:TONE[tone] }}>#{r.rank}</div>
+                      <div style={{ width:"100%", height:Math.max(12, h), background:TONE[tone], opacity:0.85,
+                        borderRadius:"4px 4px 0 0", marginTop:4 }} />
+                      <div className="num" style={{ fontSize:9, color:T.ink3, marginTop:4 }}>R{r.i}</div>
+                      <div className="num" style={{ fontSize:8.5, color:T.ink3 }}>{fmtMMSS(r.t)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <Note tone="ok">
+                R1 is the outlier — #{first.rank} (top {first.top}%), the only run outside the top third,
+                and the one carrying the corral walk-up. From there the position climbs almost every
+                run to #{last.rank} (top {last.top}%) on R8. Passing that many people late means the
+                pacing was right; it also means the first run had time in it.
+              </Note>
+            </Card>
+          </Sec>
+        );
+      })()}
+
       {stationRows.length > 0 && (
         <Sec title={`Station by station · ${PREV_RACE.name.replace("HYROX ", "")} → ${RACE.name.replace("HYROX ", "")}`}
           sub={`Stations ${fmtMMSS(prev.stationTotal)} → ${fmtMMSS(now.stationTotal)} · ${fmtDelta(now.stationTotal - prev.stationTotal)}`}>
@@ -2782,43 +2904,58 @@ function RaceResult({ ana }) {
         </Card>
       </Sec>
 
-      <Sec title="What Athens says about the next one" sub="Ranked by seconds still on the table">
+      <Sec title="What Athens says about the next one"
+        sub={now.field ? "Ordered by field position — where the rank is actually lost" : "Ranked by seconds still on the table"}>
         <div className="grid g3">
           <Card pad={14}>
-            <Tag tone="warn">ROXZONE</Tag>
-            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>{fmtMMSS(now.roxzone)}</div>
-            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
-              The only bucket over budget and the only one slower than {PREV_RACE.name.replace("HYROX ", "")}.
-              The exits after row (0:40), farmers (0:46) and lunges (1:04) are worth ~50s on their own.
-            </div>
-          </Card>
-          <Card pad={14}>
-            <Tag tone="warn">WALL BALLS</Tag>
+            <Tag tone="warn">RUNNING</Tag>
             <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
-              {fmtMMSS(now.byStation["Wall Balls 100"] || 0)}
+              {fmtMMSS(now.runTotal)}
+              {now.field && <span style={{ fontSize:12, fontWeight:700, color:T.warn, marginLeft:7 }}>top {now.field.running.top}%</span>}
             </div>
-            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
-              {prev && prev.byStation["Wall Balls 100"]
-                ? `${fmtDelta((now.byStation["Wall Balls 100"] || 0) - prev.byStation["Wall Balls 100"])} on Riga, where it ranked #37. `
-                : ""}
-              A strength that got taxed by the faster running — the fix is compromised wall-ball work, not more wall balls.
-            </div>
-          </Card>
-          <Card pad={14}>
-            <Tag tone="ok">RUNNING</Tag>
-            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>{fmtMMSS(now.runTotal)}</div>
             <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
               {prev ? `${fmtMMSS(Math.abs(now.runTotal - prev.runTotal))} faster than Riga and ` : ""}
-              {fmtMMSS(Math.abs(budget[0].delta))} under plan, with no fade. This is now the strong half of the race.
+              {fmtMMSS(Math.abs(budget[0].delta))} under plan, with no fade — but still the weakest
+              discipline against this field{now.field ? `, ${(now.field.running.top - now.field.stations.top).toFixed(1)} points behind the stations` : ""}.
+              The next block's headline, and R1 is where it starts.
+            </div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="info">ROXZONE</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
+              {fmtMMSS(now.roxzone)}
+              {now.field && <span style={{ fontSize:12, fontWeight:700, color:T.info, marginLeft:7 }}>top {now.field.roxzone.top}%</span>}
+            </div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
+              The only bucket over budget and the only one slower than {PREV_RACE.name.replace("HYROX ", "")}.
+              Mid-table for this field, so the cheapest seconds on the board: the exits after row
+              (0:40), farmers (0:46) and lunges (1:04) are worth ~50s of pure execution.
+            </div>
+          </Card>
+          <Card pad={14}>
+            <Tag tone="ok">STATIONS</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
+              {fmtMMSS(now.stationTotal)}
+              {now.field && <span style={{ fontSize:12, fontWeight:700, color:T.ok, marginLeft:7 }}>top {now.field.stations.top}%</span>}
+            </div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
+              The strength — near the sharp end of the field. Protect it rather than chase it.
+              The one crack is wall balls at {fmtMMSS(now.byStation["Wall Balls 100"] || 0)}
+              {prev && prev.byStation["Wall Balls 100"]
+                ? ` (${fmtDelta((now.byStation["Wall Balls 100"] || 0) - prev.byStation["Wall Balls 100"])} on Riga, where it ranked #37)`
+                : ""}, which the faster running taxed.
             </div>
           </Card>
         </div>
       </Sec>
 
       <Note tone="info" icon="📄">
-        Splits sourced from the official HYROX race replay. Roxzone is the residual
-        (finish − runs − stations) for both races so the buckets sum to the finish time;
-        HYROX's own rounded roxzone row for Riga reads 5:18.
+        Splits, ranks and field positions are HYROX's own published figures — the race
+        replay plus the app's Metrics tab. HYROX rounds every split independently, so
+        running + stations + roxzone comes to {fmtAuto(now.runTotal + now.stationTotal + now.roxzone)}{" "}
+        against a {fmtHMS(now.finish)} finish
+        {now.roundingGap ? ` (${fmtDelta(now.roundingGap)} of rounding)` : ""}
+        {prev && prev.roundingGap ? `; ${PREV_RACE.name.replace("HYROX ", "")} overshoots by ${fmtMMSS(prev.roundingGap)} the same way` : ""}.
       </Note>
     </div>
   );
