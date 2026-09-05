@@ -424,7 +424,11 @@ Stations 28:29 (Riga 30:55) — landed within 1s of the 28:30 budget. Burpee bro
 Roxzone 5:47 (Riga ~5:11) — the one regression, and 1:25 over the 4:22 plan. Transitions after row (0:40), farmers (0:46) and lunges (1:04) are where it went.
 Wall balls 4:27 vs 4:06 in Riga (+21s) and sled push 2:26 vs 2:16 (+10s) — the price paid for the faster running.
 
-Against the field (591 finishers): overall #86, top 14.6%. Stations #57, top 9.6% — the strength. Roxzone #117, top 19.8%. Running #164, top 27.7% — the weakest discipline, which inverts the read from the clock alone. Run rank climbs all race: R1 #257 (top 43.8%) to R8 #63 (top 11%).
+Against the field (591 finishers): overall #86, top 14.6%. Stations #57, top 9.6% — the strength. Roxzone #117, top 19.8%. Running #164, top 27.7% — the weakest block, which inverts the read from the clock alone. Run rank climbs all race: R1 #257 (top 43.8%) to R8 #63 (top 11%).
+
+Stations by field position: Farmers Carry #12 (top 2%) — elite. Wall Balls #65 (11.2%), Row #67 (11.4%), Burpee Broad Jump #83 (14%), Sled Push #89 (15.1%), Sandbag Lunge #89 (15.2%), Sled Pull #110 (18.6%), Ski Erg #176 (29.8%). The ski erg is the weakest element of the entire race — behind even the running block — and the block's top 9.6% hides it.
+
+Ski erg is also the biggest gap between tested and raced: 1000m TT on Jul 28 was 3:54, the plan asked 4:08, the race gave 4:18.
 
 Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and the ski erg into one lap and left a 7s ghost lap, and the watch ran 44s past the line. Official splits are the source of truth here; the recording is only used for heart rate on R2–R8.`,
     official: {
@@ -476,15 +480,17 @@ Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and t
       { time: 254, rank: 117, top: 20.0 },   // R7 4:14
       { time: 250, rank:  63, top: 11.0 },   // R8 4:10 — fastest run, and best-ranked, last
     ],
+    // Same source as the runs: the app's Metrics tab. These sum to exactly the
+    // published 28:32 stations total, which the replay-derived times missed by 3s.
     stations: [
-      { name: "Ski Erg 1000 m",         time: 257 },  // 4:17
-      { name: "Sled Push 50 m",         time: 146 },  // 2:26
-      { name: "Sled Pull 50 m",         time: 231 },  // 3:51
-      { name: "Burpee Broad Jump 80 m", time: 230 },  // 3:50
-      { name: "Row 1000 m",             time: 260 },  // 4:20
-      { name: "Farmers Carry 200 m",    time:  90 },  // 1:30
-      { name: "Sandbag Lunge 100 m",    time: 228 },  // 3:48
-      { name: "Wall Balls 100",         time: 267 },  // 4:27
+      { name: "Ski Erg 1000 m",         time: 258, rank: 176, top: 29.8 },  // 4:18 — weakest element of the race
+      { name: "Sled Push 50 m",         time: 146, rank:  89, top: 15.1 },  // 2:26
+      { name: "Sled Pull 50 m",         time: 231, rank: 110, top: 18.6 },  // 3:51
+      { name: "Burpee Broad Jump 80 m", time: 231, rank:  83, top: 14.0 },  // 3:51
+      { name: "Row 1000 m",             time: 260, rank:  67, top: 11.4 },  // 4:20
+      { name: "Farmers Carry 200 m",    time:  90, rank:  12, top:  2.0 },  // 1:30 — top 2% of the field
+      { name: "Sandbag Lunge 100 m",    time: 229, rank:  89, top: 15.2 },  // 3:49
+      { name: "Wall Balls 100",         time: 267, rank:  65, top: 11.2 },  // 4:27
     ],
   },
   },
@@ -2586,7 +2592,7 @@ function raceSummary(hyroxId) {
   if (!o || !o.runs || !o.stations) return null;
   const f = o.field || null;
   const runs = o.runs.map(r => r.time);
-  const stations = o.stations.map(st => ({ name:st.name, t:st.time }));
+  const stations = o.stations.map(st => ({ name:st.name, t:st.time, rank:st.rank ?? null, top:st.top ?? null }));
   // Published total first, sum of splits as the fallback.
   const runTotal = (f && f.running && f.running.time) || runs.reduce((a, b) => a + b, 0);
   const stationTotal = (f && f.stations && f.stations.time) || stations.reduce((a, b) => a + b.t, 0);
@@ -2817,10 +2823,45 @@ function RaceResult({ ana }) {
                 );
               })}
               <Note tone="warn">
-                Against the clock the running was the big win. Against the field it is the
-                weakest discipline: <strong>{worst.label.toLowerCase()} top {worst.d.top}%</strong> versus{" "}
-                <strong>{best.label.toLowerCase()} top {best.d.top}%</strong>. The stations are already
-                near the sharp end of this field; the running is what holds the overall rank back.
+                Against the clock the running was the big win. Against the field it is the weakest
+                block: <strong>{worst.label.toLowerCase()} top {worst.d.top}%</strong> versus{" "}
+                <strong>{best.label.toLowerCase()} top {best.d.top}%</strong>. Read the stations
+                block with care though — its top {best.d.top}% is an average, and one station sits
+                well outside it (below).
+              </Note>
+            </Card>
+          </Sec>
+        );
+      })()}
+
+      {now.stations.some(st => st.top != null) && (() => {
+        const ranked = now.stations.filter(st => st.top != null).sort((a, b) => a.top - b.top);
+        const best = ranked[0], worst = ranked[ranked.length - 1];
+        const blockTop = now.field ? now.field.stations.top : null;
+        return (
+          <Sec title="Stations against the field"
+            sub={`Sorted strongest to weakest · the block as a whole is top ${blockTop}%`}>
+            <Card pad={16}>
+              {ranked.map((st, i) => {
+                const beat = 100 - st.top;
+                const tone = st.top <= 12 ? "ok" : st.top <= 22 ? "info" : "warn";
+                return (
+                  <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 0" }}>
+                    <div style={{ flex:"1 1 140px", minWidth:112, fontSize:11.5, fontWeight:600, color:T.ink }}>{st.name}</div>
+                    <div className="num" style={{ fontSize:11, color:T.ink3, minWidth:42, textAlign:"right" }}>{fmtMMSS(st.t)}</div>
+                    <div style={{ flex:"2 1 90px", minWidth:60 }}>
+                      <Bar value={beat} tone={tone} height={13} radius={5} />
+                    </div>
+                    <div className="num" style={{ fontSize:10.5, color:T.ink3, minWidth:34, textAlign:"right" }}>#{st.rank}</div>
+                    <div className="num" style={{ fontSize:11.5, fontWeight:800, color:TONE[tone], minWidth:50, textAlign:"right" }}>top {st.top}%</div>
+                  </div>
+                );
+              })}
+              <Note tone="warn">
+                <strong>{best.name}</strong> is elite — #{best.rank} of {now.field ? now.field.size : "the field"},
+                top {best.top}%. But the block average hides <strong>{worst.name.toLowerCase()}</strong> at
+                top {worst.top}%, the single weakest element of the whole race — behind even the running block.
+                Seven of eight stations sit at top {ranked[ranked.length - 2].top}% or better; this one is the outlier.
               </Note>
             </Card>
           </Sec>
@@ -2908,6 +2949,20 @@ function RaceResult({ ana }) {
         sub={now.field ? "Ordered by field position — where the rank is actually lost" : "Ranked by seconds still on the table"}>
         <div className="grid g3">
           <Card pad={14}>
+            <Tag tone="warn">SKI ERG</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
+              {fmtMMSS(now.byStation["Ski Erg 1000 m"] || 0)}
+              {(() => { const st = now.stations.find(x => x.name === "Ski Erg 1000 m");
+                return st && st.top != null
+                  ? <span style={{ fontSize:12, fontWeight:700, color:T.warn, marginLeft:7 }}>top {st.top}%</span> : null; })()}
+            </div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
+              The weakest single element of the race, and the biggest gap between tested and raced:
+              the 1000m TT on Jul 28 was <strong style={{ color:T.ink2 }}>3:54</strong>, the plan asked for 4:08,
+              the race gave 4:18. That is 24s of proven capability left on the erg.
+            </div>
+          </Card>
+          <Card pad={14}>
             <Tag tone="warn">RUNNING</Tag>
             <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
               {fmtMMSS(now.runTotal)}
@@ -2930,20 +2985,6 @@ function RaceResult({ ana }) {
               The only bucket over budget and the only one slower than {PREV_RACE.name.replace("HYROX ", "")}.
               Mid-table for this field, so the cheapest seconds on the board: the exits after row
               (0:40), farmers (0:46) and lunges (1:04) are worth ~50s of pure execution.
-            </div>
-          </Card>
-          <Card pad={14}>
-            <Tag tone="ok">STATIONS</Tag>
-            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>
-              {fmtMMSS(now.stationTotal)}
-              {now.field && <span style={{ fontSize:12, fontWeight:700, color:T.ok, marginLeft:7 }}>top {now.field.stations.top}%</span>}
-            </div>
-            <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
-              The strength — near the sharp end of the field. Protect it rather than chase it.
-              The one crack is wall balls at {fmtMMSS(now.byStation["Wall Balls 100"] || 0)}
-              {prev && prev.byStation["Wall Balls 100"]
-                ? ` (${fmtDelta((now.byStation["Wall Balls 100"] || 0) - prev.byStation["Wall Balls 100"])} on Riga, where it ranked #37)`
-                : ""}, which the faster running taxed.
             </div>
           </Card>
         </div>
