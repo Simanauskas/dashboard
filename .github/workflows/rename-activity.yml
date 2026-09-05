@@ -1,0 +1,60 @@
+name: Rename Garmin Activity
+
+# Garmin tokens are only readable inside Actions (GitHub Secrets are write-only
+# from outside) and by the auth.simas.fit Worker, so a one-off Garmin write has
+# to run here. Dispatch only — never scheduled.
+on:
+  workflow_dispatch:
+    inputs:
+      activity_id:
+        description: 'Garmin activity id'
+        required: true
+      name:
+        description: 'New activity name'
+        required: true
+      description:
+        description: 'Optional activity description'
+        required: false
+        default: ''
+      apply:
+        description: 'Write the change (false = dry run)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install "garth==0.4.47"
+
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+
+      # Inputs go through env, never interpolated into the shell: a name
+      # containing a quote or a backtick would otherwise run as code here.
+      - name: Rename
+        env:
+          ACTIVITY_ID: ${{ inputs.activity_id }}
+          NEW_NAME: ${{ inputs.name }}
+          NEW_DESC: ${{ inputs.description }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          args=("$ACTIVITY_ID" "$NEW_NAME")
+          if [ -n "$NEW_DESC" ]; then args+=(--description "$NEW_DESC"); fi
+          if [ "$APPLY" = "true" ]; then args+=(--apply); fi
+          python rename_activity.py "${args[@]}"
