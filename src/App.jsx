@@ -480,15 +480,21 @@ Watch: recorded 1:10:07 against an official 1:09:23. A mis-press merged R1 and t
    rows in the log, the week board and the sim log show that instead of what
    the watch happened to capture. Keyed by date + title because update.py
    writes both from the same Garmin activity, so they always agree. */
+// Keyed by DATE, not by name. The name is Garmin's and the athlete can change
+// it at any time; keying on it meant a rename in Garmin Connect silently
+// unhooked the official time and the race quietly went back to reading as the
+// watch recording. There is at most one official race in a day, so the date
+// identifies it — the title only has to still look like a Hyrox session.
 const OFFICIAL_DURATIONS = (() => {
   const m = {};
   Object.values(HYROX_DATA).forEach(s => {
-    if (s.official && s.official.finishTime) m[`${s.date}|${(s.name || "").trim()}`] = s.official.finishTime;
+    if (s.official && s.official.finishTime) m[s.date] = s.official.finishTime;
   });
   return m;
 })();
 // Official finish for this activity row, or null when it has no official result.
-const officialDur = (a) => (a ? OFFICIAL_DURATIONS[`${a._date}|${(a.Title || "").trim()}`] ?? null : null);
+const officialDur = (a) =>
+  (a && /hyrox/i.test(a.Title || "") ? OFFICIAL_DURATIONS[a._date] ?? null : null);
 // What to print as this activity's duration: official when there is one.
 const shownDur = (a) => officialDur(a) ?? (a ? a._dur : 0);
 
