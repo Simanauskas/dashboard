@@ -609,6 +609,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Strength Training","2026-09-09 10:22:55","false","Strength","0,00","134","00:57:27","66","123","0,1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:57:27","00:57:27","--","--"
 "Lap Swimming","2026-09-09 09:57:58","false","Pool Swim","0,32","78","00:08:02","107","126","0,6","--","--","19:51","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:06:24","00:24:20","--","--"
 "Lap Swimming","2026-09-07 09:59:49","false","Pool Swim","0,44","123","00:23:15","82","136","0,4","--","--","20:06","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:08:47","00:26:34","--","--"
 "Strength Training","2026-09-07 08:37:28","false","Strength","0,00","240","00:58:14","81","120","0,3","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:58:14","00:58:14","--","--"
@@ -887,8 +888,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-09";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-09T08:07:00Z";
-const LAST_DATA = "2026-09-09T08:07:00Z";
+const LAST_RUN  = "2026-09-09T09:07:00Z";
+const LAST_DATA = "2026-09-09T09:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
