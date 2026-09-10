@@ -1149,14 +1149,24 @@ function readiness(tsb, dsh, hrv, hrvBaseline) {
 // that used to look forward to it flips to looking back at it — see RaceView.
 // Set `hyroxId` to the HYROX_DATA key so the result panel can read the splits
 // rather than repeat them.
-const RACE = {
+const ATHENS = {
   name:"HYROX ATHENS", dateISO:"2026-09-05", label:"SEP 5", target:"1:10:00",
   venue:"Metropolitan Expo", hyroxId:"24244349642",
   result:"1:09:23", resultSec:4163,
 };
-// The race the Athens plan was built to beat.
-const PREV_RACE = { name:"HYROX RIGA", dateISO:"2026-05-30", label:"MAY 30",
+const RIGA = { name:"HYROX RIGA", dateISO:"2026-05-30", label:"MAY 30",
   result:"1:14:56", resultSec:4496, hyroxId:"23064789093" };
+
+// Copenhagen runs Thu 25 – Sun 28 Mar 2027; he races Saturday, as in Riga and
+// Athens. `blockStart` is where the countdown bar starts measuring from — the
+// first week of the Copenhagen build, not the first entry in TAPER_PLAN, which
+// still holds the Athens block as history.
+const RACE = {
+  name:"HYROX COPENHAGEN", dateISO:"2027-03-27", label:"MAR 27", target:"1:05:00",
+  venue:"Bella Center", blockStart:"2026-09-14",
+};
+// The race the Copenhagen plan is built to beat.
+const PREV_RACE = ATHENS;
 
 // Single source of truth for weekly TRIMP targets through race day.
 // Used by both the LOAD tab's weekly bars AND the roadmap — replaces the old
@@ -1170,6 +1180,17 @@ const TAPER_PLAN = [
   { start:"2026-08-31", end:"2026-09-05", theme:"Race Week 🏁", lo:100, hi:200, note:"Cut 40% · activate only · TSB +10→+20" },
   { start:"2026-09-06", end:"2026-09-13", theme:"Decompress",    lo: 80, hi:200, note:"Post-Athens · walk, swim, easy tennis · no erg, no sled" },
   { start:"2026-09-14", end:"2026-09-27", theme:"Aerobic Reset", lo:280, hi:400, note:"Rebuild base · Z2 volume · strength back in, specificity later" },
+  // ── Copenhagen block · sub-65 ──
+  { start:"2026-09-28", end:"2026-11-08", theme:"Base I · Aerobic",    lo:380, hi:460, note:"Running volume + strength · weekly roxzone circuit starts" },
+  { start:"2026-11-09", end:"2026-12-20", theme:"Base II · Threshold", lo:420, hi:500, note:"3×1km @ 4:00–4:05 · erg volume · strength maintained" },
+  { start:"2026-12-21", end:"2027-01-03", theme:"Holiday Deload",      lo:200, hi:300, note:"Planned, not accidental · absorb the base" },
+  { start:"2027-01-04", end:"2027-02-14", theme:"Specificity Build",   lo:440, hi:520, note:"Compromised running · Full Sim #1 on Sat 30 Jan" },
+  { start:"2027-02-15", end:"2027-02-21", theme:"Specificity",         lo:400, hi:460, note:"Race block wk −6 · reset erg benchmarks" },
+  { start:"2027-02-22", end:"2027-02-28", theme:"Erg Engine",          lo:440, hi:500, note:"Race block wk −5 · ski and row, all compromised" },
+  { start:"2027-03-01", end:"2027-03-07", theme:"Full Sim #2",         lo:420, hi:480, note:"Race block wk −4 · sub-1:06:15 says sub-65 is on" },
+  { start:"2027-03-08", end:"2027-03-14", theme:"Peak Load",           lo:470, hi:540, note:"Race block wk −3 · highest week · no heat block needed" },
+  { start:"2027-03-15", end:"2027-03-21", theme:"Sharpen",             lo:300, hi:360, note:"Race block wk −2 · half sim at exact target splits" },
+  { start:"2027-03-22", end:"2027-03-27", theme:"Race Week 🏁",        lo:100, hi:200, note:"Cut 40% · activate only · TSB +10→+20" },
 ];
 
 // Look up the target band for a week given its [startISO, endISO] range.
@@ -1245,6 +1266,69 @@ const SCHEDULE = [
     { date:"2026-09-11", dow:"FRI", label:"Sep 11", sessions:[{type:"plan",text:"35min Z2 jog · first real aerobic touch since the race"}] },
     { date:"2026-09-12", dow:"SAT", label:"Sep 12", sessions:[{type:"tennis",text:"Tennis 🎾"},{type:"plan",text:"Debrief: roxzone drills are the next block's headline — see RACE → what Athens says"}] },
     { date:"2026-09-13", dow:"SUN", label:"Sep 13", sessions:[{type:"rest",text:"Rest · family day"}] },
+  ]},
+
+  /* ── Copenhagen block · sub-65 ─────────────────────────────────────────
+     Fixed points every week: tennis Tue AM, Thu PM and one of Sat/Sun; the
+     Gym+ circle Wed evening. Hard running sits on Tuesday PM, stacked onto
+     a day already spent, so Monday stays easy ahead of Tuesday tennis and
+     Friday stays clear of Thursday's. The day-before-a-match rule: cut the
+     LEG content, not the session — key run becomes Z2 + strides, strength
+     drops lunges and heavy sled, the long run moves to Sunday.
+     ──────────────────────────────────────────────────────────────────── */
+  { week:8, label:"Sep 14–20", theme:"Aerobic Reset", days:[
+    { date:"2026-09-14", dow:"MON", label:"Sep 14", sessions:[{type:"plan",text:"Z2 run 35min · easy, first structured week back"}] },
+    { date:"2026-09-15", dow:"TUE", label:"Sep 15", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"}] },
+    { date:"2026-09-16", dow:"WED", label:"Sep 16", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening · first one back — take the aerobic option in every block, no maximal strength"}] },
+    { date:"2026-09-17", dow:"THU", label:"Sep 17", sessions:[{type:"plan",text:"Z2 run 40min · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-09-18", dow:"FRI", label:"Sep 18", sessions:[{type:"plan",text:"Strength 45min · rebuild only — lat pulldown, split squats, core. No sled yet"}] },
+    { date:"2026-09-19", dow:"SAT", label:"Sep 19", sessions:[{type:"plan",text:"Long run 60min · pure Z2, conversational the whole way"}] },
+    { date:"2026-09-20", dow:"SUN", label:"Sep 20", sessions:[{type:"rest",text:"Tennis 🎾 or full rest — your call, but not both a match and a session"}] },
+  ]},
+  { week:9, label:"Sep 21–27", theme:"Aerobic Reset", days:[
+    { date:"2026-09-21", dow:"MON", label:"Sep 21", sessions:[{type:"plan",text:"Z2 run 40min + 4×30s strides · legs only, no fatigue into Tuesday"}] },
+    { date:"2026-09-22", dow:"TUE", label:"Sep 22", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"Optional: 25min easy spin or swim · evening"}] },
+    { date:"2026-09-23", dow:"WED", label:"Sep 23", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening · pick SKI over row wherever the block offers a choice — it is your weakest station"}] },
+    { date:"2026-09-24", dow:"THU", label:"Sep 24", sessions:[{type:"plan",text:"Ski 20min technique · morning · easy, legs stay for tennis"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-09-25", dow:"FRI", label:"Sep 25", sessions:[{type:"plan",text:"Strength 45min · sled pull 6×25m light technique + lunges 3×50m + lat pulldown"}] },
+    { date:"2026-09-26", dow:"SAT", label:"Sep 26", sessions:[{type:"plan",text:"Long run 70min Z2"}] },
+    { date:"2026-09-27", dow:"SUN", label:"Sep 27", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+  ]},
+  { week:10, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
+    { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"⏱ ROW 1000m TT — fresh legs, no excuses, it has been deferred twice"},{type:"plan",text:"Then ⏱ SKI 1000m TT after 10min easy · expect ~3:54"}] },
+    { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"Z2 run 40min · evening"}] },
+    { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 10min after the circle · 8 transitions, station → jog → station, clock every one. Baseline today, target 0:32"}] },
+    { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:10, 2min rest · moderate — legs stay for tennis"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-02", dow:"FRI", label:"Oct 2", sessions:[{type:"plan",text:"Strength 45min · sled pull 6×25m heavy + lunges 4×50m unbroken + lat pulldown 4×10"}] },
+    { date:"2026-10-03", dow:"SAT", label:"Oct 3", sessions:[{type:"plan",text:"⏱ 5km TT · the first running benchmark you have ever set. 10min warm-up, then honest"}] },
+    { date:"2026-10-04", dow:"SUN", label:"Oct 4", sessions:[{type:"rest",text:"Full rest · family day"}] },
+  ]},
+  { week:11, label:"Oct 5–11", theme:"Base I · Aerobic", days:[
+    { date:"2026-10-05", dow:"MON", label:"Oct 5", sessions:[{type:"plan",text:"Z2 run 50min easy"}] },
+    { date:"2026-10-06", dow:"TUE", label:"Oct 6", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · threshold 3×1km @ 4:15, 90s rest · evening"}] },
+    { date:"2026-10-07", dow:"WED", label:"Oct 7", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:36"}] },
+    { date:"2026-10-08", dow:"THU", label:"Oct 8", sessions:[{type:"plan",text:"Ski 30min moderate · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-09", dow:"FRI", label:"Oct 9", sessions:[{type:"plan",text:"Strength 45min · sled pull 8×25m + lunges 4×50m + core"}] },
+    { date:"2026-10-10", dow:"SAT", label:"Oct 10", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km"}] },
+    { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+  ]},
+  { week:12, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
+    { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"Z2 run 50min + 4×30s strides"}] },
+    { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · compromised: [1000m ski → 1km @ 4:20] ×3 continuous · evening"}] },
+    { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:36"}] },
+    { date:"2026-10-15", dow:"THU", label:"Oct 15", sessions:[{type:"plan",text:"Z2 run 40min · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-16", dow:"FRI", label:"Oct 16", sessions:[{type:"plan",text:"Strength 45min · sled pull heavy + wall balls 3×25 straight off a 1km run"}] },
+    { date:"2026-10-17", dow:"SAT", label:"Oct 17", sessions:[{type:"plan",text:"Long run 80min Z2"}] },
+    { date:"2026-10-18", dow:"SUN", label:"Oct 18", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+  ]},
+  { week:13, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
+    { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"Z2 run 45min easy"}] },
+    { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · threshold 4×1km @ 4:12, 90s rest · evening"}] },
+    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:34"}] },
+    { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:05 · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-23", dow:"FRI", label:"Oct 23", sessions:[{type:"plan",text:"Strength 45min · sled pull + lunges 4×50m unbroken + lat pulldown"}] },
+    { date:"2026-10-24", dow:"SAT", label:"Oct 24", sessions:[{type:"plan",text:"Long run 85min · last 20min @ 4:25/km"}] },
+    { date:"2026-10-25", dow:"SUN", label:"Oct 25", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
   ]},
 ];
 
@@ -2593,7 +2677,11 @@ function BodyView({ ana }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    RACE — targets · sessions · trends
    ═══════════════════════════════════════════════════════════════════════════ */
-const RACE_BUDGET = [
+// ── Athens, as it was planned ────────────────────────────────────────────
+// Kept verbatim so the Athens retrospective keeps grading itself against the
+// plan it was actually built on. RaceResult takes these as props; do not
+// repoint them at the next race.
+const ATHENS_BUDGET = [
   { part:"8 × 1 km runs",  target:36*60+48, note:"4:36 per km, every km" },
   { part:"8 × stations",   target:28*60+30, note:"including sled work" },
   { part:"Roxzone",        target: 4*60+22, note:"jog every transition" },
@@ -2601,7 +2689,7 @@ const RACE_BUDGET = [
 // Where the five minutes from Riga (1:14:56) were meant to come from.
 // `station` ties a row to its official station name so the delivered saving
 // can be measured instead of asserted — null means it is not one station.
-const RACE_GAINS = [
+const ATHENS_GAINS = [
   { name:"Runs",      sec:122, station:null,                        how:"8 × 4:36 instead of drifting past 5:00" },
   { name:"Roxzone",   sec: 56, station:"__roxzone",                 how:"jog every transition, no walking" },
   { name:"Sled pull", sec: 38, station:"Sled Pull 50 m",            how:"pure technique — hand-over-hand rhythm" },
@@ -2610,11 +2698,36 @@ const RACE_GAINS = [
   { name:"Row",       sec: 31, station:"Row 1000 m",                how:"hold 2:05/500m off tired legs" },
   { name:"Lunges",    sec:  9, station:"Sandbag Lunge 100 m",       how:"stop resetting mid-lane" },
 ];
-const RIGA_SPLITS = [
-  { label:"Ski erg 1000m",  station:"Ski Erg 1000 m",     riga:"4:39", target:"4:08" },
-  { label:"Row 1000m",      station:"Row 1000 m",         riga:"4:43", target:"4:12" },
-  { label:"Sled pull 50m",  station:"Sled Pull 50 m",     riga:"4:08", target:"3:30" },
-  { label:"Roxzone",        station:"__roxzone",          riga:"5:18", target:"4:22" },
+
+// ── Copenhagen · the sub-65 budget ───────────────────────────────────────
+// Built from the Athens official splits, not from a round number. Sums to
+// 1:04:44 against a 1:05:00 goal. HYROX rounds each split independently, so
+// the Athens column of any comparison sums 8s past its official finish and
+// this one carries the same slop — see raceSummary's roundingGap.
+const RACE_BUDGET = [
+  { part:"8 × 1 km runs",  target:33*60+22, note:"R1 4:40, then 4:06 per km" },
+  { part:"8 × stations",   target:27*60+ 7, note:"ski is the only big mover" },
+  { part:"Roxzone",        target: 4*60+15, note:"0:32 a transition, trained" },
+];
+// Ranked by field position at Athens, not by how slow each element feels.
+// Running (top 27.7%) and roxzone (top 19.8%) are his two worst elements and
+// carry 202 of the 287 seconds; the stations block is already top 9.6%.
+const RACE_GAINS = [
+  { name:"Runs",      sec:110, station:null,                        how:"4:06/km after R1, down from a 4:18 average" },
+  { name:"Roxzone",   sec: 92, station:"__roxzone",                 how:"weekly timed transition circuit — never trained before" },
+  { name:"Ski erg",   sec: 20, station:"Ski Erg 1000 m",            how:"3:54 fresh vs 4:18 raced — train it off running legs" },
+  { name:"Sled pull", sec: 19, station:"Sled Pull 50 m",            how:"6–8×25m heavy, hand-over-hand, every Friday" },
+  { name:"Wall balls",sec: 15, station:"Wall Balls 100",            how:"recover Riga's 4:06 — compromised sets, never fresh" },
+  { name:"Lunges",    sec: 11, station:"Sandbag Lunge 100 m",       how:"4×50m unbroken, plus the 1:04 lunge exit drill" },
+  { name:"Row",       sec:  8, station:"Row 1000 m",                how:"defend top 11% — compromised rows inside run sets" },
+  { name:"Burpee BJ", sec:  6, station:"Burpee Broad Jump 80 m",    how:"maintenance only, it already gained 1:30" },
+  { name:"Sled push", sec:  6, station:"Sled Push 50 m",            how:"technique — Riga was 2:16, so this is lost ground" },
+];
+const STATION_TARGETS = [
+  { label:"Ski erg 1000m",  station:"Ski Erg 1000 m",     prev:"4:18", target:"3:58" },
+  { label:"Sled pull 50m",  station:"Sled Pull 50 m",     prev:"3:51", target:"3:32" },
+  { label:"Wall balls 100", station:"Wall Balls 100",     prev:"4:27", target:"4:12" },
+  { label:"Roxzone",        station:"__roxzone",          prev:"5:47", target:"4:15" },
 ];
 
 /* ── Reading a race back out of HYROX_DATA ────────────────────────────────
@@ -2667,19 +2780,19 @@ const deltaTone = (sec, dead = 3) => (sec < -dead ? "ok" : sec > dead ? "bad" : 
    Every panel here answers a question the TARGETS tab asked before the race,
    with the official splits instead of an estimate: did the budget hold, did
    the identified gains actually show up, and which station is next. */
-function RaceResult({ ana }) {
-  const now = raceSummary(RACE.hyroxId);
-  const prev = raceSummary(PREV_RACE.hyroxId);
+function RaceResult({ ana, race = ATHENS, prev: prevRace = RIGA, budget: budgetPlan = ATHENS_BUDGET, gains: gainPlan = ATHENS_GAINS }) {
+  const now = raceSummary(race.hyroxId);
+  const prev = raceSummary(prevRace.hyroxId);
   if (!now) return null;
 
-  const targetSec = parseClock(RACE.target);
+  const targetSec = parseClock(race.target);
   const vsTarget = now.finish - targetSec;
   const vsPrev = prev ? now.finish - prev.finish : null;
   const beat = vsTarget <= 0;
 
-  // Plan (RACE_BUDGET) against what the race actually cost.
+  // Plan (budget) against what the race actually cost.
   const actualByPart = [now.runTotal, now.stationTotal, now.roxzone];
-  const budget = RACE_BUDGET.map((b, i) => ({ ...b, actual:actualByPart[i], delta:actualByPart[i] - b.target }));
+  const budget = budgetPlan.map((b, i) => ({ ...b, actual:actualByPart[i], delta:actualByPart[i] - b.target }));
   const maxBudget = Math.max(...budget.map(b => Math.max(b.actual, b.target)));
 
   // Identified gains: what was predicted vs what the clock says was delivered.
@@ -2690,7 +2803,7 @@ function RaceResult({ ana }) {
     if (prev.byStation[station] == null || now.byStation[station] == null) return null;
     return prev.byStation[station] - now.byStation[station];
   };
-  const gains = RACE_GAINS.map(g => ({ ...g, got:savedFor(g.station) })).filter(g => g.got != null);
+  const gains = gainPlan.map(g => ({ ...g, got:savedFor(g.station) })).filter(g => g.got != null);
   const maxGain = Math.max(1, ...gains.map(g => Math.abs(g.got)), ...gains.map(g => g.sec));
 
   // Every station, both races, sorted by where the time actually moved.
@@ -2717,7 +2830,7 @@ function RaceResult({ ana }) {
           <div style={{ display:"flex", gap:22, alignItems:"center", flexWrap:"wrap" }}>
             <div>
               <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.18em", color:T.ink3 }}>
-                {RACE.name} · {RACE.label} · OFFICIAL
+                {race.name} · {race.label} · OFFICIAL
               </div>
               <div className="num" style={{ display:"flex", alignItems:"baseline", gap:10, marginTop:4 }}>
                 <span style={{ fontSize:52, fontWeight:800, color:beat ? T.ok : T.ink, lineHeight:1, letterSpacing:"-0.04em" }}>
@@ -2726,9 +2839,9 @@ function RaceResult({ ana }) {
                 <span style={{ fontSize:15, fontWeight:700, color:T.ink3 }}>finish</span>
               </div>
               <div style={{ fontSize:11.5, color:T.ink2, marginTop:7 }}>
-                {beat ? `Target ${RACE.target} beaten by ${fmtMMSS(Math.abs(vsTarget))}.`
-                      : `${fmtMMSS(vsTarget)} over the ${RACE.target} target.`}
-                {vsPrev != null && ` ${fmtMMSS(Math.abs(vsPrev))} ${vsPrev < 0 ? "faster" : "slower"} than ${PREV_RACE.name.replace("HYROX ", "")} (${PREV_RACE.result}).`}
+                {beat ? `Target ${race.target} beaten by ${fmtMMSS(Math.abs(vsTarget))}.`
+                      : `${fmtMMSS(vsTarget)} over the ${race.target} target.`}
+                {vsPrev != null && ` ${fmtMMSS(Math.abs(vsPrev))} ${vsPrev < 0 ? "faster" : "slower"} than ${prevRace.name.replace("HYROX ", "")} (${prevRace.result}).`}
               </div>
             </div>
             <div style={{ marginLeft:"auto", display:"flex", gap:20 }}>
@@ -2758,9 +2871,9 @@ function RaceResult({ ana }) {
       </Card>
 
       <div className="grid g4" style={{ marginBottom:20 }}>
-        <Stat label="vs target" value={fmtDelta(vsTarget)} sub={`target ${RACE.target}`} tone={deltaTone(vsTarget, 0)} accentBar />
-        <Stat label={`vs ${PREV_RACE.name.replace("HYROX ", "")}`} value={vsPrev != null ? fmtDelta(vsPrev) : "—"}
-          sub={`${PREV_RACE.label} · ${PREV_RACE.result}`} tone={vsPrev != null ? deltaTone(vsPrev, 0) : "mute"} accentBar />
+        <Stat label="vs target" value={fmtDelta(vsTarget)} sub={`target ${race.target}`} tone={deltaTone(vsTarget, 0)} accentBar />
+        <Stat label={`vs ${prevRace.name.replace("HYROX ", "")}`} value={vsPrev != null ? fmtDelta(vsPrev) : "—"}
+          sub={`${prevRace.label} · ${prevRace.result}`} tone={vsPrev != null ? deltaTone(vsPrev, 0) : "mute"} accentBar />
         <Stat label="Run average" value={fmtMMSS(runAvgAfterFirst)} sub={`R2–R8 · ${fmtMMSS(runAvg)} incl. R1 start`} tone="warn" accentBar />
         <Stat label="Run fade" value={fade === 0 ? "none" : fmtDelta(fade)}
           sub={`last run vs best of R2–R8 · range ${fmtMMSS(fastRun)}–${fmtMMSS(slowRun)}`}
@@ -2768,7 +2881,7 @@ function RaceResult({ ana }) {
       </div>
 
       <div className="split-even">
-        <Sec title="Race-day budget · plan vs actual" sub={`Planned ${fmtHMS(RACE_BUDGET.reduce((s, b) => s + b.target, 0))} · ran ${fmtHMS(now.finish)}`}>
+        <Sec title="Race-day budget · plan vs actual" sub={`Planned ${fmtHMS(budget.reduce((s, b) => s + b.target, 0))} · ran ${fmtHMS(now.finish)}`}>
           <Card pad={16}>
             {budget.map((b, i) => (
               <div key={i} style={{ marginBottom:13 }}>
@@ -2797,7 +2910,7 @@ function RaceResult({ ana }) {
           </Card>
         </Sec>
 
-        <Sec title="Predicted gains vs delivered" sub={`Planned −${fmtMMSS(RACE_GAINS.reduce((s, g) => s + g.sec, 0))} · delivered ${fmtDelta(vsPrev ?? 0)}`}>
+        <Sec title="Predicted gains vs delivered" sub={`Planned −${fmtMMSS(gainPlan.reduce((s, g) => s + g.sec, 0))} · delivered ${fmtDelta(vsPrev ?? 0)}`}>
           <Card pad={16}>
             {gains.map((g, i) => (
               <div key={i} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:9 }}>
@@ -2945,7 +3058,7 @@ function RaceResult({ ana }) {
       })()}
 
       {stationRows.length > 0 && (
-        <Sec title={`Station by station · ${PREV_RACE.name.replace("HYROX ", "")} → ${RACE.name.replace("HYROX ", "")}`}
+        <Sec title={`Station by station · ${prevRace.name.replace("HYROX ", "")} → ${race.name.replace("HYROX ", "")}`}
           sub={`Stations ${fmtMMSS(prev.stationTotal)} → ${fmtMMSS(now.stationTotal)} · ${fmtDelta(now.stationTotal - prev.stationTotal)}`}>
           <Card pad={16}>
             {stationRows.map((r, i) => (
@@ -2964,7 +3077,7 @@ function RaceResult({ ana }) {
         </Sec>
       )}
 
-      <Sec title="Run splits" sub={`${fmtMMSS(now.runTotal)} total · ${fmtDelta(prev ? now.runTotal - prev.runTotal : 0)} vs ${PREV_RACE.name.replace("HYROX ", "")}`}>
+      <Sec title="Run splits" sub={`${fmtMMSS(now.runTotal)} total · ${fmtDelta(prev ? now.runTotal - prev.runTotal : 0)} vs ${prevRace.name.replace("HYROX ", "")}`}>
         <Card pad={16}>
           <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:110 }}>
             {now.runs.map((t, i) => {
@@ -3023,7 +3136,7 @@ function RaceResult({ ana }) {
               {now.field && <span style={{ fontSize:12, fontWeight:700, color:T.info, marginLeft:7 }}>top {now.field.roxzone.top}%</span>}
             </div>
             <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>
-              The only bucket over budget and the only one slower than {PREV_RACE.name.replace("HYROX ", "")}.
+              The only bucket over budget and the only one slower than {prevRace.name.replace("HYROX ", "")}.
               Mid-table for this field, so the cheapest seconds on the board: the exits after row
               (0:40), farmers (0:46) and lunges (1:04) are worth ~50s of pure execution.
             </div>
@@ -3037,7 +3150,7 @@ function RaceResult({ ana }) {
         running + stations + roxzone comes to {fmtAuto(now.runTotal + now.stationTotal + now.roxzone)}{" "}
         against a {fmtHMS(now.finish)} finish
         {now.roundingGap ? ` (${fmtDelta(now.roundingGap)} of rounding)` : ""}
-        {prev && prev.roundingGap ? `; ${PREV_RACE.name.replace("HYROX ", "")} overshoots by ${fmtMMSS(prev.roundingGap)} the same way` : ""}.
+        {prev && prev.roundingGap ? `; ${prevRace.name.replace("HYROX ", "")} overshoots by ${fmtMMSS(prev.roundingGap)} the same way` : ""}.
       </Note>
     </div>
   );
@@ -3048,7 +3161,8 @@ function RaceTargets({ ana }) {
   const budgetTotal = RACE_BUDGET.reduce((s, b) => s + b.target, 0);
   const gainTotal = RACE_GAINS.reduce((s, g) => s + g.sec, 0);
   const maxGain = Math.max(...RACE_GAINS.map(g => g.sec));
-  const blockStart = new Date(TAPER_PLAN[0].start);
+  const blockPhase = TAPER_PLAN.find(b => b.start === RACE.blockStart) || TAPER_PLAN[0];
+  const blockStart = new Date(blockPhase.start);
   const raceDay = new Date(RACE.dateISO);
   const progress = Math.min(100, Math.max(0, ((new Date(TODAY) - blockStart) / (raceDay - blockStart)) * 100));
   const { tsb } = ana;
@@ -3069,12 +3183,12 @@ function RaceTargets({ ana }) {
             <div style={{ marginLeft:"auto", textAlign:"right" }}>
               <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.14em", color:T.ink3 }}>TARGET</div>
               <div className="num" style={{ fontSize:36, fontWeight:800, color:T.accentIn, letterSpacing:"-0.03em" }}>{RACE.target}</div>
-              <div className="num" style={{ fontSize:11, color:T.ink3 }}>Riga was 1:14:56</div>
+              <div className="num" style={{ fontSize:11, color:T.ink3 }}>Athens was {PREV_RACE.result}</div>
             </div>
           </div>
           <div style={{ marginTop:20 }}>
             <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:T.ink3, marginBottom:6 }}>
-              <span>{TAPER_PLAN[0].theme} · block start</span>
+              <span>{blockPhase.theme} · block start</span>
               <span>{progress.toFixed(0)}% through the block</span>
               <span>Race day</span>
             </div>
@@ -3084,7 +3198,7 @@ function RaceTargets({ ana }) {
       </Card>
 
       <div className="split-even">
-        <Sec title="Race-day budget" sub={`Adds up to ${fmtHMS(budgetTotal)} — 20s of headroom on ${RACE.target}`}>
+        <Sec title="Race-day budget" sub={`Adds up to ${fmtHMS(budgetTotal)} — ${fmtMMSS(parseClock(RACE.target) - budgetTotal)} of headroom on ${RACE.target}`}>
           <Card pad={16}>
             {RACE_BUDGET.map((b, i) => (
               <div key={i} style={{ display:"flex", alignItems:"center", gap:11, marginBottom:12 }}>
@@ -3103,7 +3217,7 @@ function RaceTargets({ ana }) {
           </Card>
         </Sec>
 
-        <Sec title="Where the 5 minutes comes from" sub={`${fmtMMSS(gainTotal)} of identified gains vs Riga`}>
+        <Sec title={`Where the ${fmtMMSS(gainTotal)} comes from`} sub={`identified gains vs ${PREV_RACE.name.replace("HYROX ", "")}`}>
           <Card pad={16}>
             {RACE_GAINS.map((g, i) => (
               <div key={i} style={{ display:"flex", alignItems:"center", gap:11, marginBottom:10 }}>
@@ -3113,7 +3227,7 @@ function RaceTargets({ ana }) {
               </div>
             ))}
             <div style={{ marginTop:8, paddingTop:10, borderTop:`1px solid ${T.lineDim}` }}>
-              {RACE_GAINS.slice(0, 3).map(g => (
+              {RACE_GAINS.slice(0, 4).map(g => (
                 <div key={g.name} style={{ fontSize:10.5, color:T.ink3, marginBottom:4, lineHeight:1.5 }}>
                   <strong style={{ color:T.ink2 }}>{g.name}:</strong> {g.how}
                 </div>
@@ -3123,10 +3237,10 @@ function RaceTargets({ ana }) {
         </Sec>
       </div>
 
-      <Sec title="Station targets" sub="Riga result → Athens target">
+      <Sec title="Station targets" sub="Athens result → Copenhagen target">
         <div className="grid g4">
-          {RIGA_SPLITS.map((r, i) => (
-            <Stat key={i} label={r.label} value={r.target} sub={`Riga ${r.riga}`} tone="accent" accentBar />
+          {STATION_TARGETS.map((r, i) => (
+            <Stat key={i} label={r.label} value={r.target} sub={`Athens ${r.prev}`} tone="accent" accentBar />
           ))}
         </div>
       </Sec>
@@ -3136,22 +3250,22 @@ function RaceTargets({ ana }) {
           <Card pad={14}>
             <Tag tone={tsb >= 10 ? "ok" : "warn"}>FORM TARGET</Tag>
             <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>TSB +10 → +20</div>
-            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>by Sep 4 · currently {tsb >= 0 ? "+" : ""}{tsb.toFixed(0)}</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>by Mar 26 · currently {tsb >= 0 ? "+" : ""}{tsb.toFixed(0)}</div>
           </Card>
           <Card pad={14}>
             <Tag tone="accent">TAPER</Tag>
-            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>Aug 31 · −40%</div>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>Mar 22 · −40%</div>
             <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>cut volume, keep intensity touches</div>
           </Card>
           <Card pad={14}>
-            <Tag tone="warn">HEAT</Tag>
-            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>30°C+ in Athens</div>
-            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>sauna 20min blocks from Aug 20</div>
+            <Tag tone="ok">NO HEAT BLOCK</Tag>
+            <div className="num" style={{ fontSize:22, fontWeight:800, color:T.ink, marginTop:8 }}>Indoor · March</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>Athens needed sauna; this load is simply freed</div>
           </Card>
           <Card pad={14}>
             <Tag tone="info">VENUE</Tag>
-            <div style={{ fontSize:15, fontWeight:800, color:T.ink, marginTop:8 }}>Metropolitan Expo</div>
-            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>walk the roxzone route on Sep 4</div>
+            <div style={{ fontSize:15, fontWeight:800, color:T.ink, marginTop:8 }}>{RACE.venue}</div>
+            <div style={{ fontSize:11, color:T.ink3, marginTop:4 }}>walk the roxzone route on Mar 26</div>
           </Card>
         </div>
       </Sec>
@@ -3596,10 +3710,11 @@ function RaceView({ ana }) {
 
   return (
     <div className="fade">
-      <SubNav items={[["targets","TARGETS"],["sessions","SESSIONS"],["trends","TRENDS"]]} value={tab} onChange={setTab} />
+      <SubNav items={[["targets","TARGETS"],["athens","ATHENS 🏁"],["sessions","SESSIONS"],["trends","TRENDS"]]} value={tab} onChange={setTab} />
       {tab === "targets" && (RACE.result && TODAY >= RACE.dateISO
-        ? <RaceResult ana={ana} />
+        ? <RaceResult ana={ana} race={RACE} prev={PREV_RACE} budget={RACE_BUDGET} gains={RACE_GAINS} />
         : <RaceTargets ana={ana} />)}
+      {tab === "athens" && <RaceResult ana={ana} race={ATHENS} prev={RIGA} budget={ATHENS_BUDGET} gains={ATHENS_GAINS} />}
       {tab === "sessions" && (sessions.length === 0
         ? <Card><Empty>No Hyrox sessions yet. They appear automatically when an activity is named with “hyrox” or “race simulation”.</Empty></Card>
         : <>
