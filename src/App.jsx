@@ -1203,61 +1203,14 @@ function getWeekTarget(startISO, endISO) {
   return { theme:"Post-race", lo:0, hi:0, note:"Recovery" };
 }
 
+/* Week 1 is the Monday-to-Sunday block that starts the road to Copenhagen —
+   the post-Athens decompress. The Athens build (Jul 27 – Sep 5) was dropped
+   once it was raced; its splits live in HYROX_DATA and its plan-vs-actual in
+   the RACE → ATHENS panel, which is where that history is actually useful.
+   No week here carries a `race` session yet, so PlanBoard's raceIdx is -1 and
+   no chip is flagged 🏁 until Copenhagen week is written. */
 const SCHEDULE = [
-  { week:1, label:"Jul 27–Aug 2", theme:"Specificity Restart", days:[
-    { date:"2026-07-27", dow:"MON", label:"Jul 27", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"✅ DONE · ski 2×500m @ 1:56 + row 2×500m @ 1:58 (fatigued) · 1000m TT still owed"}] },
-    { date:"2026-07-28", dow:"TUE", label:"Jul 28", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"✅ SKI 1000m TT = 3:54 (1:57/500m) · 45s faster than Riga's 4:39 · row TT deferred (heavy legs)"}] },
-    { date:"2026-07-29", dow:"WED", label:"Jul 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-07-30", dow:"THU", label:"Jul 30", sessions:[{type:"plan",text:"ROW 1000m TT first (fresh legs), then threshold 3×1km @ 4:20/km · TT is the priority"}] },
-    { date:"2026-07-31", dow:"FRI", label:"Jul 31", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled PULL 6×25m technique + BBJ 5×20m @ 70s + lat pulldown 4×10"}] },
-    { date:"2026-08-01", dow:"SAT", label:"Aug 1", sessions:[{type:"hyrox",text:"HALF SIM · 4×1km @ 4:40 + Ski / Sled Push / Sled Pull / BBJ · JOG every transition"}] },
-    { date:"2026-08-02", dow:"SUN", label:"Aug 2", sessions:[{type:"rest",text:"Full rest · family day"}] },
-  ]},
-  { week:2, label:"Aug 3–9", theme:"Erg Engine", days:[
-    { date:"2026-08-03", dow:"MON", label:"Aug 3", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: 3×500m ski @ 2:07/500m"}] },
-    { date:"2026-08-04", dow:"TUE", label:"Aug 4", sessions:[{type:"tennis",text:"Tennis 🎾 · morning",cal:true},{type:"plan",text:"4×1000m ski @ 2:03/500m · 2min rest · hold the split the whole 1000m, no fade"}] },
-    { date:"2026-08-05", dow:"WED", label:"Aug 5", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-08-06", dow:"THU", label:"Aug 6", sessions:[{type:"plan",text:"COMPROMISED: [1000m ski → 1km run @ 4:35] ×3 · this exact pattern cost you Riga"}] },
-    { date:"2026-08-07", dow:"FRI", label:"Aug 7", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Strength 45min · sled pull 8×25m heavy · lunges 4×50m · wall balls 2×25 (maintain only)"}] },
-    { date:"2026-08-08", dow:"SAT", label:"Aug 8", sessions:[{type:"plan",text:"Long run 70min · last 20min @ 4:40/km · aerobic base + race-pace top-up"}] },
-    { date:"2026-08-09", dow:"SUN", label:"Aug 9", sessions:[{type:"rest",text:"Rest · family day"}] },
-  ]},
-  { week:3, label:"Aug 10–16", theme:"Full Sim #1", days:[
-    { date:"2026-08-10", dow:"MON", label:"Aug 10", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-08-11", dow:"TUE", label:"Aug 11", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Erg endurance 4×1000m ski @ 4:10 · 2min rest · revised target, hold it"}] },
-    { date:"2026-08-12", dow:"WED", label:"Aug 12", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"BBJ block 6×20m @ 68s · 75s rest · rhythm over power · + 15min core"}] },
-    { date:"2026-08-13", dow:"THU", label:"Aug 13", sessions:[{type:"plan",text:"Easy 30min Z2 jog · freshen up for Saturday"}] },
-    { date:"2026-08-14", dow:"FRI", label:"Aug 14", sessions:[{type:"tennis",text:"Tennis 🎾 · light only, no sparring",cal:true}] },
-    { date:"2026-08-15", dow:"SAT", label:"Aug 15", sessions:[{type:"hyrox",text:"🏁 FULL RACE SIM #1 · target 1:12–1:13 · log EVERY split incl. roxzone"}] },
-    { date:"2026-08-16", dow:"SUN", label:"Aug 16", sessions:[{type:"rest",text:"Full rest"}] },
-  ]},
-  { week:4, label:"Aug 17–23", theme:"Peak Load", days:[
-    { date:"2026-08-17", dow:"MON", label:"Aug 17", sessions:[{type:"rest",text:"Rest / 30min easy walk · sim recovery"}] },
-    { date:"2026-08-18", dow:"TUE", label:"Aug 18", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"hyrox",text:"Hyrox group · evening",cal:true}] },
-    { date:"2026-08-19", dow:"WED", label:"Aug 19", sessions:[{type:"plan",text:"4×[1000m row @ 2:05/500m + 1km run @ 4:35] continuous · the exact Athens pattern"}] },
-    { date:"2026-08-20", dow:"THU", label:"Aug 20", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"🔥 Sauna 20min post-session · heat acclimation starts (Athens will be 30°C+)"}] },
-    { date:"2026-08-21", dow:"FRI", label:"Aug 21", sessions:[{type:"hyrox",text:"Hyrox group · evening",cal:true},{type:"plan",text:"After: sled pull 6×25m + 100 wall balls unbroken-ish"}] },
-    { date:"2026-08-22", dow:"SAT", label:"Aug 22", sessions:[{type:"plan",text:"Compromised long: 5×[1km @ 4:35 + 1 station] continuous · peak specificity"}] },
-    { date:"2026-08-23", dow:"SUN", label:"Aug 23", sessions:[{type:"rest",text:"Rest · family day · 🔥 sauna 20min"}] },
-  ]},
-  { week:5, label:"Aug 24–30", theme:"Sharpen", days:[
-    { date:"2026-08-24", dow:"MON", label:"Aug 24", sessions:[{type:"hyrox",text:"Hyrox group · evening · moderate, don't race it",cal:true}] },
-    { date:"2026-08-25", dow:"TUE", label:"Aug 25", sessions:[{type:"tennis",text:"Tennis 🎾",cal:true},{type:"plan",text:"Erg 6×500m @ 2:05 · 90s rest · sharp not deep · 🔥 sauna 20min"}] },
-    { date:"2026-08-26", dow:"WED", label:"Aug 26", sessions:[{type:"plan",text:"Run 45min · 4×3min @ 4:30/km · sharpening only"}] },
-    { date:"2026-08-27", dow:"THU", label:"Aug 27", sessions:[{type:"tennis",text:"Tennis 🎾 · light",cal:true},{type:"plan",text:"🔥 Sauna 20min"}] },
-    { date:"2026-08-28", dow:"FRI", label:"Aug 28", sessions:[{type:"rest",text:"Rest or 25min easy jog"}] },
-    { date:"2026-08-29", dow:"SAT", label:"Aug 29", sessions:[{type:"hyrox",text:"🏁 SIM #2 · HALF distance at EXACT Athens splits · 4 runs @ 4:36 + 4 stations · rehearsal not test"}] },
-    { date:"2026-08-30", dow:"SUN", label:"Aug 30", sessions:[{type:"rest",text:"Rest · 🔥 sauna 20min"}] },
-  ]},
-  { week:6, label:"Aug 31–Sep 5", theme:"🏁 Race Week — Taper", days:[
-    { date:"2026-08-31", dow:"MON", label:"Aug 31", sessions:[{type:"rest",text:"Rest / 30min easy walk"}] },
-    { date:"2026-09-01", dow:"TUE", label:"Sep 1", sessions:[{type:"plan",text:"30min Z2 + 4×30s strides · legs only, zero fatigue"},{type:"plan",text:"🔥 Sauna 20min · final heat prep"}] },
-    { date:"2026-09-02", dow:"WED", label:"Sep 2", sessions:[{type:"plan",text:"Activation 25min: jog + 3×20m BBJ + 2×500m ski @ race pace + 25 wall balls · NO fatigue"}] },
-    { date:"2026-09-03", dow:"THU", label:"Sep 3", sessions:[{type:"rest",text:"Rest · hydrate + electrolytes · start carb load"}] },
-    { date:"2026-09-04", dow:"FRI", label:"Sep 4", sessions:[{type:"rest",text:"✈️ Travel to Athens · 20min shakeout · WALK THE ROXZONE ROUTE at the venue"}] },
-    { date:"2026-09-05", dow:"SAT", label:"Sep 5", sessions:[{type:"race",text:"🏁 HYROX ATHENS · 1:09:23 · target beaten by 37s · 86th overall, 17th in 35-39",cal:true}] },
-  ]},
-  { week:7, label:"Sep 6–13", theme:"Decompress", days:[
+  { week:1, label:"Sep 6–13", theme:"Decompress", days:[
     { date:"2026-09-06", dow:"SUN", label:"Sep 6", sessions:[{type:"rest",text:"Full rest · walk only · eat and sleep"}] },
     { date:"2026-09-07", dow:"MON", label:"Sep 7", sessions:[{type:"rest",text:"Rest · 30min easy walk · no training"}] },
     { date:"2026-09-08", dow:"TUE", label:"Sep 8", sessions:[{type:"plan",text:"20–30min very easy jog OR swim · Z1 only, purely to move blood"}] },
@@ -1276,7 +1229,7 @@ const SCHEDULE = [
      LEG content, not the session — key run becomes Z2 + strides, strength
      drops lunges and heavy sled, the long run moves to Sunday.
      ──────────────────────────────────────────────────────────────────── */
-  { week:8, label:"Sep 14–20", theme:"Aerobic Reset", days:[
+  { week:2, label:"Sep 14–20", theme:"Aerobic Reset", days:[
     { date:"2026-09-14", dow:"MON", label:"Sep 14", sessions:[{type:"plan",text:"Z2 run 35min · easy, first structured week back"}] },
     { date:"2026-09-15", dow:"TUE", label:"Sep 15", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"}] },
     { date:"2026-09-16", dow:"WED", label:"Sep 16", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening · first one back — take the aerobic option in every block, no maximal strength"}] },
@@ -1285,7 +1238,7 @@ const SCHEDULE = [
     { date:"2026-09-19", dow:"SAT", label:"Sep 19", sessions:[{type:"plan",text:"Long run 60min · pure Z2, conversational the whole way"}] },
     { date:"2026-09-20", dow:"SUN", label:"Sep 20", sessions:[{type:"rest",text:"Tennis 🎾 or full rest — your call, but not both a match and a session"}] },
   ]},
-  { week:9, label:"Sep 21–27", theme:"Aerobic Reset", days:[
+  { week:3, label:"Sep 21–27", theme:"Aerobic Reset", days:[
     { date:"2026-09-21", dow:"MON", label:"Sep 21", sessions:[{type:"plan",text:"Z2 run 40min + 4×30s strides · legs only, no fatigue into Tuesday"}] },
     { date:"2026-09-22", dow:"TUE", label:"Sep 22", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"Optional: 25min easy spin or swim · evening"}] },
     { date:"2026-09-23", dow:"WED", label:"Sep 23", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening · pick SKI over row wherever the block offers a choice — it is your weakest station"}] },
@@ -1294,7 +1247,7 @@ const SCHEDULE = [
     { date:"2026-09-26", dow:"SAT", label:"Sep 26", sessions:[{type:"plan",text:"Long run 70min Z2"}] },
     { date:"2026-09-27", dow:"SUN", label:"Sep 27", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
   ]},
-  { week:10, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
+  { week:4, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
     { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"⏱ ROW 1000m TT — fresh legs, no excuses, it has been deferred twice"},{type:"plan",text:"Then ⏱ SKI 1000m TT after 10min easy · expect ~3:54"}] },
     { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"Z2 run 40min · evening"}] },
     { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 10min after the circle · 8 transitions, station → jog → station, clock every one. Baseline today, target 0:32"}] },
@@ -1303,7 +1256,7 @@ const SCHEDULE = [
     { date:"2026-10-03", dow:"SAT", label:"Oct 3", sessions:[{type:"plan",text:"⏱ 5km TT · the first running benchmark you have ever set. 10min warm-up, then honest"}] },
     { date:"2026-10-04", dow:"SUN", label:"Oct 4", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
-  { week:11, label:"Oct 5–11", theme:"Base I · Aerobic", days:[
+  { week:5, label:"Oct 5–11", theme:"Base I · Aerobic", days:[
     { date:"2026-10-05", dow:"MON", label:"Oct 5", sessions:[{type:"plan",text:"Z2 run 50min easy"}] },
     { date:"2026-10-06", dow:"TUE", label:"Oct 6", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · threshold 3×1km @ 4:15, 90s rest · evening"}] },
     { date:"2026-10-07", dow:"WED", label:"Oct 7", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:36"}] },
@@ -1312,7 +1265,7 @@ const SCHEDULE = [
     { date:"2026-10-10", dow:"SAT", label:"Oct 10", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km"}] },
     { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
   ]},
-  { week:12, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
+  { week:6, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
     { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"Z2 run 50min + 4×30s strides"}] },
     { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · compromised: [1000m ski → 1km @ 4:20] ×3 continuous · evening"}] },
     { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:36"}] },
@@ -1321,7 +1274,7 @@ const SCHEDULE = [
     { date:"2026-10-17", dow:"SAT", label:"Oct 17", sessions:[{type:"plan",text:"Long run 80min Z2"}] },
     { date:"2026-10-18", dow:"SUN", label:"Oct 18", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
   ]},
-  { week:13, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
+  { week:7, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
     { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"Z2 run 45min easy"}] },
     { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · threshold 4×1km @ 4:12, 90s rest · evening"}] },
     { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:34"}] },
