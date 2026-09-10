@@ -2560,7 +2560,7 @@ function ReferencePanel() {
             ["HRV baseline", `${hrvBaseline} ms (rolling weekly)`],
             ["Resting HR range", "40–46 bpm"],
             ["Devices", "Garmin Epix 2 Pro · HRM-Pro Plus"],
-            ["Last race", "Hyrox Riga · 30 May 2026 · 1:14:56"],
+            ["Previous race", `${PREV_RACE.name} · ${PREV_RACE.label} · ${PREV_RACE.result}`],
             [RACE.result && TODAY >= RACE.dateISO ? "Last race" : "Next race",
              RACE.result && TODAY >= RACE.dateISO
                ? `${RACE.name} · ${RACE.label} · ${RACE.result} (target ${RACE.target})`
