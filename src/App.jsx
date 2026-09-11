@@ -1223,7 +1223,7 @@ const SCHEDULE = [
     { date:"2026-09-09", dow:"WED", label:"Sep 9", sessions:[{type:"tennis",text:"Tennis 🎾 · social, no sparring"}] },
     { date:"2026-09-10", dow:"THU", label:"Sep 10", sessions:[{type:"rest",text:"Rest · 🔥 sauna 20min · mobility 15min"}] },
     { date:"2026-09-11", dow:"FRI", label:"Sep 11", sessions:[{type:"plan",text:"35min Z2 jog · first real aerobic touch since the race"}] },
-    { date:"2026-09-12", dow:"SAT", label:"Sep 12", sessions:[{type:"tennis",text:"Tennis 🎾"},{type:"plan",text:"Debrief: roxzone drills are the next block's headline — see RACE → what Athens says"}] },
+    { date:"2026-09-12", dow:"SAT", label:"Sep 12", sessions:[{type:"tennis",text:"Tennis 🎾"},{type:"plan",note:true,text:"Debrief: roxzone drills are the next block's headline — see RACE → what Athens says"}] },
     { date:"2026-09-13", dow:"SUN", label:"Sep 13", sessions:[{type:"rest",text:"Rest · family day"}] },
   ]},
 
@@ -1290,6 +1290,418 @@ const SCHEDULE = [
     { date:"2026-10-25", dow:"SUN", label:"Oct 25", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
   ]},
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADAPTIVE PLAN ENGINE
+   ───────────────────────────────────────────────────────────────────────────
+   SCHEDULE above is the *intent* — what the block wants, written by hand.
+   Everything below derives the *prescription* — what to actually do today,
+   given what was really trained and how the body responded to it.
+
+   It is a pure function of the synced data, evaluated on every render. That
+   is deliberate: it means the plan is exactly as fresh as the last Garmin
+   sync with no second pipeline to keep alive, and an unplanned session shows
+   up in the rest of the week the moment the sync picks it up.
+
+   Two hard rules, learned the same way the coach notes were:
+     · Never rewrite SCHEDULE from here. The intent stays readable and
+       diffable; adaptations are an overlay carrying their own reason.
+     · Every adjustment states WHY, in numbers pulled from the data in view.
+       An adjustment the athlete cannot audit is one he will ignore.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Duration written into a plan line: "35min", "20–30min" (take the midpoint),
+   "1h15". Returns null when the line names no duration, which is the signal to
+   fall back to what this session type historically takes him. */
+function planDurationMin(text) {
+  const t = String(text || "");
+  const range = t.match(/(\d+)\s*[–—-]\s*(\d+)\s*\s*min/i);
+  if (range) return Math.round((+range[1] + +range[2]) / 2);
+  const hm = t.match(/(\d+)\s*h\s*(\d{1,2})/i);
+  if (hm) return +hm[1] * 60 + +hm[2];
+  const min = t.match(/(\d+)\s*min/i);
+  if (min) return +min[1];
+  const hr = t.match(/(\d+)\s*h(?:our)?\b/i);
+  if (hr) return +hr[1] * 60;
+  return null;
+}
+
+/* Rewrite the duration inside a plan line by a factor, so a trimmed session
+   reads as the number he should actually do rather than the original with a
+   footnote. Ranges scale both ends; a line with no duration comes back
+   untouched and the caller falls back to an annotation. */
+function scaleDuration(text, factor) {
+  const round5 = (n) => Math.max(10, Math.round(n / 5) * 5);
+  let hit = false;
+  let out = String(text || "").replace(/(\d+)\s*([–—-])\s*(\d+)\s*min/i, (m, a, dash, b) => {
+    hit = true; return `${round5(+a * factor)}${dash}${round5(+b * factor)}min`;
+  });
+  if (!hit) out = out.replace(/(\d+)\s*min/i, (m, a) => { hit = true; return `${round5(+a * factor)}min`; });
+  return hit ? out : null;
+}
+
+/* Intensity a planned line is asking for, as an expected average HR.
+   Keyword-driven because the plan text is the only statement of intent that
+   exists before the session happens; where the text says nothing, the model
+   built from his own history supplies the number. CPET zones, running values
+   (bike zones +10): A <125 · B 125–142 · C 142–156 · D 156–177 · E >177. */
+const PLAN_INTENSITY = [
+  [/\brest\b|family day|full rest|no training/i, 0],
+  [/sauna|massage|mobility|walk only|easy walk/i, 0],
+  [/\bZ1\b|very easy|purely to move blood/i, 112],
+  [/⏱|time trial|\bTT\b|threshold|KEY RUN|\bsim\b|simulation|race pace|unbroken/i, 168],
+  [/roxzone|circuit|compromised/i, 162],
+  [/hyrox|circle @/i, 156],
+  [/strength|sled|lunge|pulldown|wall ball|core/i, 126],
+  [/\bZ2\b|easy|conversational|long run|technique|spin|swim|jog/i, 138],
+  [/moderate|erg|\bski\b|\brow\b/i, 146],
+];
+
+function planIntensity(session, model) {
+  const t = String(session.text || "");
+  // "Tennis 🎾 or full rest — your call" is typed `rest` but is a real session
+  // half the time, so the tennis test comes before the rest test.
+  if (session.type === "tennis" || /tennis/i.test(t)) return model.tennis.hr;
+  if (session.type === "rest") return 0;
+  for (const [re, hr] of PLAN_INTENSITY) if (re.test(t)) return hr;
+  return model.plan.hr;
+}
+
+/* What his sessions actually cost him, by type, from the last 90 days.
+   Medians rather than means so one 70-minute race does not distort the
+   tennis estimate. Falls back to the defaults when a type has no history —
+   which is the case for ski/row early in a block. */
+function loadModel(enriched) {
+  const med = (xs) => {
+    const s = xs.filter(v => v > 0).sort((a, b) => a - b);
+    return s.length ? s[Math.floor(s.length / 2)] : null;
+  };
+  const recent = enriched.filter(a => a._days >= 0 && a._days <= 90);
+  const build = (pred, fbHr, fbMin) => {
+    const set = recent.filter(pred);
+    return {
+      hr: med(set.map(a => a._avgHR)) || fbHr,
+      min: med(set.map(a => a._dur / 60)) || fbMin,
+      n: set.length,
+    };
+  };
+  return {
+    tennis:   build(isTennis, 138, 75),
+    run:      build(isRun, 145, 45),
+    strength: build(isStrength, 126, 45),
+    hyrox:    build(isHyrox, 156, 60),
+    plan:     build(a => a._avgHR > 0, 140, 45),
+  };
+}
+
+/* Estimated TRIMP a planned session would cost. Duration from the line if it
+   names one, otherwise from history. Used only to project the week forward —
+   completed days always use the real measured TRIMP. */
+const Z2_HR = 138;
+
+function estTrimp(session, model, hrOverride) {
+  if (isInfoLine(session)) return 0;
+  const hr = hrOverride || planIntensity(session, model);
+  if (!hr) return 0;
+  const t = String(session.text || "");
+  let min = planDurationMin(t);
+  if (min == null) {
+    if (session.type === "tennis" || /tennis/i.test(t)) min = model.tennis.min;
+    else if (/hyrox|circle @/i.test(t)) min = model.hyrox.min;
+    else if (/strength|sled/i.test(t)) min = model.strength.min;
+    else if (/run|jog|km/i.test(t)) min = model.run.min;
+    else min = model.plan.min;
+  }
+  return calcTRIMP(hr, min) * (isOptionalLine(session) ? 0.5 : 1);
+}
+
+/* Does a logged activity satisfy a planned session? Ordered most specific
+   first: the roxzone line says "station → jog → station" and would otherwise
+   be claimed by a run. */
+const SESSION_MATCHERS = [
+  [/tennis/i,                      (a) => isTennis(a)],
+  [/hyrox|circle @|roxzone/i,      (a) => isHyrox(a) || /hyrox|circle|roxzone/i.test(a.Title || "")],
+  [/sauna|massage/i,               (a) => isRecovery(a)],
+  [/strength|sled|lunge|pulldown|wall ball/i, (a) => isStrength(a)],
+  [/\bski\b|\brow\b|erg/i,         (a) => /ski|row|erg|elliptical/i.test((a.Title || "") + " " + (a["Activity Type"] || ""))],
+  [/swim/i,                        (a) => /swim/i.test(a["Activity Type"] || "")],
+  [/spin|bike|cycl/i,              (a) => /cycl|bike/i.test(a["Activity Type"] || "")],
+  [/run|jog|km\b|\bTT\b/i,         (a) => isRun(a)],
+];
+
+/* A plan line that reminds rather than prescribes — "Debrief: roxzone drills
+   are the next block's headline — see RACE → what Athens says". It names no
+   duration and asks for no work, but it mentions a station, so the matchers
+   claim it and it was costing 63 TRIMP of imaginary training, which alone
+   pushed the week over its ceiling and trimmed a real session.
+
+   `note: true` on the SCHEDULE line is the explicit way to say so; the
+   heuristic below catches the ones nobody remembered to mark. It is
+   deliberately narrow — a line that names a duration is always a session. */
+const INFO_PHRASE = /\bdebrief\b|\bsee (RACE|TRAIN|BODY|TODAY)\b/i;
+
+function isInfoLine(s) {
+  if (s.note) return true;
+  const t = String(s.text || "");
+  if (planDurationMin(t) != null) return false;
+  if (s.type === "tennis" || s.type === "hyrox" || s.type === "race") return false;
+  if (INFO_PHRASE.test(t)) return true;
+  return !SESSION_MATCHERS.some(([re]) => re.test(t));
+}
+
+/* Lines that offer a choice — "Tennis or full rest, your call" — are costed at
+   half, because over a block that is what they average out to. */
+const isOptionalLine = (s) => /\byour call\b|\boptional\b|\bOR\b|\bor full rest\b/i.test(String(s.text || ""));
+
+function sessionSatisfiedBy(session, done) {
+  const t = String(session.text || "");
+  if (session.type === "tennis" && done.some(isTennis)) return done.find(isTennis);
+  for (const [re, match] of SESSION_MATCHERS) {
+    if (re.test(t)) { const hit = done.find(match); if (hit) return hit; }
+  }
+  return null;
+}
+
+const isRestSession = (s) => s.type === "rest" && !/tennis/i.test(s.text || "");
+
+/* ── the engine ──────────────────────────────────────────────────────────── */
+function adaptPlan({ ana, health, hrvBaseline: base }) {
+  const { enriched, atl, ctl, tsb, daysSinceHard } = ana;
+  const daily = health.daily || [];
+  const todayRow = daily[daily.length - 1] || {};
+  const hrv = todayRow.hrv || null;
+  const lastSleep = (health.sleep || [])[health.sleep.length - 1];
+  const sleepMin = lastSleep ? lastSleep.deep + lastSleep.rem + lastSleep.light : null;
+  const R = readiness(tsb, daysSinceHard, hrv, base);
+  const hrvDelta = hrv && base ? hrv - base : null;
+  const model = loadModel(enriched);
+
+  const doneByDate = {};
+  enriched.forEach(a => { (doneByDate[a._date] = doneByDate[a._date] || []).push(a); });
+  const trimpOn = (d) => (doneByDate[d] || []).reduce((s, a) => s + a._trimp, 0);
+
+  const wkIdx = SCHEDULE.findIndex(w => w.days.some(d => d.date === TODAY));
+  const week = wkIdx >= 0 ? SCHEDULE[wkIdx] : null;
+
+  const adjustments = [];
+  const note = (date, label, why, kind) => adjustments.push({ date, label, why, kind });
+
+  /* ── signals the rules fire on ─────────────────────────────────────────── */
+  // Hard days back-to-back immediately before today.
+  const HARD_TRIMP = 55;
+  let consecutiveHard = 0;
+  for (let i = 1; i <= 4; i++) {
+    const d = new Date(TODAY); d.setDate(d.getDate() - i);
+    if (trimpOn(d.toISOString().slice(0, 10)) >= HARD_TRIMP) consecutiveHard++;
+    else break;
+  }
+  // Days since a genuine rest day (no logged load at all).
+  let daysSinceRest = 0;
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date(TODAY); d.setDate(d.getDate() - i);
+    if (trimpOn(d.toISOString().slice(0, 10)) > 5) daysSinceRest++;
+    else break;
+  }
+
+  /* ── week accounting ───────────────────────────────────────────────────── */
+  let governor = null;
+  if (week) {
+    const days = week.days;
+    const target = getWeekTarget(days[0].date, days[days.length - 1].date);
+    const mid = (target.lo + target.hi) / 2;
+    const todayIdx = days.findIndex(d => d.date === TODAY);
+
+    const doneTrimp = days.filter(d => d.date <= TODAY).reduce((s, d) => s + trimpOn(d.date), 0);
+    // Half-credit for today: the day is in progress, judging it as complete
+    // makes every morning look behind schedule.
+    const elapsed = Math.max(0.5, todayIdx + 0.5);
+    const expected = mid * (elapsed / days.length);
+    const pace = expected > 0 ? doneTrimp / expected : 1;
+
+    // What the untouched plan still asks for, from today on.
+    const remainingPlanned = days.filter(d => d.date >= TODAY).reduce((s, d) => {
+      const already = doneByDate[d.date] || [];
+      return s + d.sessions.reduce((ss, sn) =>
+        ss + (d.date === TODAY && sessionSatisfiedBy(sn, already) ? 0 : estTrimp(sn, model)), 0);
+    }, 0);
+
+    const projected = Math.round(doneTrimp + remainingPlanned);
+    governor = {
+      target, mid, doneTrimp: Math.round(doneTrimp), remainingPlanned: Math.round(remainingPlanned),
+      projected, pace, elapsed, totalDays: days.length, todayIdx,
+      over: projected > target.hi, under: projected < target.lo,
+      theme: week.theme, label: week.label, weekNo: week.week,
+    };
+  }
+
+  /* ── the scaling decision, one number the rules share ──────────────────── */
+  // >1 means do more than written, <1 means do less. Kept inside a band so no
+  // single signal can erase a session on its own.
+  let scale = 1, scaleWhy = [];
+  if (governor) {
+    if (governor.projected > governor.target.hi && governor.target.hi > 0) {
+      const need = governor.target.hi - governor.doneTrimp;
+      const f = governor.remainingPlanned > 0 ? need / governor.remainingPlanned : 1;
+      if (f < 0.95) {
+        scale = Math.max(0.6, f);
+        scaleWhy.push(`week projects ${governor.projected} TRIMP against a ${governor.target.lo}–${governor.target.hi} ceiling`);
+      }
+    } else if (governor.projected < governor.target.lo && governor.target.lo > 0 && R >= 7) {
+      scale = Math.min(1.25, governor.target.lo / Math.max(1, governor.projected));
+      scaleWhy.push(`week projects ${governor.projected} TRIMP, under the ${governor.target.lo} floor, and readiness is ${R}/10`);
+    }
+  }
+
+  // Readiness overrides volume: a suppressed morning caps the day regardless
+  // of what the week's arithmetic wants.
+  let easeHard = false, easeWhy = null;
+  if (R <= 3) { easeHard = true; easeWhy = `readiness ${R}/10`; }
+  else if (hrvDelta != null && hrvDelta <= -10) { easeHard = true; easeWhy = `HRV ${hrv}ms is ${Math.abs(hrvDelta)}ms under the ${base}ms baseline`; }
+  else if (sleepMin != null && sleepMin < 360) { easeHard = true; easeWhy = `${fmtMin(sleepMin)} of sleep last night`; }
+  else if (consecutiveHard >= 3) { easeHard = true; easeWhy = `${consecutiveHard} hard days back to back`; }
+  if (easeHard && hrvDelta != null && hrvDelta > -10 && R > 3 && consecutiveHard < 3 && sleepMin >= 360) easeHard = false;
+
+  const forceRest = daysSinceRest >= 9 && tsb < -15;
+
+  /* ── apply to every day from today forward ─────────────────────────────── */
+  const HARD_HR = 155;
+  const adaptDay = (day, inCurrentWeek) => {
+    const done = doneByDate[day.date] || [];
+    const past = day.date < TODAY, isToday = day.date === TODAY;
+    const sessions = day.sessions.map((s) => {
+      const out = { ...s, _orig: s.text, _status: "planned", _adj: null };
+      const hit = sessionSatisfiedBy(s, done);
+      if (hit) {
+        out._status = "done";
+        out._doneWith = hit;
+        return out;
+      }
+      if (past) { out._status = (isRestSession(s) || isInfoLine(s)) ? "planned" : "missed"; return out; }
+      if (isRestSession(s) || isInfoLine(s)) return out;
+      if (!inCurrentWeek && !isToday) return out;      // only steer the live week
+
+      const hr = planIntensity(s, model);
+      const hard = hr >= HARD_HR;
+
+      // R3 — readiness gate. Applies to today and tomorrow only; beyond that
+      // the physiology in view is too old to prescribe from.
+      const withinGate = isToday || daysAgo(day.date) >= -1;
+      if (easeHard && hard && withinGate) {
+        out._status = "adjusted";
+        out._adj = { kind: "ease", label: "Ease off",
+                     detail: "Hold it at Z2 — drop the intervals, the timing and the max efforts. Same duration.",
+                     why: easeWhy };
+        note(day.date, "Quality work eased to Z2", easeWhy, "ease");
+        return out;
+      }
+
+      // R4 — weekly volume governor.
+      if (scale < 0.95) {
+        if (scale <= 0.72 && !hard && s.type !== "tennis" && /optional|OR /i.test(s.text)) {
+          out._status = "adjusted";
+          out._adj = { kind: "drop", label: "Skip", detail: "Drop this one entirely.", why: scaleWhy[0] };
+          note(day.date, "Optional session dropped", scaleWhy[0], "drop");
+          return out;
+        }
+        const scaled = scaleDuration(s.text, scale);
+        if (scaled && scaled !== s.text) {
+          out._status = "adjusted";
+          out.text = scaled;
+          out._adj = { kind: "trim", label: `−${Math.round((1 - scale) * 100)}%`,
+                       detail: `Was: ${s._orig || s.text}`, why: scaleWhy[0] };
+          note(day.date, `Volume cut ${Math.round((1 - scale) * 100)}%`, scaleWhy[0], "trim");
+          return out;
+        }
+        if (hard) {
+          out._status = "adjusted";
+          out._adj = { kind: "trim", label: "Shorten",
+                       detail: "Cut roughly a quarter of the working sets.", why: scaleWhy[0] };
+          note(day.date, "Working sets cut", scaleWhy[0], "trim");
+        }
+        return out;
+      }
+      if (scale > 1.05) {
+        const scaled = scaleDuration(s.text, scale);
+        if (scaled && scaled !== s.text) {
+          out._status = "adjusted";
+          out.text = scaled;
+          out._adj = { kind: "add", label: `+${Math.round((scale - 1) * 100)}%`,
+                       detail: `Was: ${s._orig || s.text}`, why: scaleWhy[0] };
+          note(day.date, `Volume raised ${Math.round((scale - 1) * 100)}%`, scaleWhy[0], "add");
+        }
+        return out;
+      }
+      return out;
+    });
+
+    // R7 — no rest day in over a week while form is negative. Convert the
+    // next day that is already light rather than inventing a rest day.
+    if (forceRest && (isToday || daysAgo(day.date) >= -2) && sessions.every(s => s._status !== "done")) {
+      const light = sessions.every(s => planIntensity(s, model) < HARD_HR);
+      if (light && sessions.length && !sessions.some(s => s._adj)) {
+        sessions.forEach(s => {
+          if (isRestSession(s)) return;
+          s._status = "adjusted";
+          s._adj = { kind: "ease", label: "Recovery",
+                     detail: "Keep it to walking or mobility. Take the rest day.",
+                     why: `${daysSinceRest} days without a rest day and form is ${tsb.toFixed(0)}` };
+        });
+        note(day.date, "Converted to a recovery day",
+             `${daysSinceRest} days without a rest day and form is ${tsb.toFixed(0)}`, "ease");
+      }
+    }
+
+    // Unplanned work: anything logged that no line in the plan asked for.
+    // No TRIMP floor here — a 10-minute swim the plan never mentioned is still
+    // unplanned, and splitting it into a second "done but unasked" bucket gave
+    // the same fact two different colours on the same card.
+    const claimed = new Set(sessions.map(s => s._doneWith).filter(Boolean));
+    const unplanned = done.filter(a => !claimed.has(a));
+
+    return { ...day, sessions, _done: done, _unplanned: unplanned, _trimp: Math.round(trimpOn(day.date)) };
+  };
+
+  const weeks = SCHEDULE.map((w, i) => ({ ...w, days: w.days.map(d => adaptDay(d, i === wkIdx)) }));
+  const todayDay = weeks.flatMap(w => w.days).find(d => d.date === TODAY) || null;
+
+  /* Second pass: what the week costs once the adjustments above are honoured.
+     The raw projection is what triggered the trim, so a budget card showing
+     only that would keep claiming an overshoot the plan on screen no longer
+     commits to — and the trim would look like it had done nothing. */
+  if (governor && wkIdx >= 0) {
+    const priceOf = (sn) =>
+      sn._status === "done" || sn._adj?.kind === "drop" ? 0
+        : sn._adj?.kind === "ease" ? estTrimp(sn, model, Z2_HR)
+        : estTrimp(sn, model);
+    const remainingAdapted = weeks[wkIdx].days
+      .filter(d => d.date >= TODAY)
+      .reduce((s, d) => s + d.sessions.reduce((ss, sn) => ss + priceOf(sn), 0), 0);
+    governor.projectedRaw = governor.projected;
+    governor.projected = Math.round(governor.doneTrimp + remainingAdapted);
+    governor.trimmedBy = governor.projectedRaw - governor.projected;
+  }
+
+  // Unplanned load over the trailing week — the thing that makes the rest of
+  // the plan move, and the number he will want to see when it does.
+  const plannedDates = new Set(SCHEDULE.flatMap(w => w.days).map(d => d.date));
+  let unplanned7 = 0;
+  weeks.flatMap(w => w.days)
+    .filter(d => d.date <= TODAY && daysAgo(d.date) <= 6)
+    // Trivial sessions are shown but not argued from: a 5-minute walk should
+    // not read as load that displaced planned work.
+    .forEach(d => { unplanned7 += d._unplanned.filter(a => a._trimp > 5).reduce((s, a) => s + a._trimp, 0); });
+
+  return {
+    weeks, today: todayDay, governor, adjustments, model,
+    signals: {
+      readiness: R, hrv, hrvDelta, base, sleepMin, tsb, atl, ctl,
+      consecutiveHard, daysSinceRest, forceRest, easeHard, easeWhy,
+      scale, scaleWhy: scaleWhy[0] || null, unplanned7: Math.round(unplanned7),
+      rhr: todayRow.rhr ?? null,
+    },
+  };
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    DESIGN SYSTEM — dark athletic cockpit
@@ -1758,9 +2170,181 @@ function buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, slee
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   ADAPTIVE PLAN — presentation
+   The plan on screen is never just SCHEDULE: it is SCHEDULE after the engine
+   has reconciled it with what was actually trained. Anything the engine
+   changed says so, and says why, right where the change is.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ADJ_TONE = { ease:"warn", trim:"warn", drop:"bad", add:"ok" };
+
+function AdjTag({ adj }) {
+  if (!adj) return null;
+  return <Tag tone={ADJ_TONE[adj.kind] || "warn"}>{adj.label}</Tag>;
+}
+
+/* One line of the prescription. `size` trades detail for density: "full" on
+   Today, "tight" in the week board where seven of these sit side by side. */
+function PlanLine({ s, size = "full" }) {
+  const tight = size === "tight";
+  const st = SS[s.type] || SS.plan;
+  const done = s._status === "done", missed = s._status === "missed", adj = s._adj;
+  const tone = done ? "ok" : adj ? (ADJ_TONE[adj.kind] || "warn") : null;
+
+  const bg     = done ? TONE_BG.ok : adj ? TONE_BG[tone] : st.bg;
+  const border = done ? `${T.ok}33` : adj ? `${TONE[tone]}44` : st.border;
+  const text   = done ? T.ok : adj ? T.ink : st.text;
+
+  return (
+    <div style={{ display:"flex", gap: tight ? 7 : 11, padding: tight ? "7px 9px" : "12px 14px",
+                  marginBottom: tight ? 0 : 8, background:bg, border:`1px solid ${border}`,
+                  borderRadius: tight ? 8 : 12, opacity: missed ? 0.5 : 1 }}>
+      <div style={{ width: tight ? 6 : 8, height: tight ? 6 : 8, borderRadius:"50%", marginTop: tight ? 5 : 6,
+                    flexShrink:0, background: done ? T.ok : adj ? TONE[tone] : st.dot }} />
+      <div style={{ minWidth:0, flex:1 }}>
+        <div style={{ fontSize: tight ? 11 : 13.5, fontWeight: tight ? 400 : 600, color:text,
+                      lineHeight:1.5, overflowWrap:"anywhere",
+                      textDecoration: missed ? "line-through" : "none" }}>
+          {done ? "✓ " : ""}{s.text}
+        </div>
+        {adj && (
+          <div style={{ marginTop: tight ? 4 : 7, display:"flex", gap:7, alignItems:"flex-start", flexWrap:"wrap" }}>
+            <AdjTag adj={adj} />
+            {!tight && (
+              <div style={{ fontSize:11.5, color:T.ink2, lineHeight:1.5, flex:"1 1 200px", minWidth:0 }}>
+                {adj.detail}
+                <span style={{ color:T.ink3 }}> — {adj.why}.</span>
+              </div>
+            )}
+          </div>
+        )}
+        {!adj && missed && !tight && (
+          <div style={{ fontSize:11, color:T.ink3, marginTop:5 }}>Not logged — counted as a deficit in this week's total.</div>
+        )}
+        {done && s._doneWith && !tight && (
+          <div className="num" style={{ fontSize:11, color:T.ink3, marginTop:4 }}>
+            {s._doneWith.Title || s._doneWith["Activity Type"]} · {fmtDur(shownDur(s._doneWith))}
+            {s._doneWith._avgHR > 0 ? ` · ♥${s._doneWith._avgHR}` : ""}
+          </div>
+        )}
+        {s.cal && !adj && (
+          <div style={{ fontSize: tight ? 8.5 : 9, fontWeight:800, letterSpacing:"0.1em", color:st.dot, marginTop:5 }}>IN CALENDAR</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* Load logged with no line in the plan asking for it — the unplanned tennis
+   match that makes everything downstream move. */
+function UnplannedLine({ a, tight }) {
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:7, padding: tight ? "6px 8px" : "9px 12px",
+      background:TONE_BG.info, border:`1px solid ${T.info}33`, borderRadius:8, marginBottom: tight ? 0 : 8 }}>
+      <span style={{ fontSize: tight ? 12 : 15 }}>{getEmoji(a)}</span>
+      <div style={{ minWidth:0, flex:1 }}>
+        <div style={{ fontSize: tight ? 10.5 : 12.5, fontWeight:700, color:T.info, lineHeight:1.35, overflowWrap:"anywhere" }}>
+          + {a.Title || a["Activity Type"]}
+        </div>
+        <div className="num" style={{ fontSize: tight ? 9.5 : 11, color:T.ink3 }}>
+          unplanned · {fmtDur(shownDur(a))}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""} · TRIMP {a._trimp.toFixed(0)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* The week's load budget: what the block asked for, what is banked, and where
+   the week lands if the rest of it is trained as it now reads. */
+function WeekGovernor({ governor, signals, compact = false }) {
+  if (!governor || governor.target.hi <= 0) return null;
+  const { target, doneTrimp, projected, pace } = governor;
+  const max = Math.max(target.hi, projected, doneTrimp) * 1.08 || 1;
+  const p = (v) => Math.min(100, (v / max) * 100);
+  const trimmed = governor.trimmedBy > 0;
+  const tone = projected > target.hi ? "warn" : projected < target.lo ? "info" : "ok";
+  const verdict = projected > target.hi
+    ? `Projecting ${projected} against a ${target.hi} ceiling for ${target.theme}${trimmed ? `, already down from ${governor.projectedRaw} — the remaining sessions are trimmed as far as they go without deleting one` : ""}.`
+    : projected < target.lo
+    ? `Projecting ${projected}, under the ${target.lo} floor for ${target.theme}.`
+    : trimmed
+    ? `Projecting ${projected} — inside the ${target.lo}–${target.hi} band for ${target.theme}, after trimming ${governor.trimmedBy} TRIMP from the sessions below.`
+    : `Projecting ${projected} — inside the ${target.lo}–${target.hi} band for ${target.theme}.`;
+
+  return (
+    <Card pad={compact ? 13 : 16} style={{ marginBottom:14 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", gap:12, flexWrap:"wrap", alignItems:"baseline" }}>
+        <div style={{ fontSize:10, fontWeight:800, letterSpacing:"0.12em", color:T.ink3 }}>WEEK LOAD BUDGET</div>
+        <Tag tone={tone}>{pace >= 1.15 ? "AHEAD OF PACE" : pace <= 0.85 ? "BEHIND PACE" : "ON PACE"}</Tag>
+      </div>
+
+      <div style={{ position:"relative", marginTop:12 }}>
+        {/* target band sits behind the fill so the bar length still reads as the value */}
+        <div style={{ position:"absolute", left:`${p(target.lo)}%`, width:`${p(target.hi) - p(target.lo)}%`,
+          top:-3, bottom:-3, background:"rgba(139,92,246,0.16)", border:`1px solid ${T.accent}44`,
+          borderRadius:4, pointerEvents:"none" }} />
+        <Bar value={p(doneTrimp)} tone={tone} height={12} />
+        <div title={`projected ${projected}`} style={{ position:"absolute", left:`${p(projected)}%`, top:-5,
+          width:2, height:22, background:T.ink, borderRadius:1 }} />
+      </div>
+
+      <div className="num" style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:T.ink3, marginTop:7 }}>
+        <span>banked {doneTrimp}</span>
+        <span>target {target.lo}–{target.hi}</span>
+        <span>projected {projected}</span>
+      </div>
+
+      <div style={{ fontSize:12, color:T.ink2, lineHeight:1.6, marginTop:10 }}>{verdict}</div>
+      {signals?.unplanned7 > 0 && (
+        <div style={{ fontSize:11.5, color:T.info, lineHeight:1.6, marginTop:6 }}>
+          {signals.unplanned7} TRIMP of the last seven days came from sessions the plan never asked for.
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/* The audit trail. Without this the plan just silently changes underneath him,
+   which is exactly the failure mode that makes an athlete stop trusting it. */
+function PlanAdjustments({ plan }) {
+  const { adjustments, signals } = plan;
+  const drivers = [];
+  if (signals.easeHard) drivers.push({ tone:"warn", text:`Intensity capped today — ${signals.easeWhy}.` });
+  if (signals.scaleWhy) drivers.push({ tone: signals.scale < 1 ? "warn" : "ok", text:`Volume scaled ${signals.scale < 1 ? "down" : "up"} — ${signals.scaleWhy}.` });
+  if (signals.forceRest) drivers.push({ tone:"bad", text:`${signals.daysSinceRest} days without a rest day. The next light day is now a recovery day.` });
+  if (signals.consecutiveHard >= 2) drivers.push({ tone:"warn", text:`${signals.consecutiveHard} hard days back to back going into today.` });
+  if (!drivers.length) drivers.push({ tone:"ok", text:"Load, readiness and the week's budget all agree with the plan as written. Nothing changed." });
+
+  return (
+    <Sec title="Plan adjustments" sub="Recomputed from the last sync">
+      <Card pad={13}>
+        {drivers.map((d, i) => <Note key={i} tone={d.tone}>{d.text}</Note>)}
+        {adjustments.length > 0 && (
+          <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${T.lineDim}` }}>
+            {adjustments.slice(0, 6).map((a, i) => (
+              <div key={i} style={{ display:"flex", gap:9, padding:"6px 0",
+                borderBottom: i < Math.min(5, adjustments.length - 1) ? `1px solid ${T.lineDim}` : "none" }}>
+                <div className="num" style={{ minWidth:44, fontSize:10, color:T.ink3, paddingTop:2 }}>{fmtISO(a.date)}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:11.5, color:TONE[ADJ_TONE[a.kind] || "warn"], fontWeight:600 }}>{a.label}</div>
+                  <div style={{ fontSize:10.5, color:T.ink3, lineHeight:1.5 }}>{a.why}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ fontSize:10.5, color:T.ink3, marginTop:8, lineHeight:1.5 }}>
+          The written block stays as authored. This layer reconciles it with what was actually
+          trained, every time the page loads.
+        </div>
+      </Card>
+    </Sec>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    TODAY
    ═══════════════════════════════════════════════════════════════════════════ */
-function TodayView({ ana, health }) {
+function TodayView({ ana, health, plan }) {
   const { yesterday, tsb, atl, ctl, daysSinceHard, weeklyKm } = ana;
   const daily = health.daily;
   const today = daily[daily.length - 1] || {};
@@ -1777,7 +2361,7 @@ function TodayView({ ana, health }) {
     ? "Recovered enough for controlled work. Hold the prescribed paces, skip the extras."
     : "Load is stacking faster than you're clearing it. Easy volume or rest.";
 
-  const todaySched = SCHEDULE.flatMap(w => w.days).find(d => d.date === TODAY);
+  const todaySched = plan.today;
   const keyAct = yesterday.find(isHyrox) || yesterday.find(a => isRun(a) && a._avgHR > 120) || yesterday[0];
   const metrics = sessionMetrics(keyAct);
   const notes = buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, sleepMin, rhr:today.rhr });
@@ -1833,19 +2417,9 @@ function TodayView({ ana, health }) {
         <div>
           <Sec title="Today's plan" sub={new Date(TODAY).toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" })}>
             {(todaySched?.sessions || []).length === 0 && <Card><Empty>Nothing scheduled — the plan has you free today.</Empty></Card>}
-            {(todaySched?.sessions || []).map((s, i) => {
-              const st = SS[s.type] || SS.plan;
-              return (
-                <div key={i} style={{ display:"flex", gap:11, padding:"13px 15px", marginBottom:8, background:st.bg,
-                                      border:`1px solid ${st.border}`, borderRadius:12 }}>
-                  <div style={{ width:8, height:8, borderRadius:"50%", background:st.dot, marginTop:6, flexShrink:0 }} />
-                  <div style={{ minWidth:0 }}>
-                    <div style={{ fontSize:13.5, fontWeight:600, color:st.text, lineHeight:1.5 }}>{s.text}</div>
-                    {s.cal && <div style={{ fontSize:9, fontWeight:800, letterSpacing:"0.1em", color:st.dot, marginTop:5 }}>IN CALENDAR</div>}
-                  </div>
-                </div>
-              );
-            })}
+            {(todaySched?.sessions || []).map((s, i) => <PlanLine key={i} s={s} />)}
+            {(todaySched?._unplanned || []).map((a, i) => <UnplannedLine key={`u${i}`} a={a} />)}
+            <WeekGovernor governor={plan.governor} signals={plan.signals} compact />
           </Sec>
 
           <Sec title="Yesterday" right={yesterday.length ? `${yesterday.length} session${yesterday.length > 1 ? "s" : ""}` : null}>
@@ -1879,11 +2453,16 @@ function TodayView({ ana, health }) {
 
           <Sec title="Next up" sub="Rest of this week">
             <Card pad={13}>
-              {SCHEDULE.flatMap(w => w.days).filter(d => d.date > TODAY).slice(0, 5).map((d, i) => (
+              {plan.weeks.flatMap(w => w.days).filter(d => d.date > TODAY).slice(0, 5).map((d, i) => (
                 <div key={i} style={{ display:"flex", gap:11, padding:"8px 0", borderBottom: i < 4 ? `1px solid ${T.lineDim}` : "none" }}>
                   <div style={{ minWidth:38, fontSize:10, fontWeight:800, letterSpacing:"0.08em", color:T.ink3, paddingTop:2 }}>{d.dow}</div>
                   <div style={{ flex:1, minWidth:0, fontSize:11.5, color:T.ink2, lineHeight:1.5 }}>
-                    {d.sessions.map((s, si) => <div key={si} style={{ marginBottom: si < d.sessions.length - 1 ? 3 : 0 }}>{s.text}</div>)}
+                    {d.sessions.map((s, si) => (
+                      <div key={si} style={{ marginBottom: si < d.sessions.length - 1 ? 3 : 0,
+                        color: s._adj ? TONE[ADJ_TONE[s._adj.kind] || "warn"] : T.ink2 }}>
+                        {s.text}{s._adj ? ` · ${s._adj.label.toLowerCase()}` : ""}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -1893,6 +2472,8 @@ function TodayView({ ana, health }) {
 
         {/* ── RIGHT RAIL: coaching ────────────────────────────────────── */}
         <div>
+          <PlanAdjustments plan={plan} />
+
           <Sec title="Coach notes">
             <Card pad={13}>
               {notes.map((n, i) => <Note key={i} tone={n.tone}>{n.text}</Note>)}
@@ -1939,16 +2520,18 @@ function SubNav({ items, value, onChange }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    TRAIN — plan · load · log
    ═══════════════════════════════════════════════════════════════════════════ */
-function PlanBoard({ activities }) {
-  const todayWk = SCHEDULE.findIndex(w => w.days.some(d => d.date === TODAY));
+function PlanBoard({ plan }) {
+  const WEEKS = plan.weeks;
+  const todayWk = WEEKS.findIndex(w => w.days.some(d => d.date === TODAY));
   const [wk, setWk] = useState(Math.max(0, todayWk));
-  const week = SCHEDULE[wk];
-  const raceIdx = SCHEDULE.findIndex(w => w.days.some(d => d.sessions.some(s => s.type === "race")));
+  const week = WEEKS[wk];
+  const raceIdx = WEEKS.findIndex(w => w.days.some(d => d.sessions.some(s => s.type === "race")));
+  const adjustedInWeek = week.days.reduce((n, d) => n + d.sessions.filter(s => s._adj).length, 0);
 
   return (
     <div>
       <div className="scroll-x no-bar" style={{ display:"flex", gap:7, marginBottom:14 }}>
-        {SCHEDULE.map((w, i) => (
+        {WEEKS.map((w, i) => (
           <Chip key={i} active={wk === i} tone={i === raceIdx ? "warn" : "accent"} onClick={() => setWk(i)}>
             WK{w.week}{i === raceIdx ? " 🏁" : ""}{i === todayWk ? " ●" : ""}
           </Chip>
@@ -1960,16 +2543,20 @@ function PlanBoard({ activities }) {
           <div style={{ fontSize:18, fontWeight:800, color:T.ink, letterSpacing:"-0.01em" }}>{week.theme}</div>
           <div style={{ fontSize:11.5, color:T.ink3, marginTop:2 }}>Week {week.week} · {week.label}</div>
         </div>
-        {(() => {
-          const t = getWeekTarget(week.days[0].date, week.days[week.days.length-1].date);
-          return t.hi > 0 ? <Tag tone="accent">TARGET {t.lo}–{t.hi} TRIMP</Tag> : null;
-        })()}
+        <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
+          {adjustedInWeek > 0 && <Tag tone="warn">{adjustedInWeek} ADJUSTED</Tag>}
+          {(() => {
+            const t = getWeekTarget(week.days[0].date, week.days[week.days.length-1].date);
+            return t.hi > 0 ? <Tag tone="accent">TARGET {t.lo}–{t.hi} TRIMP</Tag> : null;
+          })()}
+        </div>
       </div>
+
+      {wk === todayWk && <WeekGovernor governor={plan.governor} signals={plan.signals} />}
 
       <div className="weekgrid">
         {week.days.map((day, di) => {
           const isToday = day.date === TODAY, isPast = day.date < TODAY;
-          const done = activities.filter(a => a._date === day.date);
           return (
             <div key={di} style={{
               background: isToday ? "rgba(139,92,246,0.07)" : T.panel,
@@ -1983,32 +2570,16 @@ function PlanBoard({ activities }) {
               </div>
               {isToday && <div style={{ fontSize:9, fontWeight:800, letterSpacing:"0.14em", color:T.accent }}>● TODAY</div>}
 
-              {done.map((a, ai) => (
-                <div key={ai} style={{ display:"flex", alignItems:"center", gap:7, padding:"6px 8px",
-                  background:"rgba(52,211,153,0.08)", border:`1px solid ${T.ok}33`, borderRadius:8 }}>
-                  <span style={{ fontSize:12 }}>{getEmoji(a)}</span>
-                  <div style={{ minWidth:0, flex:1 }}>
-                    <div style={{ fontSize:10.5, fontWeight:700, color:T.ok, lineHeight:1.35, overflowWrap:"anywhere" }}>
-                      ✓ {a.Title || a["Activity Type"]}
-                    </div>
-                    <div className="num" style={{ fontSize:9.5, color:T.ink3 }}>{fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""}</div>
-                  </div>
-                </div>
-              ))}
+              {day.sessions.map((s, si) => <PlanLine key={si} s={s} size="tight" />)}
 
-              {day.sessions.map((s, si) => {
-                const st = SS[s.type] || SS.plan;
-                return (
-                  <div key={si} style={{ display:"flex", gap:7, padding:"7px 9px", background:st.bg,
-                                         border:`1px solid ${st.border}`, borderRadius:8 }}>
-                    <div style={{ width:6, height:6, borderRadius:"50%", background:st.dot, marginTop:5, flexShrink:0 }} />
-                    <div style={{ fontSize:11, color:st.text, lineHeight:1.5, minWidth:0 }}>
-                      {s.text}
-                      {s.cal && <span style={{ fontSize:8.5, fontWeight:800, color:st.dot, marginLeft:6, letterSpacing:"0.08em" }}>CAL</span>}
-                    </div>
-                  </div>
-                );
-              })}
+              {(day._unplanned || []).map((a, ai) => <UnplannedLine key={`u${ai}`} a={a} tight />)}
+
+              {day._trimp > 0 && (
+                <div className="num" style={{ fontSize:9, color:T.ink3, letterSpacing:"0.06em",
+                  paddingTop:5, borderTop:`1px solid ${T.lineDim}` }}>
+                  TRIMP {day._trimp}
+                </div>
+              )}
             </div>
           );
         })}
@@ -2256,12 +2827,12 @@ function LogPanel({ activities }) {
   );
 }
 
-function TrainView({ ana, activities }) {
+function TrainView({ ana, activities, plan }) {
   const [tab, setTab] = useState("plan");
   return (
     <div className="fade">
       <SubNav items={[["plan","PLAN"],["load","LOAD"],["log","LOG"]]} value={tab} onChange={setTab} />
-      {tab === "plan" && <PlanBoard activities={activities} />}
+      {tab === "plan" && <PlanBoard plan={plan} />}
       {tab === "load" && <LoadPanel ana={ana} activities={activities} />}
       {tab === "log"  && <LogPanel activities={activities} />}
     </div>
@@ -3858,12 +4429,16 @@ const TABS = [
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
   const [ana, setAna] = useState(null);
+  const [plan, setPlan] = useState(null);
   const [view, setView] = useState("today");
 
   useEffect(() => {
     const a = analyze(parseCSV(CSV_DATA));
     setActivities(a.enriched);
     setAna(a);
+    // The plan is derived, not stored: every load reconciles the written block
+    // against what was actually trained, so it is as fresh as the last sync.
+    setPlan(adaptPlan({ ana:a, health:HEALTH_DATA, hrvBaseline }));
   }, []);
 
   useEffect(() => { window.scrollTo({ top:0, behavior:"smooth" }); }, [view]);
@@ -3920,12 +4495,12 @@ export default function Dashboard() {
 
         {/* ── CONTENT ─────────────────────────────────────────────────── */}
         <main className="wrap main-pad">
-          {!ana ? (
+          {!ana || !plan ? (
             <Card pad={40}><Empty>Loading training data…</Empty></Card>
           ) : (
             <>
-              {view === "today" && <TodayView ana={ana} health={HEALTH_DATA} />}
-              {view === "train" && <TrainView ana={ana} activities={activities} />}
+              {view === "today" && <TodayView ana={ana} health={HEALTH_DATA} plan={plan} />}
+              {view === "train" && <TrainView ana={ana} activities={activities} plan={plan} />}
               {view === "body"  && <BodyView ana={ana} />}
               {view === "race"  && <RaceView ana={ana} />}
             </>

@@ -940,7 +940,7 @@ def stamp_run(got_fresh_data: bool):
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument('--mode',   default='full', choices=['full','activities','backfill'])
+    p.add_argument('--mode',   default='full', choices=['full','activities','backfill','poll'])
     p.add_argument('--days',   type=int, default=14, help='For backfill mode: how many days back to fetch')
     p.add_argument('--date',   default=None)
     args = p.parse_args()
@@ -954,9 +954,47 @@ if __name__ == '__main__':
     yesterday = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
 
     got_fresh_data = False
+    quiet_poll = False
 
     try:
-        if args.mode == 'full':
+        if args.mode == 'poll':
+            # Cheap, silent check for anything new, safe to run every few minutes.
+            #
+            # It is the same single get_activities() call as `activities` mode —
+            # Garmin returns the last 30 activities regardless of the window, so
+            # widening it is free — but it writes NOTHING, LAST_RUN included,
+            # unless the file actually changed. That is the whole point: every
+            # hourly run produces a commit precisely because LAST_RUN is always
+            # rewritten, and at a 10-minute cadence that would be 144 empty
+            # commits a day. The hourly full/activities runs remain the
+            # proof-of-life the dashboard's sync dot reads.
+            before = DASHBOARD.read_text(encoding='utf-8')
+            window = [(datetime.date.today() - datetime.timedelta(days=i)).isoformat()
+                      for i in range(0, REFRESH_DAYS + 1)]
+            csv_rows, activity_ids, activity_summaries = fetch_activities(client, window)
+            hyrox_sessions = {}
+            for act_id, summary in activity_summaries.items():
+                detail = fetch_hyrox_session_data(client, act_id, summary["name"])
+                if detail:
+                    hyrox_sessions[act_id] = {**summary, **detail}
+            patch(today, {}, csv_rows, advance_today=False,
+                  hyrox_sessions=hyrox_sessions)
+
+            # A wellness gap costs a fetch only when one exists; normally [].
+            for date_str in missing_wellness_dates():
+                print(f"  ↻ {date_str} has no HRV/sleep row — retrying")
+                wellness = fetch_wellness(client, date_str)
+                if wellness.get('hrv') or wellness.get('sleep'):
+                    patch(date_str, wellness, [], advance_today=False)
+
+            if DASHBOARD.read_text(encoding='utf-8') == before:
+                quiet_poll = True
+                print("poll: nothing new — leaving the file untouched")
+            else:
+                got_fresh_data = True
+                print("poll: new data landed")
+
+        elif args.mode == 'full':
             # Activities for the whole refresh window in one call, so renames on
             # recent sessions are picked up alongside the new ones.
             window = [(datetime.date.today() - datetime.timedelta(days=i)).isoformat()
@@ -1046,6 +1084,9 @@ if __name__ == '__main__':
         # Always stamp LAST_RUN (so the dashboard can show 'scheduler is alive')
         # even on partial failures, and stamp LAST_DATA only when we actually
         # pulled fresh Garmin data (so the dashboard knows tokens are still valid).
-        stamp_run(got_fresh_data)
+        # The one exception is a poll that found nothing: stamping there would
+        # commit on every poll and defeat the mode.
+        if not quiet_poll:
+            stamp_run(got_fresh_data)
 
     print("Done.")

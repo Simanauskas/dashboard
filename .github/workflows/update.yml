@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'full, activities, or backfill'
+        description: 'full, activities, poll, or backfill'
         required: false
         default: 'full'
       days:
@@ -74,6 +74,8 @@ jobs:
 
       - name: Commit and push if changed
         run: |
+          # poll mode leaves the file untouched when nothing new arrived, so the
+          # "nothing to commit" branch below is the normal outcome there.
           git config user.name  "garmin-bot"
           git config user.email "bot@simanauskas.github.io"
           git add src/App.jsx
