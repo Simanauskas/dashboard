@@ -6,6 +6,7 @@ const HEALTH_DATA = {
     ["2026-01-13",73.6],["2026-01-17",73.1],["2026-01-20",73.1],["2026-02-12",73.5],["2026-02-15",73.9],["2026-02-24",74.3],["2026-02-28",75.5],["2026-03-04",73.4],
     ["2026-03-08",72.3],["2026-03-12",73.1],["2026-03-16",73.2],["2026-03-19",73.2],["2026-03-22",74.1],["2026-03-23",73.5],["2026-03-24",72.9],["2026-04-16",75.0],
     ["2026-05-12",75.9],["2026-05-17",76.7],["2026-08-04",75.5],["2026-08-13",75.2],["2026-08-14",74.9],["2026-08-29",76.9],["2026-09-02",76.7],["2026-09-11",76.2],
+    ["2026-09-12",75.6],
   ],
   vo2max: [
     ["2026-03-09",52],["2026-03-17",53],["2026-03-21",53],["2026-03-24",53],
@@ -112,6 +113,7 @@ const HEALTH_DATA = {
     {date:"2026-09-09",hrv:104,rhr:40,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-09-10",hrv:110,rhr:39,spo2:96,resp:11.0,sleep_score:75},
     {date:"2026-09-11",hrv:103,rhr:38,spo2:96,resp:11.0,sleep_score:95},
+    {date:"2026-09-12",hrv:55,rhr:40,spo2:98,resp:11.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -212,6 +214,7 @@ const HEALTH_DATA = {
     {date:"2026-09-09",deep:115,rem:88,light:264,awake:7},
     {date:"2026-09-10",deep:137,rem:90,light:174,awake:8},
     {date:"2026-09-11",deep:154,rem:151,light:245,awake:1},
+    {date:"2026-09-12",deep:142,rem:104,light:293,awake:12},
   ],
 };
 
@@ -895,8 +898,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-12";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-12T05:07:00Z";
-const LAST_DATA = "2026-09-12T05:07:00Z";
+const LAST_RUN  = "2026-09-12T06:07:00Z";
+const LAST_DATA = "2026-09-12T06:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2100,7 +2103,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 91; // updated 2026-09-11
+const hrvBaseline = 81; // updated 2026-09-12
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
