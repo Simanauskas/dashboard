@@ -32,6 +32,37 @@ and never once done.
 
 ---
 
+## 2026-09-25 (b)
+- adherence: unchanged from entry (a); tennis now reads 7/7 on history only
+- readiness: not re-read; this entry records a plan-structure change, not a
+  daily decision
+- decision: CHANGED — removed all 12 prescribed tennis sessions from 26 Sep
+  onward, and reworded one line that assumed tennis later the same day
+- why: he plays tournaments and sparring arranged with other people, usually
+  confirmed only a few days ahead. The fixed Tue-AM / Thu-PM / one-of-Sat-Sun
+  slot was fiction. A plan that prescribes a session he cannot commit to
+  teaches him to ignore the plan.
+- watching: **the prospective calendar path is NOT built.** He asked for a
+  daily scan of his calendar that writes confirmed fixtures into SCHEDULE as
+  `{type:"tennis",cal:true,text:"..."}` BEFORE they happen. Two things block
+  it, and neither is code:
+    1. No Google Calendar connector on the account. Connect at
+       https://claude.ai/customize/connectors — connectors are read when a
+       session starts, so a new session is needed after connecting.
+    2. Even then, this Routine's fired sessions carry NO connectors. A
+       Routine created through the API only inherits connectors the creating
+       session itself holds. It will need recreating from a session that has
+       Calendar, or creating through the claude.ai Routines UI.
+  Naming convention to match when it is built, from the athlete:
+    `Edvinas🎾`              → session with his trainer
+    `Name Surname🎾<court>`  → match or sparring
+  Until then tennis reaches the dashboard retrospectively only: Garmin syncs
+  it, adaptPlan() surfaces it as unplanned load, its TRIMP lands in the week
+  budget, and the remaining sessions are trimmed to absorb it. That path
+  works and needs nothing.
+
+---
+
 ## 2026-09-25
 - adherence: ski 2x prescribed / 0 done · everything else on track
 - readiness: HRV 90 vs baseline 72, RHR 39, hrvBaseline down from 91 on 11 Sep
