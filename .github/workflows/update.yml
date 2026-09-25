@@ -72,6 +72,26 @@ jobs:
       - name: Run update
         run: python update.py --mode ${{ steps.mode.outputs.mode }} --days ${{ steps.mode.outputs.days }}
 
+      # Tennis fixtures are arranged with other people and confirmed only a
+      # few days ahead, so they cannot be written into SCHEDULE by hand. This
+      # reads them from iCloud instead. Skipped on poll runs: the calendar
+      # does not change every ten minutes, and 144 CalDAV fetches a day is
+      # rude. Never allowed to fail the job — the Garmin half matters more,
+      # and calendar_sync.py already swallows its own errors and exits 0.
+      - name: Sync tennis fixtures from iCloud Calendar
+        if: steps.mode.outputs.mode != 'poll'
+        continue-on-error: true
+        env:
+          ICLOUD_USER: ${{ secrets.ICLOUD_USER }}
+          ICLOUD_APP_PASSWORD: ${{ secrets.ICLOUD_APP_PASSWORD }}
+        run: |
+          if [ -z "$ICLOUD_USER" ]; then
+            echo "ICLOUD_USER not set — calendar sync not configured yet, skipping"
+            exit 0
+          fi
+          pip install --quiet caldav
+          python calendar_sync.py
+
       - name: Commit and push if changed
         run: |
           # poll mode leaves the file untouched when nothing new arrived, so the

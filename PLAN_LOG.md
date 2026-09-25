@@ -42,7 +42,16 @@ and never once done.
   confirmed only a few days ahead. The fixed Tue-AM / Thu-PM / one-of-Sat-Sun
   slot was fiction. A plan that prescribes a session he cannot commit to
   teaches him to ignore the plan.
-- watching: **the prospective calendar path is NOT built.** He asked for a
+- update (later the same day): the prospective path IS now built, against
+  iCloud rather than Google. `calendar_sync.py` reads iCloud CalDAV inside
+  the GitHub Actions run, filters events containing 🎾, and writes them into
+  SCHEDULE as `{type:"tennis",cal:true,...}`. It only ever manages lines
+  carrying `cal:true`, so hand-authored sessions on the same day are
+  untouched. It needs the ICLOUD_USER and ICLOUD_APP_PASSWORD repository
+  secrets; until those exist the step prints "not configured yet" and skips.
+  The Routine needs no connector for any of this. The paragraph below is the
+  superseded Google-connector plan, kept for the record.
+- watching (superseded): **the prospective calendar path is NOT built.** He asked for a
   daily scan of his calendar that writes confirmed fixtures into SCHEDULE as
   `{type:"tennis",cal:true,text:"..."}` BEFORE they happen. Two things block
   it, and neither is code:
