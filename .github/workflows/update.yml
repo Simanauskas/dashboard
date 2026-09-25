@@ -84,6 +84,10 @@ jobs:
         env:
           ICLOUD_USER: ${{ secrets.ICLOUD_USER }}
           ICLOUD_APP_PASSWORD: ${{ secrets.ICLOUD_APP_PASSWORD }}
+          # Comma-separated calendar names to read. The account shares three
+          # calendars and only his own belongs in his training plan. Unset
+          # means read everything, which the run warns about.
+          ICLOUD_CALENDARS: ${{ secrets.ICLOUD_CALENDARS }}
         run: |
           if [ -z "$ICLOUD_USER" ]; then
             echo "ICLOUD_USER not set — calendar sync not configured yet, skipping"

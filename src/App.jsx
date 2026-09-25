@@ -1519,7 +1519,7 @@ function isInfoLine(s) {
 
 /* Lines that offer a choice — "Tennis or full rest, your call" — are costed at
    half, because over a block that is what they average out to. */
-const isOptionalLine = (s) => /\byour call\b|\boptional\b|\bOR\b|\bor full rest\b/i.test(String(s.text || ""));
+const isOptionalLine = (s) => /\byour call\b|\boptional\b|\bOR\b|\bor full rest\b|\bunconfirmed\b/i.test(String(s.text || ""));
 
 function sessionSatisfiedBy(session, done) {
   const t = String(session.text || "");

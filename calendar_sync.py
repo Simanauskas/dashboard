@@ -61,7 +61,12 @@ def classify(summary: str):
     s = (summary or "").strip()
     if RACKET not in s:
         return None
-    before, _, after = s.partition(RACKET)
+    # A leading "?" is his marker for a fixture that is not confirmed yet.
+    # It still belongs on the board — he wants to see it coming — but it must
+    # not read as settled, and the engine costs it at half (see isOptionalLine
+    # in App.jsx) because it may not happen.
+    tentative = s.lstrip().startswith("?")
+    before, _, after = s.lstrip().lstrip("?").partition(RACKET)
     who, court = _clean(before), _clean(after)
 
     sport = SPORTS.get(who.lower())
@@ -69,7 +74,7 @@ def classify(summary: str):
         label = f"{sport} 🎾"
         if court:
             label += f" · court {court}" if court.isdigit() else f" · {court}"
-        return ("sport", label)
+        return ("sport", label + (" · unconfirmed" if tentative else ""))
 
     # No name, only emoji, a generic word, or something with no real letters
     # in it (the calendar produced a bare "?" once). Do not invent a person.
@@ -77,34 +82,51 @@ def classify(summary: str):
         label = "Tennis 🎾"
         if court:
             label += f" · court {court}" if court.isdigit() else f" · {court}"
-        return ("tennis", label)
+        return ("tennis", label + (" · unconfirmed" if tentative else ""))
 
     # A bare first name is his trainer; a full name is an opponent.
     if " " not in who:
-        return ("trainer", f"Tennis 🎾 · session with {who}")
+        return ("trainer", f"Tennis 🎾 · session with {who}" + (" · unconfirmed" if tentative else ""))
     label = f"Tennis 🎾 · {who}"
     if court:
         label += f" · court {court}" if court.isdigit() else f" · {court}"
-    return ("match", label)
+    return ("match", label + (" · unconfirmed" if tentative else ""))
 
 
 # ── fetch ────────────────────────────────────────────────────────────────────
-def fetch_caldav(user, password, days):
-    """[(date, summary, start)] for VEVENTs in the next `days`, all calendars."""
+def fetch_caldav(user, password, days, allow=None):
+    """[(date, summary, start)] for VEVENTs in the next `days`.
+
+    `allow` is a set of lower-cased calendar names to read. This account
+    shares three calendars — his, his fiancee's, and a joint one — and the
+    first live run pulled a padel session off HER calendar into HIS training
+    plan. Reading her calendar at all is not something this should do, so the
+    allowlist exists; without it the run reads everything and says so loudly.
+    """
     import caldav                                    # installed in the workflow
     client = caldav.DAVClient(url=CALDAV_URL, username=user, password=password)
     principal = client.principal()
     start = datetime.datetime.now(datetime.timezone.utc)
     end = start + datetime.timedelta(days=days)
     out = []
+    names = []
     for cal in principal.calendars():
+        name = str(getattr(cal, "name", "") or "")
+        names.append(name)
+        if allow is not None and name.lower() not in allow:
+            print(f"  – skipping calendar {name!r} (not in ICLOUD_CALENDARS)")
+            continue
         try:
             found = cal.search(start=start, end=end, event=True, expand=True)
         except Exception as e:                        # a shared or odd calendar
-            print(f"  ! skipped calendar {getattr(cal,'name','?')}: {e}")
+            print(f"  ! skipped calendar {name!r}: {e}")
             continue
         for ev in found:
             out.extend(_from_ical(ev.data))
+    print("  calendars seen: " + ", ".join(repr(n) for n in names))
+    if allow is None:
+        print("  ::warning::ICLOUD_CALENDARS is not set — reading EVERY shared "
+              "calendar, including ones that are not his. Set it to his own.")
     return out
 
 
@@ -177,8 +199,10 @@ def main():
         if not (user and pw):
             print("ICLOUD_USER / ICLOUD_APP_PASSWORD not set — skipping calendar sync")
             return 0
+        raw = os.environ.get("ICLOUD_CALENDARS", "").strip()
+        allow = {n.strip().lower() for n in raw.split(",") if n.strip()} or None
         try:
-            events = fetch_caldav(user, pw, a.days)
+            events = fetch_caldav(user, pw, a.days, allow)
         except Exception as e:
             # Never fail the sync over the calendar: the Garmin half matters more.
             print(f"::warning::calendar sync failed, plan left as-is: {e}")
