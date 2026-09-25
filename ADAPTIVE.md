@@ -7,7 +7,7 @@ wrong.
 
 | | Freshness | Mechanism |
 |---|---|---|
-| Wellness, activities, splits | up to one hour | Cloudflare cron → `workflow_dispatch` → `update.py` |
+| Wellness, activities, splits | up to ten minutes | Cloudflare cron → `workflow_dispatch` → `update.py` |
 | Today's prescription, week budget | every page load | `adaptPlan()` in `src/App.jsx` |
 | The written block itself | when a human or a scheduled session edits it | `SCHEDULE` / `TAPER_PLAN` |
 
@@ -75,74 +75,88 @@ Put it in `adaptPlan()`, give it a `note(date, label, why, kind)` call, and make
 `why` quote the numbers that fired it. An adjustment the athlete cannot audit is
 one he will ignore, and the plan-adjustments panel exists for exactly that.
 
-## 2. Sync latency — `poll` mode (built, dormant)
+## 2. Sync latency — `poll` mode
 
 `update.py --mode poll` is a cheap, silent check for anything new. It makes the
 same single `get_activities()` call as `activities` mode (Garmin returns the
 last 30 activities regardless of the window, so widening it is free) but it
 **writes nothing, `LAST_RUN` included, unless the file actually changed**.
 
-That exemption is the point. Every hourly run produces a commit precisely
-because `LAST_RUN` is always rewritten; at a ten-minute cadence that would be
-144 empty commits a day, each one a Cloudflare Pages deploy.
+That exemption is what makes the cadence affordable. Every hourly run produces
+a commit precisely because `LAST_RUN` is always rewritten; at a ten-minute
+cadence that would otherwise be 144 commits a day, each one a Pages deploy.
+In practice it holds: roughly 144 runs a day produce about 24 commits, of
+which only two to four are polls that actually found something.
 
-It is verified working — dispatch it by hand any time:
+### The live schedule
 
+One cron in `wrangler.toml`, with the mode chosen by the minute it fires on:
+
+```toml
+crons = ["7,10,20,30,40,50 * * * *"]
 ```
-mode=poll → "Activities: 7 / ✓ Patched src/App.jsx /
-             poll: nothing new — leaving the file untouched" → nothing to commit
-```
 
-**Nothing schedules it. Read the next section before trying to.**
+`:07` refreshes OAuth2 and dispatches `full` (05–09 UTC) or `activities`.
+The other five ticks are refresh-free polls — refreshing on every one would be
+144 token exchanges a day against Garmin for a token good for ~27h. Keep
+`SYNC_MINUTE` in `src/worker.js` at 7 to match.
 
-### Cloudflare will not run this Worker's cron more than once an hour
+**Data freshness is up to ten minutes.** The adaptive plan re-derives on every
+page load, so the plan is never stale relative to the data either.
 
-Tested on 11 Sep 2026 and abandoned. `wrangler deploy` accepts and echoes back
-any schedule you give it; Cloudflare then invokes the handler once an hour
-whatever it says. Three shapes, same ceiling:
+### Correction: the hourly cap recorded here was wrong
 
-| `crons` in wrangler.toml | Result |
+An earlier version of this file stated, at length and with a table, that
+Cloudflare would not invoke this Worker's cron more than once an hour, and
+told the reader not to try. **That is false.** All six minutes fire. Measured
+over the last 100 dispatches:
+
+| Cron minute | Dispatches |
 |---|---|
-| `["7 * * * *"]` | fires hourly, reliably — this is the live config |
-| `["7 * * * *", "*/10 * * * *"]` | only the first ever fired; the `*/10` missed 12 consecutive windows |
-| `["7,10,20,30,40,50 * * * *"]` | only `:07` fired; `:40` and `:50` never did |
+| `:07` | 17 |
+| `:10` | 16 |
+| `:20` | 16 |
+| `:30` | 16 |
+| `:40` | 17 |
+| `:50` | 17 |
 
-The third row is what settles it: those minutes are in the *same* entry as
-`:07`, so this is neither "only the first entry gets scheduled" nor the `*/10`
-step syntax. `wrangler tail` held across a full hour confirmed the handler is
-simply never entered off the hour — the hourly logged at 17h and 18h UTC and
-nothing else appeared.
+The original finding came from a two-hour window on 11 Sep 2026 in which the
+sub-hourly ticks genuinely never fired, across three different cron shapes,
+confirmed by `wrangler tail`. Whatever that was — new-schedule propagation
+taking far longer than expected, or a transient on Cloudflare's side — it
+resolved on its own. `mode=poll` commits appear from 21 Sep onward.
 
-Things ruled out, so nobody re-tests them:
+The lesson worth keeping: a negative result from a single session is a
+snapshot, not a property. This file asserted a platform limit from two hours
+of evidence and would have stopped anyone from re-testing it.
 
-- **Not the code.** A cron string that failed to match would still have
-  dispatched `mode=activities` and produced a visible workflow run. None
-  appeared, so the handler was never invoked at all.
-- **Not the deploy.** `wrangler tail` showed the new log format live, and the
-  hourly kept firing and committing across every version.
-- **Not propagation.** Two hours, twelve windows, zero invocations.
+### If the poll ever needs turning down
 
-Unconfirmed but likely the Workers **Free** plan. If that changes, the
-two-cron version is preserved on the `claude/ten-minute-poll-cron` branch of
-`Simanauskas/garmin-auth-worker` (`d3bca25`), and `poll` mode needs no changes
-to start working.
+Cut the minute list. `["7,25,45 * * * *"]` is a third of the run volume and
+still twenty-minute freshness; `["7 * * * *"]` is the original hourly. Nothing
+else needs changing — `SYNC_MINUTE` stays 7 and `poll` mode is unaffected.
 
-The alternative that does not involve cron: the Worker already exposes
-`POST /refresh` taking `{"mode":"poll"}`, so any external scheduler can drive
-it. Note before relying on that — **the endpoint is unauthenticated**. It is
-already publicly reachable, because the dashboard's Refresh button calls it
-straight from the browser, but pointing a public scheduler at it deserves a
-shared secret first.
+### The non-cron alternative
 
-### What the live Worker actually does
+The Worker exposes `POST /refresh` taking `{"mode":"poll"}`, so an external
+scheduler can drive it without any cron at all. Before relying on that —
+**the endpoint is unauthenticated**. It is already publicly reachable, because
+the dashboard's Refresh button calls it straight from the browser, but
+pointing a public scheduler at it deserves a shared secret first.
 
-One cron, `7,10,20,30,40,50 * * * *`, with the mode chosen by the minute:
-`:07` refreshes OAuth2 and dispatches `full` (05–09 UTC) or `activities`, and
-every other tick would be a refresh-free `poll` if Cloudflare ever ran it.
-Keep `SYNC_MINUTE` in `src/worker.js` at 7 to match. Deployed from
-`claude/ten-minute-poll-cron`, which is behaviourally identical to `main` for
-the hourly path.
+### When jobs fail before any step runs
 
-Data freshness is therefore **up to one hour**. The adaptive plan re-derives on
-every page load, so the plan is never stale relative to the data — but the data
-itself is as old as the last hourly sync.
+A run that fails in ~4 seconds with **zero steps and a 404 on its logs** never
+reached a runner, so nothing in this repo caused it. Read the annotation
+rather than guessing:
+
+```
+GET /repos/Simanauskas/dashboard/check-runs/<job_id>/annotations
+```
+
+On 25 Sep 2026 that returned "The job was not started because recent account
+payments have failed or your spending limit needs to be increased", which is
+an account-level GitHub billing block and is fixed only in GitHub Settings →
+Billing & plans. Every run from 20:30 UTC on 24 Sep failed this way. Note that
+this repo is public, so standard-runner minutes are free and the poll cadence
+is not billable — the cause was elsewhere in the account.
