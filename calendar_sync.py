@@ -50,6 +50,18 @@ PICTO = re.compile(
     "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0000FE00-\U0000FE0F\U00002190-\U000021FF]")
 
 
+def _norm_cal(name: str) -> str:
+    """Calendar names carry emoji — 'Simas👱‍♂️', 'Ilona❤️Simas'. Matching on the
+    raw string means retyping a ZWJ sequence into a GitHub secret correctly,
+    so compare with the emoji stripped and spaces removed too."""
+    # ZWJ and variation selectors glue emoji together ("👱‍♂️" is three code
+    # points plus a joiner); strip them too or "Simas👱‍♂️" normalises with an
+    # invisible character still on the end and never matches "Simas".
+    s = PICTO.sub("", name or "")
+    s = re.sub("[\u200b-\u200f\ufe0e\ufe0f\u2640\u2642]", "", s)
+    return re.sub(r"\s+", "", s).lower()
+
+
 def _clean(part: str) -> str:
     return PICTO.sub("", part or "").strip().strip("'\"“”‘’·-–—").strip()
 
@@ -113,7 +125,7 @@ def fetch_caldav(user, password, days, allow=None):
     for cal in principal.calendars():
         name = str(getattr(cal, "name", "") or "")
         names.append(name)
-        if allow is not None and name.lower() not in allow:
+        if allow is not None and not ({name.lower(), _norm_cal(name)} & allow):
             print(f"  – skipping calendar {name!r} (not in ICLOUD_CALENDARS)")
             continue
         try:
@@ -122,7 +134,8 @@ def fetch_caldav(user, password, days, allow=None):
             print(f"  ! skipped calendar {name!r}: {e}")
             continue
         for ev in found:
-            out.extend(_from_ical(ev.data))
+            for iso, summary, hhmm in _from_ical(ev.data):
+                out.append((iso, summary, hhmm, name))
     print("  calendars seen: " + ", ".join(repr(n) for n in names))
     if allow is None:
         print("  ::warning::ICLOUD_CALENDARS is not set — reading EVERY shared "
@@ -130,7 +143,7 @@ def fetch_caldav(user, password, days, allow=None):
     return out
 
 
-def _from_ical(text):
+def _from_ical(text, cal=""):
     """Minimal VEVENT reader: SUMMARY + DTSTART. Avoids a second dependency
     and copes with the folded lines iCloud emits."""
     unfolded = re.sub(r"\r?\n[ \t]", "", text or "")
@@ -143,7 +156,8 @@ def _from_ical(text):
         d = dt.group(1)
         iso = f"{d[:4]}-{d[4:6]}-{d[6:]}"
         hhmm = f"{dt.group(2)}:{dt.group(3)}" if dt.group(2) else ""
-        out.append((iso, sm.group(1).strip(), hhmm))
+        out.append((iso, sm.group(1).strip(), hhmm) if not cal
+                   else (iso, sm.group(1).strip(), hhmm, cal))
     return out
 
 
@@ -159,7 +173,7 @@ def patch(events, code):
     today = datetime.date.today()
     horizon = (today + datetime.timedelta(days=HORIZON_DAYS)).isoformat()
     by_date = {}
-    for iso, summary, hhmm in events:
+    for iso, summary, hhmm, _cal in events:
         hit = classify(summary)
         if not hit:
             continue
@@ -193,14 +207,19 @@ def main():
     a = ap.parse_args()
 
     if a.from_ics:
-        events = _from_ical(pathlib.Path(a.from_ics).read_text(encoding="utf-8"))
+        events = _from_ical(pathlib.Path(a.from_ics).read_text(encoding="utf-8"), "local.ics")
     else:
         user, pw = os.environ.get("ICLOUD_USER"), os.environ.get("ICLOUD_APP_PASSWORD")
         if not (user and pw):
             print("ICLOUD_USER / ICLOUD_APP_PASSWORD not set — skipping calendar sync")
             return 0
         raw = os.environ.get("ICLOUD_CALENDARS", "").strip()
-        allow = {n.strip().lower() for n in raw.split(",") if n.strip()} or None
+        allow = set()
+        for n in raw.split(","):
+            n = n.strip()
+            if n:
+                allow |= {n.lower(), _norm_cal(n)}
+        allow = allow or None
         try:
             events = fetch_caldav(user, pw, a.days, allow)
         except Exception as e:
@@ -208,11 +227,11 @@ def main():
             print(f"::warning::calendar sync failed, plan left as-is: {e}")
             return 0
 
-    tennis = [(d, s, t) for d, s, t in events if classify(s)]
-    print(f"calendar: {len(events)} events in window, {len(tennis)} tennis")
-    for d, s, t in sorted(tennis):
+    tennis = [e for e in events if classify(e[1])]
+    print(f"calendar: {len(events)} events in window, {len(tennis)} racket")
+    for d, s, t, cal in sorted(tennis):
         kind, text = classify(s)
-        print(f"  {d} {t or '--:--'}  {s!r}  ->  [{kind}] {text}")
+        print(f"  {d} {t or '--:--'}  [{cal}] {s!r}  ->  [{kind}] {text}")
 
     code = DASHBOARD.read_text(encoding="utf-8")
     new, changed = patch(tennis, code)
