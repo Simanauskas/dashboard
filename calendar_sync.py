@@ -33,21 +33,52 @@ HORIZON_DAYS = 10
 
 
 # ── classify ─────────────────────────────────────────────────────────────────
-def classify(summary: str):
-    """-> (kind, text) for a calendar title, or None if it is not tennis.
+# The racket marks a racket session, not necessarily tennis: he types
+# "Padelis 🎾👟" for padel. Naming that one "session with Padelis" invented a
+# person and mislabelled the sport, so the sport words are recognised first.
+SPORTS = {
+    "padelis": "Padel", "padel": "Padel",
+    "tenisas": "Tennis", "tennis": "Tennis",
+    "squash": "Squash", "skvosas": "Squash",
+    "badminton": "Badminton", "badmintonas": "Badminton",
+}
+GENERIC = {"training", "treniruote", "treniruotė", "match", "rungtynes", "rungtynės"}
 
-    Anything without the racket is not his tennis and is ignored outright;
-    that keeps the rest of his calendar out of the training plan.
-    """
+# Strip emoji and pictographs out of the name part. "Padelis 🎾👟" carries a
+# second emoji; a title that is nothing BUT emoji leaves an empty name.
+PICTO = re.compile(
+    "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0000FE00-\U0000FE0F\U00002190-\U000021FF]")
+
+
+def _clean(part: str) -> str:
+    return PICTO.sub("", part or "").strip().strip("'\"“”‘’·-–—").strip()
+
+
+def classify(summary: str):
+    """-> (kind, text) for a calendar title, or None if it is not a racket
+    session. Anything without the racket is not his training and is ignored
+    outright, which keeps the rest of his calendar out of the plan."""
     s = (summary or "").strip()
     if RACKET not in s:
         return None
     before, _, after = s.partition(RACKET)
-    who = before.strip().strip("'\"“”‘’")
-    court = after.strip().strip("'\"“”‘’")
-    # "Tennis 🎾" names no person; do not read the sport as an opponent.
-    if not who or who.lower() in {"tennis", "tenisas", "training", "treniruote"}:
-        return ("tennis", "Tennis 🎾")
+    who, court = _clean(before), _clean(after)
+
+    sport = SPORTS.get(who.lower())
+    if sport:                                   # the title names the sport
+        label = f"{sport} 🎾"
+        if court:
+            label += f" · court {court}" if court.isdigit() else f" · {court}"
+        return ("sport", label)
+
+    # No name, only emoji, a generic word, or something with no real letters
+    # in it (the calendar produced a bare "?" once). Do not invent a person.
+    if not who or who.lower() in GENERIC or len(re.findall(r"[^\W\d_]", who)) < 2:
+        label = "Tennis 🎾"
+        if court:
+            label += f" · court {court}" if court.isdigit() else f" · {court}"
+        return ("tennis", label)
+
     # A bare first name is his trainer; a full name is an opponent.
     if " " not in who:
         return ("trainer", f"Tennis 🎾 · session with {who}")
@@ -156,7 +187,8 @@ def main():
     tennis = [(d, s, t) for d, s, t in events if classify(s)]
     print(f"calendar: {len(events)} events in window, {len(tennis)} tennis")
     for d, s, t in sorted(tennis):
-        print(f"  {d} {t or '--:--'}  {s}  ->  {classify(s)[1]}")
+        kind, text = classify(s)
+        print(f"  {d} {t or '--:--'}  {s!r}  ->  [{kind}] {text}")
 
     code = DASHBOARD.read_text(encoding="utf-8")
     new, changed = patch(tennis, code)
