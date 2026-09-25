@@ -126,6 +126,7 @@ const HEALTH_DATA = {
     {date:"2026-09-22",hrv:81,rhr:39,spo2:93,resp:12.0,sleep_score:88},
     {date:"2026-09-23",hrv:105,rhr:40,spo2:95,resp:12.0,sleep_score:95},
     {date:"2026-09-24",hrv:59,rhr:42,spo2:95,resp:12.0,sleep_score:null},
+    {date:"2026-09-25",hrv:90,rhr:39,spo2:93,resp:11.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -239,6 +240,7 @@ const HEALTH_DATA = {
     {date:"2026-09-22",deep:122,rem:117,light:251,awake:6},
     {date:"2026-09-23",deep:78,rem:71,light:333,awake:2},
     {date:"2026-09-24",deep:142,rem:92,light:230,awake:15},
+    {date:"2026-09-25",deep:120,rem:81,light:289,awake:5},
   ],
 };
 
@@ -647,6 +649,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Treadmill Running","2026-09-25 10:09:41","false","Tempo 3x2km 14kmh 14.5km 14.5kmh 60s rest","8,00","496","00:39:18","141","169","3,4","175","--","4:54","--","--","--","--","--","--","100,51","7,3","7,6","270","--","--","--","--","--","--","--","--","--","No","--","7","--","--","--","--","--","00:38:40","00:39:18","--","--"
 "Tennis V2","2026-09-24 10:06:49","false","Training🎾1:1","0,30","420","01:20:02","90","143","1,2","13","--","273:13","--","--","--","--","--","--","28,16","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:38","01:20:02","--","--"
 "Treadmill Running","2026-09-22 19:58:09","false","Z2 60m","10,53","703","01:00:33","133","143","2,9","178","--","5:45","--","--","--","--","--","--","110,96","6,5","7,4","265","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:59:58","01:00:35","--","--"
 "Other","2026-09-22 11:50:40","false","Sauna 15m","0,00","57","00:15:08","77","101","0,1","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:08","00:15:08","--","--"
@@ -947,10 +950,10 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-09-24";
+const TODAY = "2026-09-25";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-24T20:08:00Z";
-const LAST_DATA = "2026-09-24T20:08:00Z";
+const LAST_RUN  = "2026-09-25T12:27:00Z";
+const LAST_DATA = "2026-09-25T12:27:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2154,7 +2157,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 73; // updated 2026-09-24
+const hrvBaseline = 72; // updated 2026-09-25
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
