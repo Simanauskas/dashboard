@@ -570,6 +570,13 @@ Watch: originally recorded 1:10:07 because it ran 44s past the line; trimmed in 
     photos:[],
     laps:[{i:1,t:656,avgHr:118,maxHr:132,dist:1774,role:"warmup"},{i:2,t:1346,avgHr:88,maxHr:122,dist:557,role:"run"},{i:3,t:235,avgHr:153,maxHr:166,dist:952,role:"run"},{i:4,t:109,avgHr:150,maxHr:165,dist:115,role:"station"},{i:5,t:197,avgHr:166,maxHr:171,dist:628,role:"run"},{i:6,t:191,avgHr:171,maxHr:174,dist:733,role:"run"},{i:7,t:139,avgHr:168,maxHr:174,dist:614,role:"run"},{i:8,t:101,avgHr:170,maxHr:174,dist:100,role:"station"},{i:9,t:150,avgHr:172,maxHr:174,dist:644,role:"run"},{i:10,t:269,avgHr:163,maxHr:174,dist:105,role:"station"},{i:11,t:391,avgHr:169,maxHr:178,dist:1810,role:"run"},{i:12,t:1,avgHr:178,maxHr:178,dist:7,role:"station"}],
   },
+"24495571783": {
+    date:"2026-09-25", name:"Hyrox circle", type:null,
+    totalTime:2720, avgHR:123, maxHR:165,
+    description:``,
+    photos:[],
+    laps:[{i:1,t:2701,avgHr:123,maxHr:165,dist:2010,role:"run"},{i:2,t:18,avgHr:140,maxHr:147,dist:3,role:"station"}],
+  },
 };
 
 /* ── Official finish time for a raw Garmin activity row ───────────────────
@@ -649,7 +656,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Indoor Running","2026-09-25 18:32:09","false","Indoor Running","2,01","473","00:45:19","123","165","2,8","64","--","22:31","--","--","--","--","--","--","72,78","15,4","10,6","460","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:26:28","00:48:17","--","--"
+"Indoor Running","2026-09-25 18:32:09","false","Hyrox circle","2,01","473","00:45:19","123","165","2,8","64","--","22:31","--","--","--","--","--","--","72,78","15,4","10,6","460","--","--","--","--","--","--","--","--","--","No","--","2","--","--","--","--","--","00:26:28","00:48:17","--","--"
 "Treadmill Running","2026-09-25 10:09:41","false","Tempo 3x2km 14kmh 14.5km 14.5kmh 60s rest","8,00","496","00:39:18","141","169","3,4","175","--","4:54","--","--","--","--","--","--","100,51","7,3","7,6","270","--","--","--","--","--","--","--","--","--","No","--","7","--","--","--","--","--","00:38:40","00:39:18","--","--"
 "Tennis V2","2026-09-24 10:06:49","false","Training🎾1:1","0,30","420","01:20:02","90","143","1,2","13","--","273:13","--","--","--","--","--","--","28,16","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:38","01:20:02","--","--"
 "Treadmill Running","2026-09-22 19:58:09","false","Z2 60m","10,53","703","01:00:33","133","143","2,9","178","--","5:45","--","--","--","--","--","--","110,96","6,5","7,4","265","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:59:58","01:00:35","--","--"
@@ -953,8 +960,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-25";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-25T18:08:00Z";
-const LAST_DATA = "2026-09-25T18:08:00Z";
+const LAST_RUN  = "2026-09-25T18:51:00Z";
+const LAST_DATA = "2026-09-25T18:51:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
