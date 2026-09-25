@@ -16,7 +16,14 @@ before the judgement starts.
 Reads only. Never writes to App.jsx.
 """
 from __future__ import annotations
-import argparse, csv, datetime, io, pathlib, re, sys
+import argparse, csv, datetime, io, pathlib, re, signal, sys
+
+# The Routine is told to run this first and may pipe it. Dying on SIGPIPE
+# there would abort the required step, so restore the default handler.
+try:
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+except (AttributeError, ValueError):
+    pass
 
 DASHBOARD = pathlib.Path("src/App.jsx")
 

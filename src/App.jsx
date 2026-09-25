@@ -1285,12 +1285,22 @@ const SCHEDULE = [
   ]},
 
   /* ── Copenhagen block · sub-65 ─────────────────────────────────────────
-     Fixed points every week: tennis Tue AM, Thu PM and one of Sat/Sun; the
-     Gym+ circle Wed evening. Hard running sits on Tuesday PM, stacked onto
-     a day already spent, so Monday stays easy ahead of Tuesday tennis and
-     Friday stays clear of Thursday's. The day-before-a-match rule: cut the
-     LEG content, not the session — key run becomes Z2 + strides, strength
-     drops lunges and heavy sled, the long run moves to Sunday.
+     TENNIS IS NOT PRESCRIBED HERE. He plays tournaments and sparring
+     arranged with other people, usually confirmed only a few days ahead, so
+     a fixed Tue-AM/Thu-PM slot was fiction — and a plan that prescribes a
+     session he cannot commit to teaches him to ignore the plan.
+
+     Tennis reaches the dashboard two ways instead. Retrospectively, the
+     moment Garmin syncs it: adaptPlan() surfaces it as unplanned load, its
+     TRIMP lands in the week budget, and the remaining sessions are trimmed
+     to absorb it. Prospectively, once a calendar scan can read the fixtures
+     and write them in as {type:"tennis",cal:true,...} — see PLAN_LOG.md.
+
+     So the fixed points are the Gym+ circle and the run/strength days only.
+     Those still assume tennis may land on any of them: keep Monday easy,
+     and if a match is confirmed for the next day, cut the LEG content rather
+     than the session — key run becomes Z2 + strides, strength drops lunges
+     and heavy sled, the long run moves a day.
      ──────────────────────────────────────────────────────────────────── */
   { week:2, label:"Sep 14–20", theme:"Aerobic Reset", days:[
     { date:"2026-09-14", dow:"MON", label:"Sep 14", sessions:[{type:"plan",text:"Z2 run 35min · easy, first structured week back"}] },
@@ -1308,43 +1318,43 @@ const SCHEDULE = [
     { date:"2026-09-24", dow:"THU", label:"Sep 24", sessions:[{type:"plan",text:"Ski 20min technique · morning · easy, legs stay for tennis"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
     { date:"2026-09-25", dow:"FRI", label:"Sep 25", sessions:[{type:"plan",text:"Strength 45min · sled pull 6×25m light technique + lunges 3×50m + lat pulldown"}] },
     { date:"2026-09-26", dow:"SAT", label:"Sep 26", sessions:[{type:"plan",text:"Long run 70min Z2"}] },
-    { date:"2026-09-27", dow:"SUN", label:"Sep 27", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+    { date:"2026-09-27", dow:"SUN", label:"Sep 27", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:4, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
     { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"⏱ ROW 1000m TT — fresh legs, no excuses, it has been deferred twice"},{type:"plan",text:"Then ⏱ SKI 1000m TT after 10min easy · expect ~3:54"}] },
-    { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"Z2 run 40min · evening"}] },
+    { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"plan",text:"Z2 run 40min · evening"}] },
     { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 10min after the circle · 8 transitions, station → jog → station, clock every one. Baseline today, target 0:32"}] },
-    { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:10, 2min rest · moderate — legs stay for tennis"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:10, 2min rest · moderate"}] },
     { date:"2026-10-02", dow:"FRI", label:"Oct 2", sessions:[{type:"plan",text:"Strength 45min · sled pull 6×25m heavy + lunges 4×50m unbroken + lat pulldown 4×10"}] },
     { date:"2026-10-03", dow:"SAT", label:"Oct 3", sessions:[{type:"plan",text:"⏱ 5km TT · the first running benchmark you have ever set. 10min warm-up, then honest"}] },
     { date:"2026-10-04", dow:"SUN", label:"Oct 4", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:5, label:"Oct 5–11", theme:"Base I · Aerobic", days:[
     { date:"2026-10-05", dow:"MON", label:"Oct 5", sessions:[{type:"plan",text:"Z2 run 50min easy"}] },
-    { date:"2026-10-06", dow:"TUE", label:"Oct 6", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · threshold 3×1km @ 4:15, 90s rest · evening"}] },
+    { date:"2026-10-06", dow:"TUE", label:"Oct 6", sessions:[{type:"plan",text:"KEY RUN · threshold 3×1km @ 4:15, 90s rest · evening"}] },
     { date:"2026-10-07", dow:"WED", label:"Oct 7", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:36"}] },
-    { date:"2026-10-08", dow:"THU", label:"Oct 8", sessions:[{type:"plan",text:"Ski 30min moderate · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-08", dow:"THU", label:"Oct 8", sessions:[{type:"plan",text:"Ski 30min moderate · morning"}] },
     { date:"2026-10-09", dow:"FRI", label:"Oct 9", sessions:[{type:"plan",text:"Strength 45min · sled pull 8×25m + lunges 4×50m + core"}] },
     { date:"2026-10-10", dow:"SAT", label:"Oct 10", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km"}] },
-    { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+    { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:6, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
     { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"Z2 run 50min + 4×30s strides"}] },
-    { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · compromised: [1000m ski → 1km @ 4:20] ×3 continuous · evening"}] },
+    { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"plan",text:"KEY RUN · compromised: [1000m ski → 1km @ 4:20] ×3 continuous · evening"}] },
     { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:36"}] },
-    { date:"2026-10-15", dow:"THU", label:"Oct 15", sessions:[{type:"plan",text:"Z2 run 40min · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-15", dow:"THU", label:"Oct 15", sessions:[{type:"plan",text:"Z2 run 40min · morning"}] },
     { date:"2026-10-16", dow:"FRI", label:"Oct 16", sessions:[{type:"plan",text:"Strength 45min · sled pull heavy + wall balls 3×25 straight off a 1km run"}] },
     { date:"2026-10-17", dow:"SAT", label:"Oct 17", sessions:[{type:"plan",text:"Long run 80min Z2"}] },
-    { date:"2026-10-18", dow:"SUN", label:"Oct 18", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+    { date:"2026-10-18", dow:"SUN", label:"Oct 18", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:7, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
     { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"Z2 run 45min easy"}] },
-    { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"tennis",text:"Tennis 🎾 · morning"},{type:"plan",text:"KEY RUN · threshold 4×1km @ 4:12, 90s rest · evening"}] },
+    { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"plan",text:"KEY RUN · threshold 4×1km @ 4:12, 90s rest · evening"}] },
     { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ Roxzone circuit · 8 transitions vs 0:34"}] },
-    { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:05 · morning"},{type:"tennis",text:"Tennis 🎾 · evening"}] },
+    { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:05 · morning"}] },
     { date:"2026-10-23", dow:"FRI", label:"Oct 23", sessions:[{type:"plan",text:"Strength 45min · sled pull + lunges 4×50m unbroken + lat pulldown"}] },
     { date:"2026-10-24", dow:"SAT", label:"Oct 24", sessions:[{type:"plan",text:"Long run 85min · last 20min @ 4:25/km"}] },
-    { date:"2026-10-25", dow:"SUN", label:"Oct 25", sessions:[{type:"rest",text:"Tennis 🎾 or full rest"}] },
+    { date:"2026-10-25", dow:"SUN", label:"Oct 25", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
 ];
 
