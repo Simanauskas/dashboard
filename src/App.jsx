@@ -952,8 +952,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-25";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-25T14:08:00Z";
-const LAST_DATA = "2026-09-25T14:08:00Z";
+const LAST_RUN  = "2026-09-25T14:43:00Z";
+const LAST_DATA = "2026-09-25T14:43:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1322,7 +1322,7 @@ const SCHEDULE = [
   ]},
   { week:4, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
     { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"⏱ ROW 1000m TT — fresh legs, no excuses, it has been deferred twice"},{type:"plan",text:"Then ⏱ SKI 1000m TT after 10min easy · expect ~3:54"}] },
-    { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"plan",text:"Z2 run 40min · evening"}] },
+    { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with ? · 18:00"},{type:"tennis",cal:true,text:"Tennis 🎾 · session with Padelis · 12:00"},{type:"plan",text:"Z2 run 40min · evening"}] },
     { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 10min after the circle · 8 transitions, station → jog → station, clock every one. Baseline today, target 0:32"}] },
     { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Erg 30min · 3×1000m ski @ 4:10, 2min rest · moderate"}] },
     { date:"2026-10-02", dow:"FRI", label:"Oct 2", sessions:[{type:"plan",text:"Strength 45min · sled pull 6×25m heavy + lunges 4×50m unbroken + lat pulldown 4×10"}] },
