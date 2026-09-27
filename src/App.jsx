@@ -246,6 +246,11 @@ const HEALTH_DATA = {
     {date:"2026-09-26",deep:62,rem:82,light:384,awake:5},
     {date:"2026-09-27",deep:205,rem:81,light:190,awake:18},
   ],
+  // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
+  // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
+  // 4-space indent; a day with nothing logged is absent, never zero-filled.
+  nutrition: [
+  ],
 };
 
 // ── Hyrox sessions data ───────────────────────────────────────────────────────
@@ -968,6 +973,9 @@ const TODAY = "2026-09-27";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
 const LAST_RUN  = "2026-09-27T08:08:00Z";
 const LAST_DATA = "2026-09-27T08:08:00Z";
+
+// LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
+const LAST_MFP  = "";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -3291,13 +3299,119 @@ function ReferencePanel() {
   );
 }
 
+// Protein bands in g per kg body weight. 1.6 is the usual floor for an athlete
+// training most days; below 1.2 is under-fuelling recovery.
+const PROTEIN_OK = 1.6, PROTEIN_WARN = 1.2;
+
+function NutritionPanel() {
+  const rows = HEALTH_DATA.nutrition || [];
+  // Today's diary is still being filled in, so it is shown but never averaged.
+  const localToday = new Date().toLocaleDateString("sv-SE");
+  const done = rows.filter(r => r.date < localToday);
+  const todayRow = rows.find(r => r.date === localToday);
+
+  if (!rows.length) {
+    return (
+      <Card pad={16}>
+        <Empty>
+          No MyFitnessPal data yet.<br />
+          Connect it from the <strong style={{ color:T.ink2 }}>Sync</strong> panel at the foot of Today (🍎 MyFitnessPal).
+        </Empty>
+      </Card>
+    );
+  }
+
+  const last = (n) => done.filter(r => daysAgo(r.date) <= n && daysAgo(r.date) >= 1);
+  const wk = last(7);
+  const avg = (arr, k) => { const v = arr.map(r => r[k]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  const kcal7 = avg(wk, "kcal"), goal7 = avg(wk, "goal");
+  const p7 = avg(wk, "protein"), c7 = avg(wk, "carbs"), f7 = avg(wk, "fat");
+  const weights = HEALTH_DATA.weight;
+  const kg = weights.length ? weights[weights.length - 1][1] : null;
+  const pPerKg = p7 != null && kg ? p7 / kg : null;
+  const kcalTone = kcal7 == null || !goal7 ? "ink" : Math.abs(kcal7 - goal7) / goal7 <= 0.1 ? "ok" : "warn";
+  const macroKcal = (p7 || 0) * 4 + (c7 || 0) * 4 + (f7 || 0) * 9;
+  const share = (g, per) => (macroKcal ? Math.round((g * per / macroKcal) * 100) : 0);
+  const recent = [...rows].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14);
+  const maxKcal = Math.max(...recent.map(r => Math.max(r.kcal || 0, r.goal || 0)), 1);
+  const logged14 = last(14).length;
+
+  return (
+    <div>
+      <div className="grid g4" style={{ marginBottom:20 }}>
+        <Stat label="Calories · 7d avg" value={kcal7 != null ? Math.round(kcal7) : "—"} unit="kcal"
+          sub={goal7 ? `goal ${Math.round(goal7)} · ${kcal7 >= goal7 ? "+" : "−"}${Math.abs(Math.round(kcal7 - goal7))}` : `${wk.length} days logged`}
+          tone={kcalTone} />
+        <Stat label="Protein · 7d avg" value={p7 != null ? Math.round(p7) : "—"} unit="g"
+          sub={pPerKg != null ? `${pPerKg.toFixed(1)} g/kg · target ≥${PROTEIN_OK}` : ""}
+          tone={pPerKg == null ? "ink" : toneOf(pPerKg, PROTEIN_OK, PROTEIN_WARN)} />
+        <Stat label="Carbs · 7d avg" value={c7 != null ? Math.round(c7) : "—"} unit="g"
+          sub={c7 != null && kg ? `${(c7 / kg).toFixed(1)} g/kg · ${share(c7, 4)}% of kcal` : ""} />
+        <Stat label="Fat · 7d avg" value={f7 != null ? Math.round(f7) : "—"} unit="g"
+          sub={f7 != null ? `${share(f7, 9)}% of kcal` : ""} />
+      </div>
+
+      <div className="split-even">
+        <Sec title="Calories in" sub={`${done.length} days logged · ${logged14} of the last 14`}>
+          <Card pad={16}>
+            {done.length > 1
+              ? <Sparkline data={done.map(r => [r.date, r.kcal])} color={T.accent} height={120} fmt={v => Math.round(v)} />
+              : <Empty>Needs two logged days for a trend.</Empty>}
+            {todayRow && (
+              <Note tone="mute" icon="🍽">
+                Today so far: <strong style={{ color:T.ink }}>{todayRow.kcal} kcal</strong> · P{todayRow.protein} C{todayRow.carbs} F{todayRow.fat}
+                {todayRow.goal ? ` · ${Math.max(0, todayRow.goal - todayRow.kcal)} left` : ""}
+              </Note>
+            )}
+          </Card>
+        </Sec>
+
+        <Sec title="Protein" sub={kg ? `g per kg at ${kg} kg · band ${PROTEIN_WARN}–${PROTEIN_OK}+` : "grams per day"}>
+          <Card pad={16}>
+            {done.length > 1
+              ? <Sparkline data={done.map(r => [r.date, kg ? r.protein / kg : r.protein])} color={T.ok} height={120}
+                  fmt={v => (kg ? v.toFixed(1) : Math.round(v))} />
+              : <Empty>Needs two logged days for a trend.</Empty>}
+          </Card>
+        </Sec>
+      </div>
+
+      <Sec title="Last 14 days" sub="Bar = calories eaten; tick = MyFitnessPal goal">
+        <Card pad={16}>
+          {recent.map(r => {
+            const tone = !r.goal ? "accent" : Math.abs(r.kcal - r.goal) / r.goal <= 0.1 ? "ok" : "warn";
+            const isToday = r.date === localToday;
+            return (
+              <div key={r.date} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 0", borderBottom:`1px solid ${T.lineDim}` }}>
+                <span className="num" style={{ width:52, fontSize:11, color: isToday ? T.ink3 : T.ink2, flexShrink:0 }}>
+                  {isToday ? "today" : fmtISO(r.date)}
+                </span>
+                <div style={{ flex:1, position:"relative", display:"flex" }}>
+                  <Bar value={pct(r.kcal, maxKcal)} tone={isToday ? "mute" : tone} height={8} />
+                  {r.goal && <div style={{ position:"absolute", top:-3, bottom:-3, width:2, borderRadius:1, background:T.ink2,
+                    left:`calc(${pct(r.goal, maxKcal)}% - 1px)` }} />}
+                </div>
+                <span className="num" style={{ width:62, textAlign:"right", fontSize:11.5, fontWeight:700, color:T.ink, flexShrink:0 }}>{r.kcal}</span>
+                <span className="num" style={{ width:118, textAlign:"right", fontSize:10.5, color:T.ink3, flexShrink:0 }}>
+                  P{r.protein} · C{r.carbs} · F{r.fat}
+                </span>
+              </div>
+            );
+          })}
+        </Card>
+      </Sec>
+    </div>
+  );
+}
+
 function BodyView({ ana }) {
   const [tab, setTab] = useState("recovery");
   return (
     <div className="fade">
-      <SubNav items={[["recovery","RECOVERY"],["composition","COMPOSITION"],["reference","REFERENCE"]]} value={tab} onChange={setTab} />
+      <SubNav items={[["recovery","RECOVERY"],["composition","COMPOSITION"],["nutrition","NUTRITION"],["reference","REFERENCE"]]} value={tab} onChange={setTab} />
       {tab === "recovery" && <RecoveryPanel ana={ana} />}
       {tab === "composition" && <CompositionPanel />}
+      {tab === "nutrition" && <NutritionPanel />}
       {tab === "reference" && <ReferencePanel />}
     </div>
   );
@@ -4398,6 +4512,13 @@ function syncState() {
     msg:`Last data ${day(lastData)} ${clock(lastData)} (${ago(lastData)}) — OAuth1 likely expired, tap Renew.` };
   if (runMin > 90) return { tone:"warn", short:"scheduler stuck",
     msg:`Last run ${clock(lastRun)} (${ago(lastRun)}) — the hourly cron may have stopped, tap Refresh.` };
+  // MyFitnessPal only counts once it has been connected (LAST_MFP non-empty),
+  // and ranks below Garmin: a dead nutrition feed is worth a word, not a red dot.
+  if (LAST_MFP && (now - new Date(LAST_MFP)) / 60000 > 28 * 60) {
+    const lastMfp = new Date(LAST_MFP);
+    return { tone:"warn", short:"MFP disconnected",
+      msg:`MyFitnessPal last synced ${day(lastMfp)} (${ago(lastMfp)}) — the session cookie has likely expired, reconnect below.` };
+  }
   return { tone:"ok", short:`synced ${ago(lastRun)}`, msg:`Synced ${clock(lastRun)} · data through ${day(lastData)}.` };
 }
 
@@ -4484,6 +4605,68 @@ function AuthControls() {
   );
 }
 
+// MyFitnessPal has no open API, so the credential is the website's own session
+// cookie. It is pasted here once and sent to the Worker, which keeps it in KV
+// and replays it hourly — that replay is what keeps it from expiring. The
+// cookie is never stored in this page or the repo.
+function MfpConnect() {
+  const [open, setOpen] = useState(false);
+  const [cookie, setCookie] = useState("");
+  const [st, setSt] = useState({ state:"idle", msg:"" });
+
+  async function connect() {
+    if (!cookie.trim()) return;
+    setSt({ state:"busy", msg:"" });
+    try {
+      const res = await fetch(`${WORKER}/mfp/connect`, {
+        method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ cookie:cookie.trim() }),
+      });
+      const data = await res.json();
+      if (data.status === "success") { setSt({ state:"ok", msg:data.message || "connected — sync running" }); setCookie(""); setOpen(false); }
+      else setSt({ state:"err", msg:data.error || "failed" });
+    } catch { setSt({ state:"err", msg:"worker unreachable" }); }
+  }
+
+  const since = LAST_MFP ? LAST_MFP.replace("T", " ").replace("Z", " UTC") : null;
+  return (
+    <div style={{ marginTop:12, paddingTop:11, borderTop:`1px solid ${T.lineDim}` }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+        <span style={{ fontSize:12, color:T.ink2, flex:"1 1 200px" }}>
+          🍎 <strong>MyFitnessPal</strong>{" "}
+          <span className="num" style={{ fontSize:10.5, color:T.ink3 }}>{since ? `last fetched ${since}` : "not connected"}</span>
+        </span>
+        <button className="tap" onClick={() => setOpen(o => !o)} style={{
+          padding:"8px 13px", borderRadius:9, fontSize:11, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap",
+          background:"transparent", border:`1px solid ${st.state === "err" ? T.bad : T.line}`, color: st.state === "err" ? T.bad : T.ink2 }}>
+          {st.state === "ok" ? "✓ Connected" : since ? "Reconnect" : "Connect"}
+        </button>
+      </div>
+      {open && (
+        <div style={{ marginTop:10 }}>
+          <div style={{ fontSize:10.5, color:T.ink3, lineHeight:1.6, marginBottom:7 }}>
+            On a computer, log in at myfitnesspal.com → open DevTools → <strong style={{ color:T.ink2 }}>Network</strong> →
+            reload → click any request to www.myfitnesspal.com → copy the whole <strong style={{ color:T.ink2 }}>Cookie</strong> request
+            header and paste it here. Don't log out of that browser afterwards — logging out ends the session.
+          </div>
+          <textarea value={cookie} onChange={e => setCookie(e.target.value)} rows={3} placeholder="__Secure-next-auth.session-token=…; …"
+            spellCheck={false} autoComplete="off"
+            style={{ width:"100%", boxSizing:"border-box", padding:"8px 10px", borderRadius:8, border:`1px solid ${T.line}`,
+              background:T.bg, color:T.ink, fontSize:11, fontFamily:"ui-monospace, monospace", resize:"vertical", outline:"none" }} />
+          <div style={{ display:"flex", gap:8, alignItems:"center", marginTop:7, flexWrap:"wrap" }}>
+            <button className="tap" onClick={connect} disabled={st.state === "busy"} style={{
+              padding:"8px 13px", borderRadius:9, fontSize:11, fontWeight:700, cursor:"pointer",
+              background:T.accent, border:`1px solid ${T.accent}`, color:"#fff" }}>
+              {st.state === "busy" ? "Checking…" : "Save"}
+            </button>
+            {st.msg && <span style={{ fontSize:10.5, color: st.state === "err" ? T.bad : T.ok }}>{st.msg}</span>}
+          </div>
+        </div>
+      )}
+      {!open && st.state === "err" && <div style={{ fontSize:10.5, color:T.bad, marginTop:6 }}>{st.msg}</div>}
+    </div>
+  );
+}
+
 // Sync status and the credential controls. These are read once in a while and
 // tapped rarely, so they sit at the foot of Today rather than occupying the
 // top of every screen. The header keeps only a status dot, which turns amber
@@ -4513,6 +4696,7 @@ function SyncPanel() {
           {" "}<strong style={{ color:T.ink2 }}>Renew</strong> re-authorises Garmin and needs the emailed code — only
           necessary about once a year, when the long-lived token expires.
         </div>
+        <MfpConnect />
       </Card>
     </Sec>
   );
