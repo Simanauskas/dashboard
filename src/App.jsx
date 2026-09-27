@@ -128,6 +128,7 @@ const HEALTH_DATA = {
     {date:"2026-09-24",hrv:59,rhr:42,spo2:95,resp:12.0,sleep_score:null},
     {date:"2026-09-25",hrv:90,rhr:39,spo2:93,resp:11.0,sleep_score:95},
     {date:"2026-09-26",hrv:117,rhr:39,spo2:96,resp:10.0,sleep_score:null},
+    {date:"2026-09-27",hrv:60,rhr:38,spo2:93,resp:11.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -243,6 +244,7 @@ const HEALTH_DATA = {
     {date:"2026-09-24",deep:142,rem:92,light:230,awake:15},
     {date:"2026-09-25",deep:120,rem:81,light:289,awake:5},
     {date:"2026-09-26",deep:62,rem:82,light:384,awake:5},
+    {date:"2026-09-27",deep:205,rem:81,light:190,awake:18},
   ],
 };
 
@@ -962,10 +964,10 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-09-26";
+const TODAY = "2026-09-27";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-27T04:08:00Z";
-const LAST_DATA = "2026-09-27T04:08:00Z";
+const LAST_RUN  = "2026-09-27T05:08:00Z";
+const LAST_DATA = "2026-09-27T05:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2197,7 +2199,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 84; // updated 2026-09-26
+const hrvBaseline = 85; // updated 2026-09-27
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
