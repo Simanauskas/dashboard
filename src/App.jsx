@@ -2455,6 +2455,266 @@ function PlanAdjustments({ plan }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    TODAY
    ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FUEL — how much to eat today, from the training actually in front of him.
+
+   Carbohydrate is set by load, following the sports-nutrition bands (IOC /
+   ACSM: 3–5 g/kg light, 5–7 moderate ~1h, 6–10 high 1–3h, 8–12 very high).
+   Load is TRIMP — the same number the plan and the load charts use — as
+   measured for work already done and as estimated for sessions still to come,
+   so an unplanned session raises the target the moment Garmin syncs it.
+   The line runs along the lower half of each band, because the other goal is
+   staying lean: fuel the work, don't bank carbohydrate for work that isn't
+   coming.
+
+   Protein is his fixed number. Fat is the lever for leanness — it carries
+   no training job, so it absorbs the energy correction instead of the carbs.
+   Every number is derived from the current sync; nothing here is hardcoded
+   about a particular day.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const FUEL = {
+  proteinG: 160,          // his target, g/day
+  carbRest: 3.0,          // g/kg on a day with no training
+  // g/kg per TRIMP: 60 → 4.2, 130 (1h Hyrox) → 5.6, 200 (2h) → 7.0, 250 → 8.0.
+  // TRIMP weights intensity exponentially, so a steeper slope overprices short
+  // hard sessions — 0.03 put a 45-min erg benchmark at 8 g/kg.
+  carbPerTrimp: 0.02,
+  carbMax: 10,            // g/kg ceiling
+  hardTrimp: 55,          // same line adaptPlan draws for a hard day
+  preloadGkg: 0.5,        // extra g/kg the day before a hard session
+  fatGkg: 1.0,            // g/kg baseline fat
+  fatFloorGkg: 0.8,       // never below — hormones, not a lever past here
+  carryDays: 3,           // how far back the carb balance looks
+  carryShare: 0.5,        // share of a past gap paid back today
+  carryUpMax: 0.75,       // g/kg: most a shortfall can add
+  carryDownMax: 0.5,      // g/kg: most a surplus can take away
+};
+
+const carbGkgFor = (trimp, nextTrimp) =>
+  Math.min(FUEL.carbMax, FUEL.carbRest + FUEL.carbPerTrimp * Math.max(0, trimp))
+  + (nextTrimp >= FUEL.hardTrimp ? FUEL.preloadGkg : 0);
+
+// Least-squares slope of weigh-ins over the last `days`, in kg per week.
+function weightTrend(weights, date, days = 21) {
+  const t0 = new Date(date).getTime();
+  const pts = weights
+    .map(([d, kg]) => [(new Date(d).getTime() - t0) / 86400000, kg])
+    .filter(([x]) => x <= 0 && x >= -days);
+  if (pts.length < 3) return null;
+  const n = pts.length, mx = pts.reduce((s, p) => s + p[0], 0) / n, my = pts.reduce((s, p) => s + p[1], 0) / n;
+  const sxx = pts.reduce((s, p) => s + (p[0] - mx) ** 2, 0);
+  if (!sxx) return null;
+  return (pts.reduce((s, p) => s + (p[0] - mx) * (p[1] - my), 0) / sxx) * 7;
+}
+
+function fuelPlan({ ana, plan, health, date }) {
+  const weights = health.weight || [];
+  const kg = weights.length ? weights[weights.length - 1][1] : 75;
+  const nutrition = health.nutrition || [];
+  const eatenOn = (d) => nutrition.find(r => r.date === d) || null;
+  const shift = (d, n) => { const x = new Date(d); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+
+  const acts = (d) => ana.enriched.filter(a => a._date === d);
+  const doneTrimp = (d) => acts(d).reduce((s, a) => s + a._trimp, 0);
+  const planDay = (d) => plan.weeks.flatMap(w => w.days).find(x => x.date === d) || null;
+  // What is still to come on a day: sessions not done, not dropped, eased
+  // ones priced at Z2 — the same pricing the week governor uses.
+  const remainingSessions = (d) => (planDay(d)?.sessions || []).filter(s =>
+    s._status !== "done" && s._status !== "missed" && s._adj?.kind !== "drop" &&
+    !isRestSession(s) && !isInfoLine(s) && estTrimp(s, plan.model) > 0);
+  const priceOf = (s) => (s._adj?.kind === "ease" ? estTrimp(s, plan.model, Z2_HR) : estTrimp(s, plan.model));
+  const plannedTrimp = (d) => (planDay(d)?.sessions || [])
+    .filter(s => s._adj?.kind !== "drop" && !isRestSession(s) && !isInfoLine(s))
+    .reduce((s, sn) => s + priceOf(sn), 0);
+
+  // ── today ────────────────────────────────────────────────────────────────
+  const done = doneTrimp(date);
+  const upcoming = remainingSessions(date);
+  const toCome = upcoming.reduce((s, sn) => s + priceOf(sn), 0);
+  const load = done + toCome;
+  const tomorrow = plannedTrimp(shift(date, 1));
+  const asPlanned = plannedTrimp(date);
+
+  // ── the last few days: did he eat the carbs those days' work needed? ─────
+  // Only days with a diary count. An unlogged day is unknown, not zero —
+  // counting it as zero would read every forgotten log as a huge shortfall.
+  const history = [];
+  for (let i = FUEL.carryDays; i >= 1; i--) {
+    const d = shift(date, -i);
+    const t = doneTrimp(d);
+    const need = Math.round(carbGkgFor(t, doneTrimp(shift(d, 1)) || plannedTrimp(shift(d, 1))) * kg);
+    const row = eatenOn(d);
+    history.push({ date: d, trimp: Math.round(t), need, ate: row ? row.carbs : null, kcal: row ? row.kcal : null });
+  }
+  const logged = history.filter(h => h.ate != null);
+  const gap = logged.reduce((s, h) => s + (h.ate - h.need), 0);       // + over, − under
+  const carry = gap < 0
+    ? Math.min(FUEL.carryUpMax * kg, -gap * FUEL.carryShare)
+    : -Math.min(FUEL.carryDownMax * kg, gap * FUEL.carryShare);
+
+  const baseGkg = carbGkgFor(load, tomorrow);
+  const carbs = Math.max(Math.round(FUEL.carbRest * kg), Math.round(baseGkg * kg + carry));
+
+  // ── leanness: steer fat by the weight trend ──────────────────────────────
+  const trend = weightTrend(weights, date);
+  let fat = FUEL.fatGkg * kg, fatWhy = null;
+  if (trend != null && trend > 0.25) { fat -= 15; fatWhy = `weight trending up ${trend.toFixed(2)} kg/week — fat trimmed 15 g`; }
+  else if (trend != null && trend < -0.5) { fat += 10; fatWhy = `weight falling ${Math.abs(trend).toFixed(2)} kg/week — faster than fuelling allows, fat +10 g`; }
+  fat = Math.round(Math.max(FUEL.fatFloorGkg * kg, fat));
+
+  const protein = FUEL.proteinG;
+  const kcal = Math.round(carbs * 4 + protein * 4 + fat * 9);
+  const eaten = eatenOn(date);
+
+  // ── why, in his terms ────────────────────────────────────────────────────
+  const why = [];
+  const doneNames = acts(date).filter(a => a._trimp > 5).map(a => a.Title || a["Activity Type"]);
+  why.push(load < 5
+    ? `No training today → ${FUEL.carbRest.toFixed(1)} g/kg floor.`
+    : `Today's load ${Math.round(load)} TRIMP` +
+      (done > 5 ? ` (${Math.round(done)} done${doneNames.length ? `: ${doneNames.join(", ")}` : ""}` +
+        (toCome > 5 ? `, ${Math.round(toCome)} still to come)` : ")") : "") +
+      ` → ${carbGkgFor(load, 0).toFixed(1)} g/kg.`);
+  if (Math.abs(load - asPlanned) >= 15 && done > 5) {
+    const dg = Math.round((carbGkgFor(load, 0) - carbGkgFor(asPlanned, 0)) * kg);
+    why.push(`${dg > 0 ? "More" : "Less"} than the plan's ${Math.round(asPlanned)} TRIMP → ${dg > 0 ? "+" : "−"}${Math.abs(dg)} g carbs vs the planned day.`);
+  }
+  if (tomorrow >= FUEL.hardTrimp) why.push(`Tomorrow is a hard day (~${Math.round(tomorrow)} TRIMP) → +${FUEL.preloadGkg} g/kg to go in stocked.`);
+  if (logged.length && Math.abs(carry) >= 10) {
+    why.push(gap < 0
+      ? `Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} ${Math.round(-gap)} g carbs short of what the training needed → +${Math.round(carry)} g today to catch up.`
+      : `Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} ${Math.round(gap)} g carbs over → −${Math.round(-carry)} g today.`);
+  } else if (logged.length) {
+    why.push(`Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} fuelled about right (${gap >= 0 ? "+" : "−"}${Math.abs(Math.round(gap))} g carbs) — no carry-over.`);
+  }
+  // The bodybuilding habit shows up as fat and protein standing in for carbs.
+  // When that is the pattern, say so: the fix is a swap, not eating more.
+  const fatLogged = logged.map(h => eatenOn(h.date).fat).filter(v => v != null);
+  const fatAvg = fatLogged.length ? fatLogged.reduce((a, b) => a + b, 0) / fatLogged.length : null;
+  if (gap < 0 && fatAvg != null && fatAvg > fat + 15) {
+    why.push(`Fat has averaged ${Math.round(fatAvg)} g against ${fat} g — every 10 g of fat swapped out makes room for ~22 g of carbs at the same calories.`);
+  }
+  if (fatWhy) why.push(`${fatWhy[0].toUpperCase()}${fatWhy.slice(1)}.`);
+  else if (trend != null) why.push(`Weight steady (${trend >= 0 ? "+" : "−"}${Math.abs(trend).toFixed(2)} kg/week) — fat at ${FUEL.fatGkg} g/kg.`);
+
+  // ── timing around what is still to come ──────────────────────────────────
+  // Lines on the same day are usually one outing (the circle and its roxzone
+  // block), so "before" goes on the first and "after" on the last, not both
+  // on each.
+  const timing = upcoming.map((s, i) => {
+    const min = planDurationMin(s.text) ?? (s.type === "tennis" ? plan.model.tennis.min : plan.model.plan.min);
+    const hard = priceOf(s) >= FUEL.hardTrimp || planIntensity(s, plan.model) >= 150;
+    const anyHard = upcoming.some(u => priceOf(u) >= FUEL.hardTrimp || planIntensity(u, plan.model) >= 150);
+    const parts = [];
+    if (i === 0) parts.push(`${Math.round((anyHard ? 1.0 : 0.5) * kg / 5) * 5} g carbs 2–3 h before`);
+    if (min >= 75) parts.push(`${min >= 120 ? 60 : 30}–${min >= 120 ? 90 : 60} g/h during`);
+    if (i === upcoming.length - 1 && anyHard) parts.push(`${Math.round(kg / 5) * 5} g carbs + 30 g protein within 2 h after`);
+    return { text: String(s.text).replace(/^⏱\s*/, "").split(/[·—]/)[0].trim(), detail: parts.join(" · ") };
+  }).filter(t => t.detail);
+
+  return {
+    kg, load, done, toCome, tomorrow, trend,
+    target: { kcal, carbs, protein, fat, carbGkg: carbs / kg },
+    eaten, history, why, timing,
+  };
+}
+
+function MacroBar({ label, eaten, target, unit = "g", strict = false }) {
+  const has = eaten != null;
+  const left = has ? target - eaten : target;
+  const over = has && left < 0;
+  // Over on carbs/protein is a watch, not an alarm; over on energy is the one
+  // that works against staying lean, so only that one goes red.
+  const tone = !has ? "mute" : over ? (strict && -left > target * 0.08 ? "bad" : "warn") : "accent";
+  return (
+    <div style={{ minWidth:0 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8 }}>
+        <span style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3 }}>{label}</span>
+        <span className="num" style={{ fontSize:10.5, color:T.ink3 }}>{has ? `${eaten} / ` : ""}{target}{unit}</span>
+      </div>
+      <div className="num" style={{ fontSize:24, fontWeight:800, color: over ? TONE[tone] : T.ink, letterSpacing:"-0.02em", lineHeight:1.2, margin:"3px 0 6px" }}>
+        {over ? `+${-left}` : left}<span style={{ fontSize:11, fontWeight:600, color:T.ink3, marginLeft:3 }}>{unit} {over ? "over" : "left"}</span>
+      </div>
+      <Bar value={has ? pct(eaten, target) : 0} tone={tone} height={6} />
+    </div>
+  );
+}
+
+function FuelCard({ ana, plan, health }) {
+  const date = new Date().toLocaleDateString("sv-SE");
+  const f = fuelPlan({ ana, plan, health, date });
+  const { target: tg, eaten } = f;
+  const synced = LAST_MFP ? new Date(LAST_MFP) : null;
+  const clock = d => d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
+
+  return (
+    <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
+      <div style={{ padding:"16px 20px 14px" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:10, flexWrap:"wrap", marginBottom:14 }}>
+          <div>
+            <span style={{ fontSize:11, fontWeight:800, letterSpacing:"0.14em", color:T.ink2 }}>FUEL TODAY</span>
+            <span className="num" style={{ fontSize:11.5, color:T.ink3, marginLeft:10 }}>
+              {tg.kcal} kcal · {tg.carbGkg.toFixed(1)} g/kg carbs at {f.kg} kg
+            </span>
+          </div>
+          <span className="num" style={{ fontSize:10.5, color:T.ink3 }}>
+            {eaten ? `diary ${synced ? `synced ${clock(synced)}` : ""}` : "nothing logged yet today"}
+          </span>
+        </div>
+        <div className="grid g4">
+          <MacroBar label="CARBS" eaten={eaten?.carbs} target={tg.carbs} />
+          <MacroBar label="PROTEIN" eaten={eaten?.protein} target={tg.protein} />
+          <MacroBar label="FAT" eaten={eaten?.fat} target={tg.fat} />
+          <MacroBar label="CALORIES" eaten={eaten?.kcal} target={tg.kcal} unit="" strict />
+        </div>
+      </div>
+
+      <div className="split-even" style={{ borderTop:`1px solid ${T.lineDim}`, padding:"12px 20px 14px", gap:18 }}>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3, marginBottom:6 }}>WHY THIS TARGET</div>
+          {f.why.map((w, i) => (
+            <div key={i} style={{ fontSize:11.5, color:T.ink2, lineHeight:1.55, padding:"2px 0" }}>· {w}</div>
+          ))}
+          {f.timing.length > 0 && (
+            <>
+              <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3, margin:"10px 0 6px" }}>AROUND WHAT'S STILL TO COME</div>
+              {f.timing.map((t, i) => (
+                <div key={i} style={{ fontSize:11.5, color:T.ink2, lineHeight:1.55, padding:"2px 0" }}>
+                  <strong style={{ color:T.ink }}>{t.text}</strong> — {t.detail}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3, marginBottom:6 }}>CARBS VS WHAT THE TRAINING NEEDED</div>
+          {f.history.map(h => {
+            const ok = h.ate == null ? null : Math.abs(h.ate - h.need) / h.need <= 0.15;
+            const tone = h.ate == null ? "mute" : ok ? "ok" : h.ate < h.need ? "bad" : "warn";
+            const max = Math.max(...f.history.map(x => Math.max(x.need, x.ate || 0)), 1);
+            return (
+              <div key={h.date} style={{ display:"flex", alignItems:"center", gap:9, padding:"4px 0" }}>
+                <span className="num" style={{ width:46, fontSize:10.5, color:T.ink3, flexShrink:0 }}>{fmtISO(h.date)}</span>
+                <div style={{ flex:1, position:"relative", display:"flex" }}>
+                  <Bar value={h.ate == null ? 0 : pct(h.ate, max)} tone={tone} height={7} />
+                  <div style={{ position:"absolute", top:-3, bottom:-3, width:2, borderRadius:1, background:T.ink2,
+                    left:`calc(${pct(h.need, max)}% - 1px)` }} />
+                </div>
+                <span className="num" style={{ width:92, textAlign:"right", fontSize:10.5, color: h.ate == null ? T.ink3 : TONE[tone], flexShrink:0 }}>
+                  {h.ate == null ? "not logged" : `${h.ate} / ${h.need} g`}
+                </span>
+              </div>
+            );
+          })}
+          <div style={{ fontSize:10, color:T.ink3, marginTop:6, lineHeight:1.5 }}>
+            Tick = carbs that day's measured TRIMP called for. Green within 15%.
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function TodayView({ ana, health, plan }) {
   const { yesterday, tsb, atl, ctl, daysSinceHard, weeklyKm } = ana;
   const daily = health.daily;
@@ -2482,6 +2742,8 @@ function TodayView({ ana, health, plan }) {
 
   return (
     <div className="fade">
+      <FuelCard ana={ana} plan={plan} health={health} />
+
       {/* ── READINESS HERO ────────────────────────────────────────────── */}
       <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
         <div style={{ display:"flex", gap:22, padding:"20px 22px", flexWrap:"wrap", alignItems:"center",

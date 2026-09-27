@@ -99,10 +99,11 @@ jobs:
       # Nutrition from MyFitnessPal. MFP_TOKEN is a short-lived API token the
       # auth.simas.fit Worker mints hourly from the session cookie it keeps in
       # KV — the same split as GARTH_OAUTH1 (Worker/KV) vs GARTH_OAUTH2 (here).
-      # Skipped on polls: diary entries do not need a 10-minute cadence.
-      # Never allowed to fail the job; mfp.py exits 0 on every error path.
+      # Polls fetch today only and write nothing unless the diary changed, so
+      # the Today fuel card tracks meals within ~10 minutes without a commit
+      # every tick. Never allowed to fail the job; mfp.py exits 0 on every
+      # error path.
       - name: Sync nutrition from MyFitnessPal
-        if: steps.mode.outputs.mode != 'poll'
         continue-on-error: true
         env:
           MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
@@ -111,6 +112,8 @@ jobs:
         run: |
           if [ "$MODE" = "backfill" ]; then
             python mfp.py --days "$DAYS"
+          elif [ "$MODE" = "poll" ]; then
+            python mfp.py --poll
           else
             python mfp.py
           fi

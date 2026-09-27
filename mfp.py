@@ -22,6 +22,7 @@ Then Connect needs doing again.
     python3 mfp.py                 # fetch the last REFRESH_DAYS + today, patch
     python3 mfp.py --days 30       # wider window (backfill)
     python3 mfp.py --dry-run       # fetch + print, write nothing
+    python3 mfp.py --poll          # today only; writes nothing unless it changed
 
 Never fails the job: an MFP outage must not cost the Garmin sync its commit.
 Every failure path prints why and exits 0.
@@ -208,7 +209,13 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--days", type=int, default=REFRESH_DAYS)
     p.add_argument("--dry-run", action="store_true")
+    # The 10-minute polls keep the Today fuel card current through the day.
+    # Like update.py's poll mode, a poll that finds nothing new writes nothing —
+    # not even LAST_MFP — so it cannot turn into a commit every ten minutes.
+    p.add_argument("--poll", action="store_true")
     a = p.parse_args()
+    if a.poll:
+        a.days = 0
 
     try:
         tok = load_token()
@@ -242,6 +249,9 @@ def main():
         new = patch(rows, code, now)
     except RuntimeError as e:
         print(f"::warning::{e}")
+        return 0
+    if a.poll and patch(rows, code, "") == patch({}, code, ""):
+        print("poll: diary unchanged — leaving the file untouched")
         return 0
     DASHBOARD.write_text(new, encoding="utf-8")
     print(f"✓ Patched {len(rows)} nutrition day(s) into {DASHBOARD}")
