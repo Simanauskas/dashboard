@@ -32,6 +32,94 @@ and never once done.
 
 ---
 
+## 2026-09-27
+- adherence: ski 2x prescribed / 0 done (WATCH) · everything else on track ·
+  **row's "NEVER DONE (1x)" was a measurement bug and is now gone** — see below ·
+  benchmarks in the next 14d: ski+row TT Mon 28 Sep, roxzone circuit Wed 30 Sep,
+  5km TT Fri 2 Oct, roxzone circuit Wed 7 Oct
+- readiness: HRV 60 vs baseline 85, RHR **38** (his floor), sleep 7h56 with
+  205min deep. Sunday, already a full rest day.
+- decision: CHANGED two things, both small: (1) fixed a double-count in
+  `adherence.py`; (2) reversed the order of the two erg TTs on Mon 28 Sep and
+  gave the session a degrade rule. Weeks 4-7 otherwise untouched — yesterday
+  rebuilt them and nothing since contradicts that.
+- why (1) — the instrument was lying: the Hyrox-circle line on 23 Sep reads
+  "pick SKI over row wherever the block offers a choice". One line, one
+  session, but `report()` tested every type pattern against it independently,
+  so it scored as a prescribed **ski** session AND a prescribed **row**
+  session. That single mention is **the entirety** of row's "NEVER DONE (1x
+  prescribed)" — a miss on a day he was only ever asked to do the circle,
+  which he did (25 Sep). `adherence.py` now strips a type named as the
+  rejected side of a choice ("over/instead of/rather than <type>") before
+  matching. Exactly one line in App.jsx matches that pattern today, the
+  intended one; row drops out, ski correctly stays at 2x because both 23 and
+  24 Sep did ask for ski. This matters beyond one phantom: the Routine is
+  ordered to trust these two inputs and not re-derive them by eye, so a
+  counter that inflates on a coaching aside will eventually either trip
+  ACTION REQUIRED on a session that was never prescribed, or teach a future
+  run that the counter is noise and to ignore a real 2x. **Note for tomorrow:
+  the row line disappearing from the report is my edit, not new adherence.**
+- why (2) — the Monday session measured the wrong thing: it read "10min easy
+  erg, ⏱ ROW 1000m TT, 10min easy, ⏱ SKI 1000m TT (expect ~3:54)". The ski TT
+  is the one number the whole Copenhagen block turns on — ski is his weakest
+  element at **top 29.8%**, and the gap that defines the block is **3:54 fresh
+  (28 Jul) vs 4:18 raced at Athens**, ~24s he has already proven he owns. That
+  comparison is only meaningful against a *clean fresh* reference, and a
+  maximal 1000m row is ~3:20-3:30 of near-max work that 10min easy does not
+  clear. Running ski second guaranteed a slow number he would then read as
+  "ski got worse" when it is just order of operations. Ski now goes first; row
+  second, with the line telling him to read a slow row as the ski tax. Row is
+  top **11.4%** — a strength the skill says to defend, not chase — so it is
+  the right one to degrade. Added: *if HRV is more than ~15 below baseline
+  this morning, do the ski TT only and drop the row.* Phrased against baseline
+  rather than an absolute number so it cannot go stale as hrvBaseline moves.
+  This is not adaptPlan's job: it scales duration and caps intensity, but it
+  cannot know which of two TTs in one line is the expendable one.
+- phase: unchanged. Aerobic Reset closes today and Base I (380-460) opens
+  tomorrow as written. The week just closed at **357 TRIMP** against the
+  280-400 band — in band, 89% of ceiling, 6 of 7 days trained. Base I's 380
+  floor is a 6% step from 357 and well under the 421-476 he held through
+  August, so the bands are realistic against what he is absorbing. No
+  TAPER_PLAN edit.
+- physiology: HRV 60 is 25ms below baseline 85 and reads alarming in
+  isolation; it is not. Last 7 days are 98/81/105/59/90/117/60 — mean 87
+  against a baseline of 85, sd ~21, so today is ~1.2sd on a genuinely
+  oscillatory series with two sub-65 days. Against that, **RHR 38 is the
+  lowest value in the visible series** (39-42 every day since 23 Sep, never
+  outside 38-46 in three weeks) and deep sleep was 205min against a 60-140
+  norm. Low HRV + floor RHR + outsized deep sleep is parasympathetic
+  dominance, not accumulating strain, and today is a rest day regardless. The
+  7-day mean has drifted 98 (14-20 Sep) -> 87, but that window contains the
+  19 Sep illness spike rolling out, so it is not yet a trend. **No sustained
+  shift and no RHR excursion. Nothing to act on; worth one more morning's
+  look** because tomorrow opens the block with maximal work.
+- watching:
+  **The 28 Sep ski TT result is a trigger, not just a benchmark.** The
+  compromised ski targets downstream — 4:05 on Thu 8 Oct, 4:20 on Tue 13 Oct,
+  4:00 on Thu 22 Oct — are all built off the **28 Jul** 3:54, and he has not
+  logged a ski erg activity in five months. If Monday comes in slower than
+  ~4:00, those three targets are fiction and must be reset off the new TT
+  rather than off the July number. Whoever runs next after Monday: check the
+  TT before reading those lines as sound.
+  **The Monday double**, carried from yesterday: if the row TT is deferred a
+  third time it stops being a TT and becomes 3x500m inside the circle. My
+  degrade rule deliberately makes skipping it legitimate on a red morning, so
+  count a red-morning skip as a defer, not as disobedience.
+  **The Wednesday Hyrox circle**, carried unchanged: it landed Wed 16 Sep, SUN
+  20 Sep, FRI 25 Sep, and nothing in the plan now depends on it. Yesterday set
+  the trigger at two more off-Wednesday landings inside three weeks; 25 Sep is
+  already counted, so the count stands at zero new. Wed 23 Sep was blank and
+  the circle ran Fri 25 Sep — that is the landing already on the tally, not a
+  new one.
+  **Ski 2x/0** stays on the WATCH list until 23-24 Sep age out of the 21-day
+  window on 15 Oct. Expected, not a live signal: yesterday deleted every
+  standalone ski and re-homed the erg inside the Monday gym trip and the
+  compromised ski->run intervals, and the first instance of that new structure
+  is tomorrow. I would act — and reopen the structure rather than the day — if
+  the 28 Sep gym trip syncs without a ski-titled activity, because that is the
+  new plan failing on its first attempt rather than the old one still decaying.
+- consecutive no-change runs before this one: 0 (26 Sep was a CHANGED run).
+
 ## 2026-09-26
 - adherence: ski 2x prescribed / 0 done (WATCH) · row 1x / 0 · everything else
   on track · benchmarks in the next 14d: row+ski TT Mon 28 Sep, roxzone

@@ -1353,7 +1353,7 @@ const SCHEDULE = [
     { date:"2026-09-27", dow:"SUN", label:"Sep 27", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:4, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
-    { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"GYM 45min · one trip, both benchmarks: 10min easy erg, ⏱ ROW 1000m TT, 10min easy, ⏱ SKI 1000m TT (expect ~3:54) · finish lat pulldown 4×10 + core, no legs · save it as \"Ski + row TT\""}] },
+    { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"GYM 45min · one trip, both benchmarks — ⏱ SKI 1000m TT GOES FIRST: 10min easy erg, then ski hard (expect ~3:54) · 10min easy · ⏱ ROW 1000m TT second, and read a slow row as the ski tax, not a decline · if HRV is more than ~15 below baseline this morning, do the ski TT only and drop the row · finish lat pulldown 4×10 + core, no legs · save it as \"Ski + row TT\""}] },
     { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · court 3 · unconfirmed · 18:00"},{type:"plan",text:"Z2 run 40min · evening"}] },
     { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 15min standalone — run it even if the circle does not · 8× [station 30s → jog 100m], clock every transition. Baseline today, target 0:32 · save it as \"Roxzone circuit\""}] },
     { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Strength 40min · UPPER only ahead of Friday — lat pulldown 4×10, sled pull 6×25m light technique, core. No lunges, no heavy push"}] },

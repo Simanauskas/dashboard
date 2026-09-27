@@ -47,6 +47,20 @@ SESSION_TYPES = [
 # App.jsx. Costing these as sessions would inflate every "prescribed" count.
 INFO = re.compile(r"\bdebrief\b|\bsee (RACE|TRAIN|BODY|TODAY)\b", re.I)
 
+# A line can name a session type as the side of a choice it is telling him NOT
+# to take. The rejected type is not prescribed, but a bare pattern match counts
+# it anyway: the Hyrox-circle line on 23 Sep read "pick SKI over row wherever
+# the block offers a choice", and that ONE line was scored as a prescribed ski
+# session AND a prescribed row session. It is the whole of row's "NEVER DONE
+# (1x prescribed)" — a miss the plan never asked for, on a day he was only ever
+# meant to do the circle. Strip the rejected clause before matching.
+#
+# Deliberately only the three unambiguous choice markers, and only when followed
+# by a session type: "not"/"before" also appear as ordinary plan English ("no
+# legs", "ahead of Friday") and would start eating real prescriptions.
+REJECTED = re.compile(r"\b(?:over|instead of|rather than)\s+(?:the\s+)?"
+                      r"(?:ski|row(?:ing)?|run(?:ning)?|swim|bike|cycling|tennis)\b", re.I)
+
 
 def load(path=DASHBOARD):
     try:
@@ -86,7 +100,8 @@ def report(code, since, until):
         pre = re.compile(ppat, re.I)
         act = re.compile(apat, re.I)
         p_dates = sorted({d for d, texts in plans
-                          if since <= d <= until and any(pre.search(t) for t in texts)})
+                          if since <= d <= until
+                          and any(pre.search(REJECTED.sub(" ", t)) for t in texts)})
         a_dates = sorted({d for d, what in logs
                           if since <= d <= until and act.search(what)})
         rows.append((label, p_dates, a_dates))
