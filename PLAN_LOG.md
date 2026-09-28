@@ -32,6 +32,108 @@ and never once done.
 
 ---
 
+## 2026-09-28
+- adherence: **ski 3x prescribed / 0 done — ACTION REQUIRED** (23, 24 and
+  **28 Sep**) · row 1x / 0 · hyrox 2/3, strength 4/3, swim 2/2, cycle 1/5,
+  tennis 7/7, run 7/8 · benchmarks in the next 14d: roxzone circuit Wed 30 Sep,
+  5km TT Fri 2 Oct, roxzone circuit Wed 7 Oct. **Read the third ski date
+  carefully: 28 Sep is TODAY**, and the Routine fires at dawn, so it is an
+  unstarted session, not a miss. The same is true of row's only prescription.
+  The honest elapsed count this morning is ski 2x/0 — the WATCH that yesterday
+  already resolved structurally. Over `--days 90` the counts are identical
+  (SCHEDULE only reaches back to 14 Sep), and there row reads 2 done: he rows,
+  he has simply not skied.
+- readiness: **today's wellness row has not landed yet** — `daily` ends at
+  27 Sep. LAST_DATA is 2026-09-28T06:07Z, under an hour old, so the sync is
+  healthy; Garmin just had not written the overnight HRV when the full run
+  fired. Last read: HRV 60 vs baseline 85, RHR 38, 7h56 sleep with 205min deep.
+  The Monday session's degrade rule is phrased against what he reads on the
+  watch this morning, so it still works without this.
+- decision: CHANGED — put the ski instruction back on the **Wednesday Hyrox
+  circle** (30 Sep, 7, 14 and 21 Oct) as a `note:true` line. Nothing else
+  touched: no day moved, no session added or removed, no load changed, and the
+  week he is one day into is structurally as he found it.
+- why: the 26 Sep rebuild's stated principle was right — *a session archetype
+  with no instance in the record is a wish* — but check where ski actually
+  landed. Of the four remaining ski touches (Mon 28 Sep TT, Thu 8 Oct, Tue
+  13 Oct, Thu 22 Oct), **three are standalone erg trips to the gym**, which is
+  the exact archetype that went 0-for-2 on 23 and 24 Sep. Meanwhile the one
+  ski prescription that *was* attached to a session with a real attendance
+  record — the 23 Sep circle line, "pick SKI over row wherever the block
+  offers a choice" — was deleted by that rebuild and never replaced. The
+  circle is the most reliably attended thing in his week: **hyrox reads 3 done
+  against 2 prescribed at 21 days, 8/2 at 45, 10/2 at 90**, and it landed
+  16 Sep, 20 Sep and 25 Sep. It also contains a ski station. Re-attaching the
+  preference there costs nothing, adds no load, and is the single highest-
+  probability ski exposure in the plan. Ski is worth this: **top 29.8%**, his
+  weakest element, **3:54 fresh on 28 Jul against 4:18 raced at Athens** — 24s
+  he has already proven he owns — and **zero ski-erg activities in five months
+  of Garmin data**.
+- also — measurability: the note tells him to put the word *ski* in the
+  circle's Garmin title if he takes the ski option. Erg work buried inside an
+  activity logged as "Hyrox circle" is invisible to the matcher, which is part
+  of why ski looks untrained. `note:true` is deliberate: this redirects a
+  choice inside a session he is already doing, so it must not be costed as
+  load by `adaptPlan` or counted as a fifth prescribed ski by `adherence.py`.
+  Verified against both — `isInfoLine` returns true on `s.note` before
+  anything else, and `planned_days` drops a text whose line carries
+  `note:true` within 24 chars.
+- a change I started and abandoned, recorded because it will tempt the next
+  run: I began patching `adherence.py` so the prescribed window ends at
+  *yesterday*, on the reasoning that a session prescribed for today cannot
+  have been missed at 06:07 — and that is what turned ski from 2x (WATCH) into
+  3x (ACTION REQUIRED) this morning, on the very day the new structure was
+  first due to run. The edit was blocked, and it was right to block it.
+  Narrowing what the counter counts, on the morning the counter fires at me,
+  is how a future genuine 3x goes unseen; and this Routine is explicitly told
+  not to re-derive these inputs by eye. The correct answer was to leave the
+  alarm loud and resolve it in the plan, which is what the change above does.
+  **Note for tomorrow: "28 Sep" will still sit in that miss list, and from
+  tonight it is a real data point rather than an artifact.** 23 and 24 Sep age
+  out on 15 Oct.
+- phase: unchanged. Aerobic Reset closed yesterday, Base I (380-460) opens
+  today as written. The 21-27 Sep week finished at **357 TRIMP** inside its
+  280-400 band, so Base I's 380 floor is a 6% step up and well under the
+  421-476 he held through August. Bands are realistic against what he is
+  absorbing. No TAPER_PLAN edit.
+- physiology: nothing to act on. 7-day HRV means run **84.7 (7-13 Sep) → 97.7
+  (14-20) → 87.1 (21-27)** — the middle figure is inflated on one side and
+  deflated on the other by the 19 Sep illness day (HRV 39, RHR 56), so this is
+  oscillation around a baseline of 85, not a sustained shift. RHR has been
+  **38-42 every single day of the last 21 except that one spike**, inside his
+  38-46 range with room to spare; yesterday's 38 is his floor, not an
+  excursion. I could not read today's numbers — see readiness above — so this
+  judgement is made on data through 27 Sep and should be re-read tomorrow.
+- watching:
+  **The Thursday compromised ergs — this is my live trigger.** Thu 8 Oct and
+  Thu 22 Oct ask for `[1000m ski → 1km run] ×3` at Gym+. His last three
+  Thursdays were tennis (24 Sep), cycling + running (17 Sep) and running
+  (10 Sep): **zero gym trips on a Thursday in the visible record**, while
+  Monday and Friday carry his strength work (9, 21, 25 Sep). I did not move
+  them today because yesterday's trigger comes first and the evidence is three
+  Thursdays deep. I will move them onto Monday or Friday if Thu 8 Oct syncs
+  without a gym or ski activity — one failure is enough, because the archetype
+  is already 0-for-2.
+  **The 28 Sep TT result, carried from yesterday and still the priority.** The
+  compromised ski targets downstream — 4:05 on Thu 8 Oct, 4:20 on Tue 13 Oct,
+  4:00 on Thu 22 Oct — are all built off the 28 Jul 3:54. If tonight's TT comes
+  in slower than ~4:00 those three numbers are fiction and must be reset off
+  the new TT. Whoever runs tomorrow: read the TT before trusting those lines.
+  **The Monday double**, carried: if the row TT is deferred a third time it
+  becomes 3x500m inside the circle. A red-morning skip under the degrade rule
+  counts as a defer, not disobedience.
+  **The Wednesday circle's day**, carried unchanged: it landed Wed 16 Sep, SUN
+  20 Sep, FRI 25 Sep. The tally of off-Wednesday landings since 26 Sep still
+  stands at zero new; the trigger is two more inside three weeks. Note this
+  now matters more than it did — today's change hangs the ski prescription on
+  that session, so if the circle stops running, ski loses its one attached
+  home and the standalone ergs are all that is left.
+  **Tue 29 Sep** has an unconfirmed 18:00 tennis and an evening Z2 run on the
+  same day. Left alone deliberately: `adaptPlan` trims the written session
+  against unplanned load on every page load, and that is its job, not mine.
+- consecutive no-change runs before this one: 0 (27 Sep was a CHANGED run, and
+  26 Sep before it).
+
 ## 2026-09-27
 - adherence: ski 2x prescribed / 0 done (WATCH) · everything else on track ·
   **row's "NEVER DONE (1x)" was a measurement bug and is now gone** — see below ·
