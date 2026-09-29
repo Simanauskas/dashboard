@@ -32,7 +32,13 @@ DASHBOARD = pathlib.Path("src/App.jsx")
 # reason SESSION_MATCHERS in App.jsx is: the roxzone line says "station → jog →
 # station" and a run pattern would otherwise claim it.
 SESSION_TYPES = [
-    ("ski",      r"\bski\b",                                  r"\bski\b"),
+    # "skierg" is one word in his Garmin titles ("DL + Skierg 1km, 200 lunges",
+    # 16 Aug; "Hyrox: 4 runs + skierg, sled push, sled pull", 29 Aug) and a bare
+    # \bski\b never matches it. Both real ski sessions were therefore invisible,
+    # and every morning run read "zero ski erg in five months" — which is false,
+    # and which four SCHEDULE lines went on to assert. The optional group keeps
+    # "Inline Skating" out (ska != ski).
+    ("ski",      r"\bski(?:erg)?\b",                          r"\bski(?:erg)?\b"),
     ("row",      r"\brow(ing)?\b",                            r"\brow(ing)?\b"),
     ("hyrox",    r"hyrox|circle @|roxzone",                   r"hyrox|circle|roxzone"),
     ("strength", r"strength|sled|lunge|pulldown|wall ball",   r"strength"),

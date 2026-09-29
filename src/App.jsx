@@ -1276,7 +1276,7 @@ const TAPER_PLAN = [
   { start:"2026-09-06", end:"2026-09-13", theme:"Decompress",    lo: 80, hi:200, note:"Post-Athens · walk, swim, easy tennis · no erg, no sled" },
   { start:"2026-09-14", end:"2026-09-27", theme:"Aerobic Reset", lo:280, hi:400, note:"Rebuild base · Z2 volume · strength back in, specificity later" },
   // ── Copenhagen block · sub-65 ──
-  { start:"2026-09-28", end:"2026-11-08", theme:"Base I · Aerobic",    lo:380, hi:460, note:"Long run on Fri, gym+erg on Mon · weekly standalone roxzone circuit" },
+  { start:"2026-09-28", end:"2026-11-08", theme:"Base I · Aerobic",    lo:380, hi:460, note:"Long run on Fri · erg only inside the Mon gym trip or circle night, never a trip of its own · weekly standalone roxzone circuit" },
   { start:"2026-11-09", end:"2026-12-20", theme:"Base II · Threshold", lo:420, hi:500, note:"3×1km @ 4:00–4:05 · erg volume · strength maintained" },
   { start:"2026-12-21", end:"2027-01-03", theme:"Holiday Deload",      lo:200, hi:300, note:"Planned, not accidental · absorb the base" },
   { start:"2027-01-04", end:"2027-02-14", theme:"Specificity Build",   lo:440, hi:520, note:"Compromised running · Full Sim #1 on Sat 30 Jan" },
@@ -1338,11 +1338,16 @@ const SCHEDULE = [
      Thu = compromised erg or easy Z2, Fri = LONG RUN or running benchmark,
      Sat = one Optional flex Z2 — the session that is meant to be droppable.
 
-     ERG WORK IS NEVER A SESSION OF ITS OWN. He has logged a ski erg activity
-     zero times in five months of Garmin data, and rowing three times. Ski was
-     prescribed standalone on 23 and 24 Sep and done neither time. It now lives
-     only inside something he already does: the Monday gym trip, or the
-     compromised ski→run intervals, which are a running session by habit.
+     ERG WORK IS NEVER A SESSION OF ITS OWN. He does ski — 1km inside the
+     16 Aug strength session, and again inside the 29 Aug Hyrox session — but
+     never once as a trip of its own: standalone ski went 0-for-3 on 23 Sep,
+     24 Sep and 28 Sep, the last of those a completely blank day. (Both real
+     ski sessions are titled "skierg", which adherence.py could not match until
+     29 Sep, so every morning run before then read "zero in five months" and
+     that was the instrument, not the athlete.) Ski therefore only ever appears
+     bolted to something already on the calendar: circle night, or the Monday
+     gym trip. Nothing is asked of a Thursday that needs a gym — he has not
+     entered one on a Thursday in eight weeks (indoor-or-gym 0/8).
 
      Nothing here depends on the Hyrox circle running: it landed Wed 16 Sep,
      SUN 20 Sep and FRI 25 Sep, so the roxzone circuit — the one thing the
@@ -1373,17 +1378,17 @@ const SCHEDULE = [
   { week:4, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
     { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"GYM 45min · one trip, both benchmarks — ⏱ SKI 1000m TT GOES FIRST: 10min easy erg, then ski hard (expect ~3:54) · 10min easy · ⏱ ROW 1000m TT second, and read a slow row as the ski tax, not a decline · if HRV is more than ~15 below baseline this morning, do the ski TT only and drop the row · finish lat pulldown 4×10 + core, no legs · save it as \"Ski + row TT\""}] },
     { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Z2 run 40min · evening"}] },
-    { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 15min standalone — run it even if the circle does not · 8× [station 30s → jog 100m], clock every transition. Baseline today, target 0:32 · save it as \"Roxzone circuit\""},{type:"plan",note:true,text:"Inside the circle: pick SKI over row wherever the block offers a choice — it is your weakest element at top 29.8% and there is not one ski erg in five months of Garmin data. If you ski, put the word ski in the activity title so it is visible."}] },
+    { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"plan",text:"⏱ SKI 1000m TT · at Gym+, BEFORE anything else while fresh — 10min easy erg, then hard, expect ~3:54 · Monday's trip never happened so this benchmark is now three times deferred, and every compromised-ski target in Oct is still built on a 28 Jul number · it is four minutes of work and the erg is already in the room, so go even if the circle does not run · save it as \"Ski 1000m TT\""},{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 15min standalone — run it even if the circle does not · 8× [station 30s → jog 100m], clock every transition. Baseline today, target 0:32 · save it as \"Roxzone circuit\""}] },
     { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Strength 40min · UPPER only ahead of Friday — lat pulldown 4×10, sled pull 6×25m light technique, core. No lunges, no heavy push"}] },
     { date:"2026-10-02", dow:"FRI", label:"Oct 2", sessions:[{type:"plan",text:"⏱ 5km TT · the first running benchmark you have ever set. 10min warm-up, then honest"}] },
     { date:"2026-10-03", dow:"SAT", label:"Oct 3", sessions:[{type:"plan",text:"Optional · Z2 run 40min · the week's flex session, drop it without guilt"}] },
     { date:"2026-10-04", dow:"SUN", label:"Oct 4", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:5, label:"Oct 5–11", theme:"Base I · Aerobic", days:[
-    { date:"2026-10-05", dow:"MON", label:"Oct 5", sessions:[{type:"plan",text:"GYM · strength 45min · sled pull 6×25m heavy + lunges 4×50m unbroken + lat pulldown 4×10"}] },
+    { date:"2026-10-05", dow:"MON", label:"Oct 5", sessions:[{type:"plan",text:"GYM 60min · compromised ski FIRST: [1000m ski @ 4:05 → 1km treadmill @ 4:25] ×3 continuous, off running legs · then strength 25min: sled pull 6×25m heavy + lunges 4×50m unbroken · save it as \"Ski + run\""}] },
     { date:"2026-10-06", dow:"TUE", label:"Oct 6", sessions:[{type:"plan",text:"KEY RUN · threshold 3×1km @ 4:15, 90s rest · evening"}] },
-    { date:"2026-10-07", dow:"WED", label:"Oct 7", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ Roxzone circuit · 15min standalone, run it even if the circle does not · 8 transitions vs 0:36"},{type:"plan",note:true,text:"Inside the circle: pick SKI over row wherever the block offers a choice — it is your weakest element at top 29.8% and there is not one ski erg in five months of Garmin data. If you ski, put the word ski in the activity title so it is visible."}] },
-    { date:"2026-10-08", dow:"THU", label:"Oct 8", sessions:[{type:"plan",text:"Compromised erg 35min · [1000m ski @ 4:05 → 1km run @ 4:25] ×3 continuous · this is the ski work — off running legs, never fresh · save it as \"Ski + run\""}] },
+    { date:"2026-10-07", dow:"WED", label:"Oct 7", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ Roxzone circuit · 15min standalone, run it even if the circle does not · 8 transitions vs 0:36"},{type:"plan",note:true,text:"Inside the circle: take the SKI option wherever the block offers a choice — top 29.8%, your weakest element. You do ski, but only ever bolted to something else: 1km inside the 16 Aug strength session, again inside the 29 Aug Hyrox session. A standalone erg trip has gone 0-for-3. Put the word ski in the activity title so it is visible."}] },
+    { date:"2026-10-08", dow:"THU", label:"Oct 8", sessions:[{type:"plan",text:"Z2 run 40min · morning · outdoors, easy"}] },
     { date:"2026-10-09", dow:"FRI", label:"Oct 9", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km"}] },
     { date:"2026-10-10", dow:"SAT", label:"Oct 10", sessions:[{type:"plan",text:"Optional · Z2 run 40min · flex session"}] },
     { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"rest",text:"Full rest · family day"}] },
@@ -1391,17 +1396,17 @@ const SCHEDULE = [
   { week:6, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
     { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"GYM · strength 45min · sled pull heavy + wall balls 3×25 straight off a 1km treadmill run + core"}] },
     { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"plan",text:"KEY RUN · compromised: [1000m ski → 1km @ 4:20] ×3 continuous · evening · save it as \"Ski + run\""}] },
-    { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ Roxzone circuit · 15min standalone, run it even if the circle does not · 8 transitions vs 0:36"},{type:"plan",note:true,text:"Inside the circle: pick SKI over row wherever the block offers a choice — it is your weakest element at top 29.8% and there is not one ski erg in five months of Garmin data. If you ski, put the word ski in the activity title so it is visible."}] },
+    { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ Roxzone circuit · 15min standalone, run it even if the circle does not · 8 transitions vs 0:36"},{type:"plan",note:true,text:"Inside the circle: take the SKI option wherever the block offers a choice — top 29.8%, your weakest element. You do ski, but only ever bolted to something else: 1km inside the 16 Aug strength session, again inside the 29 Aug Hyrox session. A standalone erg trip has gone 0-for-3. Put the word ski in the activity title so it is visible."}] },
     { date:"2026-10-15", dow:"THU", label:"Oct 15", sessions:[{type:"plan",text:"Z2 run 40min · morning"}] },
     { date:"2026-10-16", dow:"FRI", label:"Oct 16", sessions:[{type:"plan",text:"Long run 80min Z2"}] },
     { date:"2026-10-17", dow:"SAT", label:"Oct 17", sessions:[{type:"plan",text:"Optional · Z2 run 40min · flex session"}] },
     { date:"2026-10-18", dow:"SUN", label:"Oct 18", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:7, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
-    { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"GYM · strength 45min · sled pull 8×25m + lunges 4×50m unbroken + lat pulldown"}] },
+    { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"GYM 60min · compromised ski FIRST: [1000m ski @ 4:00 → 1km treadmill @ 4:20] ×3 continuous, off running legs · then strength 25min: sled pull 8×25m + lunges 4×50m unbroken · save it as \"Ski + run\""}] },
     { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"plan",text:"KEY RUN · threshold 4×1km @ 4:12, 90s rest · evening"}] },
-    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ Roxzone circuit · 15min standalone, run it even if the circle does not · 8 transitions vs 0:34"},{type:"plan",note:true,text:"Inside the circle: pick SKI over row wherever the block offers a choice — it is your weakest element at top 29.8% and there is not one ski erg in five months of Garmin data. If you ski, put the word ski in the activity title so it is visible."}] },
-    { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"Compromised erg 35min · [1000m ski @ 4:00 → 1km run @ 4:20] ×3 continuous · ski off running legs · save it as \"Ski + run\""}] },
+    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ Roxzone circuit · 15min standalone, run it even if the circle does not · 8 transitions vs 0:34"},{type:"plan",note:true,text:"Inside the circle: take the SKI option wherever the block offers a choice — top 29.8%, your weakest element. You do ski, but only ever bolted to something else: 1km inside the 16 Aug strength session, again inside the 29 Aug Hyrox session. A standalone erg trip has gone 0-for-3. Put the word ski in the activity title so it is visible."}] },
+    { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"Z2 run 45min · morning · outdoors, easy"}] },
     { date:"2026-10-23", dow:"FRI", label:"Oct 23", sessions:[{type:"plan",text:"Long run 85min · last 20min @ 4:25/km"}] },
     { date:"2026-10-24", dow:"SAT", label:"Oct 24", sessions:[{type:"plan",text:"Optional · Z2 run 45min · flex session"}] },
     { date:"2026-10-25", dow:"SUN", label:"Oct 25", sessions:[{type:"rest",text:"Full rest · family day"}] },

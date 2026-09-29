@@ -32,6 +32,126 @@ and never once done.
 
 ---
 
+## 2026-09-29
+- adherence: **ski 3x prescribed / 0 done — ACTION REQUIRED** (23, 24, 28 Sep)
+  at 21 days · row 1x/0 · strength 4/2 · hyrox 2/3, cycle 1/5, run 8/8, tennis
+  8/7, swim 2/1 · benchmarks next 14d: ski TT + roxzone circuit Wed 30 Sep,
+  5km TT Fri 2 Oct, roxzone circuit Wed 7 Oct. **Yesterday's marker resolves
+  badly: Mon 28 Sep is a completely blank day.** No activity of any kind — the
+  GYM trip carrying both erg benchmarks did not happen, and 27 Sep was blank
+  too. That is the trigger 27 Sep set verbatim ("the 28 Sep gym trip syncs
+  without a ski-titled activity"), and 28 Sep is now a real elapsed miss, not
+  an artifact of the counter's window.
+- **the instrument was lying again, and this one is bigger than the row
+  double-count.** `adherence.py` matched ski with `\bski\b`. His Garmin titles
+  spell it as one word: **"DL + Skierg 1km, 200 lunges, 100 burpees" (16 Aug)**
+  and **"Hyrox: 4 runs + skierg, sled push, sled pull" (29 Aug)**. `\bski\b`
+  cannot match "skierg", so **both of his real ski sessions have been invisible
+  to every morning run**, and the claim "not one ski erg in five months of
+  Garmin data" — asserted in four SCHEDULE lines and in the week-3 comment
+  block, and repeated in three PLAN_LOG entries — **is false**. Pattern is now
+  `\bski(?:erg)?\b` on both the plan and activity sides ("Inline Skating" still
+  does not match: ska != ski). With it fixed, `--days 60` reads **ski 3
+  prescribed / 2 done, "short by 1"**, not NEVER DONE. The 21-day window is
+  unchanged at 3/0 because both instances are August, so ACTION REQUIRED
+  correctly still fires — but the diagnosis inverts.
+- readiness: HRV **106 vs baseline 83**, RHR 41, 8h32 sleep. Green.
+- decision: CHANGED — (1) fixed the ski matcher; (2) re-homed the lost 1000m
+  ski TT onto **Wed 30 Sep at Gym+**; (3) moved the two Thursday compromised-erg
+  sessions (8, 22 Oct) into that week's **Monday gym trip**, Thursdays become
+  Z2 runs; (4) corrected the false "zero ski erg" claim everywhere it is
+  written; (5) one TAPER_PLAN note. No load added, no session invented.
+- why — **he is not refusing to ski, he is refusing to make a trip of it.** Both
+  real ski sessions were bolted to something already on the calendar: 1km inside
+  a strength session (16 Aug), and inside a Hyrox session (29 Aug). Every failed
+  prescription was a trip whose *purpose* was the erg — standalone mornings
+  23 and 24 Sep, and the dedicated 28 Sep GYM trip whose entire content was two
+  erg TTs. That archetype is now **0-for-3**. Yesterday's fix (attach ski to
+  circle night as a `note:true` preference) had the right instinct but no
+  teeth: a note is free, unmeasured, and cannot carry a benchmark. So the ski
+  TT is now a **prescribed** line on Wed 30 Sep, first thing at Gym+, worded to
+  go even if the circle does not run — four minutes of work, and 29 Aug is
+  direct precedent for skiing inside that session. This is the highest-
+  probability ski exposure available and it is tomorrow, not next week.
+- why — **Thursday, hard evidence.** Over the last eight weeks (3 Aug–29 Sep)
+  he trained **7 of 8 Thursdays** but entered a gym on **0 of 8**. Thursdays are
+  outdoor runs and tennis (10 Sep run, 17 Sep run+cycle, 24 Sep tennis). Two
+  compromised ski→run sessions sat there (8, 22 Oct) needing an erg. By weekday,
+  indoor-or-gym goes **Mon 4/9, Wed 3/8, Sat 3/8, Sun 3/8, Tue 2/9, Fri 2/8,
+  Thu 0/8** — Monday is his best gym day and is where the strength already is,
+  so the ski moved there and merged with it rather than stacking: Mon 5/19 Oct
+  become "GYM 60min · compromised ski FIRST [1000m ski → 1km treadmill] ×3,
+  then strength 25min", strength trimmed from 45 to 25min so the week's volume
+  is roughly flat. Thu 8/22 Oct become the Z2 runs he does anyway. **Note I did
+  not retreat from Monday** despite 28 Sep being blank: 28 Sep failed as an
+  *erg-only* trip, and Monday's record as a *gym* day (7 Sep swim+strength,
+  21 Sep strength, 4/9 overall, trained 8/9) is the best in the week. 16 Aug is
+  the precedent for exactly this shape — ski inside a strength session.
+- why — **28 Sep was partly physiological, and I am saying so rather than
+  reading it purely as disobedience.** HRV was 60 on 27 Sep and 65 on 28 Sep,
+  both ~20 below the then-baseline of 85, after training 24/25/26 Sep. The
+  written degrade rule said "ski TT only, drop the row" on that morning; he did
+  neither, but two rest days on those numbers is a defensible athlete decision.
+  It does not rescue the benchmark — three-times deferred is three-times
+  deferred — but it does mean the fix is *where* the ski lives, not *whether*
+  he will train.
+- row: **the 1000m row TT is retired, not rescheduled.** It has now been
+  deferred three times and it was never worth much: row is **top 11.4%**, a
+  strength the skill says to defend rather than chase, and the circle rows. No
+  standalone row is prescribed anywhere in weeks 4-7. Its 1x/0 in the window is
+  the dead 28 Sep line and will age out on 15 Oct.
+- phase: unchanged. Base I (380-460) opened 28 Sep and is two days old, one of
+  them blank — too early to judge the band. The 21-27 Sep week closed at 357
+  against 280-400, and 380 is a 6% step from that and well under the 421-476 he
+  held through August, so the bands stay realistic. Only the Base I **note**
+  changed, because its premise moved: "gym+erg on Mon" is now "erg only inside
+  the Mon gym trip or circle night, never a trip of its own".
+- physiology: nothing to act on. HRV 106 today against baseline 83; the last
+  seven days are 105/59/90/117/60/65/106, **mean 86 against baseline 83** —
+  oscillation around baseline with a wide sd, which is his normal shape, not a
+  shift. `hrvBaseline` has drifted 91 (11 Sep) -> 72 (25 Sep) -> 84 -> 85 ->
+  **83**, and that whole swing is the 19 Sep illness spike (HRV 39, RHR 56)
+  moving through Garmin's 7-day window; it is not a sustained decline. RHR over
+  21 days is **38-42 every single day except that one spike**, comfortably
+  inside his 38-46 range. No excursion.
+- verification: `npm run build` clean (418.05 kB); all 9 patch anchors present;
+  `update.patch()` round-tripped against a copy of the real src/App.jsx and
+  against pristine origin/main as a control — daily and sleep rows replace with
+  their 4-space indent intact, weight upserts inside its own span, CSV upserts,
+  no daily/sleep rows lost (117/116 both sides), and SCHEDULE comes back
+  byte-identical.
+- watching:
+  **Wed 30 Sep is now the whole test, and it is decisive.** If a ski activity
+  syncs tomorrow, the "bolt it to something he already does" theory is proven
+  and the Oct structure stands. If it does not — ski prescribed at the one
+  venue that certainly has the erg, on his most-attended session, as four
+  minutes of work — then the theory is wrong and **the next run should take ski
+  out of the plan rather than re-home it a fifth time**, and redirect the time
+  to running, which is his weakest *block* against the field (top 27.7%) and
+  needs no equipment. Say that plainly: four re-homings is enough.
+  **The 28 Jul 3:54 is still the only ski number the block owns.** Every
+  compromised target downstream (4:05 on Mon 5 Oct, 4:20 on Tue 13 Oct, 4:00 on
+  Mon 19 Oct) is built on it and it is two months old. Whoever runs after
+  Wed 30 Sep: read the TT before trusting those three numbers, and reset them
+  off the new one if it comes in slower than ~4:00.
+  **Strength 4/2.** Both missed Fridays (18, 25 Sep) plus the blank 28 Sep. It
+  now sits on Mondays only, merged with the ski. I will act if Mon 5 Oct syncs
+  without a strength or ski activity — that is the merged session failing on
+  its first attempt, and it would mean Monday has stopped being a gym day.
+  **A pre-existing `update.py` quirk, recorded not acted on:** `patch()` reads
+  sleep stages from `wellness["sleep"]`, not flat keys. My first round-trip
+  passed flat keys and the sleep row silently no-op'd rather than erroring.
+  Behaviour is identical on pristine origin/main so it is not a regression and
+  I have not touched it, but a future harness should use the nested shape or it
+  will believe sleep patching is broken when it is not.
+  **The Wednesday circle's day**, carried: landed Wed 16 Sep, SUN 20 Sep, FRI
+  25 Sep, Wed 23 Sep blank. Trigger unchanged at two more off-Wednesday
+  landings inside three weeks. This matters more again today — the ski TT is
+  written to survive the circle not running, but the three `note:true` ski
+  preference lines on 7, 14 and 21 Oct do depend on it.
+- consecutive no-change runs before this one: **0** (28, 27 and 26 Sep were all
+  CHANGED runs).
+
 ## 2026-09-28
 - adherence: **ski 3x prescribed / 0 done — ACTION REQUIRED** (23, 24 and
   **28 Sep**) · row 1x / 0 · hyrox 2/3, strength 4/3, swim 2/2, cycle 1/5,
