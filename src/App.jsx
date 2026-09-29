@@ -981,11 +981,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-09-29";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-09-29T06:07:00Z";
-const LAST_DATA = "2026-09-29T06:07:00Z";
+const LAST_RUN  = "2026-09-29T07:07:00Z";
+const LAST_DATA = "2026-09-29T07:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-09-29T06:07:00Z";
+const LAST_MFP  = "2026-09-29T07:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1378,7 +1378,7 @@ const SCHEDULE = [
   { week:4, label:"Sep 28–Oct 4", theme:"Base I · Benchmarks", days:[
     { date:"2026-09-28", dow:"MON", label:"Sep 28", sessions:[{type:"plan",text:"GYM 45min · one trip, both benchmarks — ⏱ SKI 1000m TT GOES FIRST: 10min easy erg, then ski hard (expect ~3:54) · 10min easy · ⏱ ROW 1000m TT second, and read a slow row as the ski tax, not a decline · if HRV is more than ~15 below baseline this morning, do the ski TT only and drop the row · finish lat pulldown 4×10 + core, no legs · save it as \"Ski + row TT\""}] },
     { date:"2026-09-29", dow:"TUE", label:"Sep 29", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Z2 run 40min · evening"}] },
-    { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"plan",text:"⏱ SKI 1000m TT · at Gym+, BEFORE anything else while fresh — 10min easy erg, then hard, expect ~3:54 · Monday's trip never happened so this benchmark is now three times deferred, and every compromised-ski target in Oct is still built on a 28 Jul number · it is four minutes of work and the erg is already in the room, so go even if the circle does not run · save it as \"Ski 1000m TT\""},{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 15min standalone — run it even if the circle does not · 8× [station 30s → jog 100m], clock every transition. Baseline today, target 0:32 · save it as \"Roxzone circuit\""}] },
+    { date:"2026-09-30", dow:"WED", label:"Sep 30", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Andrius Jonaitis · 13:45"},{type:"plan",text:"⏱ SKI 1000m TT · at Gym+, BEFORE anything else while fresh — 10min easy erg, then hard, expect ~3:54 · Monday's trip never happened so this benchmark is now three times deferred, and every compromised-ski target in Oct is still built on a 28 Jul number · it is four minutes of work and the erg is already in the room, so go even if the circle does not run · save it as \"Ski 1000m TT\""},{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",text:"⏱ ROXZONE CIRCUIT starts · 15min standalone — run it even if the circle does not · 8× [station 30s → jog 100m], clock every transition. Baseline today, target 0:32 · save it as \"Roxzone circuit\""}] },
     { date:"2026-10-01", dow:"THU", label:"Oct 1", sessions:[{type:"plan",text:"Strength 40min · UPPER only ahead of Friday — lat pulldown 4×10, sled pull 6×25m light technique, core. No lunges, no heavy push"}] },
     { date:"2026-10-02", dow:"FRI", label:"Oct 2", sessions:[{type:"plan",text:"⏱ 5km TT · the first running benchmark you have ever set. 10min warm-up, then honest"}] },
     { date:"2026-10-03", dow:"SAT", label:"Oct 3", sessions:[{type:"plan",text:"Optional · Z2 run 40min · the week's flex session, drop it without guilt"}] },
