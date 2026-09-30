@@ -32,6 +32,143 @@ and never once done.
 
 ---
 
+## 2026-09-30
+- adherence: **ski 4x prescribed / 0 done — ACTION REQUIRED** (23, 24, 28 and
+  **30 Sep**) · row 1x/0 · strength 4/2 · hyrox 3/3, cycle 1/5, tennis 8/8,
+  run 8/8, swim 1/1 · benchmarks next 14d: 5km TT Fri 2 Oct, roxzone circuit
+  Wed 7 and Wed 14 Oct. **Read the fourth ski date carefully: 30 Sep is TODAY**
+  and this fires at dawn, so it is an unstarted session, not a miss. The honest
+  elapsed count is 3x/0 — and all three elapsed dates were already resolved by
+  yesterday's run, which re-homed the TT onto today. At `--days 45` ski reads
+  **4 prescribed / 2 done, "short by 2"**, because both real ski sessions are
+  August.
+- **so the instrument cannot go quiet for two more weeks, and that is not a bug
+  to fix.** 23 and 24 Sep are elapsed days in SCHEDULE; rewriting them would
+  falsify the record, so ACTION REQUIRED will keep firing until they age out of
+  the 21-day window on 14/15 Oct. The only thing that clears it honestly is a
+  logged ski activity. Whoever runs tomorrow: do not re-home the TT a fifth
+  time just because the banner is still red — check whether 30 Sep produced a
+  ski-titled activity first, and if it did not, follow yesterday's instruction
+  and take ski out rather than move it again.
+- readiness: HRV **100 vs baseline 82** (+18), RHR **39**, **8h31** sleep
+  (deep 121 / rem 116 / light 274, awake 1), sleep score 95. His best readiness
+  of the week, on the one day of the week that carries a benchmark. Nothing in
+  the state argues for backing off, and the Monday degrade rule's threshold
+  (~15 below baseline) is nowhere near.
+- decision: CHANGED — (1) demoted today's roxzone baseline **behind** the ski
+  TT; (2) moved the compromised ski off **Tue 13 Oct** into the Mon 12 Oct gym
+  trip that already exists, Tuesday becomes a plain threshold run; (3) re-priced
+  all three compromised-ski targets off the **raced 4:18** instead of the fresh
+  3:54; (4) Base I floor **380 → 350**. Today's ski TT line is untouched, on
+  purpose — it is yesterday's experiment and I am not muddying it.
+- why — **today asks for four things and only one of them matters.** Wed 30 Sep
+  carried a calendar-fixed tennis at 13:45, the ski TT, the Hyrox circle, and a
+  brand-new 15min standalone roxzone baseline. Two of those are unproven ⏱ asks
+  competing for the same evening at Gym+, and stacking discrete asks is the
+  exact shape that went 0-for-3 on the erg. The roxzone baseline is the one with
+  nothing riding on it: it is **already written for Wed 7 Oct** and loses nothing
+  by waiting a week, whereas three October sessions are still priced off a 28 Jul
+  number until the ski TT lands. So the roxzone line now says so in as many
+  words — run it, but after the ski, and if only one extra thing fits it is the
+  ski. No load added or removed; a precedence, not a rewrite.
+- why — **week 6 was the last erg trip in the plan, and yesterday's own evidence
+  condemned it.** Yesterday moved the Thursday ski sessions to Monday on a
+  by-weekday count of gym attendance (Thu 0/8, Mon 4/9) and then left **Tue
+  13 Oct** — "KEY RUN · compromised: [1000m ski → 1km] ×3 · evening" — sitting
+  on a weekday that reads **2/9**, barely better than the Thursday it rejected.
+  Meanwhile Mon 12 Oct was already a gym day and was the only Base I Monday
+  *without* an erg on it. Merging them costs nothing and makes all three Base I
+  weeks one shape: **Monday is the gym-and-erg day, Tuesday is the key run.**
+  Mon 12 Oct is now GYM 60min (compromised ski first, then strength 30min,
+  keeping the wall-balls-off-a-treadmill-run content, which is the skill's
+  prescribed fix for the one station that went backwards at Athens), and Tue
+  13 Oct is threshold 4×1km @ 4:14, which also fixes an incoherent progression —
+  the three Tuesdays now read 3×4:15 → 4×4:14 → 4×4:12 instead of 4:15, a
+  compromised erg session, and 4:12. **Every erg exposure in the plan is now
+  bolted to a session archetype with attendance behind it. There is no
+  standalone erg trip left anywhere.**
+- why — **the compromised ski targets were built on the wrong number.** Mon 5 Oct
+  asked 4:05, Mon 19 Oct 4:00, Tue 13 Oct 4:20 — all derived from the fresh
+  **3:54** of 28 Jul, and two of them are *faster than anything he has ever
+  skied except that single fresh TT*, asked for three times continuously off
+  running legs. The Athens plan already ran this experiment: it took the same
+  3:54, asked **4:08**, and he raced **4:18**. A fresh number over-predicts by
+  ~10s even for one rep in a race where ski comes after a single run. So the
+  progression is re-anchored on the 4:18 he actually raced: **4:15 (5 Oct) →
+  4:12 (12 Oct) → 4:10 (19 Oct)**, monotonic, and the 5 Oct line now says where
+  the number comes from so he can trust it. This holds whatever today's TT
+  reads: applying a fresh split as a compromised target is the error, not the
+  size of the split.
+- why — **the Base I floor was a floor he will fail.** Weekly TRIMP, last ten
+  weeks: **476, 363, 421, 472, 289, 250, 156, 447, 357**, and this week is at
+  **50 after two elapsed days** (28 Sep blank, 29 Sep tennis only). Only 4 of
+  those 10 weeks cleared 380, and his longest run of consecutive 380+ weeks is
+  **two** (421 then 472, 10–23 Aug) — Base I asks for **six**. A floor he misses
+  every week is not just cosmetic: `adaptPlan` scales sessions **up** by as much
+  as 1.25× whenever the week projects under `lo` and readiness is ≥7, so a
+  too-high floor makes the engine push hardest on exactly the weeks two days
+  went missing — today being one. Floor moves to **350**, mid 405, still above
+  the 357 he just closed. `hi` stays **460** so a good week is not capped. Six
+  weeks at 350–460 is a plan describing him; 380–460 was describing a wish.
+- phase: Base I is otherwise right and stays. The content question — "do the
+  next two weeks need different sessions rather than smaller ones?" — is what
+  change (2) answers: the sessions were not too big, one of them was on the
+  wrong day.
+- weakness: nothing has moved. Ski is still the weakest element (top 29.8%),
+  running still the weakest block (top 27.7%), roxzone still the cheapest
+  seconds (top 19.8%). No new race, sim or TT since Athens, so STATION_TARGETS,
+  RACE_BUDGET and RACE_GAINS are untouched — there is no evidence to move them
+  with, and today's TT is the first that would be.
+- physiology: nothing to act on. HRV 100 today; the last seven days are
+  59/90/117/60/65/106/100, **mean 85 against baseline 82** — his usual wide
+  oscillation around baseline, not a shift. `hrvBaseline` 91 (11 Sep) → 72
+  (25 Sep) → 84 → 85 → 83 → **82** is still the 19 Sep illness spike (HRV 39,
+  RHR 56) washing out of Garmin's 7-day window. RHR across 21 days is **38–42
+  every day except that one 56**, well inside his 38–46 range. No excursion.
+- verification: `npm run build` clean (419.17 kB); 9/9 patch anchors present;
+  `update.patch()` round-tripped against a copy of the real src/App.jsx **and**
+  against pristine origin/main as a control — both identical: daily and sleep
+  rows replace with their 4-space indent intact, weight upserts inside its own
+  span with vo2max untouched, CSV upserts, 118 daily and 117 sleep rows both
+  sides, SCHEDULE and TAPER_PLAN byte-identical afterwards. Used the nested
+  `wellness["sleep"]` shape, per yesterday's note. Also caught and fixed two of
+  my own drafts before they shipped: "3:54 fresh TT" in the 5 Oct line made
+  `adherence.py` list that session as a benchmark (its regex matches `\bTT\b`),
+  and a first draft of the TAPER_PLAN note claimed he had never held two
+  consecutive weeks above 380 — 421 then 472 in August is exactly that. It is
+  three he has never strung together.
+- watching:
+  **Today is still the whole test, and demoting the roxzone does not change
+  that.** Ski prescribed at the venue that certainly has an erg, on his most
+  attended session, as four minutes of work, with everything else on the day
+  explicitly told to yield to it. If no ski activity syncs, the theory is out of
+  excuses and yesterday's instruction stands: remove ski from the plan rather
+  than re-home it a fifth time, and put the time into running.
+  **The three October ski splits are provisional until the TT lands.** They are
+  anchored on the raced 4:18 now, which is defensible with no new data at all,
+  but if today reads materially off 3:54 — either way — the next run should
+  re-derive them from it. A TT slower than ~4:10 fresh would mean 4:15
+  compromised is too hard and the whole Base I ski progression needs loosening.
+  **Strength 4/2**, carried from yesterday unchanged: act if **Mon 5 Oct** syncs
+  with neither a strength nor a ski activity — that is the merged Monday session
+  failing on its first attempt. Mon 12 Oct is now the same shape, so the same
+  test repeats a week later.
+  **This week's volume**, new: at 50 TRIMP with five days left and a 350 floor,
+  the week needs ~300 from Wed–Sat, of which Fri is a 5km TT (short) and Sat is
+  optional. It will probably land 250–300, under even the lowered floor. I am
+  deliberately not adding sessions to chase it — the shortfall is two blank days
+  already spent, and `adaptPlan` will scale what remains. But if week 5 (5–11
+  Oct) also closes under 350, that is two Base I weeks under a floor I just
+  lowered, and the honest response then is to question the phase, not the band
+  again.
+  **The Wednesday circle's day**, carried unchanged: landed Wed 16 Sep, SUN
+  20 Sep, FRI 25 Sep, Wed 23 Sep blank. Trigger stays at two more off-Wednesday
+  landings inside three weeks. Today it matters less than it did — the ski TT is
+  written to survive the circle not running — but the three `note:true` ski
+  preference lines on 7, 14 and 21 Oct still depend on it.
+- consecutive no-change runs before this one: **0** (29, 28, 27 and 26 Sep were
+  all CHANGED runs).
+
 ## 2026-09-29
 - adherence: **ski 3x prescribed / 0 done — ACTION REQUIRED** (23, 24, 28 Sep)
   at 21 days · row 1x/0 · strength 4/2 · hyrox 2/3, cycle 1/5, run 8/8, tennis
