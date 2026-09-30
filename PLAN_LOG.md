@@ -32,6 +32,76 @@ and never once done.
 
 ---
 
+## 2026-09-30 · intra-day (not a Routine firing — user asked at ~16:10 local)
+- trigger: he played the 13:45 fixture (Andrius Jonaitis, **6/3 6/3, 1h33, avg HR
+  119, max 169, ~76 TRIMP**), reported it was harder on the legs than expected,
+  and asked what to do with a gym trip two hours out.
+- read: **the fatigue is local and eccentric, not systemic.** An avg HR of 119 is
+  zone B — barely an aerobic session — but a straight-sets match with spikes to
+  169 is a lot of decelerations. HRV 100 vs baseline 82, RHR 39, 8h31 sleep all
+  say he is not tired; his legs are. So the answer is to fence off the legs, not
+  to back off.
+- decision: CHANGED — (1) ski TT **stays on today**, reworded for tired legs and
+  re-paced; (2) Thursday's UPPER-only strength **pulled forward** into today,
+  since he is in the gym anyway; (3) today's roxzone baseline **moved to Wed
+  7 Oct**, which now reads as the baseline; (4) tonight's circle marked optional
+  with the eccentric work fenced off; (5) Thu 1 Oct becomes the easy day.
+- why keep the ski TT on beaten-up legs: ski is lats, triceps and trunk with a
+  hip drive — the least leg-dependent thing in his toolkit — and it is four
+  minutes. There is also a positive case, not merely a tolerable one: the fresh
+  **3:54** of 28 Jul is *precisely the number that did not transfer* (it priced
+  Athens at 4:08; he raced **4:18**). A split off tired legs is closer to how ski
+  actually arrives in a race and is therefore **more** useful for pricing the
+  October compromised sessions than another fresh number. This morning I anchored
+  those targets on the raced 4:18 because I had no measurement; tonight replaces
+  the inference with one. Pacing is written as 1:56–1:58/500m with an explicit
+  "do not chase 3:54", because a blown TT at 600m yields a number worse than none.
+- why the upper pull is the best add: zero leg cost, and **ski (top 29.8%) and
+  sled pull (top 18.6%) are two of his three weakest elements sharing one prime
+  mover.** It was already written for Thursday, so nothing is invented — it just
+  happens on the day he is standing in the gym. Thursday then becomes genuinely
+  easy, which is a better run-up to Friday's 5km than a second strength session
+  in three days.
+- why the roxzone moved rather than stayed: 8× [station 30s → jog 100m] is the
+  most leg-eccentric thing on the board and it is a *baseline* — nothing is
+  riding on the number, and 7 Oct already carried the next one. Friday's 5km TT
+  is his first ever running benchmark, on his weakest block against the field
+  (top 27.7%), and protecting it outranks a baseline that costs nothing to defer
+  by a week. Also fixed an inconsistency the move exposed: today said "target
+  0:32" while 7 Oct said "vs 0:36". Athens averaged **0:43** per transition
+  (5:47 over 8), so 7 Oct now states that and calls 0:36 the number to beat.
+- what I did NOT do: no change to TAPER_PLAN, RACE, STATION_TARGETS,
+  RACE_BUDGET or RACE_GAINS. The Base I floor stays at the 350 set this morning.
+  I did not add load to chase the week's number — removing the roxzone and
+  half-costing the circle lowers today's projection, which is correct: the
+  constraint tonight is his legs, not his week.
+- adherence after the edit: strength 4 → **5 prescribed / 2 done** (today now
+  carries a strength-matching line) and run 8 → 7 prescribed (the removed
+  roxzone line was matching `\bjog\b`). Both moves are honest. Note the
+  benchmark check now prints "something logged" against today's ski TT — that is
+  day-granular, and what is logged is the tennis, not a ski. Pre-existing
+  behaviour, untouched, but do not read it as the TT having landed.
+- verification: `npm run build` clean (420.12 kB); 9/9 patch anchors;
+  `update.patch()` round-tripped against a copy of src/App.jsx and against
+  pristine origin/main — identical, SCHEDULE and TAPER_PLAN byte-identical
+  after patching. Checked both accident-prone regexes on every line I wrote:
+  `isOptionalLine` matches a bare `\bOR\b`, so the ski TT and the upper pull are
+  verified NOT optional while the circle and Thursday deliberately are; and
+  `adherence.py`'s `\bTT\b` is kept out of the upper-pull line so it is not
+  mistaken for a benchmark.
+- also learned, worth carrying: **`calendar_sync.py` writes into SCHEDULE.** A
+  `mode=poll` sync removed today's `{type:"tennis",cal:true,...}` line while this
+  session was open. It only ever touches `cal:true` tennis objects and never
+  reads or moves hand-authored lines, so hand edits are safe — but SCHEDULE is
+  not a purely hand-written constant, and a future run should not be surprised to
+  find a tennis line appear or vanish under it.
+- for tomorrow's Routine: today's ski TT is now measured or it is not. If a
+  ski-titled activity synced, **re-derive the three compromised targets (5, 12,
+  19 Oct) off it** rather than off my 4:18 anchor, and read it against a
+  post-tennis context, not against the fresh 3:54 — anything near 4:00–4:05 on
+  these legs is a good number. If nothing synced, yesterday's standing
+  instruction holds: take ski out rather than re-home it a fifth time.
+
 ## 2026-09-30
 - adherence: **ski 4x prescribed / 0 done — ACTION REQUIRED** (23, 24, 28 and
   **30 Sep**) · row 1x/0 · strength 4/2 · hyrox 3/3, cycle 1/5, tennis 8/8,
