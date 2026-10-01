@@ -32,6 +32,161 @@ and never once done.
 
 ---
 
+## 2026-10-01
+- adherence: **ski 4x prescribed / 1 done — the ACTION REQUIRED banner is cleared,
+  and cleared honestly: he skied.** No ACTION REQUIRED and no WATCH this morning.
+  strength 6/2 (→ 5/2 after the edit below) · row 1x/0 · swim 1x/0 · hyrox 3/3 ·
+  cycle 2/6 · tennis 8/9 · run 7/7 · benchmarks next 14d: 5km TT Fri 2 Oct,
+  roxzone circuit Wed 7 and Wed 14 Oct.
+- readiness: HRV **118 vs baseline 91** (+27, the best reading in the 21-day
+  window), RHR **40**, **8h25** sleep (deep 132 / rem 77), sleep score 95.
+- decision: CHANGED — (1) **re-anchored all three October compromised-ski
+  sessions on the 3:57 he actually skied**, and (2) **inverted what those
+  sessions measure**: the ski is now the fixed input and the following km is the
+  measurement. (3) Removed a phantom strength prescription from today's line.
+  (4) Updated the ski `how` string in RACE_GAINS, which still described the
+  superseded method.
+
+### The measurement that arrived
+**`Indoor Cardio · "SkiErg TT 10min warmup-2290m, 1000m- 3:57 (post tennis)"`,
+30 Sep 18:33.** This is the fourth consecutive morning ski was prescribed and the
+first it was trained — and it landed on the day yesterday's run re-homed it to
+and then explicitly protected by demoting the roxzone baseline behind it. The
+intervention worked; record that, because three previous runs re-homed this
+session and this is the one that produced a number.
+
+His three ski data points now read:
+
+| | 1000m | Context |
+|---|---|---|
+| 28 Jul | **3:54** | fresh, standalone |
+| 30 Sep | **3:57** | after a 93min straight-sets match (avg HR 119, max 169) |
+| Athens | **4:18** | race, station 1, after a single 5:09 run |
+
+- why (1) — **the targets were 13–18s too soft, and I set them myself yesterday.**
+  Yesterday's run re-priced 5/12/19 Oct off the raced 4:18 (→ 4:15 / 4:12 / 4:10)
+  precisely *because* it had no measurement off tired legs and said so. It now has
+  one. He skied **3:57** on legs that had just played a 93-minute match, so three
+  sessions were about to ask him for 4:15, 4:12 and 4:10 — all slower than a
+  single rep he has already done in a worse state. A target he clears while
+  coasting is not a stimulus. New progression, ×3 continuous rather than a single
+  rep so the ask sits ~8s off the measured single and tightens: **under 4:05
+  (5 Oct) → under 4:03 (12 Oct) → under 4:00 (19 Oct)**, monotonic.
+- why (2), and this is the actual block-level call — **the diagnosis of ski was
+  wrong in kind, not in degree, and my own re-anchoring yesterday was built on it.**
+  The skill's standing prescription is "train the ski compromised, off running
+  legs, not fresh." Tested: tennis legs cost him **3 seconds**. Leg fatigue is
+  therefore *not* where the race loss lives, and a session built to impose leg
+  fatigue on an exercise driven by lats, triceps and trunk is measuring a
+  variable with a 3-second range.
+
+  So where do the 21 seconds come from? Not fitness (3:54 fresh), not leg fatigue
+  (3:57 tired), and not accumulated race fatigue either — **ski is station 1 at
+  Hyrox, straight after one run, when he is the freshest he will be all day.** The
+  only remaining explanation is **pacing under race conditions**: he throttled the
+  erg to protect the seven runs and seven stations still ahead. That is a rational
+  fear and it is the thing to train, and no amount of skiing on tired legs
+  addresses it.
+
+  The session that answers it keeps the shape yesterday built — [1000m ski → 1km
+  treadmill] ×3 inside the Monday gym trip, which has 9/10 weekday attendance
+  behind it — but swaps which half carries the number. The ski is now committed
+  and non-negotiable ("do NOT pace the ski to protect the run"); the **km is the
+  measurement**, held at **4:15 = Athens R2 pace**, and the question he reports
+  back is whether rep 3 still holds it. The run standard stays 4:15 across all
+  three weeks on purpose: one variable moves, and it is the ski, so the kms stay
+  comparable week to week. If the kms survive on 19 Oct he has *demonstrated* he
+  can open Copenhagen at 4:00, and the 20s already sitting in RACE_GAINS and the
+  3:58 in STATION_TARGETS become evidence instead of hope.
+- why I did NOT move STATION_TARGETS / RACE_BUDGET / RACE_GAINS `sec` values:
+  **the target was already 3:58 and the gain already 20s.** The TT validates those
+  numbers, it does not move them, and inventing a faster target off one post-match
+  rep would be exactly the over-extrapolation that priced Athens at 4:08. The one
+  thing I did change is the ski `how` string, which read "3:54 fresh vs 4:18 raced
+  — train it off running legs" and is now the superseded method the schedule no
+  longer asks for; leaving it would have made the RACE tab contradict the plan.
+- why (3) — **today's line was generating a strength prescription out of a
+  sentence saying strength had moved away.** "the UPPER-only strength that lived
+  here moved to Wednesday's gym trip" tripped `adherence.py`'s
+  `strength|sled|lunge|...` matcher, so 1 Oct counted as a sixth prescribed
+  strength session on a day whose actual prescription is "easy spin, a walk, or
+  full rest". Reworded to "gym work": strength now reads **5 prescribed / 2 done**
+  and today is costed as the easy day it is. Fixed in the plan text rather than by
+  widening `REJECTED` in adherence.py, because that regex is deliberately narrow
+  and loosening it to catch "moved to" would start eating real prescriptions.
+- benchmarks, checked against where he actually trains: **5km TT Fri 2 Oct is
+  safe** — Friday is **9/10** attended since 23 Jul and is reliably a *running*
+  day (tempo 3×2km on 25 Sep, Z2 10km 21 Aug, 5km+strides 4 Sep). Roxzone Wed 7
+  and Wed 14 Oct sit on **8/10** Wednesdays, the circle night. Nothing needs
+  moving ahead of slipping, so today adds no load before tomorrow's benchmark:
+  HRV 118 is a green light, but the right use of a green light the day before his
+  first-ever running benchmark is to arrive fresh.
+- phase: **Base I stays, and the Base I floor stays at 350.** Worth stating
+  explicitly because yesterday set that floor while `hrvBaseline` was depressed at
+  82 — but it was justified on TRIMP history (only 4 of his last 10 weeks cleared
+  380, longest run of consecutive 380+ weeks is two, Base I asks for six), not on
+  HRV, so the baseline's recovery does not reopen it. Bands are otherwise
+  realistic against what he is absorbing; no TAPER_PLAN edit.
+- weakness: **ski's ranking is unchanged but its mechanism is now known.** Still
+  the weakest element at top 29.8%; running still the weakest block (top 27.7%);
+  roxzone still the cheapest seconds (top 19.8%) and still untested — Wed 7 Oct is
+  the first ever measurement of it. What moved is that ski has gone from "needs
+  fatigue resistance" to "needs permission to commit", which is a cheaper fix.
+- physiology: **`hrvBaseline` 82 → 91 in one day, and this is a recovery, not a
+  shift.** 91 is exactly where it sat on 11 Sep, before the 19 Sep illness spike
+  (HRV 39, RHR 56); the intervening 72 → 82 readings were that single day washing
+  through Garmin's rolling window, and it has now washed out. Last seven HRV are
+  90/117/60/65/106/100/118, mean **94** against baseline 91 — his usual wide
+  oscillation, now around a restored centre. RHR across the 21 days is **38–42
+  every day except that one 56**, today 40, comfortably inside his 38–46 range.
+  No excursion to act on, and nothing here argues for backing off.
+- watching:
+  - **strength, 5 prescribed / 2 done.** Not flagged (two were trained) and
+    day-granular matching overstates it — 28 Sep was a blank day and he did train
+    strength on 21 and 30 Sep. Leaving it. **What would make me act:** a third
+    week with no logged strength session, or the count reaching 3+ prescribed
+    with 0 done inside a 21-day window — either would mean moving the Monday
+    strength block onto the Wednesday circle night rather than asking for it again.
+  - **row, 1x prescribed / 0 done** (the 28 Sep ROW 1000m TT, on a day he logged
+    nothing at all). Below the WATCH threshold and deliberately not re-homed: row
+    is top 11.4%, a strength to defend rather than chase, and re-homing it would
+    put a second standalone erg benchmark back on the board after that pattern
+    went 0-for-3. **What would make me act:** if it is prescribed once more it hits
+    2x/0 and becomes a WATCH, and at that point it goes inside the Wednesday
+    circle as the alternate, never as a trip of its own.
+  - **swim, 1x prescribed / 0 done** (22 Sep, Aerobic Reset). Not in the Base I
+    template at all, so it will age out of the window on 13 Oct without action.
+  - **the 28 Sep benchmark line still prints NOTHING LOGGED** and will keep doing
+    so until it ages out around 19 Oct. That day really was blank; rewriting an
+    elapsed day would falsify the record. Do not re-home it — the ski half is
+    now measured and the row half is covered above.
+- for tomorrow's Routine: the 5km TT is tonight's business, so **the first thing
+  to check is whether a ~5km hard run synced on 2 Oct.** If it did, that is the
+  first running benchmark he has ever set and the three Tuesday threshold targets
+  (4:15 / 4:14 / 4:12) should be re-derived off it the way the ski targets were
+  re-derived today — running is the weakest *block* (top 27.7%) and those
+  paces are currently inherited, not measured. If it did not land, read it against
+  Friday's 9/10 attendance before concluding anything: one miss on his most
+  reliable weekday is a miss, not a pattern.
+- verification: `npm run build` clean (422.17 kB); **9/9** patch anchors;
+  `update.patch()` round-tripped against a copy of the real src/App.jsx **and**
+  against pristine origin/main as a control — both identical on all 13 checks:
+  wellness rows patch and keep their **4-space indent**, no daily rows lost
+  (119 → 119), weight upserts inside its own array without touching vo2max, CSV
+  upserts, and SCHEDULE / TAPER_PLAN / RACE_GAINS / STATION_TARGETS / RACE_BUDGET
+  survive byte-identical. Checked every line I wrote against the accident-prone
+  regexes, and **caught two defects in my own text doing it**: (a) "off a 1h33
+  tennis match" made `planDurationMin` return **93** instead of 60, because the
+  `(\d+)h(\d{1,2})` branch is tested before the plain-minutes branch and would
+  have inflated 5 Oct's TRIMP by 55%; and (b) the word *tennis* in a gym line
+  let `SESSION_MATCHERS` mark the session satisfied by a tennis activity, since
+  tennis is matched first. Both reworded to "93min singles match". Also confirmed
+  the three Monday lines carry no `⏱`/`TT`/"time trial" so they are not misread
+  as benchmarks, and no bare `or` so `isOptionalLine` does not half-cost them;
+  today's line keeps "your call" and is correctly optional. Reverted the
+  package-lock.json churn `npm install` introduced. Final diff: **5 lines**, none
+  of them machine-written.
+
 ## 2026-09-30 · intra-day (not a Routine firing — user asked at ~16:10 local)
 - trigger: he played the 13:45 fixture (Andrius Jonaitis, **6/3 6/3, 1h33, avg HR
   119, max 169, ~76 TRIMP**), reported it was harder on the legs than expected,
