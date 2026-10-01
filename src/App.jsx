@@ -681,7 +681,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Running","2026-10-01 13:05:35","false","Vilnius Running","10,87","787","00:52:12","151","176","4,4","170","--","4:48","--","--","--","52","49","--","121,00","6,2","7,6","264","--","--","--","--","--","--","--","--","--","No","--","17","--","--","--","--","--","00:51:43","00:52:32","--","--"
+"Running","2026-10-01 13:05:35","false","8x1km tempo 4:00","10,87","787","00:52:12","151","176","4,4","170","--","4:48","--","--","--","52","49","--","121,00","6,2","7,6","264","--","--","--","--","--","--","--","--","--","No","--","17","--","--","--","--","--","00:51:43","00:52:32","--","--"
 "Cycling","2026-09-30 20:00:13","false","Vilnius Cycling","1,80","83","00:05:39","131","141","1,8","--","--","3:08","--","--","--","3","46","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:31","00:05:47","--","--"
 "Strength Training","2026-09-30 18:57:06","false","Strength - lats and core","0,00","156","00:25:46","95","128","0,4","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:25:46","00:25:46","--","--"
 "Indoor Cardio","2026-09-30 18:33:58","false","SkiErg TT 10min warmup-2290m, 1000m- 3:57 (post tennis)","0,00","226","00:17:18","136","170","2,5","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","4","--","--","--","--","--","00:17:18","00:17:18","--","--"
@@ -994,8 +994,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-01";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-01T13:08:00Z";
-const LAST_DATA = "2026-10-01T13:08:00Z";
+const LAST_RUN  = "2026-10-01T13:50:00Z";
+const LAST_DATA = "2026-10-01T13:50:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
 const LAST_MFP  = "2026-10-01T13:08:00Z";
