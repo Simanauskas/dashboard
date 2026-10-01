@@ -265,7 +265,7 @@ const HEALTH_DATA = {
     {date:"2026-09-28",kcal:2738,protein:125,carbs:305,fat:106,fiber:27,goal:2074},
     {date:"2026-09-29",kcal:2112,protein:164,carbs:196,fat:53,fiber:28,goal:2074},
     {date:"2026-09-30",kcal:3393,protein:186,carbs:400,fat:112,fiber:44,goal:2074},
-    {date:"2026-10-01",kcal:1122,protein:35,carbs:121,fat:55,fiber:13,goal:2074},
+    {date:"2026-10-01",kcal:2586,protein:123,carbs:176,fat:129,fiber:16,goal:2074},
   ],
 };
 
@@ -998,7 +998,7 @@ const LAST_RUN  = "2026-10-01T14:07:00Z";
 const LAST_DATA = "2026-10-01T14:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-01T14:31:00Z";
+const LAST_MFP  = "2026-10-01T14:41:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
