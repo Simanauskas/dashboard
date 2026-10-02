@@ -133,6 +133,7 @@ const HEALTH_DATA = {
     {date:"2026-09-29",hrv:106,rhr:41,spo2:98,resp:12.0,sleep_score:null},
     {date:"2026-09-30",hrv:100,rhr:39,spo2:97,resp:11.0,sleep_score:95},
     {date:"2026-10-01",hrv:118,rhr:40,spo2:96,resp:11.0,sleep_score:95},
+    {date:"2026-10-02",hrv:71,rhr:54,spo2:98,resp:14.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -253,6 +254,7 @@ const HEALTH_DATA = {
     {date:"2026-09-29",deep:100,rem:58,light:353,awake:15},
     {date:"2026-09-30",deep:121,rem:116,light:274,awake:1},
     {date:"2026-10-01",deep:132,rem:77,light:296,awake:0},
+    {date:"2026-10-02",deep:58,rem:0,light:177,awake:32},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -266,6 +268,7 @@ const HEALTH_DATA = {
     {date:"2026-09-29",kcal:2112,protein:164,carbs:196,fat:53,fiber:28,goal:2074},
     {date:"2026-09-30",kcal:3393,protein:186,carbs:400,fat:112,fiber:44,goal:2074},
     {date:"2026-10-01",kcal:2586,protein:123,carbs:176,fat:129,fiber:16,goal:2074},
+    {date:"2026-10-02",kcal:365,protein:22,carbs:23,fat:20,fiber:2,goal:2074},
   ],
 };
 
@@ -994,11 +997,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-02";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-02T06:07:00Z";
-const LAST_DATA = "2026-10-02T06:07:00Z";
+const LAST_RUN  = "2026-10-02T07:07:00Z";
+const LAST_DATA = "2026-10-02T07:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-02T06:08:00Z";
+const LAST_MFP  = "2026-10-02T07:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2235,7 +2238,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 91; // updated 2026-10-01
+const hrvBaseline = 88; // updated 2026-10-02
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
