@@ -32,6 +32,152 @@ and never once done.
 
 ---
 
+## 2026-10-02
+- adherence: no ACTION REQUIRED and no WATCH. ski 4/1 · **strength 5/2** · row 1x/0 ·
+  swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 8/9 · **run 8/7 after my edit, see the
+  note below — that is not a new miss** · benchmarks next 14d: roxzone circuit Wed
+  7 Oct (the first ever) and Wed 14 Oct, both on 8/10 Wednesdays, neither at risk.
+- readiness: **no 2026-10-02 wellness row yet** — latest is 1 Oct, HRV **118 vs
+  baseline 91**, RHR **40**, sleep 8h25 (deep 132 / rem 77), score 95. LAST_DATA is
+  **2026-10-02T06:07Z**, so the sync is alive and this is the watch not yet synced
+  this morning, not a break; REFRESH_DAYS=4 will backfill it. I did not read today's
+  readiness, and nothing below depends on it.
+- decision: CHANGED — **re-priced the entire October threshold ladder off a
+  measurement he made on his own**, and rewrote today's benchmark line around what
+  he did yesterday. 5 lines: Tue 6 / 13 / 20 Oct, Fri 2 Oct, and the Base II note.
+
+### What arrived overnight
+**`Running · "8x1km tempo 4:01"`, 1 Oct 13:05 — 10.87km, 52:12, avg HR 151, max 176,
+Aerobic TE 4.4, 96 TRIMP.** The day's prescription was *"Easy day · 25min easy spin,
+a walk, or full rest — your call. Friday's 5km is the week's benchmark and it is
+worth arriving fresh for."* He went and ran eight kilometre reps instead. Overall
+pace 4:48/km across 10.87km means ~2:30 of jog recovery per rep, and avg 151 with a
+176 max puts the reps in upper zone D (156–177 running) — hard, but **not maximal**:
+he never reached zone E.
+
+- why — **three running prescriptions were slower than the race they are preparing.**
+  Laid side by side:
+
+  | | Pace per km |
+  |---|---|
+  | Tue 6 / 13 / 20 Oct, as written | 4:15 / 4:14 / 4:12 |
+  | Athens R2–R8, **with a station before every km** | **4:18** |
+  | Copenhagen budget, runs 2–8 (`RACE_BUDGET`) | **4:06** |
+  | What he ran on 1 Oct, unprompted, off jog recoveries | **4:01** |
+
+  A session labelled `KEY RUN · threshold` was asking **3 seconds per km faster than
+  his compromised race pace**, 9s/km slower than the budget it is supposed to build,
+  and 14s/km slower than a session he did for fun four days earlier on a rest day.
+  That cannot produce 4:06, and it is the same defect yesterday's run named on the
+  ski — *a target he clears while coasting is not a stimulus* — sitting untouched in
+  every running line. Yesterday's run was explicitly waiting on tonight's 5km TT to
+  re-derive these paces. It no longer has to: the measurement already exists, it is
+  race-shaped (8×1km is literally the Hyrox run profile), and it is better evidence
+  than a TT would have been.
+- the new ladder — **pace pinned at the budget number, progression by density.**
+  **5×1km @ 4:06 off 90s (6 Oct) → 6×1km @ 4:06 off 75s (13 Oct) → 6×1km @ 4:04 off
+  60s (20 Oct).** Two axes move, both monotonic; the pace stops drifting 3s over
+  three weeks and sits at 4:06 because **race pace has to become repeatable, not
+  maximal**. 6km at 4:04 off 60s rest is meaningfully denser than 8km at 4:01 off
+  2:30 jogs, so the end of the ladder is a real step past 1 Oct rather than a
+  ratification of it. I deliberately started at 5 reps, not 8: one unprescribed
+  session is not a licence to make his best day the new weekly floor.
+- why I did NOT touch the Monday 4:15 km. Yesterday's run built that session one day
+  ago and held the run standard constant on purpose — it is a compromised km straight
+  off a maximal 1000m erg, pegged to Athens R2, with the ski as the only moving
+  variable. Churning it the next morning would be preference, not physiology, and the
+  session is 3 days out. The Tuesday line now says so explicitly so the two numbers
+  do not read as a contradiction. **What would make me act, and when:** if rep 3
+  holds 4:15 comfortably on Mon 5 Oct, 12 Oct should go to 4:08 and 19 Oct to 4:06 —
+  check his report on that session before leaving those lines alone.
+- today's 5km TT: **kept on Friday, and the week needs it.** The week stands at
+  **265 TRIMP through 1 Oct against the Base I 350–460 band** — 28 Sep was blank, and
+  the 8×1km is the largest single session in it. The TT is the session that puts the
+  week in band, Friday is **9/10** attended and reliably a running day, and he goes
+  in on HRV 118 / RHR 40. Moving it would have been the wrong read: he is not
+  fatigued, he is under-loaded. What I did change is the framing — the line now
+  quotes yesterday's session back at him, says the TT sits 24h off hard legs and will
+  read a few seconds per km slow, sets the expectation at **19:00–19:30 as a floor,
+  not a ceiling**, and adds a degrade rule (if km 1 says no, make it 3km hard and keep
+  the day). It also states that the October paces no longer wait on this number,
+  which is the point: a slow TT can no longer poison the ladder.
+- a defect I fixed while in the line: **today's benchmark was costed at 10 minutes.**
+  `planDurationMin` takes the leftmost `(\d+)\s*min`, and the old text's first match
+  was "10min warm-up" — so a 5km TT was projecting ~27 TRIMP instead of ~120, and the
+  week was reading ~319 projected, *under* its floor, where `adaptPlan` would sooner
+  add volume than trim. Now "45min door to door" is leftmost and the week projects
+  **~414**, mid-band. **And the same line was invisible to `adherence.py`**: its run
+  pattern ends in `\bkm\b`, which does not match "5km" (no word boundary inside
+  `5km`), and the old text had no *jog*, *tempo* or *threshold* either — so the 5km TT
+  has never once been counted as a prescribed run. The new text contains "jog home",
+  so run moved 7/7 → **8/7**. **For tomorrow: that "short by 1" is my edit plus a
+  session that had not happened when I ran. It should read 8/8 once tonight syncs.**
+- phase: **Base I stays, bands stay.** 265 TRIMP so far this week against 350–460 is
+  low but explained by a blank Monday, and the projection lands at ~414. Recent weeks:
+  447 (14–20 Sep, over band) → 357 (21–27 Sep, in band) → ~414 projected. The 350
+  floor set on 30 Sep is holding and nothing argues for moving it. The only TAPER_PLAN
+  edit is the **Base II note**, which read `3×1km @ 4:00–4:05` — after this morning
+  that is *fewer reps at a slower pace* than the Base I block it follows, and the
+  roadmap panel displays it. Rewritten to carry on from 6×1km @ 4:04 off 60s.
+- weakness: unchanged in ranking, but **running's mechanism is now clearer**. It is
+  still the weakest block against the field (top 27.7%) while the stations block is
+  top 9.6%. What today establishes is that the gap is not engine — a man who runs
+  8×1km at 4:01 at submaximal HR is not pace-limited at 4:18. Like the ski, it is
+  what he will commit to under race conditions. Athens showed zero fade and R8 was
+  his best-ranked run of the day (#63, top 11.0%), which says the same thing: he
+  finished with something left. The ladder is built to make 4:06 feel ordinary.
+- physiology: **nothing to act on.** `hrvBaseline` 91, unchanged from yesterday and
+  exactly where it sat on 11 Sep before the 19 Sep illness spike washed through.
+  Last seven HRV 117/60/65/106/100/118 plus a missing today — wide oscillation around
+  a restored centre. RHR is **38–42 on every day in the 21-day window** except that
+  single 56 on 19 Sep, comfortably inside his 38–46 range. **No sustained shift and no
+  excursion.**
+- watching:
+  - **He does not do easy days when he feels good.** 1 Oct asked for 25min easy and
+    got 96 TRIMP of kilometre reps, the day before a benchmark. One instance is not a
+    pattern — 17 Sep's Thursday was an honest Z2 40min at HR 130, and on 26 Sep he
+    *under*-did a prescribed long run. But it is the second time in a week the written
+    day and the trained day diverged upward. **What would make me act:** a second
+    easy-day overshoot inside three weeks. At that point the fix is not to keep
+    writing easy days he ignores — it is to put the quality where he wants to do it
+    and make the easy day a genuine rest day he will respect.
+  - **strength 5 prescribed / 2 done**, carried from yesterday with its trigger
+    unchanged: a third week with no logged strength session, **or** the count reaching
+    3+ prescribed with 0 done in a 21-day window. Neither is met (21 and 30 Sep were
+    both trained). Still not acting.
+  - **row 1x/0** and **swim 1x/0**, both below the WATCH threshold and both carried
+    unchanged. Row acts if prescribed once more (→ 2x/0), and then goes inside the
+    Wednesday circle as the alternate, never as a trip of its own. Swim ages out of
+    the window on 13 Oct without action.
+  - **the missing 2026-10-02 wellness row.** Two full-mode runs today (05:07Z, 06:07Z)
+    stamped LAST_DATA but wrote no wellness row, where 1 Oct's landed at 05:08Z.
+    Almost certainly an unsynced watch. **What would make me act:** if tomorrow opens
+    with no 10-02 row *and* no 10-03 row, that is two days and the Worker's
+    `oauth2 refresh:` line is the thing to read, not the plan.
+  - **ski 4/1** is expected decay, not a live signal: three of the four prescriptions
+    are the 23/24 Sep standalone ergs and the blank 28 Sep, all of which age out by
+    19 Oct, and the structure that replaced them produced 3:57 on 30 Sep on its first
+    attempt. The next instances are Mon 5 / 12 / 19 Oct.
+  - **Wed 7 Oct is the first roxzone measurement he has ever taken** — top 19.8% and
+    the cheapest seconds on the board (92s in `RACE_GAINS`). It is the one thing in
+    the next fortnight with no baseline at all. Protect it.
+- verification: `npm run build` clean (**424.38 kB**); **9/9** patch anchors;
+  `update.patch()` round-tripped against a copy of the real src/App.jsx **and**
+  against pristine origin/main as a control — **18/18 identical on both**: wellness
+  rows patch and keep their **4-space indent**, no daily or sleep rows lost
+  (119→120, 118→119), dates unique after dedupe, weight upserts inside its own array
+  without touching vo2max, CSV upserts, and SCHEDULE / TAPER_PLAN / RACE_GAINS /
+  STATION_TARGETS / RACE_BUDGET / HYROX_DATA survive byte-identical. Every new line
+  was run through the accident-prone regexes: all four SCHEDULE lines resolve to
+  intensity **168**, match **exactly one** adherence type (`run`) with no phantom
+  ski/row/strength/cycle/tennis prescription, carry no bare `or` so `isOptionalLine`
+  does not half-cost them, contain no `Nh NN` to inflate `planDurationMin`, and the
+  three Tuesday lines carry no `⏱`/`TT` so they are not misread as benchmarks. The
+  Tuesday lines deliberately name no duration, so `estTrimp` keeps falling back to
+  his historical run median exactly as before. Reverted the package-lock.json churn
+  `npm install` introduced. Final diff: **5 lines**, none machine-written.
+- consecutive no-change runs before this one: **0** (1 Oct CHANGED, 30 Sep CHANGED).
+
 ## 2026-10-01
 - adherence: **ski 4x prescribed / 1 done — the ACTION REQUIRED banner is cleared,
   and cleared honestly: he skied.** No ACTION REQUIRED and no WATCH this morning.
