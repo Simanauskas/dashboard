@@ -32,6 +32,109 @@ and never once done.
 
 ---
 
+## 2026-10-03
+- adherence: no ACTION REQUIRED and no WATCH. ski 4/1 · strength 5/2 · row 1x/0 ·
+  swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 8/8 · run 8/7. **Benchmarks already due:
+  28 Sep NOTHING LOGGED, 2 Oct NOTHING LOGGED, 30 Sep logged.** Next 14d: roxzone
+  circuit Wed 7 and Wed 14 Oct, plus the running benchmark I moved onto Tue 6 Oct.
+- readiness: **no 2026-10-03 row yet**; latest is 2 Oct — HRV **71 vs baseline 88**
+  (−17), RHR **54**, respiration **14.0**, sleep **3h55 total with zero REM** and 32min
+  awake, no sleep score. LAST_DATA **2026-10-03T06:07Z**, so the sync is alive and
+  yesterday's missing-row watch resolved itself: the 10-02 row backfilled exactly as
+  predicted. `hrvBaseline` slipped 91 → 88.
+- decision: CHANGED — 3 lines. (1) **Tue 6 Oct becomes the running benchmark** and
+  carries the ⏱, because Friday's standalone 5km TT did not happen. (2) A degrade rule
+  on Mon 5 Oct keyed to the RHR excursion. (3) The Base I note now extends the
+  no-trip-of-its-own rule from ergs to benchmarks.
+- why: **standalone benchmark trips are 0-for-2; bolted-on benchmarks are 1-for-1.**
+  The three benchmarks in this window: 28 Sep (ski + row double TT) — blank day,
+  nothing logged. 2 Oct (5km TT) — blank day, nothing logged. 30 Sep (ski TT) —
+  **done, 3:57**, and that was the one bolted onto a night he was already out for
+  tennis. Two of the three were trips made for no other purpose and neither happened.
+  This is precisely the lesson the plan already learned for ergs and wrote into the
+  Base I note on 28 Sep ("EVERY erg exposure now sits inside the Mon gym trip or the
+  circle night, never a trip of its own") — and it was never applied to running. So
+  the running measurement moves inside the Tuesday KEY RUN: **Tuesday is 7/8 attended
+  over eight weeks**, against Saturday's 3/8, and the session was already race-shaped.
+  Kilometre reps at the Copenhagen budget pace (4:06) read Copenhagen better than a
+  flat 5km ever would, because Copenhagen is eight kilometre reps with a station in
+  front of each. Adding ⏱ is what makes `adherence.py` see it, so a future cold
+  morning can tell whether it happened.
+- why I did NOT simply re-prescribe the 5km on a later Friday: it has **no decision
+  riding on it any more**. Yesterday's run re-derived the whole October threshold
+  ladder off the 1 Oct 8×1km @ 4:01 and stated the paces no longer wait on the TT.
+  A benchmark that measures nothing and has gone 0-for-2 is a wish, not a session.
+- physiology — **the one thing to say this morning.** 2 Oct: **RHR 54, eight beats
+  above the top of his 38–46 range**, with HRV 71 (−17 on baseline), respiration 14.0
+  against a typical 10–12, and a 3h55 night containing **no REM at all**. That is the
+  same signature as 19 Sep (HRV 39, RHR 56, resp 14.0), which washed through in a
+  single day: 20 Sep read 57/41 and 21 Sep was back to 98/40. So the likeliest read is
+  one bad night rather than the start of something, and **it is also the explanation
+  for the blank Friday** — 2 Oct was not a refusal to train, and nothing in this entry
+  treats it as one. `hrvBaseline` 91 → 88 is a 3ms drift inside an oscillation that has
+  run 118/71 in two days; not a sustained shift. **What would make me act:** a second
+  consecutive day with RHR above 46, or a 10-03 row that has not recovered toward the
+  high 30s / low 40s. That is why Monday now carries an explicit RHR-above-46 rule.
+- what I deliberately did NOT touch, and why — **today's Saturday line.** It reads
+  "Optional · Z2 run 40min · drop it without guilt", and that is already the right
+  session. More importantly `adaptPlan` will cap today on its own: `easeHard` fires
+  twice over, on `hrvDelta −17 ≤ −10` and on `sleepMin 235 < 360`, and the under-floor
+  scale-up is gated behind `R >= 7` so it cannot add load on a morning like this.
+  Rewriting the line would have duplicated the engine. **Monday 5 Oct's prescription**
+  is likewise unchanged — yesterday built it, it is the #1 priority session, and
+  churning it would be preference. All I added is where the trim should land if he is
+  still suppressed: keep the compromised erg reps, drop the pull-and-carry block.
+- phase and bands: **Base I stays, 350–460 stays.** The week closes at **265 TRIMP
+  done through 2 Oct**, projecting ~292 with today half-costed — roughly 85 under the
+  floor, and the trend is 447 → 357 → 265. That looks like an unrealistic band until
+  you see the cause: **two blank days, and both are explained.** Mon 28 Sep was the
+  standalone double-TT trip (the structural problem this entry fixes) and Fri 2 Oct was
+  the RHR 54 morning. With those two attended the week lands near 420, mid-band. The
+  350 floor was set four days ago with explicit reasoning and one week does not
+  overturn it. **What would make me move it:** if 5–11 Oct also finishes under 350 with
+  no physiological explanation, that is two of two in Base I and the band is wrong, not
+  him — drop the floor to 320 rather than keep grading him against a number he misses.
+- weakness ranking: unchanged. Running is still the weakest block against the field
+  (top 27.7%) and the ski erg still the weakest element (top 29.8%). Nothing in the
+  last 24h moves either — there was no training on 2 Oct to move them.
+- watching:
+  - **strength 5/2**, carried for a third morning with its trigger unchanged: a third
+    week with no logged strength session, **or** 3+ prescribed and 0 done in a 21-day
+    window. Neither is met (21 and 30 Sep were both trained). Still not acting.
+  - **ski 4/1** — still expected decay, not a live signal. Three of the four
+    prescriptions are the 23/24 Sep standalone ergs and the blank 28 Sep, all ageing
+    out by 19 Oct, and the replacement structure produced 3:57 on its first attempt.
+    Next instances Mon 5 / 12 / 19 Oct, all inside the gym trip.
+  - **row 1x/0** and **swim 1x/0**, both below the WATCH threshold. Row acts if
+    prescribed once more (→ 2x/0) and then only as the in-circle alternate. Swim ages
+    out of the window on 13 Oct without action.
+  - **the easy-day overshoot**, carried from yesterday: 1 Oct asked for 25min easy and
+    got 96 TRIMP. The trigger was "a second overshoot inside three weeks" — 2 Oct was
+    blank, so no second instance. Unchanged.
+  - **Wed 7 Oct roxzone circuit** is still the first roxzone measurement he has ever
+    taken, and the only thing in the fortnight with no baseline. It sits on the circle
+    night, which is the right structure. Protect it.
+- verification: `npm run build` clean (**426.04 kB**); **9/9** patch anchors;
+  `update.patch()` round-tripped against a copy of the real src/App.jsx **and** against
+  pristine origin/main as a control — **18/18 identical on both**: wellness daily and
+  sleep rows patch and keep their **4-space indent**, no rows lost, dates unique and
+  sorted, weight upserts inside its own array without touching vo2max, CSV upserts,
+  TODAY advances, and SCHEDULE / TAPER_PLAN / RACE_GAINS / STATION_TARGETS /
+  RACE_BUDGET / HYROX_DATA all survive byte-identical. Both edited SCHEDULE lines were
+  run through the accident-prone regexes and diffed against their HEAD versions: Mon
+  5 Oct is **identical in every derived property** (intensity 168, duration 60,
+  not optional, types ski/strength/run); Tue 6 Oct changes **only** the benchmark flag
+  False → True, keeping intensity 168, **no duration** (so `estTrimp` still falls back
+  to his historical run median), not optional, and **exactly one** adherence type
+  (`run`) with no phantom ski/row/strength/cycle/tennis prescription. One real defect
+  caught and fixed before it shipped: my first draft ended "the number that matters is
+  rep **5 min**us rep 1", which `planDurationMin` read as a **5-minute** session and
+  would have costed a threshold workout at ~9 TRIMP instead of ~90. Reverted the
+  package-lock.json churn `npm install` introduced. Final diff: 3 lines, none
+  machine-written.
+- consecutive no-change runs before this one: **0** (2 Oct CHANGED, 1 Oct CHANGED,
+  30 Sep CHANGED).
+
 ## 2026-10-02
 - adherence: no ACTION REQUIRED and no WATCH. ski 4/1 · **strength 5/2** · row 1x/0 ·
   swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 8/9 · **run 8/7 after my edit, see the
