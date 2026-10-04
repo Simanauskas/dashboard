@@ -32,6 +32,156 @@ and never once done.
 
 ---
 
+## 2026-10-04
+- adherence: no ACTION REQUIRED and no WATCH. ski 4/1 · strength 5/2 · row 1x/0 ·
+  swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 7/8 · run 8/7. **Benchmarks already due:
+  28 Sep NOTHING LOGGED, 2 Oct NOTHING LOGGED, 30 Sep logged.** Next 14d as the plan
+  stood this morning: **Wed 7 Oct and Wed 14 Oct roxzone circuits**, plus Tue 6 Oct's
+  KEY RUN. After this entry: Tue 6 Oct, **Thu 8 Oct, Thu 15 Oct**.
+- readiness: HRV **79 vs baseline 79** (delta **0**), RHR **40**, respiration 12.0,
+  **10h35 asleep** (204 deep / 145 REM / 286 light / 17 awake), sleep score 95.
+  LAST_DATA **2026-10-04T06:07Z**, minutes old — sync healthy. `hrvBaseline` 88 → 79.
+- decision: CHANGED — **the roxzone circuit moves off Wednesday onto Thursday, in all
+  three weeks that carry it (7→8, 14→15, 21→22 Oct)**, is rewritten to need no venue,
+  and now tells him to put the word roxzone in the title. Plus two corrections: Monday
+  5 Oct's preamble, which stated something that turned out to be false, and the Base I
+  note.
+- why: **the host session does not exist.** The line read `15min standalone, run it
+  even if the circle does not` — so on any Wednesday the circle skips, the first
+  roxzone measurement he has ever taken becomes a trip made for no other purpose, and
+  **a trip of its own is 0-for-4**: ski 23 Sep, ski 24 Sep, the 28 Sep double TT, the
+  2 Oct 5km. The one benchmark that landed, 30 Sep's 3:57, hung off an evening he was
+  already out. Yesterday's run wrote that rule into the Base I note and then said of
+  this very session "it sits on the circle night, which is the right structure.
+  Protect it." **That was the error, and it is only visible from the circle's history:
+  five circles since August landed Mon 24 Aug, Mon 31 Aug, Wed 16 Sep, SUN 20 Sep and
+  FRI 25 Sep — four different weekdays, one Wednesday in five.** A benchmark hung off
+  a host that shows up on the right day 20% of the time is a standalone trip 80% of
+  the time. Thursday instead: **8/9 attended since 3 Aug** against Wednesday's 6/9, it
+  already carries a Z2 run to bolt onto, and the circuit is now burpee broad jumps and
+  step-ups — nothing to load, which matters because **he has entered a gym on a
+  Thursday 0 times in 9 weeks**. It also lands the circuit *under fatigue*, off the
+  back of a run, which is what the Athens post-mortem actually asked for and what a
+  fresh Wednesday version would not have given.
+- why this was worth overriding yesterday's "protect it": roxzone is the only bucket
+  that went backwards from Riga (**+29s**) and the only one to miss its Athens plan
+  (**+1:25**); `RACE_GAINS` credits it **92 of the 287 seconds** Copenhagen needs, the
+  second-largest line on the board. It has **never once been measured**. Deferring it
+  the way the ski TT and the 5km were deferred is the single most expensive thing that
+  could happen to this block, and the mechanism that deferred both of those was
+  already written into this line.
+- two defects found while verifying, both invisible from the plan text: (1) the
+  Wednesday line contained the words "after the tennis", so `planIntensity` matched
+  `/tennis/i` **before** reaching the ⏱ branch and costed a timed benchmark at his
+  tennis median HR of 103 — **7.5 TRIMP instead of 40.8**, a 5.4× under-cost, which
+  means `adaptPlan`'s week governor has been trimming real sessions to make room for a
+  roxzone circuit it believed was almost free. (2) The same three words made
+  `adherence.py` score a **phantom tennis prescription** on every roxzone Wednesday.
+  Both are gone; the new lines probe clean at duration 15, intensity 168, 41 TRIMP,
+  adherence types `hyrox,run` only, benchmark=true.
+- physiology — **the thing to say this morning.** Yesterday set the trigger: "a second
+  consecutive day with RHR above 46, or a 10-03 row that has not recovered." **Both
+  halves fired, and harder than the trigger anticipated.** 3 Oct read **RHR 62** — 16
+  beats above the top of his 38–46 range and **the highest reading in the whole
+  122-day record**, worse than 19 Sep's 56 — with HRV 43, respiration 15.0, and a
+  **second consecutive night of literally zero REM** (5h47 total, 62min awake). Then
+  this morning it is simply over: **RHR 40, HRV 79, respiration 12.0, 10h35 asleep
+  with 145min of REM back, sleep score 95.** A two-day excursion with REM suppression,
+  closed out by a 10½-hour rebound night. So the gate yesterday attached to Monday is
+  the right machinery and it is now almost certainly moot — which is why I left the
+  gate in place but corrected the sentence above it, because that sentence told him
+  "the same shape as 19 Sep, which washed through inside a day, so this is most likely
+  already behind you" and **it did not wash through in a day; 3 Oct was worse.** He
+  should not read a claim the data contradicts.
+- the baseline, and a blunted instrument: `hrvBaseline` has gone **91 → 88 → 79 in
+  three days**. That is not a sustained physiological decline — it is the rolling mean
+  absorbing 71 and 43, inside a series that has run **39 to 129 over 21 days**. The
+  consequence is worth stating though: **the baseline fell to meet the suppressed
+  reading, so today's genuinely-recovered HRV of 79 computes `hrvDelta` = 0** and
+  `adaptPlan` reads this morning as perfectly neutral. Before the excursion he was
+  posting 100 and 118 against a baseline of 91. For a week or so the HRV delta will
+  under-report both suppression and recovery, and the honest readiness signal is RHR
+  and sleep — which is a second, independent reason Monday's explicit RHR-above-46
+  gate stays in rather than being left to the engine.
+- what I deliberately did NOT touch: **Monday 5 Oct's session content.** He arrives off
+  **three completely blank days** (2, 3 and 4 Oct — last logged session is the 1 Oct
+  8×1km) on a clean reading, so the compromised ski reps, the 4:15 run standard and the
+  pull-and-carry block all stand exactly as yesterday built them; the only change is
+  the preamble that was factually wrong. **Tuesday 6 Oct** is untouched — it is the
+  running benchmark yesterday moved there and Tuesday is 7/9. **Friday's long run,
+  Saturday's optional flex, Sunday's rest**: unchanged, and Saturday at **3/9 attended**
+  is correctly the droppable one. **STATION_TARGETS / RACE_BUDGET / RACE_GAINS**:
+  unchanged — they already encode the 3:57-off-tennis-legs read of the ski erg ("it is
+  pacing, not fatigue") and a trained roxzone, and nothing moved in 24h because nothing
+  was trained.
+- phase and bands: **Base I stays, 350–460 stays.** The week closed at **265 TRIMP**
+  against a 350 floor — 85 under, and the trend is **447 → 358 → 265**. Yesterday's
+  stated trigger was "if 5–11 Oct also finishes under 350 with no physiological
+  explanation, drop the floor to 320." Week 4's miss is explained twice over: Mon 28 Sep
+  was the standalone double-TT trip (the structural fault this entry is still unwinding)
+  and 2–3 Oct was the RHR excursion. **So the trigger is live and unresolved, and next
+  Sunday's run decides it.** One correction for whoever reads that note: it claims he
+  "has never strung three [380+ weeks] together" — he did, Jul 13 / 20 / 27 at 440 /
+  530 / 476. The 350 floor is ambitious, not fictional: **6 of his last 10 weeks
+  cleared it.** Note also the written weeks now project 641 / 627 / 665, far over the
+  460 ceiling — that is by design, `adaptPlan` is the governor and trims to band; my net
+  addition to written intent is **+32** (roxzone 41 on Thursday, less the 9 it was
+  wrongly costing on Wednesday).
+- weakness ranking: unchanged. Running still the weakest block against the field (top
+  27.7%), ski erg still the weakest element (top 29.8%). Nothing trained since 1 Oct,
+  so nothing could have moved.
+- watching:
+  - **strength 5/2**, a fourth morning carried, trigger unchanged: a third consecutive
+    week with no logged strength, **or** 3+ prescribed and 0 done in 21 days. Neither is
+    met — 21 Sep (48min) and 30 Sep (26min) both landed, and **both were bolted to a
+    night he was already out**, which is the same structural lesson holding. What would
+    make me act: if Mon 5 **and** Mon 12 Oct both pass with no strength logged, the
+    end-of-gym-trip block is being dropped and it moves to the front of the session.
+  - **ski 4/1** — still expected decay, not a live signal. Three of the four
+    prescriptions are the 23/24 Sep standalone ergs and the blank 28 Sep, all ageing out
+    by 19 Oct, and the replacement structure produced 3:57 first time. What would make me
+    act: no ski logged across Mon 5 **and** Mon 12 Oct, which would mean the bolted
+    structure is failing too and ski has to move into a running session as a pre-run erg
+    rather than wait for a gym.
+  - **row 1x/0** and **swim 1x/0**, both under the WATCH threshold. Swim ages out 13 Oct
+    untouched. Row is the honest one: `references/training-log.md` records the 1000m row
+    TT as **never completed, deferred twice** across months, which no 21-day window can
+    see — and at **top 11.4%** it is a strength the plan is told to defend, not chase.
+    It is not prescribed anywhere in the next three weeks and I am not re-adding it; if
+    a future run wants the number, it belongs bolted to a Monday gym trip, never as a
+    trip of its own.
+  - **Thu 8 Oct is now the one thing in the fortnight with no baseline at all.** If it
+    goes blank, the problem is not the day and not the venue, and the next move is to
+    fold the eight transitions into the Monday gym trip rather than keep relocating a
+    session of its own.
+  - **Sunday 5/8 vs Saturday 3/9.** He trains Sundays more often than Saturdays, yet
+    every Sunday reads "Full rest · family day" and Saturday carries the optional. The
+    Sunday sessions were circles landing there (16 Aug, 20 Sep), not a Sunday habit, and
+    family day is his stated constraint — so I am not prescribing Sunday. Recording it
+    because it is the kind of thing that looks like a finding and is not.
+- verification: `npm run build` clean (**428.93 kB**, from 426.04 — text only); **9/9**
+  patch anchors; SCHEDULE still parses as **50 days** under `adherence.py`'s day regex.
+  `update.patch()` round-tripped against a copy of the real src/App.jsx **and** against
+  pristine origin/main as a control — **21/21 on both**: daily and sleep rows patch and
+  keep their **4-space indent**, no rows lost, dates unique and sorted, weight upserts
+  inside its own array without touching vo2max, CSV upserts, TODAY advances, and
+  SCHEDULE / TAPER_PLAN / RACE / RACE_BUDGET / RACE_GAINS / STATION_TARGETS /
+  HYROX_DATA all survive byte-identical. Every new and edited line was probed through
+  `planDurationMin` / `planIntensity` / `isInfoLine` / `isOptionalLine` and
+  `adherence.py`'s matchers before it was written: **Mon 5 Oct is identical in all six
+  derived properties** (duration 60, intensity 168, not info, not optional, 163 TRIMP,
+  types ski/strength/run); the three new Thursday lines carry an explicit `15min` so
+  they cannot fall back to the 52-minute run median, contain no double quote (which
+  would truncate `adherence.py`'s `text:"([^"]+)"`), no `] }` (which would break its day
+  regex), no bare "or" (which `isOptionalLine` would half-cost), and none of
+  ski/row/lunge/sled/strength/wall-ball/tennis (which would each have invented a
+  prescription). Four of my own test assertions failed first and were wrong, not the
+  code — caught because the pristine control failed identically: `advance_today` moves
+  TODAY to **date+1**, and sleep stages arrive nested under `wellness['sleep']`, not as
+  top-level keys. Reverted the package-lock.json churn `npm install` introduced.
+- consecutive no-change runs before this one: **0** (3 Oct CHANGED, 2 Oct CHANGED,
+  1 Oct CHANGED).
+
 ## 2026-10-03
 - adherence: no ACTION REQUIRED and no WATCH. ski 4/1 · strength 5/2 · row 1x/0 ·
   swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 8/8 · run 8/7. **Benchmarks already due:
