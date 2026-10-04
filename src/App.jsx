@@ -135,6 +135,7 @@ const HEALTH_DATA = {
     {date:"2026-10-01",hrv:118,rhr:40,spo2:96,resp:11.0,sleep_score:95},
     {date:"2026-10-02",hrv:71,rhr:54,spo2:98,resp:14.0,sleep_score:null},
     {date:"2026-10-03",hrv:43,rhr:62,spo2:97,resp:15.0,sleep_score:null},
+    {date:"2026-10-04",hrv:79,rhr:40,spo2:91,resp:12.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -257,6 +258,7 @@ const HEALTH_DATA = {
     {date:"2026-10-01",deep:132,rem:77,light:296,awake:0},
     {date:"2026-10-02",deep:58,rem:0,light:177,awake:32},
     {date:"2026-10-03",deep:73,rem:0,light:274,awake:62},
+    {date:"2026-10-04",deep:204,rem:145,light:286,awake:17},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -999,11 +1001,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-04";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-04T05:07:00Z";
-const LAST_DATA = "2026-10-04T05:07:00Z";
+const LAST_RUN  = "2026-10-04T06:07:00Z";
+const LAST_DATA = "2026-10-04T06:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-04T05:07:00Z";
+const LAST_MFP  = "2026-10-04T06:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2240,7 +2242,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 76; // updated 2026-10-03
+const hrvBaseline = 79; // updated 2026-10-04
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
