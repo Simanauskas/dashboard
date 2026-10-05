@@ -693,6 +693,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Cycling","2026-10-05 10:07:19","false","Vilnius Cycling","8,99","224","00:30:04","101","140","1,2","--","--","3:20","--","--","--","120","101","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:28:16","01:39:15","--","--"
 "Other","2026-10-04 11:57:59","false","Mushrooming","2,28","215","01:16:37","71","120","0,2","23","--","33:36","--","--","--","57","61","--","131,72","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:40:36","01:36:04","--","--"
 "Running","2026-10-04 08:37:16","false","Z2 Active Recovery ","9,71","679","00:57:03","123","135","2,8","174","--","5:52","--","--","--","52","45","--","98,46","7,4","7,4","271","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:56:30","00:58:00","--","--"
 "Running","2026-10-01 13:05:35","false","8x1km tempo 4:01","10,87","787","00:52:12","151","176","4,4","170","--","4:48","--","--","--","52","49","--","121,00","6,2","7,6","264","--","--","--","--","--","--","--","--","--","No","--","17","--","--","--","--","--","00:51:43","00:52:32","--","--"
@@ -1008,8 +1009,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-05T08:07:00Z";
-const LAST_DATA = "2026-10-05T08:07:00Z";
+const LAST_RUN  = "2026-10-05T08:50:00Z";
+const LAST_DATA = "2026-10-05T08:50:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
 const LAST_MFP  = "2026-10-05T08:40:00Z";
