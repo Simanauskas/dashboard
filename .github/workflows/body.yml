@@ -1,0 +1,87 @@
+name: Body Composition Upload
+
+# Dispatched by the auth.simas.fit Worker when the iOS Shortcut posts a Renpho
+# reading to /body. Garmin tokens are readable only here and in the Worker, so
+# the Garmin write has to run in Actions. Dispatch only — never scheduled.
+# Must live on main to be dispatchable (gotcha #19).
+on:
+  workflow_dispatch:
+    inputs:
+      readings:
+        description: 'JSON list of {ts, kg, fat, bmi} — ts ISO 8601 with UTC offset'
+        required: true
+      dry_run:
+        description: 'Build and check, write nothing'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+
+# Two weigh-ins seconds apart (two Shortcut runs) must not race each other's
+# push. Queue them instead; the second one finds its reading already in Garmin.
+concurrency:
+  group: body-upload
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 10
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install "garth==0.4.47" "garminconnect==0.2.8" requests
+
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+
+      # Inputs go through env, never interpolated into the shell: the JSON is
+      # posted from a phone and must not be able to run as code here.
+      - name: Upload to Garmin and patch dashboard
+        env:
+          READINGS: ${{ inputs.readings }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          args=(--upload "$READINGS")
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          python body.py "${args[@]}"
+
+      - name: Commit and push if changed
+        if: inputs.dry_run != 'true'
+        run: |
+          git config user.name  "garmin-bot"
+          git config user.email "bot@simanauskas.github.io"
+          git add src/App.jsx
+          if git diff --staged --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: body composition $(date -u +%Y-%m-%dT%H:%MZ)"
+          # The hourly sync pushes to the same file. Same retry as update.yml;
+          # on a conflict the next full sync re-reads Garmin, so nothing is lost.
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "push rejected (attempt $attempt) — rebasing onto main"
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::warning::rebase conflict on App.jsx; reading is in Garmin, next full sync writes it"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::push still failing after 3 rebases — check the PAT"
+          exit 1

@@ -3463,9 +3463,27 @@ function CompositionPanel() {
   const wVals = weights.map(w => w[1]);
   const latestVo2 = HEALTH_DATA.vo2max[HEALTH_DATA.vo2max.length - 1];
   const fa = HEALTH_DATA.fitnessAge;
-  const latestBf = bfEntries.length ? bfEntries[bfEntries.length - 1] : null;
-  const firstBf = bfEntries.length ? bfEntries[0] : null;
-  const leanMass = latestBf && latestWeight ? (latestWeight[1] * (1 - latestBf.bf / 100)).toFixed(1) : null;
+
+  // Scale readings (Renpho → Garmin, written by body.py) are the live series;
+  // the Google Sheet is kept as history from before the scale. Same date →
+  // the scale wins. Each scale row carries its own weight, so lean mass is
+  // computed from the weigh-in the fat % came from, not whatever weight is newest.
+  const scale = HEALTH_DATA.body || [];
+  const bfSeries = (() => {
+    const byDate = {};
+    for (const e of bfEntries) byDate[e.date] = { date:e.date, bf:e.bf, kg:null };
+    for (const r of scale) if (r.fat != null) byDate[r.date] = { date:r.date, bf:r.fat, kg:r.kg };
+    return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+  })();
+  const latestBf = bfSeries.length ? bfSeries[bfSeries.length - 1] : null;
+  const firstBf = bfSeries.length ? bfSeries[0] : null;
+  const leanKg = latestBf ? (latestBf.kg ?? latestWeight?.[1]) : null;
+  const leanMass = latestBf && leanKg ? (leanKg * (1 - latestBf.bf / 100)).toFixed(1) : null;
+  // Bioimpedance swings 1–2 points with hydration, so a single morning means
+  // little — the 7-reading mean is the number to steer by.
+  const recent = bfSeries.slice(-7);
+  const bfAvg = recent.length >= 3 ? (recent.reduce((a, e) => a + e.bf, 0) / recent.length).toFixed(1) : null;
+  const lastScale = scale.length ? scale[scale.length - 1] : null;
 
   return (
     <div>
@@ -3509,23 +3527,26 @@ function CompositionPanel() {
         </Sec>
 
         <Sec title="Body fat" right={
-          <span style={{ color: bfStatus === "live" ? T.ok : T.ink3 }}>
-            {bfStatus === "loading" ? "⟳ fetching sheet…" : bfStatus === "live" ? "● live from Google Sheet" : "○ cached (sheet unavailable)"}
+          <span style={{ color: lastScale || bfStatus === "live" ? T.ok : T.ink3 }}>
+            {lastScale ? `● scale · ${lastScale.date}`
+              : bfStatus === "loading" ? "⟳ fetching sheet…" : bfStatus === "live" ? "● live from Google Sheet" : "○ cached (sheet unavailable)"}
           </span>
         }>
           <Card pad={16}>
             <div className="grid g3" style={{ marginBottom:14 }}>
-              <Stat pad={12} label="Latest" value={latestBf ? `${latestBf.bf}%` : "—"} sub={latestBf ? latestBf.date : ""} tone="ok" />
-              {leanMass && <Stat pad={12} label="Lean mass" value={leanMass} unit="kg" sub="est. from last weight" tone="ok" />}
+              <Stat pad={12} label="Latest" value={latestBf ? `${latestBf.bf}%` : "—"}
+                sub={latestBf ? (bfAvg ? `${latestBf.date} · 7-reading avg ${bfAvg}%` : latestBf.date) : ""} tone="ok" />
+              {leanMass && <Stat pad={12} label="Lean mass" value={leanMass} unit="kg"
+                sub={latestBf?.kg != null ? "from the same weigh-in" : "est. from last weight"} tone="ok" />}
               {firstBf && latestBf && (
                 <Stat pad={12} label={`Since ${firstBf.date.slice(0,7)}`}
                   value={`${latestBf.bf <= firstBf.bf ? "↓" : "↑"} ${Math.abs(latestBf.bf - firstBf.bf).toFixed(1)}%`}
                   sub={`${firstBf.bf}% → ${latestBf.bf}%`} tone={latestBf.bf <= firstBf.bf ? "ok" : "warn"} />
               )}
             </div>
-            {bfEntries.length > 1 && <Sparkline data={bfEntries} color={T.ok} height={110} fmt={v => v.toFixed(1)} />}
+            {bfSeries.length > 1 && <Sparkline data={bfSeries} color={T.ok} height={110} fmt={v => v.toFixed(1)} />}
             <div style={{ fontSize:10, color:T.ink3, marginTop:8, lineHeight:1.5 }}>
-              Readings outside 9–20% are treated as scale outliers and excluded.
+              Scale readings via Garmin; earlier history from the Google Sheet, where values outside 9–20% are excluded as outliers.
             </div>
           </Card>
         </Sec>

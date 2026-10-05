@@ -118,6 +118,24 @@ jobs:
             python mfp.py
           fi
 
+      # Body composition (Renpho → Garmin, see body.py). Re-reads what Garmin
+      # holds and upserts HEALTH_DATA.body — the backstop for an upload run
+      # whose commit was dropped, and how a backfill reaches the dashboard.
+      # Hourly full runs only: polls don't need it, uploads patch directly.
+      # Never allowed to fail the job; body.py exits 0 in sync mode.
+      - name: Sync body composition from Garmin
+        if: steps.mode.outputs.mode == 'full' || steps.mode.outputs.mode == 'backfill'
+        continue-on-error: true
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
+          DAYS: ${{ steps.mode.outputs.days }}
+        run: |
+          if [ "$MODE" = "backfill" ]; then
+            python body.py --days "$DAYS"
+          else
+            python body.py --days 30
+          fi
+
       - name: Commit and push if changed
         run: |
           # poll mode leaves the file untouched when nothing new arrived, so the
