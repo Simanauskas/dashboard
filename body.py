@@ -155,25 +155,34 @@ def upload(client, readings: list[dict], dry_run: bool) -> list[dict]:
                        + ", ".join(f"{r['ts'].isoformat()} {r['kg']}kg" for r in missing))
 
 
-def fetch_rows(client, days: int) -> dict[str, dict]:
-    """Garmin → {date: row}, the LAST reading of each calendar day. Days with
-    a weight but no body fat (a manual entry, say) are skipped: the weight
-    array already carries those, and a fat-less row would plot as a gap."""
+def fetch_rows(client, days: int):
+    """Garmin → ({date: body row}, {date: kg}, window_start).
+
+    Body rows: the LAST reading of each calendar day that carries body fat
+    (a fat-less manual entry would plot as a gap). Weights: the last weigh-in
+    of every day, with or without fat. Returns None for both maps when Garmin
+    answered with nothing at all, so the caller cannot mistake an outage for
+    "every weigh-in was deleted"."""
     end = datetime.date.today()
     start = end - datetime.timedelta(days=days)
-    rows, when = {}, {}
-    for e in garmin_entries(client, start.isoformat(), end.isoformat()):
+    entries = garmin_entries(client, start.isoformat(), end.isoformat())
+    if not entries:
+        return None, None, start.isoformat()
+    rows, weights, when, wwhen = {}, {}, {}, {}
+    for e in entries:
         d = e.get("calendarDate")
-        if not d or e.get("bodyFat") is None or not e.get("weight"):
+        if not d or not e.get("weight"):
             continue
         t = e.get("timestampGMT") or 0
-        if d in when and when[d] > t:
+        if t >= wwhen.get(d, -1):
+            weights[d], wwhen[d] = round(e["weight"] / 1000, 1), t
+        if e.get("bodyFat") is None or (d in when and when[d] > t):
             continue
         g = lambda k, s=1000: round(e[k] / s, 1) if e.get(k) is not None else None
         rows[d] = {"kg": g("weight"), "fat": round(e["bodyFat"], 1), "bmi": g("bmi", 1),
                    "water": g("bodyWater", 1), "muscle": g("muscleMass"), "bone": g("boneMass")}
         when[d] = t
-    return rows
+    return rows, weights, start.isoformat()
 
 
 # ── patch ────────────────────────────────────────────────────────────────────
@@ -216,15 +225,54 @@ def ensure_array(code: str) -> str:
     return code[:n.end()] + NEW_ARRAY + code[n.end():]
 
 
-def patch(rows: dict[str, dict], code: str) -> str:
+def patch(rows: dict[str, dict], code: str, since: str | None = None) -> str:
+    """Upsert rows. With `since`, Garmin is authoritative from that date on:
+    a row Garmin no longer has (deleted there) is removed here too."""
     code = ensure_array(code)
     m = ARRAY.search(code)
     if not m:
         raise RuntimeError("body array not found in App.jsx — was HEALTH_DATA reshaped?")
     by_date = {e.group(1): "    " + e.group(0) for e in ROW.finditer(m.group(2))}
+    if since:
+        for d in [d for d in by_date if d >= since and d not in rows]:
+            print(f"  − {d}: no longer in Garmin, removing body row")
+            del by_date[d]
     for d, r in rows.items():
         by_date[d] = _row(d, r)
     body = "".join("\n" + by_date[d] for d in sorted(by_date))
+    return code[:m.start(2)] + body + code[m.end(2):]
+
+
+WEIGHT = re.compile(r'(weight:\s*\[)(.*?)(\n  \],)', re.DOTALL)
+
+
+def scale_dates(code: str) -> set[str]:
+    m = ARRAY.search(code)
+    return {e.group(1) for e in ROW.finditer(m.group(2))} if m else set()
+
+
+def patch_weight(weights: dict[str, float], code: str, since: str,
+                 removable: set[str]) -> str:
+    """Reconcile HEALTH_DATA.weight with Garmin from `since` on: each day's
+    last weigh-in is upserted (update.py only ever stores the single newest,
+    so it misses days). Removal is deliberately narrow: only days that came
+    from the scale (`removable`, i.e. had a body row) and are now gone from
+    Garmin. Older weight history arrived by routes this script has never
+    verified it can see, so it is never deleted here. Same span-scoped,
+    date-keyed rewrite and 8-per-line layout as update.py (gotcha #4)."""
+    m = WEIGHT.search(code)
+    if not m:
+        print("::warning::weight array not found — skipping weight reconcile")
+        return code
+    by_date = dict(re.findall(r'\["(\d{4}-\d{2}-\d{2})",([\d.]+)\]', m.group(2)))
+    for d in [d for d in by_date if d >= since and d in removable and d not in weights]:
+        print(f"  − {d}: weigh-in no longer in Garmin, removing")
+        del by_date[d]
+    for d, kg in weights.items():
+        by_date[d] = str(kg)
+    items = [f'["{d}",{by_date[d]}]' for d in sorted(by_date)]
+    body = "\n" + "\n".join("    " + ",".join(items[i:i+8]) + ","
+                             for i in range(0, len(items), 8))
     return code[:m.start(2)] + body + code[m.end(2):]
 
 
@@ -253,14 +301,17 @@ def main() -> int:
         update.patch(local_day, {"weight": (local_day, round(latest["kg"], 1))}, [],
                      advance_today=False)
         span = max(2, (datetime.date.today() - min(r["ts"].date() for r in confirmed)).days + 1)
-        rows = fetch_rows(client, span)
+        rows, weights, since = fetch_rows(client, span)
     else:
         try:
-            rows = fetch_rows(client, a.days)
+            rows, weights, since = fetch_rows(client, a.days)
         except Exception as e:
             print(f"::warning::body composition fetch failed: {type(e).__name__}: {e}")
             return 0
 
+    if rows is None:
+        print("Body: Garmin returned no weigh-ins at all in the window — changing nothing")
+        return 0
     print(f"Body: {len(rows)} day(s) with body fat in Garmin")
     for d, r in sorted(rows.items())[-5:]:
         print(f"  {d}: {r['kg']} kg · {r['fat']}% fat")
@@ -268,7 +319,8 @@ def main() -> int:
         return 0
     code = DASHBOARD.read_text(encoding="utf-8")
     try:
-        new = patch(rows, code)
+        new = patch_weight(weights, patch(rows, code, since), since,
+                           removable=scale_dates(code))
     except RuntimeError as e:
         print(f"::warning::{e}")
         return 0 if not a.upload else 1

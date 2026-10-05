@@ -10,10 +10,13 @@ on:
       readings:
         description: 'JSON list of {ts, kg, fat, bmi} — ts ISO 8601 with UTC offset'
         required: true
+      # A checkbox, not free text: a typed value that wasn't exactly "true"
+      # once turned a test into a real write.
       dry_run:
-        description: 'Build and check, write nothing'
+        description: 'Dry run — build and check, write nothing'
+        type: boolean
         required: false
-        default: 'false'
+        default: false
 
 permissions:
   contents: write
@@ -56,11 +59,12 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           args=(--upload "$READINGS")
-          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          # Fail safe: anything but an explicit false is a dry run.
+          if [ "$DRY_RUN" != "false" ]; then args+=(--dry-run); fi
           python body.py "${args[@]}"
 
       - name: Commit and push if changed
-        if: inputs.dry_run != 'true'
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name  "garmin-bot"
           git config user.email "bot@simanauskas.github.io"
