@@ -1013,11 +1013,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-05T13:08:00Z";
-const LAST_DATA = "2026-10-05T13:08:00Z";
+const LAST_RUN  = "2026-10-05T14:07:00Z";
+const LAST_DATA = "2026-10-05T14:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-05T13:20:00Z";
+const LAST_MFP  = "2026-10-05T14:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1422,8 +1422,8 @@ const SCHEDULE = [
     { date:"2026-10-07", dow:"WED", label:"Oct 7", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Andrius Verkelis · court 7 · 12:00"},{type:"hyrox",text:"Hyrox circle @ Gym+ · evening, whichever evening it runs"},{type:"plan",note:true,text:"Inside the circle: take the SKI option wherever the block offers a choice — top 29.8%, your weakest element. You do ski, but only ever bolted to something else: 1km inside the 16 Aug strength session, again inside the 29 Aug Hyrox session. A standalone erg trip has gone 0-for-3. Put the word ski in the activity title so it is visible. The timed roxzone circuit that used to sit on this day has moved to Thursday, because it depended on this circle running and five circles since August landed on four different weekdays — if the circle DOES run tonight, clock the eight transitions inside it anyway and the measurement is free."}] },
     { date:"2026-10-08", dow:"THU", label:"Oct 8", sessions:[{type:"plan",text:"Z2 run 40min · morning · outdoors, easy"},{type:"plan",text:"⏱ Roxzone circuit · 15min bolted onto the end of this morning’s Z2 run, nothing extra to travel to · 8× [30s hard station → jog 100m], clock every transition and write all eight numbers down · Athens averaged 0:43 a transition; 0:36 is the number to beat · MOVED OFF WEDNESDAY, and this is why: it was written ‘run it even if the circle does not’, which made the first roxzone measurement you have ever taken a trip of its own — and a trip of its own has gone 0-for-4: the 23 Sep and 24 Sep standalone sessions, the 28 Sep double TT, the 2 Oct 5km. The one benchmark that landed, 30 Sep’s 3:57, hung off an evening you were already out of the house. The circle cannot host it either: five circles since August landed Mon 24 Aug, Mon 31 Aug, Wed 16 Sep, SUN 20 Sep and FRI 25 Sep — one Wednesday in five. Thursday is 8/9 attended since 3 Aug and needs no venue, which matters because you have entered a gym on a Thursday zero times in nine weeks · stations are burpee broad jumps and step-ups, nothing to load · PUT THE WORD ROXZONE IN THE TITLE, otherwise tomorrow cannot tell that it happened · this is the bucket that went backwards from Riga (+29s), missed its Athens plan by 1:25, and carries 92 of the 287 seconds the Copenhagen budget needs"}] },
     { date:"2026-10-09", dow:"FRI", label:"Oct 9", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Kristupas Veteris · court 10 · 13:30"},{type:"plan",text:"Long run 75min · last 15min @ 4:30/km"}] },
-    { date:"2026-10-10", dow:"SAT", label:"Oct 10", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · court 18 · 08:00"},{type:"plan",text:"Optional · Z2 run 40min · flex session"}] },
-    { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"rest",text:"Full rest · family day"}] },
+    { date:"2026-10-10", dow:"SAT", label:"Oct 10", sessions:[{type:"plan",text:"Optional · Z2 run 40min · flex session"}] },
+    { date:"2026-10-11", dow:"SUN", label:"Oct 11", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · court 18 · 08:00"},{type:"rest",text:"Full rest · family day"}] },
   ]},
   { week:6, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
     { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"GYM 60min · compromised ski FIRST: [1000m ski → 1km treadmill @ 4:15] ×3 continuous · ski every rep under 4:03, run standard unchanged at 4:15 — one variable moves at a time and it is the ski, so the kms stay comparable week to week · then strength 30min: sled pull heavy + wall balls 3×25 straight off a 1km treadmill run + core · save it as \"Ski + run\""}] },
