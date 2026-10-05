@@ -6,7 +6,7 @@ const HEALTH_DATA = {
     ["2026-01-13",73.6],["2026-01-17",73.1],["2026-01-20",73.1],["2026-02-12",73.5],["2026-02-15",73.9],["2026-02-24",74.3],["2026-02-28",75.5],["2026-03-04",73.4],
     ["2026-03-08",72.3],["2026-03-12",73.1],["2026-03-16",73.2],["2026-03-19",73.2],["2026-03-22",74.1],["2026-03-23",73.5],["2026-03-24",72.9],["2026-04-16",75.0],
     ["2026-05-12",75.9],["2026-05-17",76.7],["2026-08-04",75.5],["2026-08-13",75.2],["2026-08-14",74.9],["2026-08-29",76.9],["2026-09-02",76.7],["2026-09-11",76.2],
-    ["2026-09-12",75.6],["2026-09-24",76.2],["2026-10-01",76.7],["2026-10-05",76.4],
+    ["2026-09-12",75.6],["2026-09-24",76.2],["2026-10-01",76.7],
   ],
   vo2max: [
     ["2026-03-09",52],["2026-03-17",53],["2026-03-21",53],["2026-03-24",53],
@@ -285,7 +285,6 @@ const HEALTH_DATA = {
   // Renpho scale via Apple Health -> Shortcut -> auth.simas.fit/body. One row
   // per line, 4-space indent, machine-written: do not reformat.
   body: [
-    {date:"2026-10-05",kg:76.4,fat:14.2,bmi:23.1,water:null,muscle:null,bone:null},
   ],
 };
 
@@ -1021,11 +1020,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-05T14:07:00Z";
-const LAST_DATA = "2026-10-05T14:07:00Z";
+const LAST_RUN  = "2026-10-05T14:22:00Z";
+const LAST_DATA = "2026-10-05T14:22:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-05T14:08:00Z";
+const LAST_MFP  = "2026-10-05T14:22:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
