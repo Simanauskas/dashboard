@@ -1022,11 +1022,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-05";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-06T01:08:00Z";
-const LAST_DATA = "2026-10-06T01:08:00Z";
+const LAST_RUN  = "2026-10-06T02:08:00Z";
+const LAST_DATA = "2026-10-06T02:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-06T01:08:00Z";
+const LAST_MFP  = "2026-10-06T02:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
