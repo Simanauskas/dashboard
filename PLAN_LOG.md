@@ -32,6 +32,160 @@ and never once done.
 
 ---
 
+## 2026-10-06
+- adherence: no ACTION REQUIRED and no WATCH. ski **5/2** · strength **6/3** · row 1x/0 ·
+  swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 8/6 · run 9/8. **Yesterday's two dated
+  triggers both resolved, and both resolved green**: 5 Oct was the Monday that was going
+  to decide whether the end-of-gym-trip strength block moves to the front and whether the
+  erg leaves the gym trip entirely, and he trained both — ski 1→2 done, strength 2→3 done.
+  **Benchmarks already due: 28 Sep NOTHING LOGGED, 2 Oct NOTHING LOGGED** (both dead
+  structure, addressed by the 3 and 4 Oct restructures), **30 Sep logged**, and **6 Oct
+  listed as due is today — not a miss**. Next 14d: **Thu 8 Oct and Thu 15 Oct roxzone
+  circuits**, on a day attended 8/9. Nothing in the fortnight sits on a day he does not
+  train.
+- readiness: HRV **52 vs baseline 75** (delta **−23**), RHR **43**, respiration 12.0,
+  SpO₂ 98, **8h44 asleep** (132 deep / 114 REM / 278 light / 14 awake), sleep score null.
+  LAST_DATA **2026-10-06T06:08Z**, minutes old — sync healthy. `hrvBaseline` 83 → **75**.
+- decision: CHANGED — **the Monday compromised-ski standard is rewritten from a ceiling
+  to a fade, on 12 and 19 Oct**; the treadmill km becomes a ceiling he may not beat;
+  tonight's KEY RUN gains the control reading and this morning's physiology; `RACE_GAINS`'s
+  ski mechanism claim is corrected; the Base I note records the finding. **Net change to
+  written training load: zero** — all six probed properties identical on every session
+  touched.
+- why: **5 Oct finally ran the session this block is built around, and it falsified that
+  session's own premise.** `Compromised 3x[ski 1km+run 1km]` logged **ski 4:02 / 4:19 /
+  4:24** against **runs 4:08 / 4:00 / 4:00**. The line asked for every ski rep under 4:05
+  and named *the run* as the measurement — "hold 4:15 per km … note whether rep 3 still
+  holds it. That is the real Athens question." Both halves came back wrong:
+  - **The run passed so hard it stopped being a measurement.** All three kms beat the 4:15
+    standard, the last two by 15s, and they got *faster* across the session (−8s rep 1 →
+    rep 3). A standard he beats by 15s is not a control.
+  - **The ski collapsed: +22s rep 1 → rep 3.** Rep 1 at 4:02 already beat the sub-4:03 that
+    12 Oct was going to ask for — the ceiling the whole progression was built to chase. So
+    the ceiling was never the limiter. The repeat is.
+- why that matters more than the splits do: it **re-reads Athens**. `RACE_GAINS` has said
+  since the race that the ski's 20s is "pacing, not fatigue", on the strength of 3:57 off
+  tennis legs versus 4:18 raced — and **simas-hyrox** carries the same claim. But 4:19 is
+  his rep-2 number and 4:24 his rep-3: **his Athens split was his repeat capability showing
+  up, not timidity on the day.** The 3:57 and the fresh 3:54 measure something he can do
+  once. The 20s is still real, but it is not lying on the floor — it has to be built, and
+  what has to be built is fatigue resistance in the pull, which the runs prove is not
+  aerobic: his engine and his legs did not fade at all. That is a weakness **localised**,
+  which answers "has a weakness moved?" with data for the first time this block.
+- why the old progression had to go rather than be left to `adaptPlan`: it asked sub-4:03
+  ×3 on 12 Oct and sub-4:00 ×3 on 19 Oct off a session that averaged **4:15**. That is 12s
+  then 15s per rep inside one and two weeks, on the session type with the worst adherence
+  record in this file (**5 prescribed / 2 done**) — and `adaptPlan` cannot see that a
+  *standard* is unreachable. It scales volume and caps intensity; it does not re-specify a
+  target. An unreachable number on his least-attended session type is how a session stops
+  happening, which is the exact failure mode this file exists to prevent. New standard:
+  **every rep under 4:10 AND rep 3 within 10s of rep 1** (12 Oct), tightening to **4:08
+  and 6s** (19 Oct) — the fade halves, the ceiling deliberately stays put, and 4:10×3 asks
+  5s/rep faster than Monday rather than 12s.
+- **the treadmill is a ceiling now, not a target.** On 5 Oct he protected the run and spent
+  the erg — the exact reverse of that line's "do NOT pace the ski to protect the run".
+  Capping the km at 4:10 and saying outright that every second under it is stolen from the
+  next erg rep is the only way the erg gets the effort.
+- the strength block: on 5 Oct it asked for sled pull + lunges and he logged **"Strength:
+  shoulders, pecs, biceps"** — push and elbow flexion, on the one day his pulling gave out.
+  He does pick his own content (30 Sep he chose "lats and core" himself and skied 3:57 that
+  same evening), so 12 Oct now names *why* the pull is the point instead of only listing it.
+- **a defect I could not fix, and it is affecting live decisions.** Monday's Multi Sport row
+  carries `Avg HR = "--"`, and `calcTRIMP` returns **0** on a falsy avgHR
+  (`src/App.jsx:1133`, via `parseNum("--") → null`). So the block's single most important
+  session — 27 minutes, max HR 175 — contributes **0 TRIMP** to ATL/CTL/form and to the
+  week's total. 5 Oct counts as **53.9 TRIMP** against roughly **103** had that row carried
+  an average HR. Two consequences: (1) the 5–11 Oct test of the 350 floor — the live trigger
+  set on 4 Oct — is being scored with ~47% of Monday missing and **cannot be read as
+  written**; a week that lands "under floor" may simply be unmeasured. (2) `adaptPlan`'s week
+  governor sees room that is not there, and will add load on top of a −23 HRV morning.
+  `calcTRIMP` and the CSV enrichment sit outside the edit surface this Routine is given
+  (SCHEDULE / TAPER_PLAN / RACE / targets only), so I have **not** touched it; flagged to the
+  user instead. Until it is fixed, do not move the Base I floor off any week containing a
+  Multi Sport activity.
+- physiology — **HRV −23, and it is Monday's bill, not the excursion returning.** 94 → 52 in
+  one day, his biggest negative delta since 3 Oct. But the 2–3 Oct signature is absent: RHR
+  is **43, inside the 38–46 range** (the excursion read 54 then 62, the latter the highest
+  anywhere in his record), respiration 12.0 against 14–15, and he slept **8h44 with 114
+  minutes of REM** where those two nights gave 3h55 and 5h47 with **zero REM both times**.
+  An acute HRV drop the morning after his hardest session in three weeks, with sleep intact
+  and RHR in range, is the expected response — and a reason to take today as written rather
+  than to nurse it. I said so in the 6 Oct line, because a cold session, or he himself,
+  reading "HRV 52" against last week's excursion could easily over-read it.
+  On the baseline: `hrvBaseline` 91 → 88 → 79 → 83 → **75**. It is Garmin's own `weeklyAvg`
+  (`update.py:534`), not computed here, and it is now absorbing 43 and 52. Yesterday
+  predicted it would read true again by ~8 Oct; today's 52 pushes that back. **Do not read
+  small deltas off this baseline for the next several days** — it is 8 points below
+  yesterday's, which flatters today's number: 52 against 83 would have been −31.
+- what I deliberately did NOT touch:
+  - **Tonight's prescription** — 5×1km @ 4:06 off 90s, evening, unchanged. He ran 8×1km at
+    4:01 on 1 Oct and 4:00 kms off a maximal erg on Monday, so 4:06×5 is soft, and on any
+    other morning I would have said so. On a −23 morning, raising a pace standard is the
+    wrong instinct, and `adaptPlan` caps intensity on poor readiness anyway. The pace stays;
+    only the session's *purpose* grew — it is now the control for whether Monday's fade is
+    local or systemic.
+  - **Thu 8 Oct's roxzone circuit** — moved on 4 Oct, still untested, still the only thing in
+    the fortnight with no baseline at all. Touching a relocation twice before testing it once
+    is churn; that was yesterday's call and it still holds.
+  - **STATION_TARGETS ski 3:58 and `RACE_GAINS` sec:20** — the *mechanism* was false, the
+    target is not yet shown to be. Copenhagen is 172 days out and this is the first
+    compromised ski measurement ever taken; cutting a target on one session would be the
+    mirror of the error I am correcting. Only the `how` string changed.
+  - **TAPER_PLAN bands and the Base I floor of 350** — see the defect above: this week cannot
+    test the floor cleanly, so it stands by default rather than by evidence.
+  - **The phase.** Base I · Aerobic is right, and 5 Oct argues *for* it: zero run fade, 4:00
+    kms off a maximal erg. What moved is the content of one session inside the phase, not the
+    phase or its bands.
+  - **Sat 10 / Sun 11 Oct** — yesterday's trigger (a blank Saturday plus unprompted Sunday
+    aerobic work a second time turns the optional into "Sat or Sun, your call") is live and
+    cannot fire until the weekend.
+- watching:
+  - **ski 5/2 and strength 6/3.** Both of yesterday's dated triggers resolved green on 5 Oct,
+    so both retire. Three of ski's five prescriptions are still dead structure — the 23/24 Sep
+    standalone ergs and the blank 28 Sep double TT — ageing out 14–19 Oct; on the live
+    structure ski is **2-for-2** (30 Sep 3:57, 5 Oct 4:02/4:19/4:24). What would make me act
+    again: **if 12 Oct logs no ski**, the erg moves out of the gym trip and into a running
+    session as a pre-run piece. Same trigger as yesterday's, now with one success behind it
+    rather than none.
+  - **the Monday treadmill km staying out of the `run` adherence count, deliberately.** My
+    rewrite says "4:10 a kilometre" rather than "4:10/km" so the Monday lines do not start
+    matching `\bkm\b` and adding two phantom run prescriptions to a row already reading 9/8.
+    That km is a controlled cost inside an erg session, not a run session, and leaving it
+    uncounted preserves comparability with the structure that preceded it. A future run that
+    changes this wording should expect `run` to jump to 11 prescribed and should not read that
+    as a drop in adherence.
+  - **row 1x/0 and swim 1x/0**, both under the WATCH threshold and neither prescribed forward.
+    Swim ages out 13 Oct, row 19 Oct. Row stays out: at top 11.4% it is a strength to defend.
+- verification: `npm run build` clean (**437.14 kB**, from 430.95 — plan text only; all five
+  edits are strings); **11/11** patch anchors; SCHEDULE still parses as **50 days**; the full
+  `adherence.py --days 21` report **byte-identical** to the pre-edit run; HEALTH_DATA /
+  HYROX_DATA / CSV_DATA / TODAY / LAST_RUN / LAST_DATA / hrvBaseline all **byte-identical**.
+  `update.patch()` round-tripped against a copy of the real src/App.jsx — **28/28** — and
+  against pristine origin/main as a control, where the only failures were the five assertions
+  that look for my own edits. Wellness rows patch and keep their **4-space indent**, no rows
+  lost, dates unique and sorted, weight upserts inside its own array with vo2max
+  byte-identical, CSV upserts exactly once, TODAY advances to date+1, and SCHEDULE /
+  TAPER_PLAN / RACE / RACE_BUDGET / RACE_GAINS / STATION_TARGETS / HYROX_DATA all survive the
+  patch byte-identical.
+  **The probe caught a real defect in my own draft.** My first 6 Oct text read "you slept
+  8h44 with 132 minutes of deep" — and `planDurationMin` tests `(\d+)\s*h\s*(\d{1,2})`
+  **before** it tests minutes, so "8h44" costed tonight's KEY RUN at **524 minutes** at HR
+  168 instead of falling through to the run model's median. A ~10× over-cost on the week's
+  hardest planned session, which would have had `adaptPlan` strip the rest of the week to make
+  room for it — the same class of defect 4 Oct caught, in the opposite direction. Rewritten to
+  spell the durations out ("nearly nine hours", "132 of deep"). Two further traps avoided by
+  probing rather than reading: writing "ski" into the 6 Oct line would have added a **sixth
+  phantom ski prescription** to the very row that drives the ACTION trigger (used "the erg",
+  which `\bski(?:erg)?\b` does not match), and writing "strength" would have added a phantom
+  strength prescription (used "a full lifting session"). Two of my own assertions also failed
+  first and were wrong, not the code — sleep stages live under `wellness['sleep']`, and
+  `^(\s*)` ate the leading newline of the extracted array slice — both caught because the
+  pristine control failed identically. Reverted the package-lock.json churn `npm install`
+  introduced. One factual slip fixed before commit: 5 Oct logged **four** short rides, not
+  five.
+- consecutive no-change runs before this one: **0** (5 Oct CHANGED, 4 Oct CHANGED, 3 Oct
+  CHANGED, 2 Oct CHANGED).
+
 ## 2026-10-05
 - adherence: no ACTION REQUIRED and no WATCH. ski 5/1 · strength 6/2 · row 1x/0 ·
   swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 7/7 · run 9/8. **Benchmarks already due:
