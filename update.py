@@ -240,6 +240,97 @@ def fetch_wellness(client, date_str):
 # not finished syncing when the morning run fired.
 REFRESH_DAYS = 4
 
+def _weighted_avg_hr(items):
+    """Duration-weighted mean of per-item average HR. None when nothing usable.
+
+    Weighted rather than a plain mean because the pieces of a compromised
+    session are not the same length: a 4-minute erg rep and a 40-second
+    transition must not count equally.
+    """
+    num = den = 0.0
+    for it in items or []:
+        if not isinstance(it, dict):
+            continue
+        hr  = it.get('averageHR') or it.get('averageHeartRate')
+        sec = (it.get('duration') or it.get('movingDuration')
+               or it.get('elapsedDuration') or 0)
+        try:
+            hr, sec = float(hr or 0), float(sec or 0)
+        except (TypeError, ValueError):
+            continue
+        if hr > 0 and sec > 0:
+            num += hr * sec
+            den += sec
+    return num / den if den else None
+
+
+def derive_avg_hr(client, activity_id):
+    """Average HR for an activity whose list summary carries none.
+
+    Garmin returns `averageHR: null` for a MULTI-SPORT parent — the HR lives on
+    the child activities, not on the wrapper that represents them. On 5 Oct 2026
+    that made a 27-minute compromised ski/run double (max HR 175) write
+    `Avg HR "--"`, and `calcTRIMP()` in App.jsx returns 0 for a falsy avgHR, so
+    the hardest session of the week contributed ZERO training load: the day
+    scored 53.9 TRIMP instead of roughly 103. ATL/CTL/form and adaptPlan's week
+    governor all read that understated number, and nothing failed loudly.
+
+    Multi-sport is how the compromised sessions in this block get recorded, so
+    the fix belongs here, at the point the row is written, rather than as a
+    guess in the UI. Three sources, best first:
+
+      1. the activity's own detail summary — Garmin's own figure when it has one
+      2. its child activities, weighted by duration (the multi-sport case)
+      3. its laps, via the same /splits endpoint fetch_hyrox_session_data uses
+
+    Returns a float, or None when nothing usable came back — in which case the
+    caller keeps '--' and behaves exactly as it did before. Never raises: a
+    Garmin hiccup here must not take down the whole sync.
+    """
+    if not activity_id:
+        return None
+
+    child_ids = []
+    try:
+        d = client.connectapi(f"/activity-service/activity/{activity_id}") or {}
+        summary = d.get('summaryDTO') or {}
+        for v in (summary.get('averageHR'), d.get('averageHR')):
+            if v:
+                print(f"  avg HR {round(float(v))} read from the activity detail of {activity_id}")
+                return float(v)
+        child_ids = (d.get('metadataDTO') or {}).get('childIds') or []
+    except Exception as e:
+        print(f"  avg-HR detail lookup failed for {activity_id}: {e}")
+
+    if child_ids:
+        kids = []
+        for cid in child_ids:
+            try:
+                c = client.connectapi(f"/activity-service/activity/{cid}") or {}
+                s = c.get('summaryDTO') or c
+                kids.append({'averageHR': s.get('averageHR'),
+                             'duration':  s.get('duration') or s.get('elapsedDuration')})
+            except Exception as e:
+                print(f"  avg-HR child {cid} failed: {e}")
+        hr = _weighted_avg_hr(kids)
+        if hr:
+            print(f"  avg HR {round(hr)} derived from {len(child_ids)} child activities "
+                  f"of {activity_id}")
+            return hr
+
+    try:
+        data = client.connectapi(f"/activity-service/activity/{activity_id}/splits") or {}
+        laps = data.get('lapDTOs') or data.get('laps') or []
+        hr = _weighted_avg_hr(laps)
+        if hr:
+            print(f"  avg HR {round(hr)} derived from {len(laps)} laps of {activity_id}")
+            return hr
+    except Exception as e:
+        print(f"  avg-HR lap lookup failed for {activity_id}: {e}")
+
+    return None
+
+
 def fetch_activities(client, dates):
     """Return properly quoted CSV rows for the given date(s).
 
@@ -276,7 +367,7 @@ def fetch_activities(client, dates):
         'indoor_running':'Indoor Running','cycling':'Cycling',
         'indoor_cycling':'Cycling','tennis':'Tennis','padel':'Tennis',
         'strength_training':'Strength Training','inline_skating':'Inline Skating',
-        'other':'Other',
+        'multi_sport':'Multi Sport','other':'Other',
     }
     def _dur(s):
         if not s: return '--'
@@ -294,6 +385,24 @@ def fetch_activities(client, dates):
     def _pace(mps):
         if not mps or mps<=0: return '--'
         spk=1000/mps; return f"{int(spk//60)}:{int(spk%60):02d}"
+
+    # Fill in a missing average HR before the row builder and the per-activity
+    # summaries read it, so the CSV, HYROX_DATA and everything derived from them
+    # agree. Gated on "has a max HR but no average" — which is exactly the
+    # multi-sport parent signature, and exactly one row in his whole history
+    # (5 Oct 2026). Anything genuinely HR-less, a sauna or a skydive, has
+    # neither figure and is skipped without an API call.
+    for a in acts:
+        if (a.get('startTimeLocal') or '')[:10] not in dates: continue
+        if a.get('averageHR') or not a.get('maxHR'): continue
+        hr = derive_avg_hr(client, a.get('activityId'))
+        if hr:
+            a['averageHR'] = round(hr)
+        else:
+            print(f"  WARNING {a.get('activityName')!r} on "
+                  f"{(a.get('startTimeLocal') or '')[:10]} has max HR {a.get('maxHR')} "
+                  f"but no average HR, and none could be derived. It will count as "
+                  f"ZERO training load until Garmin returns one.")
 
     rows = []
     for a in acts:
