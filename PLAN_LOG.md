@@ -32,6 +32,68 @@ and never once done.
 
 ---
 
+## 2026-10-06 · addendum (evening) — the multi-sport TRIMP defect is FIXED
+Not a re-plan. Written the same day as the entry below, after the user asked for the
+defect in it to be fixed, and appended rather than folded into that entry so nothing
+above is rewritten. **Read this before acting on the "what I deliberately did NOT
+touch" and "watching" items in the 2026-10-06 entry — two of them are now stale.**
+
+- what changed in the machine: `fetch_activities()` in `update.py` now fills in a
+  missing average HR before the CSV row and the per-activity summaries are built, so
+  CSV_DATA, HYROX_DATA and everything derived from them agree. `derive_avg_hr()` tries
+  the activity detail summary, then its child activities weighted by duration (the
+  multi-sport case), then its laps. Gated on "has a max HR but no average", which is
+  exactly the multi-sport parent signature and matched **one row in his entire
+  history**; anything genuinely HR-less (a sauna, a skydive) has neither figure and is
+  skipped without an API call. On total failure it leaves '--' exactly as before and
+  prints a loud WARNING naming the session that will count as zero.
+- it landed and the number is real: the 5 Oct double now reads **avg HR 159** (max 175),
+  derived by Garmin's own detail summary and upserted in place by the normal sync
+  (`4fb4259`, mode=activities). **No rows with the broken signature remain.**
+- **the numbers this morning's entry was wrong about.** 5 Oct goes from **53.9 → 114.0
+  TRIMP**, and the session itself from **0.0 → 60.0**. So:
+  - **The instruction "do not move the Base I floor off any week containing a Multi
+    Sport activity" is RETIRED.** It was correct while the defect existed and is now
+    obsolete. Multi-sport days are costed properly from here.
+  - **Week 5 (5–11 Oct) stands at 264 TRIMP after two days**, against the 350 floor,
+    with five days still to come. The 4 Oct trigger — *if 5–11 Oct also finishes under
+    350 with no physiological explanation, drop the floor to 320* — is now very unlikely
+    to fire, and for the right reason: the week was never as empty as the dashboard said.
+  - **ATL/CTL/form and `adaptPlan`'s week governor were reading an understated week and
+    are now correct.** Anything either of them did on 5–6 Oct was decided on ~47% of
+    Monday.
+- a side benefit worth keeping: **159 bpm settles what Monday actually cost.** His 1 Oct
+  8×1km tempo averaged 151, the 25 Sep 3×2km tempo 141, the 30 Sep ski TT 136. At 159 —
+  the bottom of CPET zone D once the +10 running adjustment is applied — the compromised
+  double was indeed his hardest session in three weeks, which this morning's 6 Oct plan
+  line asserted off max HR alone. The claim holds; it is now measured rather than inferred.
+- **tonight did NOT happen as written, and tomorrow must not be fooled.** The 6 Oct
+  prescription was `⏱ KEY RUN · threshold 5×1km @ 4:06, 90s jog`, and this morning's entry
+  made it the control for whether Monday's erg fade is local or systemic. He logged
+  **"Z2 10km", 52min, avg HR 138** instead — an easy aerobic run, on a morning his HRV was
+  23 below baseline. That is sound autoregulation and not a refusal, and the day still
+  carries 150 TRIMP across it plus 140min of tennis. But two consequences:
+  - **The control reading is still outstanding.** Monday's finding stands on one session:
+    erg 4:02/4:19/4:24 against runs 4:08/4:00/4:00. Nothing tonight tested whether a flat
+    threshold set holds 4:06 to rep 5. The next chance is **Tue 13 Oct's 6×1km @ 4:06**,
+    and the 12 Oct Monday rewrite goes ahead on Monday's evidence alone until then.
+  - **`adherence.py` will report "2026-10-06 something logged" for that benchmark, and
+    that is a false positive.** Its benchmark check tests only whether *any* activity
+    exists on the date (`d in done_on`), not whether the prescribed session is the one
+    that was trained. Three activities were logged on 6 Oct and none of them was a
+    threshold set. **Do not read that line as the KEY RUN having been taken.** The same
+    blind spot will mask any future benchmark that lands on a day he trains something
+    else, which is worth fixing in `adherence.py` rather than remembering.
+- verification: 36/36 offline assertions against fake clients covering source precedence,
+  duration weighting (a 4-minute rep and a 40-second transition must not count equally),
+  alternate field names, a partially failing child fetch, total failure, BaseException
+  passthrough, and the zero-API-call gate on both an activity that already has HR and one
+  with no HR at all; plus 14/14 on a real `update.patch()` round-trip against a copy of
+  src/App.jsx proving the stored 5 Oct row is replaced **in place** with every other
+  column byte-identical, no duplicate row, and daily/sleep/weight/body/SCHEDULE/
+  TAPER_PLAN/HYROX_DATA/hrvBaseline all untouched. Confirmed against the live sync
+  afterwards, not just in the fixture. `src/App.jsx` was not edited in this change.
+
 ## 2026-10-06
 - adherence: no ACTION REQUIRED and no WATCH. ski **5/2** · strength **6/3** · row 1x/0 ·
   swim 1x/0 · hyrox 3/3 · cycle 2/6 · tennis 8/6 · run 9/8. **Yesterday's two dated
