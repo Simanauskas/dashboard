@@ -280,7 +280,7 @@ const HEALTH_DATA = {
     {date:"2026-10-03",kcal:2628,protein:144,carbs:237,fat:125,fiber:28,goal:2074},
     {date:"2026-10-04",kcal:2280,protein:200,carbs:222,fat:68,fiber:30,goal:2074},
     {date:"2026-10-05",kcal:2497,protein:167,carbs:243,fat:95,fiber:34,goal:2074},
-    {date:"2026-10-06",kcal:353,protein:15,carbs:65,fat:2,fiber:8,goal:2074},
+    {date:"2026-10-06",kcal:1370,protein:93,carbs:130,fat:53,fiber:19,goal:2074},
   ],
   // Body composition from Garmin, written by body.py: the last reading of each
   // day that carries body fat. kg, fat %, BMI, water %, muscle and bone in kg;
@@ -705,7 +705,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Tennis V2","2026-10-06 10:12:39","false","Tennis","0,37","959","02:20:15","107","157","2,2","11","--","378:47","--","--","--","--","--","--","23,60","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:31","02:20:15","--","--"
+"Tennis V2","2026-10-06 10:12:39","false","Tennis training ","0,37","959","02:20:15","107","157","2,2","11","--","378:47","--","--","--","--","--","--","23,60","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:31","02:20:15","--","--"
 "Strength Training","2026-10-05 18:52:59","false","Strength: shoulders, pecs, biceps","0,00","142","01:01:39","85","123","0,2","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:01:39","01:01:39","--","--"
 "Cycling","2026-10-05 15:32:12","false","Vilnius Cycling","2,22","48","00:07:26","131","190","0,2","--","--","3:20","--","--","--","1","47","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:06:03","00:09:06","--","--"
 "Cycling","2026-10-05 14:33:19","false","Z1 recovery 15min cycling","0,00","153","00:15:00","115","124","1,1","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:00","00:15:00","--","--"
@@ -1027,11 +1027,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-06";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-06T13:08:00Z";
-const LAST_DATA = "2026-10-06T13:08:00Z";
+const LAST_RUN  = "2026-10-06T13:21:00Z";
+const LAST_DATA = "2026-10-06T13:21:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-06T13:08:00Z";
+const LAST_MFP  = "2026-10-06T13:21:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
