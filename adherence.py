@@ -98,6 +98,47 @@ def logged_days(code):
     return out
 
 
+BENCH = re.compile(r"⏱|time trial|\bTT\b")
+
+# A title that reads as easy aerobic work. Narrow on purpose: it only has to
+# separate "he trained the benchmark" from "he trained something gentle on the
+# benchmark's day", and the titles are printed either way so the reader can
+# overrule it.
+EASY_TITLE = re.compile(r"\bZ[12]\b|easy|recovery|shakeout|active rec", re.I)
+
+
+def bench_state(date, text, by_date):
+    """Did the benchmark actually get TRAINED, not merely land on a busy day?
+
+    The old check tested `date in done_on` — whether ANY activity existed that
+    day. On 6 Oct that printed "something logged" against a prescribed
+    threshold 5x1km while what he actually trained was tennis and a Z2 10km:
+    the benchmark was not taken and the report said it was. The 6 Oct PLAN_LOG
+    entry caught it by hand and asked for it to be fixed here rather than
+    remembered, because the same blind spot masks any benchmark landing on a
+    day he trains something else.
+
+    A type match is still not proof the prescribed session is the one trained —
+    nothing in a Garmin title has to say "threshold" — so this never claims
+    more than it knows. It returns the verdict AND the matching titles, and the
+    strongest word it will use on its own is CHECK.
+    """
+    done = by_date.get(date, [])
+    if not done:
+        return "NOTHING LOGGED", ""
+    shown = " · ".join(w[:46] for w in done[:4])
+    want = [apat for _, ppat, apat in SESSION_TYPES
+            if re.search(ppat, REJECTED.sub(" ", text), re.I)]
+    if not want:
+        return "logged, type unreadable", shown
+    hits = [w for w in done if any(re.search(a, w, re.I) for a in want)]
+    if not hits:
+        return "TRAINED OTHER TYPE", shown
+    if all(EASY_TITLE.search(w) for w in hits):
+        return "TRAINED EASY INSTEAD", " · ".join(w[:46] for w in hits)
+    return "type match — CHECK IT", " · ".join(w[:46] for w in hits)
+
+
 def report(code, since, until):
     plans, logs = planned_days(code), logged_days(code)
     rows, must_act, watch = [], [], []
@@ -133,14 +174,18 @@ def report(code, since, until):
 
     # Benchmarks are named individually because deferring one is the failure
     # mode the plan text itself keeps admitting to ("deferred twice").
-    BENCH = re.compile(r"⏱|time trial|\bTT\b")
-    done_on = {d for d, _ in logs}
     bench = [(d, t) for d, texts in plans for t in texts
              if since <= d <= until and BENCH.search(t)]
     if bench:
         print("\nBENCHMARKS already due in this window:")
+        by_date = {}
+        for d, what in logs:
+            by_date.setdefault(d, []).append(what)
         for d, t in bench:
-            print(f"  {d}  {'something logged' if d in done_on else 'NOTHING LOGGED'}  {t[:58]}")
+            state, titles = bench_state(d, t, by_date)
+            print(f"  {d}  {state:24}  {t[:58]}")
+            if titles:
+                print(f"{'':14}logged: {titles}")
 
     # Looking forward matters as much: a benchmark landing on a weekday he
     # never trains will be deferred again, and that is decidable in advance.
