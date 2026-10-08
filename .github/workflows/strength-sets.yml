@@ -1,0 +1,56 @@
+name: Strength Sets
+
+# Reads / rewrites the exercise sets of a Garmin strength activity.
+# Garmin tokens are only readable inside Actions, so the write runs here.
+# Dispatch only — never scheduled. Read-only unless `apply` is ticked.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Activity date YYYY-MM-DD (blank = today, Vilnius)'
+        required: false
+        default: ''
+      activity_id:
+        description: 'Garmin activity id (blank = the one strength activity on date)'
+        required: false
+        default: ''
+      sets:
+        description: 'JSON set spec (see strength_sets.py); blank = just print'
+        required: false
+        default: ''
+      apply:
+        description: 'Write the change (unticked = dry run)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  sets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install "garth==0.4.47" requests
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+      # Inputs via env, never interpolated into the shell.
+      - name: Sets
+        env:
+          DATE: ${{ inputs.date }}
+          AID: ${{ inputs.activity_id }}
+          SETS: ${{ inputs.sets }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          args=()
+          if [ -n "$DATE" ]; then args+=(--date "$DATE"); fi
+          if [ -n "$AID" ]; then args+=(--activity-id "$AID"); fi
+          if [ -n "$SETS" ]; then args+=(--sets "$SETS"); fi
+          if [ "$APPLY" = "true" ]; then args+=(--apply); fi
+          python strength_sets.py "${args[@]}"
