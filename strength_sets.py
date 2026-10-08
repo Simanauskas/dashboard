@@ -12,7 +12,7 @@ With --sets and --apply it PUTs the full set list and reads it back.
 
 --sets is a JSON list of sets in order, each:
     {"category": "PULL_UP", "name": "PULL_UP", "reps": 11, "kg": null, "sec": 60}
-`keep: N` as an entry keeps the next N existing ACTIVE sets unchanged.
+Existing sets are always kept; the spec sets are appended after them.
 
 Runs in CI (strength-sets.yml) because Garmin tokens live only in Actions.
 """
@@ -21,7 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -60,41 +60,23 @@ def show(sets: list[dict]) -> None:
               + (f"  (+{len(ex)-1} alt)" if len(ex) > 1 else ""))
 
 
-def build(existing: list[dict], spec: list[dict], start: datetime) -> list[dict]:
-    """Keep the requested existing ACTIVE sets (and the RESTs between them),
-    then append the spec sets after them, each followed by a rest."""
-    out, it = [], iter(existing)
-    pending = list(spec)
-    while pending and "keep" in pending[0]:
-        n = pending.pop(0)["keep"]
-        while n:
-            s = next(it)
-            out.append(s)
-            if s.get("setType") == "ACTIVE":
-                n -= 1
-        # include a trailing rest if there is one
-    t = start
-    if out:
-        last = out[-1]
-        t = datetime.fromisoformat(last["startTime"].replace("Z", "")[:19]) + timedelta(seconds=last.get("duration") or 0)
-    for sp in pending:
-        dur = float(sp.get("sec") or 45)
+def build(existing: list[dict], spec: list[dict]) -> list[dict]:
+    """Keep every existing set, then append the spec sets, each followed by a
+    REST — in the shape Garmin Connect's own "add set" editor writes: no
+    startTime and 0 s unless `sec` is given."""
+    out = [dict(s) for s in existing]
+    for sp in spec:
         out.append({
             "exercises": [{"category": sp["category"], "name": sp.get("name"), "probability": 100.0}],
-            "duration": dur,
+            "duration": float(sp.get("sec") or 0),
             "repetitionCount": sp.get("reps"),
             "weight": None if sp.get("kg") is None else float(sp["kg"]) * 1000.0,   # grams
             "setType": "ACTIVE",
-            "startTime": t.strftime("%Y-%m-%dT%H:%M:%S.0"),
+            "startTime": None,
             "wktStepIndex": None,
-            "messageIndex": None,
         })
-        t += timedelta(seconds=dur)
-        rest = float(sp.get("rest", 90))
-        out.append({"exercises": [], "duration": rest, "repetitionCount": None, "weight": None,
-                    "setType": "REST", "startTime": t.strftime("%Y-%m-%dT%H:%M:%S.0"),
-                    "wktStepIndex": None, "messageIndex": None})
-        t += timedelta(seconds=rest)
+        out.append({"exercises": [], "duration": 0.0, "repetitionCount": None, "weight": None,
+                    "setType": "REST", "startTime": None, "wktStepIndex": None})
     for i, s in enumerate(out):
         s["messageIndex"] = i
     return out
@@ -118,13 +100,11 @@ def main() -> int:
         aid = args.activity_id
         act = garth.connectapi(f"/activity-service/activity/{aid}")
         print(f"  activity {aid} '{act.get('activityName')}' {(act.get('summaryDTO') or {}).get('startTimeLocal')}")
-        start_gmt = (act.get("summaryDTO") or {}).get("startTimeGMT")
     else:
         act = find_activity(args.date)
         if not act:
             return 1
         aid = act["activityId"]
-        start_gmt = act.get("startTimeGMT")
 
     data = get_sets(aid)
     sets = data.get("exerciseSets") or []
@@ -152,8 +132,7 @@ def main() -> int:
         if args.apply:
             return 1
 
-    start = datetime.fromisoformat(str(start_gmt).replace(" ", "T")[:19])
-    new = build(sets, spec, start)
+    new = build(sets, spec)
     print(f"\nplanned sets ({len(new)}):")
     show(new)
 
@@ -170,7 +149,7 @@ def main() -> int:
     want = [(s["exercises"][0]["category"], s.get("repetitionCount")) for s in new if s["setType"] == "ACTIVE"]
     got = [((s.get("exercises") or [{}])[0].get("category"), s.get("repetitionCount"))
            for s in after if s.get("setType") == "ACTIVE"]
-    if got[-len(want):] == want[-len(want):] and len(got) == len(want):
+    if got == want:
         print("✓ sets written and read back")
         return 0
     print(f"✗ read-back differs\n  want {want}\n  got  {got}")
