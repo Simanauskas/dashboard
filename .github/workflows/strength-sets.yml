@@ -18,6 +18,10 @@ on:
         description: 'JSON set spec (see strength_sets.py); blank = just print'
         required: false
         default: ''
+      find:
+        description: 'Search the exercise catalog instead, e.g. "row; wall ball"'
+        required: false
+        default: ''
       apply:
         description: 'Write the change (unticked = dry run)'
         type: boolean
@@ -47,7 +51,9 @@ jobs:
           AID: ${{ inputs.activity_id }}
           SETS: ${{ inputs.sets }}
           APPLY: ${{ inputs.apply }}
+          FIND: ${{ inputs.find }}
         run: |
+          if [ -n "$FIND" ]; then python strength_sets.py --find "$FIND"; exit; fi
           args=()
           if [ -n "$DATE" ]; then args+=(--date "$DATE"); fi
           if [ -n "$AID" ]; then args+=(--activity-id "$AID"); fi

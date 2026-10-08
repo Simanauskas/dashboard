@@ -10,9 +10,18 @@ READ-ONLY by default: finds the strength activity on --date (or --activity-id),
 prints its sets, and checks any --sets spec against Garmin's exercise catalog.
 With --sets and --apply it PUTs the full set list and reads it back.
 
---sets is a JSON list of sets in order, each:
-    {"category": "PULL_UP", "name": "PULL_UP", "reps": 11, "kg": null, "sec": 60}
-Existing sets are always kept; the spec sets are appended after them.
+--sets is a JSON list of set edits, each one of:
+    {"category": "PULL_UP", "name": "PULL_UP", "reps": 11, "kg": null}
+        → appended after the existing sets (untimed, followed by a REST),
+          the way Garmin Connect's own "add set" editor writes them
+    {"at": 4, "category": ..., "name": ..., "reps": ..., "kg": ...}
+        → relabels existing set #4 (index as printed), keeping its timing
+    {"at": 6, "delete": true}
+        → removes existing set #6
+Existing sets not named by an "at" are kept untouched. Weight goes to Garmin
+in grams; kg null = bodyweight. Carries log metres as reps.
+
+--find TEXT searches Garmin's exercise catalog (e.g. --find "row; wall ball").
 
 Runs in CI (strength-sets.yml) because Garmin tokens live only in Actions.
 """
@@ -60,14 +69,31 @@ def show(sets: list[dict]) -> None:
               + (f"  (+{len(ex)-1} alt)" if len(ex) > 1 else ""))
 
 
+def exercise(sp: dict) -> list[dict]:
+    return [{"category": sp["category"], "name": sp.get("name"), "probability": 100.0}]
+
+
 def build(existing: list[dict], spec: list[dict]) -> list[dict]:
-    """Keep every existing set, then append the spec sets, each followed by a
-    REST — in the shape Garmin Connect's own "add set" editor writes: no
-    startTime and 0 s unless `sec` is given."""
     out = [dict(s) for s in existing]
+    drop = set()
     for sp in spec:
+        if "at" not in sp:
+            continue
+        i = sp["at"]
+        if not 0 <= i < len(out):
+            raise SystemExit(f"✗ set #{i} does not exist ({len(out)} sets)")
+        if sp.get("delete"):
+            drop.add(i)
+            continue
+        out[i].update({"exercises": exercise(sp), "setType": "ACTIVE",
+                       "repetitionCount": sp.get("reps"),
+                       "weight": None if sp.get("kg") is None else float(sp["kg"]) * 1000.0})
+    out = [s for i, s in enumerate(out) if i not in drop]
+    for sp in spec:
+        if "at" in sp:
+            continue
         out.append({
-            "exercises": [{"category": sp["category"], "name": sp.get("name"), "probability": 100.0}],
+            "exercises": exercise(sp),
             "duration": float(sp.get("sec") or 0),
             "repetitionCount": sp.get("reps"),
             "weight": None if sp.get("kg") is None else float(sp["kg"]) * 1000.0,   # grams
@@ -82,13 +108,29 @@ def build(existing: list[dict], spec: list[dict]) -> list[dict]:
     return out
 
 
+def catalog() -> dict:
+    return requests.get(CATALOG_URL, timeout=20).json()["categories"]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=datetime.now(ZoneInfo("Europe/Vilnius")).strftime("%Y-%m-%d"))
     ap.add_argument("--activity-id", default="")
     ap.add_argument("--sets", default="", help="JSON spec (see module docstring)")
+    ap.add_argument("--find", default="", help="search the exercise catalog and exit")
     ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
+
+    if args.find:
+        cat = catalog()
+        for q in args.find.split(";"):      # several searches: "row; lunge"
+            terms = q.upper().replace("-", " ").split()
+            print(f"\n[{q.strip()}]")
+            for c, v in sorted(cat.items()):
+                for n in sorted(v["exercises"]):
+                    if all(t in f"{c} {n}".replace("_", " ") for t in terms):
+                        print(f"  {c:<20} {n}")
+        return 0
 
     garth.resume(str(Path.home() / ".garth"))
     try:
@@ -117,7 +159,7 @@ def main() -> int:
 
     spec = json.loads(args.sets)
     try:
-        cat = requests.get(CATALOG_URL, timeout=20).json()["categories"]
+        cat = catalog()
         bad = [s for s in spec if "category" in s and (s["category"] not in cat or
                (s.get("name") and s["name"] not in cat[s["category"]]["exercises"]))]
         for s in bad:
