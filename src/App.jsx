@@ -282,7 +282,7 @@ const HEALTH_DATA = {
     {date:"2026-10-01",kcal:2586,protein:123,carbs:176,fat:129,fiber:16,goal:2074},
     {date:"2026-10-02",kcal:1402,protein:98,carbs:41,fat:91,fiber:6,goal:2074},
     {date:"2026-10-03",kcal:2628,protein:144,carbs:237,fat:125,fiber:28,goal:2074},
-    {date:"2026-10-04",kcal:2280,protein:200,carbs:222,fat:68,fiber:30,goal:2074},
+    {date:"2026-10-04",kcal:2280,protein:200,carbs:222,fat:68,fiber:30,goal:null},
     {date:"2026-10-05",kcal:2497,protein:167,carbs:243,fat:95,fiber:34,goal:2074},
     {date:"2026-10-06",kcal:2873,protein:181,carbs:315,fat:117,fiber:42,goal:2099},
     {date:"2026-10-07",kcal:3033,protein:148,carbs:429,fat:89,fiber:57,goal:2099},
@@ -713,6 +713,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Cycling","2026-10-08 15:44:14","false","Vilnius Cycling","2,22","45","00:06:41","95","113","0,1","--","--","3:01","--","--","--","17","41","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:05:56","00:06:41","--","--"
 "Strength Training","2026-10-08 14:51:28","false","Strength","0,00","360","00:46:31","105","163","2,4","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:27:15","00:46:31","--","--"
 "Indoor Cardio","2026-10-08 14:38:33","false","Ski-ERG 10min 2380m","0,00","141","00:10:18","137","155","2,2","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:18","00:10:18","--","--"
 "Cycling","2026-10-08 14:22:24","false","Vilnius Cycling","1,95","78","00:09:00","109","128","0,4","--","--","4:38","--","--","--","58","3","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:53","00:09:00","--","--"
@@ -1043,11 +1044,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-08";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-08T12:41:00Z";
-const LAST_DATA = "2026-10-08T12:41:00Z";
+const LAST_RUN  = "2026-10-08T13:08:00Z";
+const LAST_DATA = "2026-10-08T13:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-08T12:51:00Z";
+const LAST_MFP  = "2026-10-08T13:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
