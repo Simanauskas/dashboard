@@ -25,10 +25,108 @@ already declined.
 - watching: <anything deliberately left alone, and what would make it act>
 ```
 
+**What goes in the dashboard, set by Simas on 9 Oct 2026.** A SCHEDULE line is
+**three sentences at most**: what to do, and why it changed. Nothing else. No
+reasoning chains, no evidence lists, no running commentary on previous runs —
+he reads these on a phone before training, and the long ones were being skipped.
+All of that belongs in THIS file, which is where the deliberation lives. If a
+line needs a fourth sentence to justify itself, the justification goes here and
+the line gets shorter. Deliberate at length, ship three sentences.
+
+Also from him, and both of these are corrections no amount of split-reading
+would have produced:
+- **Roxzone is not trainable as a session.** Race roxzone time is distance
+  between stations, a sip of water, and heavy legs off the run. His gym has
+  everything close together, so it cannot be rehearsed. Compromised running IS
+  the roxzone training — do not prescribe transition circuits.
+- **A station's clock runs arc to arc, not machine to machine.** Roughly 10s in
+  and 10s out of the ski erg split is getting to the machine and leaving it,
+  which is most of the gap between his gym times and his race splits. It is not
+  lost performance. Every competitor crosses the same arcs, so his top-29.8%
+  ski rank is still a real weakness and still worth training — but as genuine
+  erg speed, not as free seconds waiting to be collected.
+
 Run `python3 adherence.py --days 21` before deciding. It prints planned
 versus actually-trained per session type, names benchmarks already due and
 those landing in the next 14 days, and flags anything prescribed repeatedly
 and never once done.
+
+---
+
+## 2026-10-09 · addendum, after Simas read the morning’s push
+- context: he pushed back on two things, and both land. **(1) The dashboard
+  comments are too long and read as a trail of thought rather than an action.
+  Three sentences at most, what changed and why.** (2) The roxzone circuit I
+  re-homed this morning is not trainable at all, and the ski gap I have been
+  calling free time is mostly a timing artifact.
+- decision: CHANGED — **the roxzone circuit is out of the plan for good**, the
+  ski and roxzone lines of the race budget are re-priced, every plan line from
+  12 Oct onward is cut to three sentences, and the Base I note goes from a
+  2,400-character wall to five lines. The three-sentence rule and both of his
+  corrections are now in this file’s header, where every future cold run reads
+  them before it writes anything.
+- why roxzone is gone, in his words: race roxzone time is **distance between
+  stations, a sip of water, and heavy legs off the run**. His gym has everything
+  close together, so there is nothing to rehearse — a gym transition circuit
+  measures a different thing and would have taught him nothing. **Compromised
+  running is the roxzone training**, and Monday already carries it. This is the
+  better resolution of the thing I flagged this morning: I had the right
+  diagnosis (prescribed three times, trained zero times) and the wrong fix. The
+  brief offers three options for a session he will not do — move it, change it,
+  or take it out — and I reached for the first when the answer was the third.
+  **Worth noting against my own 8 Oct and 9 Oct entries: two consecutive runs
+  spent their change budget re-homing a session that should never have been in
+  the plan.** Host-chasing is a failure mode of this Routine.
+- why the ski gap was never free, and the arithmetic agrees with him: the
+  station clock runs **arc to arc**, so ~10s in and ~10s out of the ski split is
+  reaching the machine and leaving it. **4:18 raced minus ~20s is 3:58 of actual
+  skiing — which sits between his 3:57 off a 93-minute match and his 4:02 off
+  running legs.** His race skiing is already inside his own tested range, so the
+  "24 seconds already yours" that four SCHEDULE lines and a RACE_GAINS row have
+  been asserting is mostly geometry. **He is right that this does not mean stop
+  training ski:** every competitor crosses the same arcs, so top 29.8% is a real
+  weakness. What changes is the lever — genuine erg speed, not execution.
+- the re-pricing, with the numbers: **roxzone 92s → 47s** (target 5:47 → 5:00
+  rather than 4:15; Riga was **5:18 with zero roxzone training**, so ~30s is
+  available on execution alone and 0:32 a transition was priced on a session
+  that will not happen). **Ski 20s → 10s** (target 4:18 → 4:08, because 20s off
+  the clock now means 20s of real erg speed from a 3:54 fresh ceiling, not 20s
+  of tidier execution). Total predicted gain **287s → 232s**, so the budget sums
+  to **1:05:39 against the 1:05:00 goal — 39 seconds short, and I have left that
+  shortfall visible in the RACE_BUDGET comment rather than papering over it.**
+  I did **not** touch `RACE.target`: the brief lets me edit RACE only when a race
+  is added or its result is known, and moving his goal is his call, not mine.
+  The honest reading is that the 39s has to come from running, which is his worst
+  block against the field (top 27.7%) and therefore where it most likely is.
+- the 1:59 ski ask **stays at 1:59**. Only its justification was wrong — it was
+  labelled "the Copenhagen target split", which under the arc correction it is
+  not. As a training stimulus it is still right: just under his 4:02 compromised,
+  repeated six times, which is exactly the erg speed the corrected plan needs.
+  Number kept, label removed.
+- verification: `npm run build` clean, **439.61 kB from 452.89** — **13.3 kB of
+  prose deleted**, which is the clearest measure of the problem he was pointing
+  at. **11/11** patch anchors, SCHEDULE **50 days**, TAPER_PLAN **18 blocks**.
+  Round-trip `update.patch()` against a copy of the real src/App.jsx: **22/22**,
+  SCHEDULE and TAPER_PLAN byte-identical through the patch. Every one of the 50
+  days diffed for prescribed type, costed `PLAN_INTENSITY` and benchmark flag:
+  **exactly 2 changed** (15 and 22 Oct losing the circuit), **48 of 50 identical**
+  — so cutting the prose moved no load and invented no prescription. That check
+  again earned its keep: shortening the lines had silently dropped the word
+  `compromised` off 12, 14 and 21 Oct (re-costing Monday’s 159-bpm session at
+  **126**) and turned `4:10/km` into a phantom `run` prescription on 12 and
+  19 Oct. All six fixed before commit.
+- longest upcoming line is now **374 characters / 3 sentences** (12 Oct), against
+  **2,700** yesterday (14 Oct). Every line from 10 Oct to 25 Oct is ≤3 sentences.
+- watching:
+  - **whether three sentences is enough to carry a reason.** If a future line
+    reads as a bare instruction he cannot audit, the fix is a better sentence,
+    not a fourth one. **What would make me act: he says a line is too terse to
+    act on.**
+  - **the 39-second budget shortfall.** It stays visible and unallocated until
+    either the running block delivers against 4:06/km or he says to move the
+    1:05:00 goal. **Decide it after the 14 and 21 Oct KEY RUNs — those two
+    sessions are the first evidence either way.**
+  - the 14 Oct ski format trigger from this morning’s entry stands unchanged.
 
 ---
 
