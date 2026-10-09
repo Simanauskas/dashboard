@@ -32,6 +32,155 @@ and never once done.
 
 ---
 
+## 2026-10-09
+- adherence: no ACTION REQUIRED and no WATCH — and the thing that needed acting on this
+  morning is invisible to both flags. ski **5/3** (up from 5/2: he skied yesterday, unprompted)
+  · hyrox 4/2 · strength **5/5 on track** · run 10/6 · row 1/1 · swim 1x/0 · cycle 2/6 · tennis 6/8.
+  Benchmarks already due: 28 Sep and 2 Oct **NOTHING LOGGED** (dead structure, aged out),
+  30 Sep logged, 6 Oct **TRAINED EASY INSTEAD**, and 8 Oct **TRAINED OTHER TYPE** — the
+  roxzone circuit, against a log of inline skating, cycling, upper strength and a 10min ski.
+  Next 14d after my edits: Wed 14 Oct, Thu 15 Oct, Wed 21 Oct (newly ⏱), Thu 22 Oct. Nothing
+  in the fortnight sits on a day he does not train.
+- readiness: HRV **63 vs baseline 66** (delta **−3**), RHR **41**, respiration 12.0, SpO₂ 94,
+  **8h16 asleep** — 141 deep, **104 REM** (back from 40), 4 awake, sleep score 88.
+  `hrvBaseline` 67 → **66**. LAST_DATA **2026-10-09T06:08Z**, minutes old, sync healthy
+  (127 daily rows, 126 sleep rows, contiguous). `easeHard` does not fire.
+- decision: CHANGED — **the roxzone circuit stops naming the session it hangs off.** Its
+  host on 15 and 22 Oct goes from *the end of this morning’s Z2 run* to *the end of today’s
+  session, whatever today’s session turns out to be*, with instructions for both venues he
+  might be standing in; the word **morning** comes off the Thursday Z2 run on both days; the
+  12 Oct compromised session is told to clock its own changeovers; the 14 Oct ski gets a
+  **10-minute floor**; and 21 Oct’s KEY RUN gets the ⏱ it should always have had. One clause
+  added to the Base I note as block policy. **Week 5 is not touched at all** — every edit
+  lands on 12, 14, 15, 21 or 22 Oct.
+- why: **the roxzone circuit has now had three hosts and been trained zero times, and each
+  time the day was right and the named host did not happen.** It sat inside the Wednesday
+  circle (which has not run since 25 Sep), then as a trip of its own (0-for-4), then from
+  4 Oct bolted to a Thursday **morning Z2 run**. Yesterday was the first unconditional
+  prescription and it failed in a new and more informative way: **he trained four times —
+  a gym trip at 14:22, 10min of ski erg for 2380m, 46min of upper strength, 10km of inline
+  skating — and never ran at all.** That is not a refusal and not a readiness problem; HRV
+  was +26 that morning. The host simply does not exist: his Thursday sessions since 3 Aug
+  started **13:43, 09:02, 15:53, 20:54, 13:05** and now a 14:22 gym trip — **one of six
+  before 10:00.** Across all 27 runs since 3 Aug only five started before 10:00. So the
+  7 Oct finding (quality runs go in the late morning) was right about the *evening* and
+  quietly wrong about the *morning*: what he reliably does is **train on Thursday**, not
+  **run on Thursday morning**. Thursday stays — 8 of 9 attended, and his three best
+  unprompted structured sessions were Thursdays (8×600 on 13 Aug, 16×400 on 27 Aug,
+  8×1km at 4:01 on 1 Oct) — and the host goes.
+- **this is a correction to my own 4 Oct rule, not a reversal of it.** That rule said a timed
+  benchmark must hang off a session he already attends, and it was right about trips: 0-for-4
+  standalone against 1-for-1 bolted. It was wrong about *naming which session*. The attended
+  thing is the **day**; the activity inside it is his choice and it varies. So the generalised
+  rule now written into the Base I note is **a benchmark may not name the session it hangs
+  off** — it names a day, a length, and how to do it in either venue.
+- roxzone is worth this much attention because it is **the cheapest time on the board**:
+  top 19.8% against stations at top 9.6%, 92 of the 287 seconds Copenhagen needs, +29s
+  *worse* than Riga, 1:25 over its Athens plan — and pure execution rather than fitness.
+  It is also the only one of the skill’s four priorities that has never once been measured.
+- **so I also took the measurement that costs nothing, and it was already in the file.**
+  5 Oct’s compromised session recorded **27:01** while its six splits sum to **24:53**
+  (12:45 of ski — 4:02/4:19/4:24 — and 12:08 of running — 4:08/4:00/4:00). **2:08 went
+  on five changeovers, about 0:26 each**, against an Athens average of 0:43. Nobody had
+  subtracted those two numbers. 12 Oct now asks him to keep the watch running through the
+  changeovers and write the five times into the description, so that even if Thursday fails
+  a third time the block still gets a transition number — on the one session this block has
+  delivered 1-for-1. Caveat recorded honestly in the line itself: some of that 2:08 may be
+  lead-in rather than changeover.
+- the 14 Oct ski gets a floor, and yesterday’s theory gets its first confirmation.
+  **He skied at the gym yesterday without being asked, so ski-at-the-gym is 2-for-2
+  (30 Sep, 8 Oct) and ski moved 5/2 → 5/3.** Yesterday’s trigger was *if 14 Oct logs no ski
+  despite the gym trip happening, the host theory is wrong* — the host theory is looking
+  right and the live question has moved to **format**. His own erg habit is **ten minutes**:
+  30 Sep 10min then a 3:57 single, 7 Oct ten minutes on the rower for 2400m, 8 Oct ten
+  minutes of ski for 2380m. The 14 Oct ask is 6×500m off 90s — roughly 20 minutes, double
+  his habit. Rather than thrash a line written yesterday and not yet tried, I gave it a floor
+  he has proven he takes: **4×500m @ 1:59 off 60s counts in full.** This file’s own rule is
+  that an unreachable number is how a session stops happening; a floor is cheaper than a
+  rewrite.
+- **the best single number in yesterday’s data, and it argues the skill’s case for it:**
+  2380m of ski in 10:18 is **4:20 per 1000m, at an average HR of 137.** That is his Athens
+  race split (4:18) at a heart rate 20–30 beats below race effort. The 24 seconds the skill
+  says are sitting there look, on this evidence, conservative.
+- physiology — **nothing is wrong and yesterday’s one flag resolved overnight.** HRV 63
+  against 66 is −3, inside the band where the answer is *train, keep intensity honest*;
+  `adaptPlan`’s gate needs −10. RHR **41, well inside 38–46**, and the five-day run is
+  43/44/44/41. **REM came back: 40 → 104 minutes**, with 141 of deep on 8h16 and a sleep
+  score of 88, so the two signals that disagreed yesterday now agree. The 2–3 Oct excursion
+  signature (RHR 54 then 62, zero REM twice) remains absent.
+- **the baseline is still the one real physiological story.** 91 → 88 → 79 → 83 → 75 → 69
+  → 67 → **66**, eight consecutive falls. Trailing 7-day raw mean is **68.6** (43/79/94/52/
+  56/93/63), against 69.7 yesterday and **85.3 for 24–30 Sep** — so the drift is real and
+  roughly 17 ms over two weeks, but it has flattened in the last two days rather than
+  accelerating. Yesterday’s trigger — *still falling with RHR drifting above 46* — did
+  **not** fire: RHR is 41, his lowest in five days. It carries forward to 10 Oct unchanged.
+  46 is still the line, and a week of 60s with RHR in range is a base block being absorbed,
+  not a hole being dug.
+- what I deliberately did NOT touch:
+  - **Week 5, entirely.** He is five days into it and HRV is −3, not −15. There is no
+    physiological case for rewriting a week in progress and the brief forbids a preference
+    one. Today’s line (tennis 13:30, long run 75min with the last 15min at 4:30) stands as
+    written; Friday long runs have landed 4 Sep, 21 Aug and 25 Sep.
+  - **TAPER_PLAN bands.** Base I 350–460 stands. The ceiling question — whether 460 is
+    below what he absorbs in a tennis-heavy week — **resolves Sunday 11 Oct and yesterday
+    said decide it on Monday, on what closed rather than on a projection.** I am honouring
+    that; moving a band on a partial week is exactly the error that rule exists to prevent.
+  - **The phase.** Base I · Aerobic, week 5 of 6, 169 days to Copenhagen. Right.
+  - **STATION_TARGETS / RACE_BUDGET / RACE_GAINS.** Yesterday produced a 10min easy ski, 46min
+    of upper strength and 42min of inline skating. Nothing there moves a target. Ski erg is
+    still the weakest element (top 29.8%, 3:58 target against 4:18 raced), running still the
+    weakest block (27.7%), roxzone still the cheapest 92 seconds and still unmeasured.
+  - **`isTennis` (src/App.jsx:1132).** Still `=== "tennis"` against 60 rows typed `Tennis V2`.
+    **Fourth run recording it.** One-word fix, `/^tennis/`, outside the edit surface this
+    Routine is given.
+  - **Two measurement-integrity bugs in `adherence.py`, also outside the surface.** (1) The
+    roxzone line contains `jog 100m`, so every roxzone prescription is ALSO counted as a
+    prescribed `run` — three of the ten in the window — which is part of why run reads
+    10/6. (2) Roxzone is folded into `hyrox`, which has 2 done, so a session prescribed three
+    times and trained zero times can never raise ACTION REQUIRED. **The flags did not catch
+    this morning’s finding; the benchmark list did.** Worth a separate fix when someone has
+    the surface for it.
+- watching:
+  - **the roxzone circuit, now host-free. What would make me act: if 15 Oct logs no roxzone
+    despite him training that day, the problem is the CONTENT, not the host** — at which
+    point the 8-station circuit is abandoned and the measurement becomes the 12 Oct
+    changeover clock permanently, which needs no extra minutes and no extra willingness.
+    **Decide it Friday 16 Oct.** If 15 Oct DOES log one, the next question is whether eight
+    transitions average under 0:43.
+  - **the Saturday flex run, 0-for-3 (19 Sep, 26 Sep, 3 Oct).** It is written `Optional ·
+    Z2 run 40min · flex session`, so it is deliberately droppable and I am not converting a
+    genuine option into a `note:true` reminder on three data points. But it is costing the
+    week load it never delivers and it accounts for three of the four missing runs.
+    **What would make me act: blank on 10 Oct and 17 Oct too makes it 0-for-5, at which point
+    it either becomes a real session on a day he trains or it leaves the plan. Decide it
+    Sunday 18 Oct.**
+  - **the 14 Oct ski format.** Host confirmed 2-for-2; the open question is whether 6×500m
+    off 90s happens at all against a ten-minute habit. **What would make me act: if 14 Oct
+    logs a continuous ten-minute piece rather than reps, the Wednesday ask becomes the
+    10-minute version permanently** (4×500m off 60s) rather than being asked for twenty
+    minutes a second time.
+  - **swim 1x/0** ages out 13 Oct, never prescribed forward, no action.
+  - **the baseline**, as above: 46 on RHR is the line, and a second week of sub-70 raw HRV
+    with RHR in range would make me look at the Friday long run before anything else.
+- consecutive NO CHANGE runs preceding this one: **zero.** The last NO CHANGE entry is 25 Sep.
+- verification: `npm run build` clean (**452.89 kB**, from 447.04 — plan text only; 6
+  insertions / 6 deletions in src/App.jsx, every hunk at line 1346 or below, nothing inside
+  any machine-written constant). **11/11** patch anchors. SCHEDULE still parses as **50 days**,
+  TAPER_PLAN as **18 blocks**, daily and sleep rows with wrong indent **0**.
+  Round-trip `update.patch()` against a copy of the real src/App.jsx: **22/22 pass** — TODAY
+  advanced, wellness and sleep rows written and read back field-for-field, weight upserted,
+  CSV row upserted, every daily and sleep row keeping its 4-space indent, no row lost
+  (127→128 daily, 126→127 sleep), dates unique and sorted, `body`/`nutrition`/`HYROX_DATA`
+  untouched, and **SCHEDULE and TAPER_PLAN byte-identical through the patch.**
+  Separately diffed every one of the 50 SCHEDULE days before and after for prescribed type,
+  costed `PLAN_INTENSITY` and session count: **exactly one day changed** (21 Oct gains its
+  benchmark flag at an unchanged 168). That check caught five keyword collisions my own prose
+  had introduced — a stray `TT` that had silently re-costed the 14 Oct ski from 162 to 168,
+  and the words `ski erg`, `row`, `lunges` and `roxzone` inventing phantom prescriptions on
+  12, 14 and 15 Oct. All five reworded before commit.
+
+---
+
 ## 2026-10-08
 - adherence: no ACTION REQUIRED and no WATCH. ski **5/2** · hyrox 4/2 · strength 5/4 ·
   run 10/7 · row 1/1 (now on track — last night's erg) · swim 1x/0 · cycle 2/6 · tennis 6/8.
