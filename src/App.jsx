@@ -292,6 +292,7 @@ const HEALTH_DATA = {
     {date:"2026-10-07",kcal:3033,protein:148,carbs:429,fat:89,fiber:57,goal:2099},
     {date:"2026-10-08",kcal:2743,protein:166,carbs:307,fat:98,fiber:27,goal:2099},
     {date:"2026-10-09",kcal:3302,protein:176,carbs:309,fat:118,fiber:39,goal:2099},
+    {date:"2026-10-10",kcal:346,protein:14,carbs:54,fat:8,fiber:11,goal:2099},
   ],
   // Body composition from Garmin, written by body.py: the last reading of each
   // day that carries body fat. kg, fat %, BMI, water %, muscle and bone in kg;
@@ -1052,11 +1053,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-10";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-10T06:08:00Z";
-const LAST_DATA = "2026-10-10T06:08:00Z";
+const LAST_RUN  = "2026-10-10T07:08:00Z";
+const LAST_DATA = "2026-10-10T07:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-10T06:08:00Z";
+const LAST_MFP  = "2026-10-10T07:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1482,7 +1483,7 @@ const SCHEDULE = [
   ]},
   { week:7, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
     { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"GYM 60min · compromised ski: [1000m ski → 1km treadmill] ×3 continuous, then sled pull 8×25m + lunges 4×50m unbroken. Every rep under 4:08 AND rep 3 within 6s of rep 1 — the fade target tightens, the ceiling deliberately does not. Treadmill stays a ceiling at 4:10 per kilometre; save it as \"Ski + run\"."}] },
-    { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"plan",text:"Z2 run 45min · evening, easy. The quality run sits on Wednesday late morning, the only slot that has ever produced one."}] },
+    { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Z2 run 45min · evening, easy. The quality run sits on Wednesday late morning, the only slot that has ever produced one."}] },
     { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 6×1km @ 4:06, 75s jog · late morning. A sixth rep and 15s less recovery — the progression is density, never pace. 4:04 off 60s comes only once 4:06 has held to the last rep."},{type:"plan",text:"SKI 20min · evening, inside the Wednesday gym trip · 6×500m @ 1:59 off 90s, compromised by this morning’s six kilometres and the same ask as 14 Oct because one answer is not a trend. Hold 1:59 to rep 6 before anything gets faster. Put the word ski in the title."},{type:"hyrox",note:true,text:"Hyrox circle @ Gym+ · if it runs tonight. It has not run since 25 Sep, so this is a reminder rather than a session and the ski above does not wait on it."}] },
     { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"Z2 run 45min · outdoors, easy, no fixed time of day. The timed transition drill is out of the plan for good — see 15 Oct."}] },
     { date:"2026-10-23", dow:"FRI", label:"Oct 23", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km · five minutes longer than 16 Oct, and the fast finish is 15min at 4:30 rather than 20min at 4:25, because the ladder now climbs from 1:06 and not from a number you have never run. If Friday gets taken, Saturday is the backstop. Hold 4:30 to the last kilometre; drift means finish easy and write it down."}] },
