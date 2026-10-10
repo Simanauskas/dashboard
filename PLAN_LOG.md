@@ -53,6 +53,159 @@ and never once done.
 
 ---
 
+## 2026-10-10
+- adherence: no ACTION REQUIRED and no WATCH. ski 5/3 · row 1/1 · hyrox 4/2 · strength 4/5 on track
+  · swim 1x/0 · cycle 2/5 · tennis 5/8 · **run 11/6, short by 5 and the worst gap on the board.**
+  Benchmarks already due: 28 Sep and 2 Oct **NOTHING LOGGED** (dead structure, aged out), 30 Sep
+  logged, 6 Oct **TRAINED EASY INSTEAD**, 8 Oct **TRAINED OTHER TYPE**. Next 14d: Wed 14 Oct and
+  Wed 21 Oct, both KEY RUNs, both on a weekday he trains — four run activities have landed on a
+  Wednesday since 1 Aug, so neither is sitting on a day he does not show up. Nothing to defer.
+- readiness: HRV **83 vs baseline 72** (delta **+11**, a green light), RHR **47**, respiration 13.0,
+  SpO₂ 97, **7h43 asleep** — 61 deep, **35 REM**, 10 awake, no sleep score. `hrvBaseline` 66 → **72**.
+  LAST_DATA **2026-10-10T06:08Z**, minutes old, sync healthy (128 daily rows, 127 sleep rows,
+  contiguous). Neither `easeHard` gate fires: delta is +11 against a −10 trigger and 463 minutes of
+  sleep clears the 360 floor.
+- decision: CHANGED — **two block-level edits, both on future weeks, none on the week in progress.**
+  (1) **TAPER_PLAN Base I band 350–460 → 400–500**, with one sentence in its note saying the band is
+  total load and tennis is most of it. (2) **The weekend's long run is re-anchored and the Saturday
+  flex run is folded into it as a `note:true` backstop** on 17 and 24 Oct — Fri 16 Oct goes 80min →
+  **70min Z2**, Fri 23 Oct goes 85min/last 20min @4:25 → **75min/last 15min @4:30**. Week 5 is not
+  touched at all, today's line included.
+- why the band moved, and it is the brief's own question answered with the number: **week 5 stands at
+  535 TRIMP through Friday against a 350–460 band — 75 over the ceiling with two days still to run.**
+  Yesterday's entry deferred this decision to Monday, "on what closed rather than on a projection."
+  That condition is now met early and in the only direction that matters: no Saturday and no Sunday
+  can bring 535 back under 460, so the thing being waited for has already happened and waiting is
+  just delay. The four most recent non-taper weeks are **447 / 357 / 327 / 535**, mean 417 — against
+  which 350–460 called the two poor weeks in-band and the good one over. **400–500 discriminates on
+  the actual data**: it flags 357 and 327 as under (both weeks carried a blank benchmark day) and 535
+  as over (an outlier), which is what a band is for.
+- and the composition is the real story, which no block-level total shows: **238 of those 535 — 44% —
+  is tennis, from 6h19 of court time across three sessions (2h20, 2h25, 1h34, at 80/80/78 TRIMP).
+  Running contributed 70, from one 52-minute Z2 10km. In a week of a block whose stated purpose is
+  aerobic base, he spent six hours playing tennis and fifty-two minutes running.** Tennis by week since
+  10 Aug: 91 / 70 / 39 / 26 / 44 / 138 / 116 / 148 / **238**. Running over the same weeks: 174 / 357 /
+  227 / 210 / 84 / 262 / 170 / 148 / **70** — the lowest running load of any training week in the record,
+  and running is his weakest block against the field at top 27.7%.
+- **so the old band was doing active harm, which is why this is not a cosmetic edit.** The governor at
+  `src/App.jsx:1740` trims when `projected > target.hi`, down to a floor of 0.6. With tennis at 238 a
+  460 ceiling left 222 for everything the plan actually prescribes, so a normal tennis week clamps the
+  governor at its floor and cuts **the prescribed running and erg work by 40% to make room for the
+  court** — tennis arrives unprescribed and uncuttable, so the trim lands entirely on the sessions that
+  address the weakness. That is a defect the deterministic engine cannot see: it holds the band it is
+  given and cannot ask whether the band is right.
+- why the long run was re-anchored rather than re-homed, and I checked myself against yesterday's
+  warning about host-chasing before touching it: **the Friday long run did not happen yesterday — he
+  played tennis at 13:30 and did not run.** The day was attended; the session was not. The day is not
+  the problem, so the day does not move: Friday has produced 3 runs on 10 Fridays since 1 Aug (21 Aug,
+  4 Sep, 25 Sep) and 2 of those were the week's quality or long run, while Saturday has produced **one
+  real session in the last five Saturdays**. Moving it to Saturday would be host-chasing onto a worse
+  day, which is the mistake the 8 and 9 Oct entries both made.
+- **the length is what was wrong, and this is a number nobody had put next to the plan.** The ladder
+  asks 75 → 80 → 85 minutes. **His longest run in ten weeks is 1:06 (15 Sep), and nothing above 70
+  minutes exists in the record since 21 July.** The eighteen runs since 1 Aug average 51 minutes and
+  peak at 66. So 9 Oct asked him for a 75-minute run with a hard 15-minute finish, 9 minutes beyond
+  anything he has done in ten weeks — and this file's own rule is that an unreachable number is how a
+  session stops happening. 70 → 75 climbs from his real ceiling; 75 → 80 → 85 climbed from nothing.
+  The 23 Oct fast finish also comes down from 20min @4:25 to 15min @4:30 for the same reason.
+- **the Saturday flex run: I am acting 8 days before yesterday's trigger, deliberately, and this is the
+  justification.** That trigger was "blank on 10 Oct and 17 Oct too makes it 0-for-5, decide it Sunday
+  18 Oct" — written when the question was whether a droppable extra was worth keeping. **Last night
+  changed the question.** With Friday's long run lost to tennis, Saturday is no longer an extra; it is
+  the last slot in the week for the one session the block is built on. So it is not removed and it is
+  not kept as a session: it becomes `note:true` — the backstop for Friday's run, at the same 70min,
+  costing zero projected load and counting as zero prescriptions. That settles the 0-for-4 evidence
+  (prescribed 19 Sep, 26 Sep, 3 Oct, 10 Oct, trained zero times) without waiting for a fifth blank day
+  to tell me something I already know, and it removes the phantom load yesterday complained about —
+  which matters more now, not less, because a 400 floor makes a run that never happens more likely to
+  push the governor the wrong way.
+- **measurement artifact I am creating, flagged so tomorrow's cold run does not misread it:** if the long
+  run lands on the backstop Saturday, `adherence.py` will score Friday as a missed prescription and the
+  Saturday run as unprescribed. The run happened; the report will say the plan was missed. Read the
+  Friday/Saturday pair as one prescription with a two-day window.
+- physiology — **the eight-month-long story reversed, and that is this morning's other real signal.**
+  `hrvBaseline` had fallen eight consecutive times, 91 → 88 → 79 → 83 → 75 → 69 → 67 → 66. **It is 72
+  today, up 6 in one day**, and the trailing 7-day raw mean is **74.3** (79/94/52/56/93/63/83) against
+  68.6 yesterday and 85.3 for 24–30 Sep. So the drift did not merely flatten, it turned — and it turned
+  during the largest training week in his record. **That is the single strongest piece of evidence that
+  535 is inside what he absorbs and 460 was not his ceiling**, and it is most of why I was willing to
+  raise the band on one week's data.
+- the one dissenting signal, and the brief asks me to name it: **RHR 47, his first reading above the
+  38–46 range since 3 Oct's 62**, on respiration 13.0 (up from 12.0) and **35 minutes of REM on 7h43**
+  — the second REM-poor night in three (8 Oct read 40). Against that: HRV is +11, the five-day RHR run
+  is 43/44/44/41/47 so 47 is one beat out rather than an excursion, and the 2–3 Oct signature (RHR 54
+  then 62, respiration 14–15, **zero** REM twice, under four hours asleep) is absent — he slept 7h43.
+  Yesterday's trigger was *baseline still falling with RHR drifting above 46*; **exactly half of it
+  fired** — RHR crossed, the baseline went the other way, which is not the shape of accumulating
+  fatigue. One morning, no action. **What would make me act: RHR at 47 or above again tomorrow, or two
+  more nights under 60 minutes of REM, and the Monday 12 Oct compromised ski is the session that gets
+  eased first.**
+- what I deliberately did NOT touch:
+  - **Week 5, entirely — including today.** He is six days in, HRV is +11, and there is no
+    physiological case for rewriting a week in progress. Today's line stays `Optional · Z2 run 40min ·
+    flex session`, which is the right session: the week's running load is 70 and an easy hour would
+    help it. I did **not** promote it into the long run, because that would add roughly 80 TRIMP to a
+    week already 35 over even the new 500 ceiling, and because the inconsistency with 17 and 24 Oct is
+    deliberate — in weeks 6 and 7 Saturday backs up a Friday long run, in week 5 that Friday is
+    already gone and Saturday is the last running slot there is. Different job, different line.
+  - **The phase.** Base I · Aerobic, week 5 of 6, 168 days to Copenhagen. Right, and the problem this
+    morning was never that the phase is wrong — it is that the phase's content is not being delivered.
+    Smaller sessions would not have helped; a reachable long run and a band that stops cutting it might.
+  - **The 14 and 21 Oct KEY RUNs, and the 14 Oct ski.** Untouched, and yesterday's ski-format trigger
+    carries forward verbatim: if 14 Oct logs a continuous ten-minute piece rather than reps, the
+    Wednesday ask becomes 4×500m off 60s permanently.
+  - **RACE / STATION_TARGETS / RACE_BUDGET / RACE_GAINS.** Yesterday produced tennis and nothing else.
+    No target moved. Ski erg is still the weakest element (top 29.8%), running still the weakest block
+    (27.7%), and the 39-second budget shortfall from yesterday's re-pricing stays visible and
+    unallocated until the 14 and 21 Oct KEY RUNs report.
+  - **`isTennis` (src/App.jsx:1132).** Still `=== "tennis"` against 60 rows typed `Tennis V2`. **Fifth
+    run recording it**, and it matters more today than it did yesterday: tennis is now 44% of his week,
+    so every UI path that classifies tennis is wrong about nearly half his load. One-word fix,
+    `/^tennis/`, outside this Routine's edit surface.
+  - **The two `adherence.py` measurement bugs** from yesterday (roxzone lines counting as prescribed
+    runs; roxzone folded into `hyrox`). The roxzone lines are gone from the plan, so the run over-count
+    ages out of the window on its own by 22 Oct. Still outside the surface.
+- verification: `npm run build` clean, **441.20 kB**, measured against a build of this morning's HEAD
+  at **440.01 kB** — **+1.19 kB**, all of it plan text (yesterday's 439.61 is not the right comparison:
+  the bot has written a day of data since). **11/11** patch anchors. Round-trip `update.patch()` against a copy of
+  the real src/App.jsx: **34/34**, with SCHEDULE, TAPER_PLAN, RACE, STATION_TARGETS, RACE_BUDGET and
+  RACE_GAINS all byte-identical through the patch, wellness rows keeping their 4-space indent, and
+  daily/sleep/weight/CSV all still patching. Every one of the 50 SCHEDULE days diffed for prescribed
+  type, costed duration, `PLAN_INTENSITY` value, info-line status, optional-line status and benchmark
+  flag: **exactly 4 changed** (16, 17, 23, 24 Oct), **46 of 50 identical** — so re-anchoring the long
+  run moved no other load and invented no prescription. That check earned its keep again: the first
+  draft of the 16 Oct line contained the words "against 6h19 of tennis", and **both** halves of that
+  phrase were costing traps — `planIntensity` tests `/tennis/i` before anything else and would have
+  priced a Z2 long run at tennis HR, and `planDurationMin`'s `(\d+)\s*h\s*(\d{1,2})` reads "6h19" as
+  **379 minutes**. Rewritten to "six hours on court", which carries the same number and trips neither.
+- the longest line I shipped this morning is **342 characters / 3 sentences** (23 Oct); 16 Oct is 336.
+  The longest line anywhere in the 10–25 Oct window is still 12 Oct at **415**, which I did not touch.
+  Every line in the window is ≤3 sentences.
+- **on the no-change count: zero consecutive NO CHANGE runs precede this entry — the last twenty
+  entries all say CHANGED.** The brief's warning is about passivity, and that is not this Routine's
+  current failure mode; yesterday's addendum named the live one, host-chasing, and said two consecutive
+  runs had spent their budget on it. So I held the two edits I made to a test: both answer a question
+  the brief asks outright (is the band realistic against what he absorbs; do the next weeks need
+  different sessions rather than smaller ones), both are grounded in a number nobody had computed
+  before this morning (535 against 460; a 1:06 ceiling under a 75-minute ask), and both land on future
+  weeks only. The third thing I found — that his running load has collapsed to 70 TRIMP while tennis
+  reached 238 — I have deliberately **not** acted on beyond these two edits, because the lever for it
+  is whether 14 Oct's KEY RUN happens, and that is four days away.
+- watching:
+  - **the new 400–500 band, against week 6.** It will be the first week judged by it. **What would make
+    me act: if 12–18 Oct closes above 500 with running again under 150, the band is not the binding
+    constraint and the plan has to stop competing with tennis for the same budget — at which point the
+    honest fix is to price tennis into the week explicitly rather than let it arrive as a surprise.
+    Decide it Monday 19 Oct.**
+  - **the re-anchored long run, 16 Oct.** 70 minutes is inside everything he has done. **What would
+    make me act: if 16 Oct AND its 17 Oct backstop are both blank, the problem is not the day and not
+    the length, and the long run comes out of Friday and goes onto Monday ahead of the gym trip, which
+    is 1-for-1. Decide it Sunday 18 Oct.**
+  - **RHR 47 and 35 minutes of REM**, per the trigger stated above. Tomorrow morning.
+  - **swim 1x/0** ages out 13 Oct, never prescribed forward, no action.
+
+---
+
 ## 2026-10-09 · addendum, after Simas read the morning’s push
 - context: he pushed back on two things, and both land. **(1) The dashboard
   comments are too long and read as a trail of thought rather than an action.
