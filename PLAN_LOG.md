@@ -53,6 +53,56 @@ and never once done.
 
 ---
 
+## 2026-10-10 · addendum, after Simas read the morning’s push
+- context: he came back live and said he had meant to run yesterday but ran out of time, asked
+  **"shall I do today long run — 1:30min z2?"**, and noted there has been little running this week.
+  He is right about the week, and his instinct to fix it today is right. **The 1:30 is not.**
+- decision: CHANGED — **today’s line only.** Sat 10 Oct goes from `Optional · Z2 run 40min · flex
+  session` to **`Long run 70min Z2`**, conversational throughout, 75min only if 70 still feels easy,
+  no fast finish. Nothing else in week 5 moves, and the 16/23 Oct ladder from this morning stands.
+- why a long run today, yes: **running delivered 70 TRIMP from one 52-minute Z2 10km this week against
+  238 TRIMP from 6h19 of court time** — the lowest running load of any training week in the record, in
+  an aerobic-base block, on his weakest block against the field (top 27.7%). And he is clear to go:
+  **HRV 83 against a baseline of 72 (+11)**, on a baseline that has just turned upward 66 → 72.
+- why not 1:30, and this is the number that settled it: **in the whole 44-column record back to 12 May
+  there is exactly one running activity over 75 minutes — 13 Jun, 10.12km in 90:36, which is 9:00/km
+  trail hiking rather than a Z2 run.** His longest genuine run is **1:14** (21 Jul, a tempo session) and
+  his longest since 1 Aug is **1:06** (15 Sep). So 1:30 is **+24 minutes, a 36% jump on his ten-week
+  maximum**, taken off a week carrying six hours of court legs — the shape of a calf or achilles
+  problem, not a fitness gain. **Monday 12 Oct is also the session to protect**: the compromised ski is
+  the block’s keystone and 1-for-1, and a 90-minute run today is the most likely way to lose it.
+- **consistency check against my own morning push, which is the strongest argument available:** two
+  hours earlier I cut 16 Oct from 80min to 70min and 23 Oct from 85min to 75min, on the explicit
+  grounds that a 1:06 ceiling cannot support an 80-plus-minute ask. Blessing 90 minutes this afternoon
+  would have contradicted that reasoning on the same data, the same day. 70 today is not a concession
+  — it pulls 16 Oct’s session forward by six days and leaves the 70 → 70 → 75 ladder intact.
+- the mild caution was stated to him rather than acted on: **RHR 47, first outside 38–46 since 3 Oct,
+  on 35 minutes of REM and 7h43 asleep.** HRV says go; it does not say set a distance record. Trigger
+  from the main entry is unchanged.
+- **I also told him not to let the dashboard talk him out of it.** Week 5 sits at 535 against the
+  400–500 band I set this morning, so the governor reads today as over and will trim the line on
+  screen. That trim is the defect the morning entry describes, arriving on cue: 70 minutes of Z2
+  running is exactly the load this block wants and more court time is not. Worth knowing that **the
+  first version of the band fix does not stop the governor cutting the one session the week needs** —
+  it only raised the ceiling, and 535 is past 500 too. **What would make me act: if the same thing
+  happens in week 6, tennis gets priced into the week explicitly instead of arriving as a surprise.
+  That is the 19 Oct decision already in the watch list, and this is the second data point for it.**
+- procedural note for the next cold run: **today’s 70min run is an agreed live change, not plan
+  drift.** If 10 Oct logs a 70-minute Z2 run, that is adherence, and the week’s run count should read
+  one better than this morning’s 11/6 suggested. He answered my confirmation prompt with a bare `T`
+  first, which I did not treat as consent — a stray keystroke next to `Y` is not an approval to deploy
+  — and asked again before pushing.
+- verification: `npm run build` clean, **441.59 kB** (from 441.20 — +0.39 kB). **11/11** patch anchors.
+  Round-trip `update.patch()` against a copy of the real src/App.jsx: **27/27**, SCHEDULE and
+  TAPER_PLAN byte-identical through the patch. All 50 SCHEDULE days re-diffed: **exactly 1 changed**
+  (10 Oct, duration 40 → 70, `PLAN_INTENSITY` 138 both before and after, optional-line flag True →
+  False so it now costs in full, prescribed type still `run` alone), **49 of 50 identical**. The line
+  was written around the same two costing traps as this morning’s: no form of the word *tennis* (which
+  `planIntensity` tests before anything else) and no `\d+h\d+` (which would read as hundreds of
+  minutes), so "six hours of court legs" carries the number safely.
+
+---
+
 ## 2026-10-10
 - adherence: no ACTION REQUIRED and no WATCH. ski 5/3 · row 1/1 · hyrox 4/2 · strength 4/5 on track
   · swim 1x/0 · cycle 2/5 · tennis 5/8 · **run 11/6, short by 5 and the worst gap on the board.**
