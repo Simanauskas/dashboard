@@ -1060,11 +1060,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-11";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-11T09:08:00Z";
-const LAST_DATA = "2026-10-11T09:08:00Z";
+const LAST_RUN  = "2026-10-11T10:08:00Z";
+const LAST_DATA = "2026-10-11T10:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-11T09:51:00Z";
+const LAST_MFP  = "2026-10-11T10:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1482,7 +1482,7 @@ const SCHEDULE = [
   { week:6, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
     { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"GYM 60min · compromised ski: [1000m ski → 1km treadmill] ×3 continuous, then sled pull heavy + wall balls 3×25 + core. Every ski rep under 4:10 AND rep 3 within 10s of rep 1 — 5 Oct went 4:02/4:19/4:24, so the fade is the target and the ceiling is already yours. The treadmill is a ceiling at 4:10 per kilometre, not a target — every second you take off it is stolen from the next erg rep; save it as \"Ski + run\"."}] },
     { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Z2 run 40min · evening, easy and conversational. Quality work sits on Thursday now: every structured run since 3 Aug started between 08:52 and 13:43, and three of the five landed on a Thursday."}] },
-    { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"plan",text:"Z2 run 40min · late afternoon, and run it straight before the second session below — one gym trip, easy legs into the machine."},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight off the 40min above so the erg is compromised rather than fresh. The quality run has moved to Thursday, which is why this now sits on easy legs. Hold 1:59 to rep 6, put the word ski in the title, and 4×500m off 60s counts in full if the night is short."},{type:"hyrox",note:true,text:"Hyrox circle @ Gym+ · if it runs tonight. It has not run since 25 Sep, so this is a reminder rather than a session and the ski above does not wait on it."}] },
+    { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Gintaras Vaikutis · court 12 · 13:00"},{type:"plan",text:"Z2 run 40min · late afternoon, and run it straight before the second session below — one gym trip, easy legs into the machine."},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight off the 40min above so the erg is compromised rather than fresh. The quality run has moved to Thursday, which is why this now sits on easy legs. Hold 1:59 to rep 6, put the word ski in the title, and 4×500m off 60s counts in full if the night is short."},{type:"hyrox",note:true,text:"Hyrox circle @ Gym+ · if it runs tonight. It has not run since 25 Sep, so this is a reminder rather than a session and the ski above does not wait on it."}] },
     { date:"2026-10-15", dow:"THU", label:"Oct 15", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 5×1km @ 4:06, 90s jog · late morning. Moved off Wednesday: three of your five structured runs since 3 Aug landed on a Thursday, none on a Tuesday, and Wednesday is already court plus gym. Five reps and not six because 6 Oct never happened — rep 5 against rep 1 is the number, and if it holds then Monday’s erg fade is a lat problem and not an engine one."}] },
     { date:"2026-10-16", dow:"FRI", label:"Oct 16", sessions:[{type:"plan",text:"Long run 70min Z2 · 70 and not 80 because your longest run in ten weeks is 1:06 and nothing above 70min exists since July. If Friday gets taken again, Saturday is the backstop and the day does not matter — the run does. Last week gave running 52 minutes against six hours on court, so this is the session the block is actually short of."}] },
     { date:"2026-10-17", dow:"SAT", label:"Oct 17", sessions:[{type:"plan",note:true,text:"If yesterday went to something else, today is the long run — same 70min Z2, not a shortened version of it. The standalone 40min flex run that used to sit here is gone: prescribed four times since 19 September, trained zero times, and charging the week a load it never delivered."}] },
