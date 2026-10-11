@@ -53,6 +53,187 @@ and never once done.
 
 ---
 
+## 2026-10-11
+- adherence: no ACTION REQUIRED and no WATCH. ski 5/3 · row 1/1 · hyrox 4/2 · strength 4/5 on track
+  · swim 1x/0 · cycle 2/5 · tennis 6/8 · **run 10/7, short by 3** (yesterday read 11/6 — the Saturday
+  long run closed one of those gaps). Benchmarks already due: 28 Sep and 2 Oct **NOTHING LOGGED**
+  (dead structure, both age out of the window by 23 Oct), 30 Sep logged, 6 Oct **TRAINED EASY
+  INSTEAD**, 8 Oct **TRAINED OTHER TYPE**. One of five benchmarks in 21 days actually landed.
+  Next 14d after this morning's edit: **Thu 15 Oct and Thu 22 Oct**, both KEY RUNs.
+- readiness: HRV **91 vs baseline 74** (delta **+17**, the best of the block), RHR **43**, respiration
+  12.0, SpO₂ 98, **6h41 asleep** — 125 deep, **70 REM**, 206 light, 0 awake. `hrvBaseline` 72 → **74**.
+  LAST_DATA **2026-10-11T06:08Z**, minutes old, sync healthy (129 daily rows, 128 sleep rows,
+  contiguous). Neither `easeHard` gate fires: +17 against a −10 trigger, 401 minutes clears the 360 floor.
+- decision: CHANGED — **two edits, both on weeks he has not started.** (1) **TAPER_PLAN Base I ceiling
+  500 → 560**; the floor stays at 400. (2) **The KEY RUN moves off Wednesday onto Thursday** on both
+  14/15 Oct and 21/22 Oct, swapping with the easy Z2 that sat on Thursday, so Wednesday becomes an
+  easy-run-into-ski compromised erg session inside the gym trip he already makes. Week 5 is untouched;
+  today's line (court at 08:00, then family day) is untouched.
+
+- **the Saturday long run landed, and that is the first thing to record.** Yesterday's live change
+  asked for 70min Z2 against his 1:06 ten-week ceiling. He ran **1:10:05, 12.80 km, average HR 131,
+  ~79 TRIMP** — his longest run since 21 July and the longest genuine Z2 run anywhere in the record.
+  The reachable-ladder reasoning was right and **the 16 Oct watch item is answered eight days early**:
+  70 minutes is now inside what he has done, so the 70 → 70 → 75 ladder needs no further defence.
+  Per yesterday's procedural note this was an agreed change, not drift, and adherence scored it.
+
+- **why the ceiling moved again, one day after it moved, and this is the number that forces it:
+  week 5 did not close at the 535 yesterday's raise was computed from. It closed at 617** — and today's
+  booked court time is not in that yet. 617 is **145 above his previous record week (472, 17 Aug)** and
+  **117 above the 500 ceiling set yesterday**. Yesterday's decision was made on a Friday projection
+  and is now known-insufficient on its own terms, from data that arrived overnight. Composition:
+  **tennis 238 (6h19), running 149 (2h02), ski 74, strength 65, cycle 52, other 22, row 13, sauna 4.**
+  Running recovered from the 70 that drove yesterday's entry to 149, entirely because of Saturday.
+- **and the band has never once contained the written plan, which is the finding no previous run had
+  computed.** Costing every SCHEDULE day through the engine's own `planIntensity`/`planDurationMin`/
+  `estTrimp`: wk4 **474**, wk5 **785**, wk6 **635**, wk7 **676** — against bands of 350–460 and then
+  400–500. So the governor at `src/App.jsx:1740` has been in **permanent trim** for the whole block,
+  which means the written plan was never the plan; the trimmed version was.
+- **what 500 would have done to week 6, tomorrow morning, before a single session:** `scale =
+  max(0.6, (hi − done) / remainingPlanned)` = 500/635 = **0.79**, so Friday's **70min long run is
+  rewritten to 55min and Monday's 60min gym to 45min on Monday's first page load**. At 560 the same
+  arithmetic gives **0.88 — 60min and 55min**, a mild trim instead of a fifth off the block's keystone
+  session. At 620 it would not trim at all, which I did not want: his second-biggest week ever is 472
+  and 617 should not read as normal. **560 is chosen to let the governor trim a little, not to bless 617.**
+- **the floor deliberately stays at 400.** The diagnosed defect is entirely the ceiling. Raising the
+  floor would arm the *volume-raise* branch (projection under `lo` and readiness ≥7 scales up to 1.25×),
+  and after a 617-week with no zero-load day since 3 Oct the last thing this plan needs is a mechanism
+  that adds volume to a light week. Minimal edit, one direction.
+- **the anti-ratchet rule is now written into the Base I note**, because two raises in two days is
+  exactly how a cold session talks itself into a ceiling of 700 by November: *the ceiling moves only on
+  closed measured weeks and on the plan's own costed total, never on a projection.* Yesterday's raise
+  broke that rule and this one obeys it — 617 is a closed week and 474/785/635/676 are the plan's own
+  arithmetic.
+
+- **why the KEY RUN left Wednesday, and I tested this against my own host-chasing warning first.**
+  Quality runs by weekday since 3 Aug: **Thursday 3** (13 Aug 8×600m, 27 Aug 16×400m, 1 Oct 8×1km at
+  4:01), **Wednesday 1** (5 Aug, nine weeks ago), **Friday 1**, **Tuesday 0**. The 9 Oct entry moved
+  quality onto "Wednesday late morning" on the correct finding that **every structured run since 3 Aug
+  started 08:52–13:43 while all ten evening runs came back Z2** — but that is a statement about the
+  *hour*, and it was applied to the wrong *weekday*. Wednesday late morning is when he is on court:
+  **30 Sep tennis 13:56 for 94min, 7 Oct tennis 12:02 for 145min**, each followed by an evening gym trip.
+- **the part that does not depend on court time at all, and is the stronger half of the argument:
+  Wednesday is the gym-trip day** and the written plan already puts the second ski and the Hyrox-circle
+  note there. Asking for the week's hardest run *and* its second erg session on the one day that needs
+  a venue guarantees the governor cuts both. **Thursday is the only day in week 6 carrying nothing**,
+  is 8/9 attended since 3 Aug, and has had **one court session in ten weeks** (24 Sep).
+- **why this is not the host-chasing the 9 Oct addendum named as this Routine's live failure mode.**
+  That was a session that should have been deleted, moved twice instead. This one is the block's
+  keystone benchmark, it has a **positive** host with direct evidence rather than a merely-less-bad one,
+  and it is load-neutral. The honest objection is that **Wednesday has had zero chances — 14 Oct would
+  have been its first**, and I am moving it before it has been tested. I am taking that cost on purpose:
+  the collision is 2-for-2 and 145 minutes deep, the brief says move a benchmark *before* it slips, and
+  this one already slipped once on 6 Oct. **If Thursday fails twice the answer is not a third weekday**
+  — see the watch list.
+- **the Wednesday session is better than what it replaces, not a leftover.** Easy 40min run straight
+  into 6×500m at 1:59 is genuinely compromised erg work off running legs, which is priority #1 from the
+  athlete profile ("train the ski *compromised*, off running legs, not fresh"). Monday stays the hard
+  compromised ski; Wednesday is now the easy-legs one. Two different stimuli instead of one erg session
+  bolted to a threshold run it was competing with.
+- **13 and 20 Oct were rewritten too, and they had to be:** both still read "quality work sits on
+  Wednesday". Leaving them would have had the plan telling him two different things on the same screen.
+  Costing is identical (both are Z2 runs with their durations unchanged); only the sentence moved.
+
+- physiology — **the baseline reversal is holding, and it happened through his biggest week ever.**
+  `hrvBaseline` fell eight consecutive times, 91 → 88 → 79 → 83 → 75 → 69 → 67 → 66, then **66 → 72 → 74**.
+  Three rises, +8 in total, and the third one lands the morning after a 617-TRIMP week closed. HRV itself
+  is **91 against 74**, the best delta of the block. That is the evidence that 617 is inside what he
+  absorbs, and most of why I was willing to put the ceiling at 560 rather than leave it.
+- **yesterday's RHR trigger did not fire, and that is worth stating plainly.** It read: *47 or above
+  again tomorrow, or two more nights under 60 minutes of REM, and the Monday compromised ski eases first.*
+  Today is **RHR 43**, back inside 38–46, on **70 minutes of REM**. The six-day run is 44/44/41/47/43 —
+  so 47 was one beat out, not an excursion, and the 2–3 Oct signature (RHR 54 then 62, zero REM twice,
+  under four hours asleep) remains absent. **Monday's ski is not eased. The trigger is retired.**
+- **the signal that replaces it is sleep, and it is the one caution this morning.** 453 then **401
+  minutes** — two nights under 7 hours, the shortest since 3 Oct, against a 505–560 habit. REM was fine
+  last night (70) so this is duration, not architecture, and 401 clears the engine's 360 gate with 41
+  minutes to spare. On its own, nothing. On top of 617 TRIMP it is the first thing I would expect to bend.
+- **no zero-load day since 3 Oct.** 4–11 Oct is eight consecutive days and today's court time makes it
+  nine; the next written rest day is **Sun 18 Oct**, which would be fifteen. I did not insert one:
+  HRV is +17, the baseline is rising, the 560 ceiling now trims week 6 by 12% on its own, and
+  `adaptPlan`'s rest-day guard (9 days without rest while form is under −15) exists for exactly this.
+  **Stated rather than acted on, with a trigger below.**
+
+- what I deliberately did NOT touch:
+  - **Week 5, including today.** Nothing in it moves. Today is court at 08:00 then family day, which is
+    the right shape for the last day of a 617 week.
+  - **Monday 12 Oct.** The compromised ski is the block's keystone, it is 1-for-1, and the 5 Oct fade
+    (4:02 → 4:19 → 4:24) is still the target. Untouched.
+  - **The phase.** Base I · Aerobic, week 5 of 6, 167 days to Copenhagen. Still right. The problem this
+    morning was placement and a ceiling, not content — and the Saturday run is evidence the content works
+    when it is reachable and lands on a day he attends.
+  - **The long-run ladder and the Saturday backstops.** 70 / 70 / 75 with `note:true` Saturdays, exactly
+    as written yesterday. Validated rather than revised.
+  - **The ski ask itself.** 6×500m at 1:59 off 90s on both Wednesdays, with the 4×500m off 60s fallback
+    intact. Yesterday's format trigger carries forward with one correction: **the ten-minute continuous
+    habit has now shown up twice without waiting for 14 Oct** — 30 Sep (TT, 10min warmup) and 8 Oct
+    (Ski-ERG 10min, 2380m). The line already concedes 4×500m off 60s "counts in full", so the trigger is
+    half-satisfied and needs no edit; **if 14 Oct logs a third continuous ten-minute piece, 4×500m off 60s
+    becomes the written ask rather than the fallback.**
+  - **RACE / STATION_TARGETS / RACE_BUDGET / RACE_GAINS.** Yesterday produced one Z2 run and a sauna.
+    No target moved. Ski erg is still the weakest element (top 29.8%), running still the weakest block
+    (27.7%), and the **39-second budget shortfall stays visible and unallocated** until the 15 and 22 Oct
+    KEY RUNs report.
+  - **`isTennis` (src/App.jsx:1132).** Still `=== "tennis"` against 33 rows typed `Tennis V2`, so
+    `loadModel.tennis` has **n=0** and falls back to the hardcoded 138bpm/75min. **Sixth run recording
+    it, and this morning I can finally price it: planned court time is costed at 101 TRIMP where his
+    real median (104bpm, 87min) is 45 — the engine over-prices every planned session on his most
+    frequent activity by about 2.2×.** That inflation is inside the 635 I just set a ceiling against,
+    which means 560 is more generous in real terms than it looks. One-word fix, `/^tennis/`, outside
+    this Routine's edit surface — but it is now the largest single distortion in the week projection,
+    not a cosmetic nit.
+  - **swim 1x/0.** Ages out of the window on 13 Oct, never prescribed forward, no action — same as
+    yesterday, and this is the last entry that needs to mention it.
+- verification: `npm run build` clean, **442.94 kB** against **442.44** for a build of this morning's
+  HEAD — **+0.50 kB**, all of it plan text. **11/11** patch anchors, SCHEDULE **50 days** (all at
+  4-space indent — my first draft left four of them at 8 and inserted a stray blank line after the
+  Base I block; both fixed before commit), TAPER_PLAN **18 blocks**. Round-trip `update.patch()` against
+  a copy of the real src/App.jsx: **17/17**, with SCHEDULE, TAPER_PLAN, RACE, RACE_BUDGET, RACE_GAINS and
+  STATION_TARGETS all byte-identical through the patch, wellness rows keeping their 4-space indent,
+  sorted and deduped with no rows lost, and daily/sleep/weight/CSV all still patching. (Note for the next
+  cold run: `patch()` wants sleep stages nested under `wellness["sleep"]` and weight as a
+  `(date, kg)` tuple — a flat dict silently skips both, which cost me two runs of the test.)
+- every one of the 50 SCHEDULE days re-diffed for prescribed type, costed duration, `PLAN_INTENSITY`
+  value, info-line status, optional-line status, benchmark flag and estimated TRIMP: **exactly 4 changed**
+  (14, 15, 21, 22 Oct), **46 of 50 identical**, and **week 6 costs 635 before and after, week 7 676
+  before and after** — so this is a pure placement change that moved no load and invented no prescription.
+  The costing traps were checked by hand again and two were live in the drafts: the Wednesday ski line
+  contained the word **threshold** ("instead of threshold ones"), which `PLAN_INTENSITY` tests *before*
+  `compromised` and would have priced it at **168 instead of 162**; and the Wednesday run line said
+  "easy legs into the **erg**", which `SESSION_MATCHERS` tests ski/row/erg *before* run, so a logged
+  SkiErg would have marked the easy run done. Both rewritten before the build. No line anywhere in the
+  window contains the literal word for court sport outside a `type:"tennis"` line, and none contains a
+  `\d+h\d+`. Longest line from 11 Oct onward is **413 characters / 3 sentences** (12 Oct, untouched);
+  my longest new line is **376**. Every line in the window is ≤3 sentences.
+- **on the no-change count: zero consecutive NO CHANGE runs precede this entry — the last twenty-one
+  entries all say CHANGED.** Passivity is not this Routine's current failure mode, so I held both edits
+  to the same test as yesterday: each answers a question the brief asks outright (are the bands realistic
+  against what he is absorbing; do the next weeks need different *sessions* rather than smaller ones),
+  each rests on a number no previous run had computed (617 closed, not 535 projected; the plan's own
+  costed 474/785/635/676; three of five structured runs on a Thursday and one on a Wednesday since 5 Aug),
+  and both land on weeks he has not started. The third thing I found — that the engine over-prices his
+  court time by 2.2× — I have **not** acted on, because the fix is one word outside my edit surface.
+- watching:
+  - **the Thursday KEY RUN, 15 Oct.** This is the real test of this morning. **What would make me act:
+    if 15 Oct is blank or reads easy, the answer is NOT a fourth weekday — the quality run comes off a
+    standalone slot entirely and gets bolted to Monday's gym trip, which is the only session in this
+    block that is 1-for-1. Decide it Friday 16 Oct**, not after 22 Oct also fails.
+  - **the 560 ceiling, against week 6.** First week judged by it, and the anti-ratchet rule now binds me.
+    **What would make me act: if 12–18 Oct closes above 560 with running again under 150, the ceiling is
+    not the binding constraint and court time has to be priced into the week as a fixed cost rather than
+    arriving as a surprise. Decide it Monday 19 Oct** — this is yesterday's 19 Oct watch item, carried
+    forward unchanged and now with a second week of evidence behind it.
+  - **sleep duration.** 453 then 401 minutes on the back of 617 TRIMP. **What would make me act: a third
+    night under 420 minutes, or any night under 360 (which trips the engine's own gate), and Thursday's
+    KEY RUN is what eases first — not Monday's ski, which is the session the block cannot afford to lose.**
+  - **the rest-day gap.** Nine days without a zero-load day as of today, fifteen by 18 Oct. **What would
+    make me act: HRV under baseline −10 or RHR above 46 at any point in week 6, and Thursday 15 Oct
+    converts to full rest with the KEY RUN going to Friday and the long run to its Saturday backstop.**
+  - **the ski format.** A third continuous ten-minute piece on 14 Oct makes 4×500m off 60s the written
+    ask, per the note above.
+
+---
+
 ## 2026-10-10 · addendum, after Simas read the morning’s push
 - context: he came back live and said he had meant to run yesterday but ran out of time, asked
   **"shall I do today long run — 1:30min z2?"**, and noted there has been little running this week.
