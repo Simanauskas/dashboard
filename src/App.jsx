@@ -145,6 +145,7 @@ const HEALTH_DATA = {
     {date:"2026-10-10",hrv:83,rhr:47,spo2:97,resp:13.0,sleep_score:null},
     {date:"2026-10-11",hrv:91,rhr:43,spo2:98,resp:12.0,sleep_score:null},
     {date:"2026-10-12",hrv:78,rhr:45,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-10-13",hrv:70,rhr:46,spo2:98,resp:12.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -276,6 +277,7 @@ const HEALTH_DATA = {
     {date:"2026-10-10",deep:61,rem:35,light:357,awake:10},
     {date:"2026-10-11",deep:125,rem:70,light:206,awake:0},
     {date:"2026-10-12",deep:101,rem:123,light:292,awake:1},
+    {date:"2026-10-13",deep:116,rem:126,light:296,awake:12},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1065,11 +1067,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-13";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-13T05:08:00Z";
-const LAST_DATA = "2026-10-13T05:08:00Z";
+const LAST_RUN  = "2026-10-13T06:08:00Z";
+const LAST_DATA = "2026-10-13T06:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-13T05:08:00Z";
+const LAST_MFP  = "2026-10-13T06:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2313,7 +2315,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 72; // updated 2026-10-12
+const hrvBaseline = 75; // updated 2026-10-13
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
