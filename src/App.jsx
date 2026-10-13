@@ -1068,11 +1068,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-13";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-13T08:41:00Z";
-const LAST_DATA = "2026-10-13T08:41:00Z";
+const LAST_RUN  = "2026-10-13T09:08:00Z";
+const LAST_DATA = "2026-10-13T09:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-13T08:08:00Z";
+const LAST_MFP  = "2026-10-13T09:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1489,7 +1489,7 @@ const SCHEDULE = [
   ]},
   { week:6, label:"Oct 12–18", theme:"Base I · Aerobic", days:[
     { date:"2026-10-12", dow:"MON", label:"Oct 12", sessions:[{type:"plan",text:"GYM 60min · compromised ski: [1000m ski → 1km treadmill] ×3 continuous, then sled pull heavy + wall balls 3×25 + core. Every ski rep under 4:10 AND rep 3 within 10s of rep 1 — 5 Oct went 4:02/4:19/4:24, so the fade is the target and the ceiling is already yours. The treadmill is a ceiling at 4:10 per kilometre, not a target — every second you take off it is stolen from the next erg rep; save it as \"Ski + run\"."}] },
-    { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",note:true,text:"The evening Z2 run that used to sit here is gone: a standalone easy run was prescribed on 29 Sep, 3 Oct and 8 Oct and trained on none of the three. Running this week is Thursday’s threshold set and Friday’s long run, both at full length."}] },
+    { date:"2026-10-13", dow:"TUE", label:"Oct 13", sessions:[{type:"plan",note:true,text:"The evening Z2 run that used to sit here is gone: a standalone easy run was prescribed on 29 Sep, 3 Oct and 8 Oct and trained on none of the three. Running this week is Thursday’s threshold set and Friday’s long run, both at full length."}] },
     { date:"2026-10-14", dow:"WED", label:"Oct 14", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Gintaras Vaikutis · court 12 · 13:00"},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight after the 13:00 match so the erg is compromised rather than fresh. The 40min run that used to sit in front of it is gone — on 30 Sep you skied 1000m in 3:57 off a 93min singles match, 3s off your fresh 3:54, so the court already supplies the tired legs. Hold 1:59 to rep 6, put the word ski in the title, and 4×500m off 60s counts in full."},{type:"hyrox",note:true,text:"Hyrox circle @ Gym+ · if it runs tonight. It has not run since 25 Sep, so this is a reminder rather than a session and the ski above does not wait on it."}] },
     { date:"2026-10-15", dow:"THU", label:"Oct 15", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 5×1km @ 4:06, 90s jog · 45min door to door, late morning. Five reps and not six because 6 Oct never happened — rep 5 against rep 1 is the number, and if it holds then Monday’s erg fade is a lat problem and not an engine one. The 45min is written in on purpose, so a hot week trims minutes off the warmup instead of reps off the set."}] },
     { date:"2026-10-16", dow:"FRI", label:"Oct 16", sessions:[{type:"plan",text:"Long run 70min Z2 · 70 and not 80 because your longest run in ten weeks is 1:06 and nothing above 70min exists since July. If Friday gets taken again, Saturday is the backstop and the day does not matter — the run does. Last week gave running 52 minutes against six hours on court, so this is the session the block is actually short of."}] },
