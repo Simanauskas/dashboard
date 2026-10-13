@@ -53,6 +53,146 @@ and never once done.
 
 ---
 
+## 2026-10-13
+- adherence: **no ACTION REQUIRED and no WATCH.** ski 6/3 · row 1/1 · hyrox 4/1 · strength 5/4 · swim 1x/0 ·
+  cycle 2/5 · tennis 5/8 · run 9/6. Benchmarks already due: 28 Sep and 2 Oct NOTHING LOGGED, 30 Sep logged,
+  6 Oct TRAINED EASY INSTEAD, 8 Oct TRAINED OTHER TYPE. Next 14d: **Thu 15 Oct and Thu 22 Oct**, both KEY RUNs,
+  both on Thursday, which is 9/10 attended since 3 Aug — no benchmark sits on a day he does not train, so
+  nothing is pre-deferred and neither hard mandate binds this morning.
+- readiness: HRV **70 vs baseline 75** (delta **-5**), RHR **46**, respiration 12.0, SpO2 98, **8h58 asleep**
+  — 116 deep, **126 REM**, 296 light, 12 awake. `hrvBaseline` **72 -> 75**, recovering yesterday's 2ms give-back.
+  LAST_DATA **2026-10-13T06:08Z**, minutes old, sync healthy (131 daily rows, 130 sleep rows, contiguous).
+  Engine signals read out of `adaptPlan` itself, not estimated: **readiness 4/10, tsb -22.4, ATL 56.8 against
+  CTL 34.4 (1.65x), consecutiveHard 0, daysSinceRest 0, easeHard FALSE, scale 1.000, unplanned7 316.**
+- decision: CHANGED — **wrote Base I week 8 (26 Oct – 1 Nov), seven new days.** No week in progress touched;
+  weeks 6 and 7 are byte-identical to yesterday. Ten added lines, nothing changed and nothing removed.
+- why: **the written plan ran out on 25 Oct while Base I runs to 8 Nov — fourteen days of the phase unwritten,
+  a horizon of twelve days, shrinking by one every morning.** `adaptPlan` can only reconcile days that exist,
+  so this is a gap no amount of recomputation closes.
+
+- **the horizon, and why nobody caught it.** SCHEDULE ended 2026-10-25; TAPER_PLAN's Base I block ends
+  2026-11-08. Nothing in this file records a deliberate two-week horizon — I grepped for one. The clone is
+  shallow (50 commits, back only to 11 Oct) so I could not date when week 7 was written, but either way the
+  runway has simply been drifting down one day at a time and no entry has mentioned it. That is exactly the
+  failure mode this file exists for: defensible every single morning, wrong across a fortnight.
+- **Monday 12 Oct logged ZERO activities.** The keystone compromised-ski session that yesterday's run
+  deliberately protected ("he may be in the gym within the hour") was not trained. **I did not move the slot,
+  and the reasoning matters more than the call:** it is not a "provably not doing" case. On 5 Oct it landed in
+  full with splits recorded (4:02/4:19/4:24). Monday is his **best-attended weekday, 9/11 since 3 Aug**. And
+  the miss came off tsb -29.8, ATL at 1.83x CTL and eight consecutive days carrying load — he took the rest day
+  `forceRest` was about to try to convert on its own. That is a reason, not avoidance. The cost is still real:
+  12 Oct was to be the second data point on the fade, and the fade is the entire ski problem.
+- **the physiological finding, and it is the number no previous entry has computed: his RHR floor has lifted
+  about 3 bpm, and it is a shift, not an excursion.** 23 Sep – 1 Oct ran **40/42/39/39/38/40/41/39/40** — nine
+  consecutive mornings inside 38-42. From 6 Oct: **43/44/44/41/47/43/45/46** — eight mornings, **not one below
+  41**, last-7 mean **44.3 against a prior-30 mean of 41.5**. This is not the 2-3 Oct event (54 then 62, zero
+  REM both nights, under four hours asleep); that was acute and it cleared inside a day. This is the floor of
+  the range itself moving, inside a nominal 38-46 so the range test never trips. **HRV agrees** (last-7 mean
+  76.3 against 82.8 for the fourteen before it) and so do the load counters (tsb -22.4, ATL 1.65x CTL). Three
+  independent markers, same direction, and they all date from the 693-TRIMP week.
+- **why that did NOT become a cut to week 6.** The correction is already running, and the rest day is what ran
+  it: tsb **-29.8 -> -22.4**, ATL/CTL **1.83 -> 1.65**, consecutiveHard **4 -> 0** — which also retired
+  yesterday's spurious `easeHard`, the one firing on four Z2-and-tennis days. Week 6 now costs **466 remaining
+  against a 400-560 band, governor at scale 1.000, no day adjusted**: nothing is over-prescribed and nothing is
+  being trimmed, because the missed Monday took its own 143 out with it. Sleep last night was 538 minutes with
+  126 REM. Cutting the Thursday KEY RUN or the Friday long run — the two sessions the block is short of, in his
+  weakest block against the field at top 27.7% — would be reacting to a signal the system is absorbing in front
+  of me. The signal gets stated and gets a sharper trigger instead.
+- **yesterday's RHR trigger did not fire, and I am saying so rather than quietly acting anyway.** It asked for
+  "47 or above on any two mornings in week 6, or any single reading above 48". Week 6 has given 45 and 46. But
+  it was written to catch an **excursion** and cannot see a **floor shift**, which is what happened. Restated
+  below as a level test on the 7-day mean.
+
+- **what went into week 8, with the reason for each number:**
+  - **Mon 26 Oct** repeats 19 Oct's ask — every rep under 4:08, rep 3 within 6s of rep 1 — rather than
+    tightening again, **because 12 Oct never happened, so 19 Oct is the first test of that standard and one
+    answer is not a trend.** Same logic the 21 Oct ski line already runs on. Costs 143, identical to 19 Oct.
+  - **Thu 29 Oct** is the next rung: **6x1km @ 4:06 off 60s, 50min door to door.** Density only, no new pace —
+    15s less recovery than 22 Oct. Safe to write before 15 Oct reports precisely because it asks no pace he has
+    not already been set. It also lands the ladder where TAPER_PLAN's Base II note already says Base I ends
+    ("6x1km @ 4:04 off 60s"): 4:04 is week 9's rung and 4:06-off-60s is the step immediately before it.
+    Costs 136, same as 22 Oct.
+  - **Fri 30 Oct** long run **80min, last 20min @ 4:30/km**. The ladder is 70 done (10 Oct, 1:10:05 / 12.80km)
+    -> 70 (16 Oct) -> 75 (23 Oct) -> 80, and the fast finish grows 15 -> 20min, the first time this block asks
+    for plan-template's full race-pace finish. Costs 108.
+  - **Wed 28 Oct** is the third writing of 6x500m @ 1:59 off 90s, compromised by a 45min Z2 run in front of it
+    because no fixture is booked. 61 + 48, same as 21 Oct.
+  - **Tue 27 Oct** carries a `note:true` tennis reminder and no prescription. No fixture is booked fourteen days
+    out, and the SCHEDULE header's own rule is that tennis is not prescribed. Costs 0 and adherence.py does not
+    count it as prescribed.
+  - **Sat 31 Oct** is the long-run backstop as a note — the mechanism that actually worked on 10 Oct, when
+    Friday 9 Oct went to a two-hour match and the 70min landed on the Saturday.
+  - **no Hyrox-circle note in week 8.** The circle has not run since 25 Sep, five weeks. Weeks 6 and 7 still
+    carry their `note:true` reminder and I left those alone, but propagating it into a week thirteen days out is
+    clutter for something that does not happen.
+  - **Sunday stays "Full rest - family day"** although he trains 7 Sundays in 10 (3 of them tennis), and
+    11 Oct's 1h29 match on a written rest day is what preceded the missed Monday. **I drafted an edit here and
+    it was wrong:** plan-template.md records "Sunday is family day and full rest" as his own constraint, and
+    unplanned Sunday load is meant to be absorbed retrospectively by adaptPlan. Reading the reference instead
+    of trusting my own pattern-match is the only reason that edit did not ship.
+  - **week 8 costs 494** against 400-560, scale 1.000, no day adjusted. Weeks 6 (466 remaining / 609 as
+    written) and 7 (589) are unchanged.
+- **two costing traps I introduced and caught before pushing, both in one line, and both one word.** The Wed
+  28 Oct ski first read "1:59 either holds to rep 6 **or** the format changes" — `isOptionalLine` tests
+  `/\bOR\b/i`, so that halved the session — and the same draft had dropped the word **compromised**, which
+  drops `PLAN_INTENSITY` from the 162 group to the 146 erg group. Together they priced a session **identical to
+  14 and 21 Oct at 16 TRIMP instead of 48.** Rewritten with "compromised by it" and with no bare "or"; it now
+  prices at 48, matching both. Recording the mechanism because this is the **second morning running** that a
+  draft line was mispriced by a single word, and the cost of the first was caught the same way.
+- **engine defects, outside this Routine's edit surface, both unchanged:**
+  1. **`isTennis` (src/App.jsx:1151) is `=== "tennis"` against rows typed `Tennis V2`**, so `loadModel.tennis`
+     has **n=0** and every planned court session is priced from the 138bpm/75min fallback at **101 TRIMP**
+     against a measured mean of **78** across his four matches last week. **Eighth entry recording this. One
+     word: `/^tennis/`.** Its effect today is specific: week 7 costs 589 against a 560 ceiling and roughly 23 of
+     that overshoot is phantom load on the single booked match.
+  2. **`HARD_TRIMP = 55` in `adaptPlan` counts ordinary days as hard.** Quiet this morning only because the
+     rest day reset `consecutiveHard` to 0 — the instrument is still a TRIMP threshold where it wants an
+     intensity test (`_avgHR >= HARD_HR`). Second entry.
+- verification: `npm run build` clean, **446.45 kB** against **443.98** yesterday — **+2.47 kB**, all of it the
+  new week's plan text. **11/11** patch anchors. 131 daily and 130 sleep rows, all at 4-space indent. SCHEDULE
+  **57 days** (was 50), dates sorted and unique, every day line at 4-space indent, **8 weeks**; TAPER_PLAN
+  **18 blocks**. Round-trip `update.patch()` against a copy of the real src/App.jsx (module body above
+  `# -- Main --`, `head -1046`, imported with `-I`): **24/24** — TODAY advanced, daily/sleep/weight/CSV all
+  patched, wellness rows keeping their 4-space indent, sorted and deduped with no rows lost, and SCHEDULE,
+  TAPER_PLAN, RACE, STATION_TARGETS, RACE_BUDGET and RACE_GAINS all byte-identical through the patch, with
+  week 8 surviving. **Three notes for the next cold run, which cost me two harness runs:** `patch()` advances
+  TODAY to **`date_str` + 1 day**, not to `date_str`; it reads sleep stages from a **nested `wellness["sleep"]`
+  dict**, not from flat `deep`/`rem`/`light` keys; and `weight` is a **`(date, kg)` tuple**, not a float.
+- **on the no-change count: zero consecutive NO CHANGE runs precede this entry — the last twenty-three all say
+  CHANGED.** Passivity is not this Routine's failure mode now; churn is. So this run made exactly one change,
+  on days he has not reached, and deliberately declined the two edits it was most tempted by — a cut to week 6
+  off the RHR signal, and moving the Monday keystone off a single miss.
+- watching:
+  - **RHR, restated as a level test because the excursion test could not see what happened.** **What would make
+    me act: if the 7-day RHR mean is still at or above 44 on Mon 19 Oct, week 7 loses the Wednesday 45min Z2
+    run** — the cheapest line in that week, and the one whose only job is to compromise the ski, which 14 Oct
+    will have already shown a court can do instead. **Decide it Mon 19 Oct.** The Thursday KEY RUN and the
+    Friday long run are the last two things to go, never the first.
+  - **the Thursday KEY RUN, 15 Oct.** Unchanged and still the real test — 6 Oct was written as the benchmark
+    and he ran an easy Z2 10km instead. **What would make me act: if 15 Oct is blank or reads easy, the quality
+    run comes off a standalone slot entirely and gets bolted to Monday's gym trip, the only session in this
+    block that has ever been 1-for-1. Decide it Fri 16 Oct**, not after 22 Oct has also failed.
+  - **Base I week 9 (2-8 Nov), still unwritten, and deliberately.** Its rung is the 4:04-off-60s that
+    TAPER_PLAN's Base II note already names as where Base I ends, and writing 4:04 before knowing whether 4:06
+    held to the last rep would be guessing. **What would make me act: write it on Fri 23 Oct, once 15 and
+    22 Oct have both reported — and write it sooner than that if either Thursday is missed**, because then the
+    ladder needs re-anchoring rather than extending.
+  - **the Monday keystone, now 1-for-2** (5 Oct in full, 12 Oct missed). Not moved, for the reasons above.
+    **What would make me act: a second consecutive miss on 19 Oct makes it 1-for-3, and then the compromised
+    ski moves to Wednesday and merges with the 6x500m — one gym trip instead of two. Decide it Tue 20 Oct.**
+  - **the ski format.** Two continuous ten-minute pieces against an interval ask so far (7 Oct Row 10min 2400m,
+    8 Oct Ski-ERG 10min 2380m). Yesterday's trigger carries forward unchanged: **a third continuous ten-minute
+    piece on 14 Oct makes 4x500m off 60s the written ask.** Worth restating that 2380m in 10:18 is 4:19/1000m —
+    his exact Athens split — off a 3:54 fresh TT. That gap is priority 1, in one line.
+  - **the 560 ceiling.** Week 6 remaining costs 466 and `unplanned7` is **316**, so if court load repeats the
+    week closes near 600 again. Yesterday's trigger stands: **if 12-18 Oct closes above 620 with running again
+    under 150, court time has to be entered as a booked fixed cost rather than arriving as unplanned load.
+    Decide it Mon 19 Oct.**
+  - **swim 1x/0 has aged out and is not a finding.** Its only prescription is 8 Sep's "20-30min very easy jog
+    OR swim" in the decompress week; it will leave the 21-day window on its own.
+
+---
+
 ## 2026-10-12
 - adherence: no ACTION REQUIRED and no WATCH. ski 6/3 · row 1/1 · hyrox 4/1 · strength 5/5 · swim 1x/0
   (ages out tomorrow) · cycle 2/5 · tennis 4/9 · **run 10/6, short by 4 — and only 2 of the 10 landed on

@@ -1504,6 +1504,16 @@ const SCHEDULE = [
     { date:"2026-10-24", dow:"SAT", label:"Oct 24", sessions:[{type:"plan",note:true,text:"If yesterday went to something else, today is the long run — same 75min, same closing 15min at 4:30/km. Nothing else sits here."}] },
     { date:"2026-10-25", dow:"SUN", label:"Oct 25", sessions:[{type:"rest",text:"Full rest · family day"}] },
   ]},
+
+  { week:8, label:"Oct 26–Nov 1", theme:"Base I · Aerobic", days:[
+    { date:"2026-10-26", dow:"MON", label:"Oct 26", sessions:[{type:"plan",text:"GYM 60min · compromised ski: [1000m ski → 1km treadmill] ×3 continuous, then sled pull 8×25m + lunges 4×50m with the bag never down. Same ask as 19 Oct — every rep under 4:08 and rep 3 within 6s of rep 1 — because one answer is not a trend and 12 Oct never happened. Treadmill stays a ceiling at 4:10 per kilometre; save it as \"Ski + run\"."}] },
+    { date:"2026-10-27", dow:"TUE", label:"Oct 27", sessions:[{type:"tennis",note:true,text:"Tennis 🎾 if a court comes up — nothing is written here because no fixture is booked this far out. Tuesday has been a court day in five of the last ten weeks and that load lands retrospectively."}] },
+    { date:"2026-10-28", dow:"WED", label:"Oct 28", sessions:[{type:"plan",text:"Z2 run 45min · late afternoon, straight before the second session below — one gym trip, easy legs into the machine. No match is booked today, so this run is what puts tired legs under the ski."},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight off the 45min above and compromised by it. Third time this ask has been written after 14 and 21 Oct, so this is where 1:59 has to hold to rep 6 before anything gets faster. Put the word ski in the title, and 4×500m off 60s still counts in full."}] },
+    { date:"2026-10-29", dow:"THU", label:"Oct 29", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 6×1km @ 4:06, 60s jog · 50min door to door, late morning. Same six reps as 22 Oct with 15s less recovery — the progression is density, never pace, and 4:04 arrives only once 4:06 has held to rep 6. The length is written in so a heavy week trims warmup instead of reps."}] },
+    { date:"2026-10-30", dow:"FRI", label:"Oct 30", sessions:[{type:"plan",text:"Long run 80min · last 20min @ 4:30/km · five minutes longer than 23 Oct with the fast finish grown from 15 to 20min. If Friday gets taken, Saturday is the backstop. Hold 4:30 to the last kilometre; drift means finish easy and write it down."}] },
+    { date:"2026-10-31", dow:"SAT", label:"Oct 31", sessions:[{type:"plan",note:true,text:"If yesterday went to something else, today is the long run — same 80min, same closing 20min at 4:30/km. Nothing else sits here."}] },
+    { date:"2026-11-01", dow:"SUN", label:"Nov 1", sessions:[{type:"rest",text:"Full rest · family day"}] },
+  ]},
 ];
 
 
