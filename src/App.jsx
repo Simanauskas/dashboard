@@ -1071,11 +1071,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-14";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-14T13:08:00Z";
-const LAST_DATA = "2026-10-14T13:08:00Z";
+const LAST_RUN  = "2026-10-14T14:08:00Z";
+const LAST_DATA = "2026-10-14T14:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-14T13:08:00Z";
+const LAST_MFP  = "2026-10-14T14:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1502,7 +1502,7 @@ const SCHEDULE = [
   { week:7, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
     { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"GYM 60min · compromised ski: [1000m ski → 1km treadmill] ×3 continuous, then sled pull 8×25m + lunges 4×50m with the bag never down. Every rep under 4:08 AND rep 3 within 6s of rep 1 — the fade target tightens, the ceiling deliberately does not. Treadmill stays a ceiling at 4:10 per kilometre; save it as \"Ski + run\"."}] },
     { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"}] },
-    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"plan",text:"Z2 run 45min · late afternoon, straight before the second session below — one gym trip, easy legs into the machine. No match is booked today, so this run is what puts tired legs under the ski; on 14 Oct the court does that job instead."},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight off the 45min above and compromised by it, the same ask as 14 Oct because one answer is not a trend. Hold 1:59 to rep 6 before anything gets faster. Put the word ski in the title."},{type:"hyrox",note:true,text:"Hyrox circle @ Gym+ · if it runs tonight. It has not run since 25 Sep, so this is a reminder rather than a session and the ski above does not wait on it."}] },
+    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Simonas Dong · court 1 · 20:30"},{type:"plan",text:"Z2 run 45min · late afternoon, straight before the second session below — one gym trip, easy legs into the machine. No match is booked today, so this run is what puts tired legs under the ski; on 14 Oct the court does that job instead."},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight off the 45min above and compromised by it, the same ask as 14 Oct because one answer is not a trend. Hold 1:59 to rep 6 before anything gets faster. Put the word ski in the title."},{type:"hyrox",note:true,text:"Hyrox circle @ Gym+ · if it runs tonight. It has not run since 25 Sep, so this is a reminder rather than a session and the ski above does not wait on it."}] },
     { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 6×1km @ 4:06, 75s jog · 50min door to door, late morning. A sixth rep and 15s less recovery — the progression is density, never pace, and 4:04 off 60s comes only once 4:06 has held to the last rep. Both Thursday benchmarks carry a written length now, so the week trims warmup rather than reps."}] },
     { date:"2026-10-23", dow:"FRI", label:"Oct 23", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km · five minutes longer than 16 Oct, and the fast finish is 15min at 4:30 rather than 20min at 4:25, because the ladder now climbs from 1:06 and not from a number you have never run. If Friday gets taken, Saturday is the backstop. Hold 4:30 to the last kilometre; drift means finish easy and write it down."}] },
     { date:"2026-10-24", dow:"SAT", label:"Oct 24", sessions:[{type:"plan",note:true,text:"If yesterday went to something else, today is the long run — same 75min, same closing 15min at 4:30/km. Nothing else sits here."}] },
