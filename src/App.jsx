@@ -149,6 +149,7 @@ const HEALTH_DATA = {
     {date:"2026-10-14",hrv:84,rhr:47,spo2:98,resp:13.0,sleep_score:null},
     {date:"2026-10-15",hrv:31,rhr:68,spo2:98,resp:19.0,sleep_score:null},
     {date:"2026-10-16",hrv:88,rhr:51,spo2:98,resp:13.0,sleep_score:null},
+    {date:"2026-10-17",hrv:78,rhr:50,spo2:98,resp:12.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -284,6 +285,7 @@ const HEALTH_DATA = {
     {date:"2026-10-14",deep:99,rem:36,light:360,awake:18},
     {date:"2026-10-15",deep:28,rem:0,light:283,awake:50},
     {date:"2026-10-16",deep:43,rem:0,light:382,awake:12},
+    {date:"2026-10-17",deep:65,rem:79,light:306,awake:2},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1077,11 +1079,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-17";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-17T06:07:00Z";
-const LAST_DATA = "2026-10-17T06:07:00Z";
+const LAST_RUN  = "2026-10-17T07:07:00Z";
+const LAST_DATA = "2026-10-17T07:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-17T06:07:00Z";
+const LAST_MFP  = "2026-10-17T07:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2335,7 +2337,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 71; // updated 2026-10-16
+const hrvBaseline = 71; // updated 2026-10-17
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
