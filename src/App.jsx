@@ -1079,11 +1079,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-17";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-17T07:07:00Z";
-const LAST_DATA = "2026-10-17T07:07:00Z";
+const LAST_RUN  = "2026-10-17T08:07:00Z";
+const LAST_DATA = "2026-10-17T08:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-17T07:07:00Z";
+const LAST_MFP  = "2026-10-17T08:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1519,7 +1519,7 @@ const SCHEDULE = [
 
   { week:8, label:"Oct 26–Nov 1", theme:"Base I · Aerobic", days:[
     { date:"2026-10-26", dow:"MON", label:"Oct 26", sessions:[{type:"plan",text:"GYM 60min · compromised ski: [1000m ski → 1km treadmill] ×3 continuous, then sled pull 8×25m + lunges 4×50m with the bag never down. Same ask as 19 Oct — every rep under 4:08 and rep 3 within 6s of rep 1 — because one answer is not a trend and 12 Oct never happened. Treadmill stays a ceiling at 4:10 per kilometre; save it as \"Ski + run\"."}] },
-    { date:"2026-10-27", dow:"TUE", label:"Oct 27", sessions:[{type:"tennis",note:true,text:"Tennis 🎾 if a court comes up — nothing is written here because no fixture is booked this far out. Tuesday has been a court day in five of the last ten weeks and that load lands retrospectively."}] },
+    { date:"2026-10-27", dow:"TUE", label:"Oct 27", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"tennis",note:true,text:"Tennis 🎾 if a court comes up — nothing is written here because no fixture is booked this far out. Tuesday has been a court day in five of the last ten weeks and that load lands retrospectively."}] },
     { date:"2026-10-28", dow:"WED", label:"Oct 28", sessions:[{type:"plan",text:"Z2 run 45min · late afternoon, straight before the second session below — one gym trip, easy legs into the machine. No match is booked today, so this run is what puts tired legs under the ski."},{type:"plan",text:"SKI 20min · 6×500m @ 1:59 off 90s, straight off the 45min above and compromised by it, then lat pulldown 4×10 plus sled pull 6×25m in the same trip. 14 Oct was never trained, so 21 Oct is the first real answer on this ask and today is the second — 1:59 has to hold to rep 6 here before anything gets faster. Put the word ski in the title, and 4×500m off 60s still counts in full."}] },
     { date:"2026-10-29", dow:"THU", label:"Oct 29", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 6×1km @ 4:06, 60s jog · 50min door to door, late morning. Same six reps as 22 Oct with 15s less recovery — the progression is density, never pace, and 4:04 arrives only once 4:06 has held to rep 6. The length is written in so a heavy week trims warmup instead of reps."}] },
     { date:"2026-10-30", dow:"FRI", label:"Oct 30", sessions:[{type:"plan",text:"Long run 80min · last 20min @ 4:30/km · five minutes longer than 23 Oct with the fast finish grown from 15 to 20min. If Friday gets taken, Saturday is the backstop. Hold 4:30 to the last kilometre; drift means finish easy and write it down."}] },
