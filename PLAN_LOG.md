@@ -53,6 +53,229 @@ and never once done.
 
 ---
 
+## 2026-10-18
+- adherence: **ACTION REQUIRED still prints `hyrox: 3x — 2026-09-30, 2026-10-07, 2026-10-08`, and it is the
+  same backward-looking artifact yesterday resolved — all three are PAST days and there are now **0 hyrox,
+  circle or roxzone lines anywhere from 19 Oct onward** (verified over all 14 forward days, not assumed).
+  ski 5/3 · row 1/1 · **hyrox 3/0** · strength 4/4 · cycle 1/4 · tennis 2/8 · **run 10/4, short by 6 and
+  still the largest shortfall on the board** (it read 11/4 yesterday; 29 Sep rolled out of the 21-day
+  window). No WATCH section printed — nothing sits at 2-and-0. Benchmarks already due: 28 Sep and 2 Oct
+  NOTHING LOGGED, 30 Sep logged, 6 Oct TRAINED EASY INSTEAD, 8 Oct TRAINED OTHER TYPE, 15 Oct NOTHING
+  LOGGED (closed as illness). Next 14d: Thu 22 Oct and Thu 29 Oct, both KEY RUNs.
+- readiness: HRV **78** vs baseline **71** (+7), RHR **50**, resp **12.0**, REM **79**, sleepMin **450**.
+  TSB **-5.12** (was -8.9), ATL **36.79**, CTL **31.67**, `consecutiveHard` 0, `daysSinceRest` 0, forceRest
+  FALSE, easeHard FALSE, **readiness 7/10 (was 8)**, scale **1.250**, scaleWhy *"week projects 129 TRIMP,
+  under the 400 floor, and readiness is 7/10"*, `adjustments: []` (week 6 is closed, remainingPlanned 0).
+  LAST_DATA **2026-10-18T06:07Z**, LAST_RUN the same — 21 minutes old, sync healthy. 135 daily / 134 sleep
+  rows, contiguous through 17 Oct.
+- decision: **CHANGED — week 7 is re-costed from 691 to 605 so the governor trims it 7% instead of 19%.**
+  Three SCHEDULE edits, all on a week he has **not started**, plus one TAPER_PLAN note block. **Bands
+  untouched — the ceiling stays 560.** Weeks 1-6 untouched; week 8 deliberately untouched but for one
+  sentence on Mon 26 Oct.
+- **the 17 Oct row landed, and it is the first thing to check as yesterday instructed.** `{date:"2026-10-17",
+  hrv:78,rhr:50,spo2:98,resp:12.0}` and `{deep:65,rem:79,light:306,awake:2}`. So yesterday's "not-yet-landed,
+  not a fault" reading was right and there is **no gap to backfill**. Read as yesterday asked — as the
+  morning's verdict after the fact — **RHR 50 means the cancel branch was the correct one to add**: the gate
+  read *"at 50 and above do not go at all"*, and **nothing is logged on 17 Oct**, so he executed it himself
+  off his own watch. That is the first evidence in this block that a three-branch gate written into a line
+  actually works, and it is the reason the tool is worth reusing rather than a lucky outcome.
+- **the illness has resolved on the marker yesterday named, which is REM and not HRV.** REM went **0 → 0 →
+  79** across 15-17 Oct and respiration **19.0 → 13.0 → 12.0** (19.0 remains the highest in all 135 rows).
+  Yesterday's armed trigger was *"a third zero-REM night or RHR back above 55 in the 17 or 18 Oct rows and
+  Monday's gym trip comes down to the ski alone without the sled pull and lunges"*. **Neither clause fired**
+  — REM is back and RHR is 50, not above 55 — so **Monday keeps its sled pull and its lunges**, and that
+  trigger is now closed rather than carried. 79min of REM is still well under his 114-145 normal, so this is
+  resolved, not restored.
+- **the 19 Oct RHR trigger DID fire, and it is the first of today's edits.** It read: compute the 7-day RHR
+  mean excluding 15 and 16 Oct; at or above 44 cut the Wednesday Z2 run; under 44 week 7 stands. Stating the
+  n as instructed: the clean rows in 13-19 Oct are **13 Oct 46, 14 Oct 47, 17 Oct 50 — n=3, mean 47.67**,
+  against a 44 cut line. The unexcluded 13-19 mean is 52.40 and is NOT what I used, per yesterday's explicit
+  warning. **So the 45min Z2 run comes off Wed 21 Oct**, and the number is not marginal: 47.67 is 3.67 above
+  the line and 4.77 above the prior-30 mean of **42.90**.
+- **the wider RHR reading, which the Routine asks for and which is not only about the infection.** His stated
+  range is 38-46. The last eight rows run **47, 43, 45, 46, 47, 68, 51, 50**. Strip the two sick days and the
+  five clean pre-illness days 10-14 Oct still mean **45.60 — at the ceiling of his range, 2.70 above the
+  prior-30 mean of 42.90**. So there is a **mild sustained upward drift in RHR that began around 10 Oct,
+  before the infection declared**, and it sits directly after week 5 closing at **693 measured — his record
+  week, 47% above the previous best of 472** — and directly before the 12 Oct keystone being missed and an
+  infection on 15 Oct. **Overreach, prodrome, illness is a coherent reading of that sequence**, and it is the
+  single reason I did not raise the ceiling (below). `hrvBaseline` is **71**, down from 80 across the
+  illness; it is still illness-depressed, which is why the governor is asking for +25% on a week an infection
+  emptied. That artifact is unchanged from yesterday except that **readiness fell 8 → 7** as HRV's delta came
+  back toward baseline.
+- **the finding of this run: week 7 was written at 691 against a 560 ceiling, so Monday morning would have
+  opened at scale 0.813 and cut all five of its sessions by 19%.** I simulated it rather than inferring it
+  (TODAY forced to 2026-10-19 against a copy of the engine, `adaptPlan` re-read): **GYM 60→50min, Z2 run
+  45→35min, SKI 20→15min, KEY RUN 50→40min, long run 75→60min**, five `trim` adjustments. **Three of those
+  land below the floor at which the session stops being the session.** The KEY RUN at 40min door to door
+  cannot hold 6×1km @ 4:06 off 75s jog — the reps and recoveries alone are **30:51**, leaving 9min for
+  warmup, cooldown and getting there, and the whole point of writing a length in was that a heavy week trims
+  warmup rather than reps. The ski at 15min cannot hold 6×500m @ 1:59 off 90s (**19:24**). And the long run
+  at 60min is **below the 70min he already ran on 10 Oct**, so the ladder goes backwards. **This is the
+  block-level judgement the engine cannot make**: `adaptPlan` trims proportionally and has no way to know a
+  set-based session has a floor, so which session leaves an over-budget week is the plan's call.
+- **why this recurred eight days after 12 Oct fixed exactly the same thing.** 12 Oct cut week 6 from 736 to
+  fit the 560 ceiling and recorded *"the written week is cut to fit the band instead of the band being raised
+  to fit the week"*. **Week 7 was never re-costed afterwards**, and two things pushed it back over: week 8
+  was written on 13 Oct, and the booked court fixtures landed. One of those arrived **overnight**: the
+  **27 Oct 10:00 fixture with Edvinas appeared in the 2026-10-17T08:07Z sync**, after yesterday's run had
+  already read the file, which is why yesterday costed week 8 at 494 and it costs **595** this morning. A
+  fixture is machine-written by `calendar_sync.py` (`cal:true`, 10-day horizon, so 18-28 Oct is live), so
+  **the cost of a written week moves on its own between runs** and re-costing the next unstarted week is a
+  standing job, not a one-off.
+- **what I changed, and the arithmetic after it.** (1) **Mon 19 Oct is a re-entry, not the week's hardest
+  session:** GYM 60→50min, compromised ski **×3 → ×2**, sled pull 8×25m → 6×25m, lunges 4×50m → 3×50m, both
+  marked light. The reason is not the band — it is that Monday is **day one back from four blank days
+  (15-18 Oct), his last erg was 8 Oct and his last run 10 Oct**, so a hard triple off a 10-day quality
+  layoff is the wrong first session. (2) **The ×3 fade ask moves off 19 Oct onto 26 Oct.** This matters more
+  than the dose: *"every rep under 4:08 and rep 3 within 6s of rep 1"* is a **measurement**, and taken off
+  ten days without an erg it would have measured the layoff and not the fade, then been compared against
+  5 Oct's 4:02/4:19/4:24. 26 Oct already asked for the identical thing, so nothing is lost — it simply
+  becomes the **first** honest ×3 answer instead of the second, which is what its line now says. (3) **Wed
+  21 Oct loses the 45min Z2 run** on the RHR trigger above; the ski keeps `6×500m @ 1:59` and keeps its lat
+  pulldown 4×10 plus sled pull 6×25m in the same trip, and takes **15min of easy treadmill inside the
+  session** so the erg is still compromised rather than fresh. Result, measured not estimated: week 7 **691 →
+  605**, Monday's scale **0.813 → 0.926**, a **7% trim**, and the week now reads **GYM 45min · SKI 20min ·
+  KEY RUN 45min · long run 70min** — the **ski set is no longer trimmed at all**, the KEY RUN keeps 14min for
+  warmup and travel around its 30:51, and the long run lands exactly on the 70min of 10 Oct with no
+  regression. Four sessions at full size instead of five at 81%.
+- **the obvious objection to edit (3), which has a specific answer.** "Ski with the run taken out from in
+  front of it" was tried once, on **14 Oct, and got nothing** — 12 Oct made that exact change. But the
+  diagnosed cause of that failure is already written in the Base I note and it is **not** the missing run:
+  *"THE ERG IS NEVER THE ONLY CONTENT OF A TRIP — 14 Oct asked for 20min of ski alone after a 13:00 match and
+  got nothing, while 30 Sep, 7 Oct and 8 Oct all landed as erg then lifting on one trip."* 14 Oct was a
+  standalone erg trip; **21 Oct is not** — it carries the lat pulldown and the sled pull that 15 Oct put
+  there precisely for this reason, plus the treadmill block. The failure mode is addressed, and the day stops
+  being the heaviest in the week (**210 → 149 TRIMP**) on a day that already carries a 20:30 match the
+  morning after a 10:00 one and sits immediately before the Thursday benchmark.
+- **why the ceiling was NOT raised, which was the live alternative and would have been the easier edit.**
+  Raising Base I to 400-660 makes the trim vanish outright — f would be 660/691 = 0.955, and the code only
+  trims below 0.95 — and the note's own rule permits a move on *"closed measured weeks and on the plan's own
+  costed total"*, both of which I have (327, 693, 129 measured; 691 and 595 written). **I rejected it on the
+  physiology.** 693 is his record week by 47%, and it is followed by a missed keystone and an infection; a
+  ceiling of 660 would sanction almost exactly the load that preceded the illness, and it would have handed
+  him the full 691 on day one back from four blank days. I also declined to raise only the **floor**: the
+  inflation branch is capped at 1.25 either way, so a higher floor adds no headroom and only fires 1.25 on
+  more weeks — the opposite of what an illness-depressed baseline needs. **The band is right; the written
+  week was wrong.**
+- **is the phase still right, and have the bands got a real answer yet.** Base I · Aerobic (28 Sep - 8 Nov,
+  400-560) is four weeks in and has closed inside the band **zero times**: 327, 693, **129**. Two of those
+  four weeks contained illness (2-3 Oct, 15-17 Oct), so the honest statement is unchanged from yesterday —
+  **no clean week has tested this band yet**, and week 7 is the first one that can. The phase itself is
+  right: Copenhagen is 27 Mar 2027, 160 days out, and specificity belongs later. **Weakness ranking has not
+  moved** and could not have: nothing has been raced or tested since Athens, and the last erg was 8 Oct.
+  Ski remains top 29.8%, running top 27.7%, roxzone top 19.8% and not trainable as a session.
+- **what I deliberately left alone.** (1) **The three past hyrox prescriptions stay exactly as written** —
+  rewriting them would clear the flag instantly and destroy the only instrument that sees across days, which
+  is the fourteen-mornings failure this file exists to prevent. 30 Sep leaves the window **21 Oct**, 7 and
+  8 Oct on **28 and 29 Oct**; from 29 Oct it clears itself. **A run before 29 Oct should read this and not
+  re-cut it.** (2) **Week 8 keeps its 45min Wednesday Z2 run** — it costs 595, which trims 6% on 26 Oct and
+  breaks nothing, and the RHR trigger I fired was written about 21 Oct, not about a week nine days out.
+  (3) **Fri 23 Oct keeps the long run with Sat 24 as its backstop**, though the record favours Saturday
+  (10 Oct landed, 9 Oct did not) — see watching. (4) **Today's own line is untouched**: Sunday is full rest
+  and family day. (5) **No machine-written constant touched** — not HEALTH_DATA, HYROX_DATA, CSV_DATA, TODAY,
+  LAST_RUN, LAST_DATA, `hrvBaseline`, and not one `cal:true` fixture line.
+- verification: `npm run build` clean, **450.18 kB** against yesterday's 448.96 (+1.22 kB: the note block in,
+  one schedule line out, plus the bot's rows). **11/11** patch anchors. SCHEDULE **57 days / 8 weeks**,
+  2026-09-06..2026-11-01, dates sorted and unique, **every `dow` verified against its own date (0
+  mismatches)**, all day lines at 4-space indent, **3 `cal:true` lines still matching `calendar_sync.py`'s
+  own regex** and the `DAY` day-line shape intact for both that script and adherence.py. TAPER_PLAN **18
+  blocks**; 135 daily and 134 sleep rows, indent `{4}` only, sorted and unique. Engine re-read after the
+  edit: week 7 **605**, week 8 **595**, Monday's simulated scale **0.926** with 4 adjustments and the ski
+  untouched; today's governor still week 6, projected **129**, scale **1.250**, `adjustments: []`.
+  adherence.py re-run after the edit: **every count identical** (run still 10, ski 5, hyrox 3), no
+  prescription erased and no new type minted — correct, since all four edits are on future dates outside the
+  backward window. Round-trip `update.patch()` against a copy of the real src/App.jsx (`head -1046
+  update.py`, imported with `-I`): **29/29** — TODAY advanced to `date_str`+1, daily/sleep/weight/CSV all
+  patched, wellness rows keeping their 4-space indent, both arrays sorted, unique and grown by exactly one
+  with no pre-existing date lost, weight date unique inside its own array and **`vo2max` byte-identical
+  (gotcha 4)**, no `hrv:0` row, no `sleep_score:None`, and SCHEDULE, TAPER_PLAN, RACE, ATHENS,
+  STATION_TARGETS, RACE_BUDGET, RACE_GAINS and HYROX_DATA all byte-identical through the patch with all four
+  of today's edits surviving. One assertion failed on the first pass and was **my check, not the file**: it
+  tested that no `Z2 run 45min · late afternoon` string remained anywhere, which also matched **week 8's
+  28 Oct line that I intentionally kept** — re-scoped per-day, 21 Oct has 2 sessions with the run gone and
+  the fixture intact, 28 Oct still has its run.
+- **on the no-change count.** The three entries before this one are **17 Oct CHANGED, 16 Oct CHANGED,
+  15 Oct CHANGED**, so **zero consecutive NO CHANGE runs precede this one** and the file's three-NO-CHANGE
+  warning does not apply. Churn is the live risk in the other direction, which is why this morning changed
+  **two sessions on an unstarted week, one sentence on a third, and one phase note**, while declining to
+  raise the band, rewrite week 8, move the Friday long run, or touch the week that just closed.
+- **engine defects, outside this Routine's edit surface, carried:**
+  1. **`isTennis` (src/App.jsx:1161) is `=== "tennis"` against rows typed `Tennis V2`**, so
+     `loadModel.tennis` reads **`{hr:138, min:75, n:0}`** — n=0, confirmed again — and planned court
+     sessions price from that fallback at **101 TRIMP each against a measured ~78** (week 5: 311 across four
+     matches). **Thirteenth entry, and today it had teeth**: the two booked fixtures are **202 of week 7's
+     691, 29% of the week**, and ~46 of that is the bug. One word: `/^tennis/`.
+  2. **`readiness()` (src/App.jsx:1326) takes only TSB and HRV.** No RHR, no respiration, no REM — the three
+     signals that actually tracked this illness. **Third entry.** `signals.rhr` is already computed and
+     exposed; feeding it in is the durable fix.
+  3. **`HARD_TRIMP = 55` counts ordinary days as hard.** Quiet again (`consecutiveHard` 0). **Seventh entry.**
+  4. **`update.py:661`** writes `sleep_score:None` if a caller passes the key with an explicit `None`. Not
+     reachable from the real fetch path. **Third entry; recorded, not fixed.**
+- **notes for the next cold run, all verified against today's file.** The node harness cut is
+  **`sed -n '2,1941p' src/App.jsx`** — **1941, not the 1940 yesterday recorded; the number drifts with the
+  bot's rows, so find the closing brace of `adaptPlan` rather than trusting either** (`awk 'NR>=1706 && /^}/
+  {print NR; exit}'`). Cutting one line short fails as `SyntaxError: Unexpected token 'export'`, which looks
+  like a bad export and is not. Append `grep '^const hrvBaseline'` after it. **To see what the governor will
+  do tomorrow, copy the harness and `sed` TODAY forward** — that simulation is what found today's 19% trim
+  and nothing in the live page shows it. When checking an indent, **use `[ ]*` and not `\s*`**: `\s` eats the
+  newline under `re.M` and reports a phantom 5-space row. `PREV_RACE` is a one-liner, `const PREV_RACE =
+  ATHENS;` — check `ATHENS` as the object instead. Measured load is not readable off the week objects; use
+  **`governor.doneTrimp` / `remainingPlanned` / `projected`**. `planDurationMin` tries **h:mm before
+  bare-min**, which is why `1h10` costs a correct 70 and is immune to `scaleDuration`; `scaleDuration`
+  rewrites only the **first** `(\d+)min` token, so a second duration later in the same line survives a trim
+  untouched. `PLAN_INTENSITY` is **first-match-wins and `compromised` (162) is tested before `strength|sled|
+  pulldown` (126)** — drop the word "compromised" from an erg line that also mentions a sled and its cost
+  silently falls by a quarter. adherence.py counts **dates, not sessions**, per type, so adding the word
+  `jog` or `km` to a ski line mints a phantom prescribed run; I used "treadmill" on 21 Oct deliberately,
+  since it matches only the activity side. The repo clone here is **shallow (50 commits)**, but
+  `git log -S` back to 15 Oct is enough to date a `cal:true` fixture, which is how the 27 Oct one was pinned
+  to 17 Oct 08:07Z. `npm ci` is needed before `npm run build` — vite is not installed in a fresh container.
+- watching:
+  - **Monday 19 Oct, the keystone, still 1-for-2** (5 Oct in full, 12 Oct missed two days before the
+    infection, so plausibly prodrome). It is now written as a ×2 re-entry, which is the easiest version it
+    has ever been. **What would make me act: a miss on 19 Oct makes it 1-for-3 and the compromised ski moves
+    to Wednesday to merge with the 6×500m, leaving the week one erg trip instead of two. Decide it Tue
+    20 Oct** — and note the diagnosis then has to separate "day one back from illness" from "Monday does not
+    work", which a single miss cannot do on its own.
+  - **the 18 Oct row, missing at the time of this run and not a fault.** No `{date:"2026-10-18"}` row exists;
+    LAST_DATA is 21 minutes old and the arrays are contiguous, and the same thing happened on 17 Oct and
+    resolved on its own — weekends sync late. **What would make me act: if 18 Oct is still absent on the
+    19 Oct run, that is a real gap** — say so, change nothing on its account, and expect `mode=backfill` if
+    it is still missing on 20 Oct. **It also carries the last unread clause of the illness**: if 18 Oct reads
+    RHR above 55 or a return to zero REM, Monday comes down to the ski alone and the lifting comes off.
+  - **the ski, and 21 Oct is still the first real test of 6×500m @ 1:59.** It is now protected from the
+    governor (20min survives a 7% trim intact) and it carries the lifting and a treadmill block. Standing
+    number: **2380m in 10:18 on 8 Oct is 4:19/1000m, his exact Athens split, off a 3:54 fresh TT** — the 24s
+    this block exists to recover. **What would make me act: if 21 Oct logs no erg, the Wednesday ski merges
+    into Monday's trip and the week carries one erg. Decide it Thu 22 Oct**, and read it **separately** from
+    the KEY RUN test that lands the same day — a blank Thursday is evidence about the run and says nothing
+    about the erg.
+  - **running delivery, still the sharpest number in the block: 4 of 10 prescribed over 21 days, on his
+    weakest block against the field at top 27.7%.** Week 6 closed with **zero running minutes** against 158
+    on court, but it closed that way because of an infection, and growing a week to compensate for an illness
+    is the same error as cutting one. Week 7 now asks ~125 running minutes (KEY RUN + long run) against ~178
+    as written — **I removed a prescription, so judge the ratio honestly next week, not just the total.**
+    **Trigger unchanged: judge 19-25 Oct, decide it Mon 26 Oct; if it closes under 90 running minutes with no
+    illness in it, week 9's Wednesday run grows.**
+  - **the Friday-versus-Saturday long run, left alone today and the closest thing to an unforced miss.**
+    23 Oct carries it with 24 Oct as a `note:true` backstop. The record favours the backstop: **9 Oct Friday
+    did not happen and 10 Oct Saturday did, at 70min**. It also sits the day after the Thursday threshold
+    set, which is hard-on-hard. **What would make me act: if 23 Oct is blank and 24 Oct carries the long run
+    again, the pairing is 0-for-2 on Friday and the long run moves to Saturday outright with Friday written
+    easy or empty. Decide it Mon 26 Oct**, alongside the running-minutes judgement and the band question, so
+    one week's evidence settles all three.
+  - **the band, and the first clean week is finally in front of us.** Base I has closed 0-for-4 inside
+    400-560 and no clean week has tested it. Week 7 is written at **605**, which trims 7% to about 573 asked.
+    **What would make me act: if 19-25 Oct closes above 620 with running again under 150 minutes, court time
+    becomes a booked fixed cost counted separately rather than unplanned load inside the band. Decide it
+    Mon 26 Oct.** And note the trap this trigger nearly walked into: **the governor interferes with its own
+    experiment** — a week whose sessions were all shaved 19% before he saw them cannot tell you whether the
+    band is right. That is now much less of a problem at 7%, which is the second reason today's edit mattered.
+  - **week 9 (2-8 Nov) is still unwritten** and Base I runs to 8 Nov. Yesterday set it for **Fri 23 Oct**,
+    alongside the 22 Oct benchmark read. Unchanged.
+
+
 ## 2026-10-17
 - adherence: **ACTION REQUIRED is back — `hyrox: 3x — 2026-09-30, 2026-10-07, 2026-10-08`, prescribed three
   times and trained zero.** It was absent yesterday (hyrox read 3/1) because the 21-day window moved: the
