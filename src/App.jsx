@@ -1088,11 +1088,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-21";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-21T18:08:00Z";
-const LAST_DATA = "2026-10-21T18:08:00Z";
+const LAST_RUN  = "2026-10-21T19:08:00Z";
+const LAST_DATA = "2026-10-21T19:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-21T18:08:00Z";
+const LAST_MFP  = "2026-10-21T19:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1519,7 +1519,7 @@ const SCHEDULE = [
   { week:7, label:"Oct 19–25", theme:"Base I · Aerobic", days:[
     { date:"2026-10-19", dow:"MON", label:"Oct 19", sessions:[{type:"plan",text:"GYM 50min · compromised ski: [1000m ski → 1km treadmill] ×2 continuous, then sled pull 6×25m + lunges 3×50m, both light. Two reps and not three because your last erg was 8 Oct and your last run 10 Oct — eleven and nine days — and the ×3 fade test on 26 Oct has to measure fade, not a layoff. This morning is the best wellness reading since the illness, HRV 113 against a baseline of 77 and RHR back to 42 inside your 38–46 range, so today’s restraint is about the layoff and nothing else. Take no split, treadmill stays a ceiling at 4:10 per kilometre, and save it as \"Ski + run\"."}] },
     { date:"2026-10-20", dow:"TUE", label:"Oct 20", sessions:[] },
-    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Simonas Dong · court 1 · 20:30"},{type:"plan",text:"SKI 20min · 15min easy treadmill first so the erg is compromised rather than fresh, then 4×500m @ 1:59 off 90s, then lat pulldown 4×10 — in the daytime, because court is booked for 20:30. The sled pull is out and it stays four reps rather than six: yesterday’s 79min match was your first training in six days, your last erg was 8 Oct, and tomorrow’s 5×1km is the week’s measurement, not this. Hold 1:59 to rep 4 and put the word ski in the title."}] },
+    { date:"2026-10-21", dow:"WED", label:"Oct 21", sessions:[{type:"plan",text:"SKI 20min · 15min easy treadmill first so the erg is compromised rather than fresh, then 4×500m @ 1:59 off 90s, then lat pulldown 4×10 — in the daytime, because court is booked for 20:30. The sled pull is out and it stays four reps rather than six: yesterday’s 79min match was your first training in six days, your last erg was 8 Oct, and tomorrow’s 5×1km is the week’s measurement, not this. Hold 1:59 to rep 4 and put the word ski in the title."}] },
     { date:"2026-10-22", dow:"THU", label:"Oct 22", sessions:[{type:"plan",text:"⏱ KEY RUN · threshold 5×1km @ 4:06, 90s jog · 50min door to door, late morning. Five reps and not six because this is your first run in twelve days, not because 4:06 is in doubt — you ran 8×1km at 4:01 unprescribed on 1 Oct, so the pace is already yours and only the layoff is new. Hold 4:06 to rep 5 and 6×1km off 75s is yours on 29 Oct; the 50min is written in so a heavy week trims warmup, never reps."}] },
     { date:"2026-10-23", dow:"FRI", label:"Oct 23", sessions:[{type:"plan",text:"Long run 75min · last 15min @ 4:30/km · five minutes longer than 16 Oct, and the fast finish is 15min at 4:30 rather than 20min at 4:25, because the ladder now climbs from 1:06 and not from a number you have never run. If Friday gets taken, Saturday is the backstop. Hold 4:30 to the last kilometre; drift means finish easy and write it down."}] },
     { date:"2026-10-24", dow:"SAT", label:"Oct 24", sessions:[{type:"plan",note:true,text:"If yesterday went to something else, today is the long run — same 75min, same closing 15min at 4:30/km. Nothing else sits here."}] },
