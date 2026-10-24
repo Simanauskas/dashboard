@@ -156,6 +156,7 @@ const HEALTH_DATA = {
     {date:"2026-10-21",hrv:111,rhr:46,spo2:98,resp:12.0,sleep_score:88},
     {date:"2026-10-22",hrv:112,rhr:46,spo2:98,resp:12.0,sleep_score:88},
     {date:"2026-10-23",hrv:106,rhr:43,spo2:98,resp:12.0,sleep_score:88},
+    {date:"2026-10-24",hrv:80,rhr:53,spo2:98,resp:14.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -298,6 +299,7 @@ const HEALTH_DATA = {
     {date:"2026-10-21",deep:113,rem:131,light:286,awake:0},
     {date:"2026-10-22",deep:106,rem:123,light:223,awake:1},
     {date:"2026-10-23",deep:142,rem:107,light:279,awake:1},
+    {date:"2026-10-24",deep:44,rem:57,light:300,awake:12},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1097,11 +1099,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-24";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-24T07:08:00Z";
-const LAST_DATA = "2026-10-24T07:08:00Z";
+const LAST_RUN  = "2026-10-24T08:08:00Z";
+const LAST_DATA = "2026-10-24T08:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-24T07:08:00Z";
+const LAST_MFP  = "2026-10-24T08:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1546,7 +1548,7 @@ const SCHEDULE = [
   ]},
   { week:9, label:"Nov 2–8", theme:"Base I · Aerobic", days:[
     { date:"2026-11-02", dow:"MON", label:"Nov 2", sessions:[{type:"rest",text:"Rest · a walk if you want one, nothing structured. Monday has carried a gym trip three times since 5 Oct and been trained once, so the week starts on tomorrow’s trip instead. If 26 Oct gets trained anyway the sled and the lunges come back here."}] },
-    { date:"2026-11-03", dow:"TUE", label:"Nov 3", sessions:[{type:"plan",text:"GYM 50min · compromised ski: [1000m ski → 1km treadmill] ×2 continuous, then sled pull 8×25m and lunges 4×50m with the bag never down — behind the court session if one is booked, on its own if not. Still two reps and no fade test: the step to ×3 comes the week after a ×2 has actually landed, and as this is written the last erg of any kind is 8 Oct. Anything under 4:15 a rep is the win, treadmill stays a ceiling at 4:10 per kilometre, save it as \"Ski + run\"."}] },
+    { date:"2026-11-03", dow:"TUE", label:"Nov 3", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"GYM 50min · compromised ski: [1000m ski → 1km treadmill] ×2 continuous, then sled pull 8×25m and lunges 4×50m with the bag never down — behind the court session if one is booked, on its own if not. Still two reps and no fade test: the step to ×3 comes the week after a ×2 has actually landed, and as this is written the last erg of any kind is 8 Oct. Anything under 4:15 a rep is the win, treadmill stays a ceiling at 4:10 per kilometre, save it as \"Ski + run\"."}] },
     { date:"2026-11-04", dow:"WED", label:"Nov 4", sessions:[{type:"plan",note:true,text:"Nothing written here, deliberately: a Wednesday erg was prescribed on 14, 21 and 28 Oct and trained on none of them. The week carries one ski and it is yesterday’s, alongside the lifting. If you want a third day, play."}] },
     { date:"2026-11-05", dow:"THU", label:"Nov 5", sessions:[{type:"plan",text:"⏱ KEY RUN · 50min, hard running, your shape · 5km at 4:20/km and no slower, any reps you like. Last week of Base I, so put the average pace of the fast part in the title: Base II’s threshold work starts from whatever that number says and not from a figure nobody has run. Nothing about the shape is prescribed, because the two tempo runs you picked yourself both landed and both beat what was written."}] },
     { date:"2026-11-06", dow:"FRI", label:"Nov 6", sessions:[{type:"plan",text:"Long run 1h15 · all of it conversational, no fast finish — held at 1h15 and not stepped up, because the ladder climbs only after a rung lands and the last long run to land is the 1h10 of 10 Oct. The fast finish is gone for the remainder of Base I: it was written three times and run none, and this week’s quality is Thursday’s floor. If Friday gets taken, Saturday is the backstop."}] },
@@ -2364,7 +2366,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 105; // updated 2026-10-23
+const hrvBaseline = 105; // updated 2026-10-24
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
