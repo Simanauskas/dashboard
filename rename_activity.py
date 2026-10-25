@@ -33,6 +33,8 @@ def main() -> int:
     ap.add_argument("activity_id", help="Garmin activity id")
     ap.add_argument("name", help="New activity name")
     ap.add_argument("--description", default=None, help="Optional activity description")
+    ap.add_argument("--distance", type=float, default=None,
+                    help="Optional distance in metres (e.g. 1000 for an indoor row)")
     ap.add_argument("--apply", action="store_true", help="Actually write the change")
     args = ap.parse_args()
 
@@ -73,8 +75,13 @@ def main() -> int:
           + (f" — starts '{old_desc[:60].replace(chr(10), ' ')}…'" if old_desc else " (empty)"))
     if args.description is not None:
         print(f"    new description: {len(args.description)} chars")
+    old_dist = summary.get("distance")
+    print(f"    distance : {old_dist if old_dist is not None else '—'} m")
+    if args.distance is not None:
+        print(f"    new distance: {args.distance:g} m")
+    dist_same = args.distance is None or (old_dist is not None and abs(old_dist - args.distance) < 1)
 
-    if old_name == args.name and (args.description is None or old_desc.strip() == args.description.strip()):
+    if old_name == args.name and dist_same and (args.description is None or old_desc.strip() == args.description.strip()):
         print("\n✓ already named that — nothing to do.")
         return 0
 
@@ -85,6 +92,9 @@ def main() -> int:
     payload = {"activityId": int(aid), "activityName": args.name}
     if args.description is not None:
         payload["description"] = args.description
+    if args.distance is not None:
+        # Same shape Garmin Connect's own "edit activity" form sends.
+        payload["summaryDTO"] = {"distance": args.distance}
     try:
         garth.client.put("connectapi", f"/activity-service/activity/{aid}", json=payload, api=True)
     except Exception as e:
@@ -111,6 +121,13 @@ def main() -> int:
             print(f"✓ description written ({len(got)} chars)")
         else:
             print(f"✗ description did not stick — Garmin has {len(got)} chars, sent {len(args.description)}")
+            ok = False
+    if args.distance is not None:
+        got = (after.get("summaryDTO") or {}).get("distance")
+        if got is not None and abs(got - args.distance) < 1:
+            print(f"✓ distance is {got:g} m")
+        else:
+            print(f"✗ distance did not stick — Garmin reports {got} m, sent {args.distance:g}")
             ok = False
     return 0 if ok else 1
 

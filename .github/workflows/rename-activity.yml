@@ -16,6 +16,10 @@ on:
         description: 'Optional activity description'
         required: false
         default: ''
+      distance:
+        description: 'Optional distance in metres (e.g. 1000)'
+        required: false
+        default: ''
       apply:
         description: 'Write the change (false = dry run)'
         required: false
@@ -52,9 +56,11 @@ jobs:
           ACTIVITY_ID: ${{ inputs.activity_id }}
           NEW_NAME: ${{ inputs.name }}
           NEW_DESC: ${{ inputs.description }}
+          NEW_DIST: ${{ inputs.distance }}
           APPLY: ${{ inputs.apply }}
         run: |
           args=("$ACTIVITY_ID" "$NEW_NAME")
           if [ -n "$NEW_DESC" ]; then args+=(--description "$NEW_DESC"); fi
+          if [ -n "$NEW_DIST" ]; then args+=(--distance "$NEW_DIST"); fi
           if [ "$APPLY" = "true" ]; then args+=(--apply); fi
           python rename_activity.py "${args[@]}"
