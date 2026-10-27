@@ -1114,11 +1114,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-10-27";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-10-27T09:07:00Z";
-const LAST_DATA = "2026-10-27T09:07:00Z";
+const LAST_RUN  = "2026-10-27T10:07:00Z";
+const LAST_DATA = "2026-10-27T10:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-10-27T09:07:00Z";
+const LAST_MFP  = "2026-10-27T10:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1554,7 +1554,7 @@ const SCHEDULE = [
 
   { week:8, label:"Oct 26–Nov 1", theme:"Base I · Aerobic", days:[
     { date:"2026-10-26", dow:"MON", label:"Oct 26", sessions:[{type:"rest",text:"Rest · a walk if you want one, nothing structured. Everything Monday used to carry has moved onto tomorrow’s court trip: this slot is 1-for-3 since 5 Oct, and taking it out is what buys Thursday its full 50min for six reps and Wednesday all six of its 500s instead of a 9% trim across both. Rest is the session."}] },
-    { date:"2026-10-27", dow:"TUE", label:"Oct 27", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"GYM 50min · steady ski 15min continuous straight off this morning’s court session, then sled pull 8×25m and lunges 4×50m with the bag never down. No reps and no clock: your last ski was 8 Oct, nineteen days ago, and the four timed ski sets written since then all went untrained while the one ski that did land was ten steady minutes bolted onto a gym trip. Hold the pace of that 8 Oct piece, about 2:10 per 500m, do not chase it faster today, and save it as Ski + strength."}] },
+    { date:"2026-10-27", dow:"TUE", label:"Oct 27", sessions:[{type:"plan",text:"GYM 50min · steady ski 15min continuous straight off this morning’s court session, then sled pull 8×25m and lunges 4×50m with the bag never down. No reps and no clock: your last ski was 8 Oct, nineteen days ago, and the four timed ski sets written since then all went untrained while the one ski that did land was ten steady minutes bolted onto a gym trip. Hold the pace of that 8 Oct piece, about 2:10 per 500m, do not chase it faster today, and save it as Ski + strength."}] },
     { date:"2026-10-28", dow:"WED", label:"Oct 28", sessions:[{type:"plan",note:true,text:"Nothing written here, deliberately: a Wednesday erg was prescribed on 14 and 21 Oct and trained on neither, so this week carries one ski and it is yesterday’s, behind the court and alongside the lifting. Nothing replaces it — if you want a third day this week, play. Tomorrow is the week’s measurement and it wants the legs."}] },
     { date:"2026-10-29", dow:"THU", label:"Oct 29", sessions:[{type:"plan",text:"⏱ KEY RUN · 50min, hard running, your shape · the one requirement is 5km at 4:20/km and no slower, in whatever reps and recoveries you want. Written sets are 0-for-3 — 6 Oct went Z2 10km, 15 Oct was the infection, 22 Oct went 8.71km at 5:37 with a max heart rate of 143 — while both tempo runs you picked yourself landed and were harder than the prescription, 8×1km at 4:01 on 1 Oct and 3×2km at 14kmh on 25 Sep. Put the average pace of the fast part in the title so it can be read."}] },
     { date:"2026-10-30", dow:"FRI", label:"Oct 30", sessions:[{type:"plan",note:true,text:"Nothing written here: the long run has moved to Saturday, because the four Fridays of this block produced no running at all while Saturday owns the only long run that has landed. Take it today if the day is free and tomorrow is not. A gym trip here is welcome — Friday is where lifting lands."}] },
