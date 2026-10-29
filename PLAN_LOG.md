@@ -53,6 +53,266 @@ and never once done.
 
 ---
 
+## 2026-10-29
+- adherence: no ACTION REQUIRED section. ski **5/1, short by 4** · row 0/1 unprescribed · hyrox
+  **1/0** (WATCH cleared itself — now below the 2x threshold, out of the window tomorrow) · strength
+  **4/4, on track** · cycle 0/6 · tennis 0/11 · **run 8/2, short by 6.** Benchmarks already due:
+  8 Oct TRAINED OTHER TYPE, 15 Oct NOTHING LOGGED, 22 Oct TRAINED EASY INSTEAD, **29 Oct NOTHING
+  LOGGED — that is today and the day has not happened yet.** Next 14d: **Thu 5 Nov**, his most
+  reliable slot, so not deferred.
+- readiness: HRV **113** vs baseline **102** (**+11**), **RHR 43**, resp 12.0, deep 95, REM 92,
+  light 302, awake 8, **sleepMin 489 (8h09)**, sleep score **95**. 147 daily / 146 sleep rows,
+  contiguous, last row 2026-10-29. **LAST_RUN and LAST_DATA both 2026-10-29T07:08Z against TODAY
+  2026-10-29 — sync healthy.** Engine, read live: **TSB −24.75** (block low by 7 points), **ATL
+  60.58** (block high), CTL 35.83, **ACWR 1.69**, `consecutiveHard` 2, **`daysSinceRest` 9**,
+  **forceRest TRUE**, `easeHard` FALSE, readiness **6/10**, `scale` 1, **`unplanned7` 481**.
+- decision: **CHANGED — one day rewritten, Fri 30 Oct, and it is physiological. `forceRest` fired
+  overnight and the engine had already deleted both of the week's remaining real sessions before he
+  woke up. Friday becomes the rest day in writing; the erg moves to Tuesday, where it is already
+  written as its own line.** Week 8 cost 303 → 287; governor projection 533 → 520 inside a 400–560
+  band. Weeks 1–7 and 9 byte-identical.
+- why: **he trained the written rest day.** 28 Oct asked for nothing and he played a three-set match
+  (`🎾 Laurynas Sederevičius 7:5 4:6 10:6`) plus two commutes, 137 TRIMP on the day. That tipped
+  `daysSinceRest` from 8 to **9** and TSB from −17.52 to **−24.75**, so `forceRest` went TRUE — and
+  **rule R7 converted Friday's ski and Saturday's long run to "keep it to walking or mobility" while
+  leaving today's KEY RUN at full prescription, because the run prices at HR 168 and R7 only touches
+  a day where every session prices under `HARD_HR` 155.**
+- watching: today's KEY RUN (first test of the floor rewrite, decide Fri 30 Oct); Saturday's long run
+  (survives **only** if Friday is actually rested — both branches verified below); ski ACTION
+  REQUIRED arriving tomorrow at 5/0 on a calendar boundary; the sled pull and lunges on 3 Nov
+  (decide Wed 4 Nov).
+
+### 1. What the engine did overnight, and why it is backwards. The edit.
+Yesterday's entry predicted the gate exactly — *"training today makes `forceRest` TRUE tomorrow
+morning"* — and checked that the KEY RUN was safe from R7. It was. **What it did not check is what
+R7 would eat instead.** Read live this morning:
+
+| day | session | priced | R7 verdict |
+|---|---|---|---|
+| **Thu 29 Oct** | ⏱ KEY RUN, 5km @ 4:20 floor | HR **168**, 136 trimp | **planned — untouched** |
+| **Fri 30 Oct** | Ski 10min steady, written yesterday | HR 146, 16 trimp | **"Recovery · keep it to walking or mobility"** |
+| **Sat 31 Oct** | Long run 1h15 | HR 138, 101 trimp | **"Recovery · keep it to walking or mobility"** |
+
+So the machine's answer to nine days without rest was: **keep the hardest session in the week and
+delete the only two that carry Base I.** R7 converts "the next day that is already light", which by
+construction protects whatever is hard and removes whatever is aerobic — and in an aerobic base
+block, the aerobic work *is* the block. That is the block-level judgement the deterministic engine
+does not make, and it is the whole reason this run exists.
+
+**The ski deletion is the part that cannot be allowed to stand.** Yesterday's run split the ski onto
+its own auditable line after five failed prescriptions, specifically so a lift could no longer mark
+it done (engine defect 4), and set the test: *"if Friday's ski landed, the ladder has a rung at
+10min… if Friday's ski did not land, then the shape, the clock, the day, the trip, the length and
+the ordering have all been tried and the remaining variable is the machine. Decide it Sat 31 Oct."*
+**That test can no longer run.** Friday's ski now reads as cancelled, so he will not ski; a cold run
+on 31 Oct would read 0-for-6 and apply the substitution rule **on a day the ski was never actually
+asked for.** The result would be attributed to him when it belongs to R7. Leaving it alone does not
+preserve the experiment, it corrupts it — which is the one thing a cold session cannot detect
+afterwards.
+
+**So Friday is written as the rest day it physiologically is, and the erg moves to Tuesday.** The
+rest day is not an invention to dodge the engine: `daysSinceRest` 9, TSB −24.75, **ATL 60.58 against
+CTL 35.83 is an acute-to-chronic ratio of 1.69**, and `unplanned7` is **481** against a written week
+of 303. He needs a day off inside the next two. The difference between my line and the engine's is
+that mine says so, says where the erg went, and does not pretend a session was prescribed and
+refused.
+
+- **`type:"rest"` is deliberate and load-bearing.** `isRestSession` returns true, `planIntensity`
+  prices it at HR 0, and **R7's own `forEach` skips rest sessions** — so the line is immune to being
+  restamped. Verified: 30 Oct now comes back `status: planned`, not `adjusted`.
+- **No session type is named in the rest line, and that is also deliberate.** Engine defect 5 —
+  `adherence.py`'s `planned_days` does not check `type:"rest"` — means any session type named in a
+  rest line is counted as prescribed. So the line says **"the erg moves to Tuesday"**, never "ski":
+  `ski`'s pattern is `\bski(?:erg)?\b` and a bare "erg" matches nothing. Likewise no "long run" (the
+  run pattern catches it) — it reads "tomorrow's hour and a quarter". **Confirmed: `adherence.py`
+  after the edit returns every count identical — ski 5/1, run 8/2, no phantom prescription created.**
+- **The second line keeps the substitution rule and makes it the standing rule rather than a pending
+  one.** He gets on an erg unprompted and it is almost always the rower (7 Oct row 10min 2400m,
+  25 Oct indoor row 1km in 3:59; the one ski was 8 Oct, 10:18 / 2380m). Row is top **11.4%**, a
+  strength; ski is top **29.8%**, the weakness and the largest tested-versus-raced gap in his race
+  (3:54 fresh TT, 4:08 planned, **4:18 raced**). The line is `note:true`, so it costs 0 and
+  `adherence.py` skips it — it adds no prescription while putting the rule in front of him.
+
+### 2. The claim I put on his dashboard, verified in both directions
+Friday's line says: *"Rest today and tomorrow's hour and a quarter survives; train today and the plan
+converts that one too."* That is a mechanical claim about R7, so I ran it rather than asserting it —
+with today's KEY RUN logged in both branches:
+
+| branch | `daysSinceRest` | TSB | `forceRest` | 31 Oct long run |
+|---|---|---|---|---|
+| **rests Friday** | 0 | −22.9 | **false** | **planned, as written** |
+| **trains Friday** | 11 | −26.6 | **true** | **"Recovery"** |
+
+Both halves true. A rest day on Friday breaks the chain whatever he does today, because
+`daysSinceRest` counts *consecutive* days back from the morning it is read. **This is the first line
+in the plan that tells him what the engine will do to tomorrow as a consequence of today**, and it is
+the honest way to leave Saturday alone rather than pre-emptively rewriting it.
+
+### 3. The physiological signal — load is the problem, recovery is not
+- **This is a green morning on every recovery marker.** HRV **113** against baseline **102** is
+  **+11**; his own rule is that above baseline is a green light. RHR **43**, inside 38–46.
+  Respiration 12.0. **8h09 of sleep, score 95.** `easeHard` FALSE, nothing capped, nothing in the
+  forward plan reads `adjusted` except what R7 did.
+- **`hrvBaseline` is 102 and has settled.** 101 on 27 Oct → 102 on 28 Oct → **102**. The last seven
+  readings are 80 / 123 / 100 / 83 / 114 / 113, mean **102** against a baseline of 102. No sustained
+  shift in either direction, and **yesterday's reversal held for a second night** (+11, +12).
+- **No RHR excursion.** Last six mornings 43 / 45 / 41 / 44 / 43 — five consecutive inside 38–46, and
+  the 53 of 24 Oct remains a one-day blip. Neither prior excursion signature is present (**15 Oct:
+  HRV 31, RHR 68, resp 19.0** — the infection that cost him twelve days; 24 Oct: 80 / 53 / 14.0).
+- **The load shape is a different story and it is the one worth naming.** **ATL 60.58 is the highest
+  of this block and TSB −24.75 is the lowest, by seven points.** ACWR **1.69** is well past the
+  1.3–1.5 band where risk climbs. Nine consecutive training days, last true rest 19 Oct. And it is
+  almost entirely court: **`unplanned7` 481 against a written week of 303**, eleven tennis sessions
+  in twenty-one days. **He is absorbing it — that is what the green markers mean — but a man five
+  weeks past a twelve-day infection, at ACWR 1.69 with no rest day in nine, gets a rest day.** Today
+  he is clear to run; Friday he is not clear to train.
+- **Why today's hard run still stands.** Green markers, `easeHard` FALSE, Thursday is his most
+  reliable slot (7/8 since 3 Aug), it is the week's only measurement, and **Base II's threshold paces
+  are written off what 5 Nov records** — today is that session's rehearsal. Moving it would also be
+  the fifth rewrite of these same lines in ten days, and yesterday's untested floor rewrite would
+  never get its test. Left exactly as written.
+
+### 4. Phase, bands and weaknesses — all still right
+- **Base I runs to 8 Nov and stays.** Closed weeks: 327 · 693 · 129 · 407. Week 7 closed 407 against
+  403 written.
+- **The band does not move, and yesterday's "under the floor" worry has inverted.** Yesterday week 8
+  projected **399** with `under: true`; this morning it projects **520** against 400–560, `under`
+  false, `over` false, `trimmedBy` **0**, with **`doneTrimp` already 283 by Thursday breakfast.** The
+  mover is the 28 Oct match. **So the 400 floor was never the issue** — exactly as yesterday's
+  projection-artefact reading predicted — and my edit takes 16 TRIMP out of a week that is now
+  comfortably mid-band. 400–560 is realistic against what he is absorbing; no TAPER_PLAN change.
+- **Do the next two weeks need different sessions rather than smaller ones?** They have had four
+  structural changes in five days — hard run became a floor (25 Oct), long run moved to Saturday
+  (26 Oct), Monday emptied (26 Oct), ski split onto its own line (28 Oct). **Three of the four are
+  still untested, and the fourth was deleted by R7 before it could be.** Nothing more should change
+  until 29, 30 and 31 Oct report.
+- **Has a weakness moved? No, and nothing raced.** RACE, PREV_RACE, STATION_TARGETS, RACE_BUDGET,
+  RACE_GAINS, HYROX_DATA and HYROX_STATIONS all verified byte-identical. Ski top **29.8%** and the
+  running block top **27.7%** are still the two priorities.
+
+### WATCH — hyrox 1/0, and it has cleared itself
+It was 2/0 for six consecutive mornings; the 7 Oct prescription has now aged out and it reads
+**1/0**, below the 2x WATCH threshold, and leaves the window entirely tomorrow. Re-verified across
+all forward SCHEDULE days: **zero sessions typed `hyrox`, zero occurrences of hyrox, circle or
+roxzone in any forward session text.** Nothing to move, nothing to remove. **What would make me act:
+any line reintroducing the circle before it clears gets deleted the same morning.**
+
+### Ski ACTION REQUIRED arrives tomorrow at 5/0 — read this before re-acting
+Projected through `adherence.py`'s own functions. Tomorrow's window is 9 Oct–30 Oct, which drops the
+**8 Oct ski, the only credit**, so the count goes to **5 prescribed / 0 done = ACTION REQUIRED**.
+With my edit 30 Oct prescribes nothing, so it is 5/0 rather than 6/0 — **either way it fires on five
+historical prescriptions ageing out, not on a sixth refusal.** It would fire if he skied every day
+this week.
+
+**So do not rewrite the ski tomorrow morning.** It has been rewritten on 25, 26, 27 and 28 Oct. The
+resolution is already shipped and it is two things: the sixth attempt is **Tue 3 Nov**, as its own
+auditable line that a lift cannot satisfy (truth table in yesterday's entry), and the **substitution
+rule is now standing** — when he is on a machine anyway, it is the ski. **The next real decision
+point is Wed 4 Nov, on whether 3 Nov logged an erg.** If it did not, the ski stops being written as a
+session at all and lives only as the substitution.
+
+### What I deliberately left alone, with the trigger and the date for each
+1. **Today's KEY RUN.** Byte-identical. **Trigger unchanged: if it logs nothing or logs easy, the
+   floor rewrite has failed too and hard running stops being a Thursday requirement. Decide it
+   Fri 30 Oct.**
+2. **Sat 31 Oct's long run.** Byte-identical, and deliberately so — it survives if Friday is rested
+   (verified, section 2), and Friday's line now tells him that in his own terms. **Trigger: if he
+   trains Friday and Saturday's run is converted, the long run moves to Sunday for week 9 onward,
+   because a session the engine can delete twice is on the wrong day. Decide it Sun 1 Nov.**
+3. **The run shortfall, 8/2.** Untouched. The plan's answer is written and today is its test.
+4. **The sled pull and the lunges.** Byte-identical on 3 Nov. Still no evidence either way, because
+   `adherence.py` matches strength on activity type alone (defect 6) and his titles are his own split
+   — `Upper body workout`, `Lower body workout` — with no sled and no lunge named since the block
+   began. **Trigger unchanged: if 3 Nov logs a strength session whose title again names neither,
+   fold them into his own upper and lower days as named additions. Decide it Wed 4 Nov.**
+5. **Wed 4 Nov's blank note.** Still loosely worded about which Wednesdays prescribed an erg;
+   `note:true`, costs 0, counted by nothing. Not worth a diff.
+6. **TAPER_PLAN.** All 18 blocks byte-identical. The Base I note still describes the week accurately.
+7. **The past SCHEDULE lines of 5, 12, 19, 21 and 27 Oct still ask for the ski in its old form.**
+   Deliberate — they are the record the adherence flag is computed from.
+8. **Sun 1 Nov, Mon 2 Nov and all of week 9.** Byte-identical.
+9. **The single `cal:true` fixture** (3 Nov). Untouched, none hand-written. **Note for the next run:
+   `grep -c cal:true` returns 2 and only one is a session — the other is inside the comment at
+   src/App.jsx:1473. Count sessions, not occurrences.**
+10. **No machine-written constant touched.** HEALTH_DATA (daily, sleep, weight, vo2max, nutrition,
+    body), HYROX_DATA, CSV_DATA, TODAY, LAST_RUN, LAST_DATA and `hrvBaseline` all verified
+    byte-identical against the pre-edit copy.
+
+### Verification
+- `npm run build` **clean, 459.63 kB** (`npm ci` first — `vite` is not installed in a fresh
+  container; same as yesterday).
+- **11/11 patch anchors** from gotcha 14, plus **18/18 frozen-constant byte-identity checks**. 147
+  daily rows, 4-space indent only, sorted, unique, no `hrv:0`, no `sleep_score:None`.
+- SCHEDULE **64 days / 9 weeks**, sorted, unique, **0 dow mismatches**, 1 `cal:true` session.
+  TAPER_PLAN 18 blocks.
+- **Trap scan on both edited lines.** 30 Oct rest line: `isRestSession` **true**, `isInfoLine` false,
+  `isOptionalLine` **false**, HR **0**, trimp **0**, status **planned** — immune to R7. 30 Oct note:
+  `note:true` → `isInfoLine` **true**, trimp **0**, skipped by `adherence.py`'s note guard. **No bare
+  "or"** in either (defect 1 — checked "for"/"form" do not match `\bOR\b`); `\brest\b` leads the rest
+  line, which is the intended pricing, not defect 2; **no double quote and no `\"` escape**, so
+  `adherence.py`'s `text:"([^"]+)"` cannot truncate them; **no session-type word in the rest line**
+  (defect 5). Both lines are three sentences.
+- **`adherence.py --days 21` re-run after the edits: every count identical** (ski 5/1, row 0/1,
+  hyrox 1/0, strength 4/4, cycle 0/6, tennis 0/11, run 8/2). **No phantom prescription.**
+- **R7 branch simulation** with a synthetic 29 Oct run and 30 Oct lift: see section 2. Both
+  directions confirmed.
+- Week costs through `estTrimp` with `loadModel` off the live CSV, before → after: 257 / 572 / 532 /
+  475 / 689 / 407 / 403 / **303→287** / 394. Governor after the edits: projected **520** (was 533),
+  `projectedRaw` 520, **`trimmedBy` 0**, band 400–560, `under` false, `over` false, `doneTrimp` 283.
+- Round-trip `update.patch()` against a copy of the real src/App.jsx (`head -1046 update.py`,
+  imported with `-I` from a scratch dir): **58/58 passed.** Insert — daily 147→148 and sleep 146→147,
+  each growing by exactly one at 4-space indent, sorted and unique; weight upserted exactly once
+  inside its own array with **`vo2max` byte-identical (gotcha 4)**; CSV added exactly once; TODAY
+  advanced to `date_str`+1; SCHEDULE / TAPER_PLAN / RACE / RACE_BUDGET / RACE_GAINS /
+  STATION_TARGETS / HYROX_DATA / nutrition / body all byte-identical **with both of this run's edits
+  intact and the old ski line gone.** Replace — no growth in either array, no date lost, CSV upserted
+  not duplicated, indent and ordering held, edits survive.
+- **Consecutive NO CHANGE runs preceding this one: 0.** The last NO CHANGE was 14 Oct; the fourteen
+  entries since have all acted.
+- **Harness notes for the next cold run.** Standing set from yesterday all still correct, plus:
+  (1) **`analyze()` takes PARSED rows, not the CSV string** — `analyze(M.CSV_DATA)` silently returns
+  ATL/CTL/TSB **0** and `daysSinceRest` 0, which reads as a healthy athlete. It must be
+  `analyze(parseCSV(CSV_DATA))`. This is the single easiest way to get a completely wrong readiness
+  picture and it fails quietly. (2) The engine slice is lines **2–1996** plus `hrvBaseline` at
+  **2395** — both moved by yesterday's commits, so re-derive with grep every run. (3) `isRestSession`
+  is `type === "rest" && !/tennis/i`, so a rest line mentioning tennis is **not** a rest line.
+
+### Engine defects, outside this Routine's edit surface
+1. **`isOptionalLine` (src/App.jsx:1747) matches `\bOR\b` case-insensitively, so any plan line
+   containing the ordinary English word "or" is costed at HALF.** Seventh entry, first raised 23 Oct.
+   Fix is `/\bOR\b/` without the `i` flag.
+2. **`planIntensity` tests `/\brest\b/` first, so "the rest of Base I" prices a session at HR 0.**
+   Sixth entry.
+3. **`isTennis` (src/App.jsx:1204) is `=== "tennis"` against rows typed `Tennis V2`**, so
+   `loadModel.tennis` reads **n=0** — confirmed live again this morning — and planned court sessions
+   price from the fallback (HR 138, 75min) rather than from his own history. All eleven court
+   sessions in the window are typed `Tennis V2`.
+4. **`SESSION_MATCHERS` order lets the lifting satisfy the ski.** Third entry; confirmed live 27 Oct.
+   Worked around from inside SCHEDULE by splitting the line. The code fix is for `sessionSatisfiedBy`
+   to require *every* matching pattern to find an activity rather than returning on the first.
+5. **`adherence.py`'s `planned_days` does not check `type:"rest"`.** A rest line that names a session
+   type is costed at 0 by App.jsx and counted as prescribed by the instrument. **Worked around today
+   by naming no session type in the new rest line** — but that is a constraint on every future rest
+   line and it should not have to be.
+6. **`adherence.py` matches the logged strength activity on type alone (`r"strength"`), so the
+   prescribed CONTENT of a strength session is invisible to it.** Second entry. It is why item 4 of
+   "left alone" has no evidence either way.
+7. **NEW — R7 has no past-day guard, and it poisons the "Plan adjustments" card.** The gate is
+   `(isToday || daysAgo(day.date) >= -2)`, and `daysAgo` is **positive** for a past date, so `>= -2`
+   is true for **every day that is not more than two days in the future.** The session map returns
+   early on `past`, but R7 sits *outside* the map, so with `forceRest` on it fires across the whole
+   schedule: **33 adjustments this morning, the oldest dated 2026-09-06, every one labelled
+   "Converted to a recovery day · 9 days without a rest day and form is -25".** It also restamps past
+   `note:true` lines as `adjusted`, which is why 28 Oct's rest note now carries a "Recovery" tag.
+   **The user-visible damage is in `PlanAdjustments` (src/App.jsx:2615), which renders
+   `adjustments.slice(0, 6)` — and the array is built in SCHEDULE order, oldest first.** So the card
+   that exists to tell him what changed today is currently showing six dates from early September
+   with today's reason string attached, and **any genuine adjustment is sliced off the end and never
+   displayed.** Two independent fixes, both one line: add `!past &&` to R7's gate, and sort or filter
+   `adjustments` by date before slicing. This is the highest-value defect in the list — it is the only
+   one that makes a panel actively misinform him.
+
+
 ## 2026-10-28
 - adherence: no ACTION REQUIRED section yet. ski **5/1, short by 4** · row 0/2 unprescribed ·
   **hyrox 2/0 (WATCH)** · strength **4/5, on track** · cycle 0/6 · tennis 0/11 · **run 7/2, short by
