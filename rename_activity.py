@@ -12,6 +12,13 @@ DRY RUN by default. Pass --apply to write.
 Locally:
     python rename_activity.py 24244349642 "Hyrox race Athens 1:09:23" --apply
 
+Lookup helpers (read-only):
+    python rename_activity.py --list 15 --type tennis_v2
+        → recent activities of that type with id, start, name and FULL description
+          (how the garmin-tennis-log skill learns his naming/description style)
+    python rename_activity.py --date 2026-10-31 --type tennis_v2 "<name>" ...
+        → resolves the activity id from the one activity of that type on the date
+
 In CI: the rename-activity workflow restores ~/.garth from GitHub Secrets and
 runs this, because Garmin tokens are not readable outside Actions/the Worker.
 """
@@ -28,10 +35,23 @@ def get_activity(aid: str) -> dict:
     return garth.connectapi(f"/activity-service/activity/{aid}")
 
 
+def recent(limit: int, type_key: str | None) -> list[dict]:
+    acts = garth.connectapi("/activitylist-service/activities/search/activities",
+                            params={"start": 0, "limit": max(limit * 4, 40)}) or []
+    if type_key:
+        acts = [a for a in acts if (a.get("activityType") or {}).get("typeKey") == type_key]
+    return acts[:limit] if limit else acts
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("activity_id", help="Garmin activity id")
-    ap.add_argument("name", help="New activity name")
+    ap.add_argument("activity_id", nargs="?", default=None,
+                    help="Garmin activity id (or omit and pass --date/--type)")
+    ap.add_argument("name", nargs="?", default=None, help="New activity name")
+    ap.add_argument("--list", type=int, default=0, metavar="N",
+                    help="Print the N most recent activities (with --type: of that type) and exit")
+    ap.add_argument("--type", default=None, help="Activity typeKey filter, e.g. tennis_v2")
+    ap.add_argument("--date", default=None, help="Resolve the activity id from this date (YYYY-MM-DD)")
     ap.add_argument("--description", default=None, help="Optional activity description")
     ap.add_argument("--distance", type=float, default=None,
                     help="Optional distance in metres (e.g. 1000 for an indoor row)")
@@ -48,7 +68,34 @@ def main() -> int:
         # rather than swallowing it.
         print(f"Token refresh failed ({e}) — using the token from secrets.")
 
+    if args.list:
+        for a in recent(args.list, args.type):
+            full = get_activity(a["activityId"])
+            desc = (full.get("description") or "").strip()
+            print(f"── {a['activityId']}  {(a.get('startTimeLocal') or '')[:16]}  "
+                  f"{(a.get('activityType') or {}).get('typeKey')}  '{a.get('activityName')}'")
+            print("   " + (desc.replace(chr(10), chr(10) + "   ") if desc else "(no description)"))
+        return 0
+
     aid = args.activity_id
+    if args.date and args.activity_id and not args.activity_id.isdigit():
+        # Called as: --date D --type T "<name>" — the positional is the name.
+        args.name, aid = args.activity_id, None
+    if not aid:
+        if not args.date:
+            print("✗ need an activity id, or --date (with --type)")
+            return 1
+        hits = [a for a in recent(0, args.type)
+                if (a.get("startTimeLocal") or "").startswith(args.date)]
+        for a in hits:
+            print(f"  candidate {a['activityId']}  {a.get('startTimeLocal')}  '{a.get('activityName')}'")
+        if len(hits) != 1:
+            print(f"✗ {len(hits)} {args.type or ''} activities on {args.date} — pass the activity id")
+            return 1
+        aid = str(hits[0]["activityId"])
+    if not args.name:
+        print("✗ need a new name")
+        return 1
     try:
         act = get_activity(aid)
     except Exception as e:
@@ -71,10 +118,12 @@ def main() -> int:
             print(f"    {k:<9}: {clock(summary[k])}  ({int(summary[k])}s)")
     print(f"    name     : '{old_name}'")
     print(f"    new name : '{args.name}'")
-    print(f"    description: {len(old_desc)} chars"
-          + (f" — starts '{old_desc[:60].replace(chr(10), ' ')}…'" if old_desc else " (empty)"))
+    print(f"    description: {len(old_desc)} chars" + ("" if old_desc else " (empty)"))
+    if old_desc:
+        print("      | " + old_desc.replace(chr(10), chr(10) + "      | "))
     if args.description is not None:
         print(f"    new description: {len(args.description)} chars")
+        print("      | " + args.description.replace(chr(10), chr(10) + "      | "))
     old_dist = summary.get("distance")
     print(f"    distance : {old_dist if old_dist is not None else '—'} m")
     if args.distance is not None:

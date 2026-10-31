@@ -7,11 +7,25 @@ on:
   workflow_dispatch:
     inputs:
       activity_id:
-        description: 'Garmin activity id'
-        required: true
+        description: 'Garmin activity id (blank = the one activity of `type` on `date`)'
+        required: false
+        default: ''
       name:
-        description: 'New activity name'
-        required: true
+        description: 'New activity name (blank with list = read-only listing)'
+        required: false
+        default: ''
+      date:
+        description: 'Find the activity by date YYYY-MM-DD instead of id'
+        required: false
+        default: ''
+      type:
+        description: 'Activity typeKey filter for date/list, e.g. tennis_v2'
+        required: false
+        default: ''
+      list:
+        description: 'Read-only: print the N most recent activities (of `type`) with descriptions'
+        required: false
+        default: 
       description:
         description: 'Optional activity description'
         required: false
@@ -58,8 +72,19 @@ jobs:
           NEW_DESC: ${{ inputs.description }}
           NEW_DIST: ${{ inputs.distance }}
           APPLY: ${{ inputs.apply }}
+          FIND_DATE: ${{ inputs.date }}
+          TYPE_KEY: ${{ inputs.type }}
+          LIST_N: ${{ inputs.list }}
         run: |
-          args=("$ACTIVITY_ID" "$NEW_NAME")
+          if [ -n "$LIST_N" ]; then
+            largs=(--list "$LIST_N"); if [ -n "$TYPE_KEY" ]; then largs+=(--type "$TYPE_KEY"); fi
+            python rename_activity.py "${largs[@]}"; exit
+          fi
+          args=()
+          if [ -n "$ACTIVITY_ID" ]; then args+=("$ACTIVITY_ID"); fi
+          args+=("$NEW_NAME")
+          if [ -n "$FIND_DATE" ]; then args+=(--date "$FIND_DATE"); fi
+          if [ -n "$TYPE_KEY" ]; then args+=(--type "$TYPE_KEY"); fi
           if [ -n "$NEW_DESC" ]; then args+=(--description "$NEW_DESC"); fi
           if [ -n "$NEW_DIST" ]; then args+=(--distance "$NEW_DIST"); fi
           if [ "$APPLY" = "true" ]; then args+=(--apply); fi
