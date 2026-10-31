@@ -54,7 +54,7 @@ separated by spaces, games with `:`. A match tiebreak is written as its own
 |---|---|
 | Match | `Rokas Mačiulaitis🎾 0:6 5:7` · `Laurynas Sederevičius🎾7:5 4:6 10:6` |
 | Sparring, no score | `Vainius Sodeika🎾sparring` |
-| Sparring + a set + tiebreaks | `Rokas Mačiulaitis🎾sparring 6:6 5:10 10:7` |
+| Sparring + a set + tiebreaks | `Rokas Mačiulaitis🎾sparring 6:6 7:10 10:8` |
 | Coach / group training | `Tennis training` (or `Training🎾1:1`) |
 
 ## Description format
@@ -71,7 +71,18 @@ it; no sentences or headings. Write in English unless he writes in Lithuanian
 -bh falling short
 ```
 
+## Changing this skill or its script
+
+Simas has authorised pushing changes to this skill, `rename_activity.py` and
+`rename-activity.yml` straight to `main` (rebase onto `origin/main`, then
+fast-forward push — the bot commits hourly). They must be on `main` anyway:
+skills load from it, and the workflow is dispatched with ref `main`.
+
 ## Gotchas
+
+- His dictated scores can come out garbled ("we played 2-1-1-1-1" meant "we
+  played tie-breaks"). If a number doesn't parse as a score, ask rather than
+  guess.
 
 - `update.py` reads names from Garmin; never edit `src/App.jsx` for this —
   the next sync would overwrite it anyway.
