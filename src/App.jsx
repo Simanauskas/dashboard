@@ -771,6 +771,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Indoor Rowing","2026-11-01 19:46:47","false","Indoor Rowing","2,48","143","00:10:07","145","162","2,3","--","--","4:05","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:07","00:10:07","--","--"
 "Cycling","2026-11-01 19:30:35","false","Vilnius Cycling","1,86","83","00:08:16","112","128","0,6","--","--","4:26","--","--","--","52","11","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:08:13","00:08:16","--","--"
 "Cycling","2026-11-01 15:01:04","false","Vilnius Cycling","5,00","129","00:17:42","100","125","2,2","--","--","3:32","--","--","--","23","86","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:14:00","00:18:28","--","--"
 "Tennis V2","2026-11-01 12:59:35","false","Vainius Sodeika🎾sparring","0,57","533","01:31:37","98","139","1,2","18","--","160:15","--","--","--","--","--","--","34,67","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:07:35","01:31:37","--","--"
@@ -1141,11 +1142,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-01";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-01T17:41:00Z";
-const LAST_DATA = "2026-11-01T17:41:00Z";
+const LAST_RUN  = "2026-11-01T18:08:00Z";
+const LAST_DATA = "2026-11-01T18:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-01T17:08:00Z";
+const LAST_MFP  = "2026-11-01T18:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
