@@ -53,6 +53,227 @@ and never once done.
 
 ---
 
+## 2026-11-02
+- adherence: **ACTION REQUIRED — ski 5 prescribed / 0 done** (12, 14, 19, 21, 27 Oct). row 0/3 ·
+  hyrox 0/1 · strength **4/4, on track** · cycle 0/8 · tennis 0/11 · **run 6/3, short by 3**.
+  Benchmarks already due: 15 Oct NOTHING LOGGED, 22 Oct TRAINED EASY INSTEAD, 29 Oct type match.
+  Next 14d: **Thu 5 Nov** and, after today's edit, **Thu 12 Nov** — both Thursdays, his most
+  reliable slot, neither deferred.
+- readiness: HRV **110** vs baseline **98** (**+12**), **RHR 42**, resp 11.0, sleep **434min
+  (7h14)**. 151 daily / 150 sleep rows, contiguous, last row 2026-11-02. LAST_RUN and LAST_DATA
+  both 2026-11-02T07:08Z against TODAY 2026-11-02 — **sync healthy**. Engine, read live off the
+  edited file: readiness **5**, **TSB −27.40**, **ATL 65.74** (new block high), CTL 38.34,
+  **ACWR 1.71**, `consecutiveHard` 4, **`daysSinceRest` 13**, `forceRest` **TRUE**, `easeHard`
+  TRUE ("4 hard days back to back"), `scale` 1, `unplanned7` **483**.
+- decision: **CHANGED — two things, both forward of this week. (1) Week 10, Mon 9 – Sun 15 Nov, is
+  now written; it did not exist, and the plan ran out on 8 Nov. (2) Base II's band goes 420–500 →
+  440–580 and its note names the erg shape that actually lands.** Nothing in week 9 touched: all
+  seven days of 2–8 Nov byte-identical, no session added, removed, moved or re-timed, week 9
+  governor unchanged at projected 391 / raw 401 / trimmedBy 10.
+- why: **the plan had six days left to run and the calendar sync has a ten-day horizon.**
+  `calendar_sync.py` only rewrites `cal:true` lines inside days that already exist in SCHEDULE
+  (`DAY` regex, `HORIZON_DAYS = 10`), so with the last written day 8 Nov, every confirmed fixture
+  for **9–12 Nov was being discarded on each run**. Separately, Base I closed **327 · 693 · 128 ·
+  406 · 614** against a 400–560 band — **one week in five inside it** — while court load alone ran
+  346 then **525**; a 500 ceiling in a threshold block means the governor trims the written reps to
+  protect a total the tennis has already spent.
+- watching: whether **today** lands under 5 TRIMP, which is the only thing that keeps `forceRest`
+  off Saturday's long run (decide Tue 3 Nov); whether 3 Nov logs a ski with a split (decide Wed
+  4 Nov); the 7 Nov long run (trigger unchanged, decide Sun 8 Nov); `hrvBaseline` 100 → 98 and the
+  two Saturday RHR excursions (decide Sat 7 Nov).
+
+### 1. The ski flag — resolved forward, and now resolved twice
+The window is 12 Oct – 2 Nov and the five prescriptions are all in the past, so nothing written
+today can clear the count; the resolution has to be the forward plan. Verified before editing:
+**exactly one written ski existed in the whole forward plan** (Tue 3 Nov; the 4 Nov line mentions
+an erg but carries `note:true`, so `adherence.planned_days()` returns zero prescribing texts for
+it). After the edit there are **two, both Tuesdays, both the same shape**: 1000m for time at the
+front of a gym trip he is already making.
+
+That shape is the one the evidence supports. **Six ergs have landed since 30 Sep and every one was
+short, timed, and bolted to a lift or a court session:** 30 Sep SkiErg 1000m **3:57** post-court,
+5 Oct compromised 3×[1000m ski + 1000m run] at **4:02**, 7 Oct row 10min/2400m before a lift,
+8 Oct Ski-ERG 10min/2380m before a lift, 25 Oct **1000m row in 3:59** five minutes before a
+lower-body session, and **1 Nov a 10:07 row thirteen minutes before Strength**. Every one of the
+five failed prescriptions was a steady piece and four had no clock.
+
+**What is new since the last entry: the 1 Nov row.** The 30 Oct standing substitution said that
+when he is on a machine anyway it should be the ski. Two days later he got on a machine and it was
+the rower. So that note is now 0-for-1, which is why week 10 writes the ski as **a session with a
+number on it** rather than relying on the substitution to redirect a machine choice he makes
+without thinking. The number is deliberately his own — 3:57 off court legs on 30 Sep — so the
+target is a thing he has already done, not a thing I have invented.
+
+**Known interaction, stated rather than fixed:** the engine shows tomorrow's ski as *"Quality work
+eased to Z2"*, because R3 reads `planIntensity` as hard and `easeHard` is true on 4 consecutive
+hard days. A 1000m erg is four minutes of work and volume-trivial; the only lever SCHEDULE has
+against the gate is removing the clock, which is the single thing that makes the session land. So
+it stays. **If 3 Nov comes back without a split, check whether the dashboard eased it before
+concluding he skipped it.**
+
+### 2. Why week 10 was the work this morning, and not another pass at week 9
+He is half a day into week 9. Rewriting it needs a physiological reason and there isn't one: HRV
+110 against a baseline of 98 is **+12**, RHR 42 is mid-range, 7h14 of sleep. This is a good
+morning. Meanwhile the plan **ended in six days** and Base II opens 9 Nov on an empty schedule — a
+cold run on 9 Nov would have been authoring the week on the morning it started, with no chance for
+him to read it.
+
+The concrete, checkable cost of the gap: `calendar_sync.py` patches only days present in SCHEDULE
+inside a 10-day horizon (today + 10 = 12 Nov). **9, 10, 11 and 12 Nov were inside the horizon and
+absent from the file, so confirmed fixtures for those days were silently dropped.** Creating the
+days fixes that with no further change; the `DAY` regex was checked against the new lines and all
+**71 SCHEDULE days now parse**, up from 64.
+
+Week 10 keeps week 9's structure, which is the first structure in this block that matches how he
+actually lives — **three written sessions and nothing else**: Tuesday's measured erg plus the lift
+in one trip, Thursday's hard run in his own shape, Saturday's long run. Content changed for a
+threshold block: Thursday takes 5 Nov's recorded pace and holds it for 1km longer, rather than
+naming a figure. **Written rep schemes went 0-for-3 in October while both self-shaped tempo runs
+landed and came in harder** (8×1km @ 4:01 on 1 Oct, 3×2km @ 14km/h on 25 Sep), so the requirement
+is distance and pace, never the reps.
+
+### 3. The band, and why it is a bookkeeping change rather than permission to train more
+Base I, week by week against 400–560: **327 · 693 · 128 · 406 · 614.** One week inside the band.
+The misses are not the band's fault — 128 was the infection, 693 and 614 were court weeks — but
+they say what the instrument is actually measuring. Unplanned load was **346** in week 7 and
+**525** in week 8, mean **435**; `unplanned7` reads **483** this morning.
+
+With `hi` at 500 and court supplying 435, the written plan has about 65 TRIMP of room — under one
+session. The trim is `scale = max(0.6, (hi − done) / remainingPlanned)`, so once tennis pushes
+`done` past `hi` the factor floors at **0.6 and cuts the written threshold work by 40%**. In a
+threshold block that is backwards: the governor can only cut what is written, so it removes the
+reps that develop the ski and the run and leaves the court time that develops neither. 440–580
+gives the written work headroom while still flagging a 614 week as over, and the floor rises from
+420 to 440 because a threshold block should not be a quieter week than Base I's 400.
+
+**This touches no physiological gate.** `easeHard`, the readiness gate, `forceRest` and the ACWR
+arithmetic are all untouched, and re-reading the engine off the edited file returns **every signal
+field identical** to before the edit. It is a ceiling on bookkeeping, not an instruction.
+
+### 4. The rest day, which is the live failure and which I did not write a fourth line about
+**Written rest is now 2-for-10 over three weeks.** 31 Oct's intervention — strip the escape clauses
+from 1, 2 and 4 Nov so the week contained one unambiguous day off — **was tested on 1 Nov and
+failed inside 24 hours**: the clause-free Sunday line produced tennis 1:31:37, a 10:07 row, 46:06
+of Strength and three commutes, **104 TRIMP**. Writing the rest line more firmly is therefore
+0-for-1, and I am not writing a firmer one today. Today's 2 Nov line already says the right thing
+and says it with the right mechanism; updating 11 days to 13 and 2-for-9 to 2-for-10 in a line he
+reads on a phone this morning is cosmetic, so it stays byte-identical.
+
+**What today actually decides.** R7 reaches `today..today+2`, so this morning it converts 2 Nov
+(already rest) and 4 Nov (already `note:true`) and **leaves Saturday 7 Nov's long run alone**. On
+Thu 5 Nov, today+2 is 7 Nov. So: **if today lands under 5 TRIMP, `daysSinceRest` is 3 by Thursday
+and the long run survives; if it goes the way the last ten did, the guard takes it, exactly as it
+took 31 Oct's.** The long run has landed **once since September** — the 1h10 of 10 Oct, a
+Saturday — and 31 Oct logged tennis 1:27 and no run at all. Week 10 keeps it on Saturday because
+Saturday is the only day of this block that has ever produced one.
+
+### 5. The physiology, read honestly
+- **`hrvBaseline` moved 100 → 98 and the drift is now continuous: 105 → 102 → 100 → 98 over about
+  ten days.** The 31 Oct run called the earlier steps "the shape a sustained shift starts with" and
+  then noted it had stopped; it has resumed. The 7-day HRV mean is **98.6 against 105.6 for the
+  seven before it** — a 7-point fall, driven by two single-day dips (83 on 27 Oct, **72 on 31 Oct**)
+  rather than a flat suppression. **This is worth saying out loud: it is the third week of a rising
+  ATL, now at a block high of 65.74, with 13 days since a day off.** It is not a reason to change
+  today — today reads +12 — but if the baseline prints 96 or lower this week on a mean that is
+  falling rather than dipping, that is a de-load signal and not a bookkeeping one.
+- **RHR excursions: 68 on 15 Oct (the infection), then 53 on 24 Oct and 54 on 31 Oct.** Both
+  post-infection excursions fell on a **Saturday morning** and both resolved within a day (43 on
+  25 Oct; 43 then 42 on 1–2 Nov). n=2 is a coincidence until it is three, so I am naming it rather
+  than acting on it: **the trigger is a third Saturday above 46 — check it on Sat 7 Nov.**
+- **ACWR 1.71 is not quoted as alarm, for the same reason as yesterday:** CTL 38.34 is depressed by
+  the 128-TRIMP infection week, which stays inside the 42-day window until early December. This is
+  rebound, not a spike.
+
+### 6. Phase, bands, weaknesses
+- **Base I is right and ends on schedule, 8 Nov.** Week 9 projects 391 against 400–560 with
+  `trimmedBy` 10 — slightly under, and correctly so on a Monday with half a day elapsed.
+- **Do the next two weeks need different sessions rather than smaller ones? Yes, and that is what
+  week 10 is.** Base I's job was volume in whatever shape landed; Base II's is a repeatable
+  threshold number and a repeatable ski number. The structure is unchanged because the structure
+  works; the content changed.
+- **Has a weakness moved? No — nothing has been raced.** RACE, PREV_RACE, STATION_TARGETS,
+  RACE_BUDGET, RACE_GAINS, HYROX_DATA and HYROX_STATIONS all verified byte-identical. Ski top
+  **29.8%** and the running block top **27.7%** remain the two priorities, and the Base II note now
+  states the ski/row trade explicitly — **row is already top 11.4%, so an erg session spent on the
+  rower is training a strength.**
+- **The 31 Oct carry is discharged.** Base II's note no longer says "erg volume"; it names the
+  shape, the reason and the ski-over-row trade.
+
+### WATCH — nothing at 2×/0 this morning
+ski is the 5×/0 ACTION item, resolved forward as above. row 0/3, hyrox 0/1, strength 4/4 and
+run 6/3 are all *unprescribed* or *short by*, none at 2 prescribed and 0 done. **What would make me
+act: any type reaching 2 prescribed and 0 done is named here the morning it reaches 2 and resolved
+the morning it reaches 3.**
+
+### What I deliberately left alone, with the trigger for each
+1. **All seven days of week 9, 2–8 Nov.** Byte-identical, including today's rest line and
+   Saturday's long run. **Trigger: if 7 Nov is converted again or logs nothing, the long run comes
+   off Saturday — decide Sun 8 Nov.**
+2. **Tue 3 Nov's ski.** Reshaped on 30 Oct, never yet tested; tomorrow is the test. Changing it
+   again today would be the fourth change in five days to a line whose new form has never been
+   tried. **Decide Wed 4 Nov.**
+3. **Thu 5 Nov's KEY RUN.** Byte-identical. Week 12 Nov is written to read its recorded pace, so if
+   it comes back unreadable again, 12 Nov loses its anchor. **Decide Fri 6 Nov.**
+4. **The rest-day policy.** Not rewritten a fourth time; see §4. **Trigger: if 2 Nov and 8 Nov both
+   train, written rest stops being written at all and the guard is left to do it — decide Mon
+   9 Nov.**
+5. **RACE, PREV_RACE, STATION_TARGETS, RACE_BUDGET, RACE_GAINS, all other TAPER_PLAN blocks.**
+   Byte-identical; 17 of 18 blocks untouched.
+6. **The past SCHEDULE lines of 12, 19, 21, 27 and 30 Oct.** They are the record the flag is
+   computed from.
+7. **No machine-written constant touched.**
+
+### Verification
+- `npm run build` **clean, 467.60 kB** (`npm ci` first — vite is absent in a fresh container).
+- **11/11 patch anchors** (gotcha 14). 151 daily / 150 sleep rows, **every row at exactly 4-space
+  indent** (checked per physical line), sorted, unique, no `hrv:0`.
+- **`git diff` is 11 added / 1 removed line: one TAPER_PLAN line at 1445 and a 10-line week-10
+  block at 1605.** Zero data constants in the diff (grep for the daily/sleep/TODAY/LAST_*/
+  hrvBaseline/CSV_DATA/HYROX_DATA shapes returns 0 hits).
+- **Trap scan on all eight new SCHEDULE lines.** Three sentences or fewer each, no double quote, no
+  `\"` escape. Run through `adherence.py`'s own matchers: **9 Nov → nothing, 10 Nov → ski +
+  strength, 11 Nov → nothing (note:true, 0 prescribing texts), 12 Nov → run, 13 Nov → nothing
+  (note:true), 14 Nov → run, 15 Nov → nothing.** Both rest lines were written specifically to avoid
+  the eight type patterns — no phantom run, erg or court prescription.
+- **`adherence.py --days 21` after the edits: every count identical** (ski 5/0, row 0/3, hyrox 0/1,
+  strength 4/4, cycle 0/8, tennis 0/11, run 6/3). The only change is 12 Nov joining the next-14-day
+  benchmark list, which is intended.
+- **Engine re-read off the edited file: every `signals` field identical** to the pre-edit run; week
+  9 governor unchanged (done 0, projected 391, raw 401, `trimmedBy` 10); `getWeekTarget` returns
+  **440–580** for 9–15 Nov; forward adjustments identical (2 Nov recovery, 3 Nov eased, 4 Nov
+  recovery) and **week 10 untouched by the engine**, as expected — `adaptPlan` steers only the live
+  week.
+- **`calendar_sync.py`'s `DAY` regex matches all seven new days**; SCHEDULE parses **71 days**, last
+  2026-11-15.
+- Round-trip `update.patch()` against a copy of the real src/App.jsx (`head -1046 update.py`,
+  imported with `-I` from a scratch dir): **52/52 passed.** INSERT — daily 151→152 and sleep
+  150→151, each +1 at 4-space indent, sorted, unique, no date lost; weight upserted once inside its
+  own array with **`vo2max` byte-identical (gotcha 4)** and no `undefined` hole; CSV added once;
+  TODAY advanced to date+1. REPLACE — no growth in either array, CSV upserted not duplicated. In
+  both branches SCHEDULE / TAPER_PLAN / RACE / HYROX_DATA / HYROX_STATIONS / nutrition / body
+  byte-identical, **week 10 and the 440–580 band both survive the patch.**
+- **Consecutive NO CHANGE runs preceding this one: 0.** 31, 30, 29, 28, 27, 26, 25 and 24 Oct were
+  all CHANGED; the last NO CHANGE was 14 Oct.
+- **There is no 1 Nov entry in this file.** The previous entry is 31 Oct, and `git log` shows 31
+  commits on 1 Nov but no plan commit — **yesterday's firing either did not happen or produced
+  nothing.** That is why 1 Nov's behaviour (a 104-TRIMP day on a written rest day) is being read
+  for the first time this morning. If 3 Nov also finds no 2 Nov entry, the Routine itself needs
+  looking at.
+- **Harness notes for the next cold run.** Standing set still correct, plus: (1) the engine slice
+  **moved — it is now lines 2–2027 with `hrvBaseline` at 2426**; re-derive both with grep every
+  time (`grep -n '^      rhr: todayRow.rhr ?? null,'` gives the end, +3 lines), because writing a
+  week into SCHEDULE shifts everything below it. (2) `update.patch()` takes sleep stages **nested**
+  — `wellness["sleep"] = {deep, rem, light, awake}`, not flat keys. Flat keys leave
+  `has_real_sleep` false and the sleep array silently does not grow, which looks exactly like
+  gotcha 2 and is not. (3) `wellness["weight"]` is a **`(date, kg)` tuple**, not a float.
+  (4) `adherence.planned_days()` scans `type:"rest"` lines too — only `note:true` and the INFO
+  regex are excluded — so the words *long run*, *threshold*, *km*, *jog*, *tempo*, *strides*,
+  *ski*, *row*, *sled*, *lunge*, *strength*, *cycl*, *bike*, *tennis*, *hyrox*, *swim* in a rest
+  line create a phantom prescription. Write "hour and a quarter", not "long run". (5) Keep
+  `analyze(parseCSV(CSV_DATA))` — passing the raw template literal returns ATL/CTL/TSB of 0 and a
+  plausible-looking readiness.
+
+
 ## 2026-10-31
 - adherence: **ACTION REQUIRED — ski 5 prescribed / 0 done**, the same five dates as yesterday
   (12, 14, 19, 21, 27 Oct) and the same window arithmetic — nothing written today can clear a flag
