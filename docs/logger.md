@@ -1,10 +1,10 @@
-# Training logger — simas.fit/log
+# Training logger — training.simas.fit/log
 
 A home-screen web app for logging sessions while training. Each saved session
 is written into the matching Garmin activity automatically.
 
 ```
-iPhone (simas.fit/log, works offline — every keystroke saved on the phone)
+iPhone (training.simas.fit/log, works offline — every keystroke saved on the phone)
   └─ Save → auth.simas.fit/log (LOG_TOKEN) → workflow_dispatch log-session.yml
             (fallback: direct dispatch with a fine-grained GitHub token)
        └─ match_sessions.py --ingest
@@ -50,7 +50,7 @@ undoes and re-applies to a given activity id.
    `npx wrangler secret put LOG_TOKEN` → `npx wrangler deploy --dry-run` → `npx wrangler deploy`.
    Deploy output must still list the cron, `env.TOKENS` and `auth.simas.fit (custom domain)`.
 3. Logger ⚙︎ Settings → auth.simas.fit → paste LOG_TOKEN → Test ("token accepted").
-4. Safari → simas.fit/log → Share → Add to Home Screen.
+4. Safari → training.simas.fit/log → Share → Add to Home Screen.
 
 Fallback if the Worker is down: Settings → GitHub, with a fine-grained token
 (repo `Simanauskas/dashboard` only; Actions read/write, Contents read).

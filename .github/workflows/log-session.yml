@@ -1,6 +1,6 @@
 name: Log Session
 
-# Receives a session from the phone logger (simas.fit/log), saves it to
+# Receives a session from the phone logger (training.simas.fit/log), saves it to
 # data/sessions/<id>.json and writes it into the matching Garmin activity
 # (match_sessions.py). If the watch activity hasn't synced yet the session stays
 # "pending" and the hourly update.yml run picks it up.

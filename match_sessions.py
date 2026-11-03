@@ -2,7 +2,7 @@
 """
 match_sessions.py
 ─────────────────
-Matches sessions logged in the phone logger (simas.fit/log) to the Garmin
+Matches sessions logged in the phone logger (training.simas.fit/log) to the Garmin
 activity the watch recorded, then writes into that activity:
 
     strength  → the Sets tab (exercise, kg, reps) + name + description

@@ -136,7 +136,7 @@ jobs:
             python body.py --days 30
           fi
 
-      # Sessions logged on the phone (simas.fit/log) whose Garmin activity had
+      # Sessions logged on the phone (training.simas.fit/log) whose Garmin activity had
       # not synced when they were saved. Exits at once, with no Garmin call,
       # when nothing is waiting — so it is cheap on every mode, polls included.
       # Never allowed to fail the job.
