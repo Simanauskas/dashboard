@@ -1151,11 +1151,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-03";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-03T09:07:00Z";
-const LAST_DATA = "2026-11-03T09:07:00Z";
+const LAST_RUN  = "2026-11-03T10:07:00Z";
+const LAST_DATA = "2026-11-03T10:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-03T09:07:00Z";
+const LAST_MFP  = "2026-11-03T10:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1600,7 +1600,7 @@ const SCHEDULE = [
   ]},
   { week:9, label:"Nov 2–8", theme:"Base I · Aerobic", days:[
     { date:"2026-11-02", dow:"MON", label:"Nov 2", sessions:[{type:"rest",text:"A full day off, and it is the week’s one real requirement rather than a gap in it: written rest has gone two for nine over the last three weeks, and the only two that landed were the infection week in mid-October. Eleven days without one is exactly what downgraded Saturday’s hour and a quarter to walking, and the same rule takes next Saturday too if this day goes the way the last nine did. Move it to Wednesday if you must, but no later than that."}] },
-    { date:"2026-11-03", dow:"TUE", label:"Nov 3", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Ski 1000m for time at the front of the trip, before the lifting, and put the split in the title. Five clockless steady ergs have been written since 12 Oct and not one landed, while both skis that did land were measured pieces: 10min for 2380m on 8 Oct and 4:02 a thousand compromised on 5 Oct. On 25 Oct you did this exact shape unprompted on the rower, a thousand in 3:59, so four minutes at the front of a lift is already something you do."},{type:"plan",text:"Gym 40min: sled pull 8×25m and lunges 4×50m with the bag never down, second in the trip. The content is unchanged from last Tuesday; what changed is that it no longer shares a line with the machine above, so each half is now marked done on its own."}] },
+    { date:"2026-11-03", dow:"TUE", label:"Nov 3", sessions:[{type:"plan",text:"Ski 1000m for time at the front of the trip, before the lifting, and put the split in the title. Five clockless steady ergs have been written since 12 Oct and not one landed, while both skis that did land were measured pieces: 10min for 2380m on 8 Oct and 4:02 a thousand compromised on 5 Oct. On 25 Oct you did this exact shape unprompted on the rower, a thousand in 3:59, so four minutes at the front of a lift is already something you do."},{type:"plan",text:"Gym 40min: sled pull 8×25m and lunges 4×50m with the bag never down, second in the trip. The content is unchanged from last Tuesday; what changed is that it no longer shares a line with the machine above, so each half is now marked done on its own."}] },
     { date:"2026-11-04", dow:"WED", label:"Nov 4", sessions:[{type:"rest",text:"Full day off, and this is the one the week turns on: Monday was written as the day off and went to the court instead, so fourteen days have now passed without one and form sits at minus 28. The recovery guard reaches two days forward, so a day under five TRIMP here is what keeps Thursday’s benchmark and Saturday’s hour and a quarter off the downgrade to walking — which is exactly what it did to 31 October. Nothing structured; a walk is fine."}] },
     { date:"2026-11-05", dow:"THU", label:"Nov 5", sessions:[{type:"plan",text:"⏱ KEY RUN · 50min, hard running, your shape · 5km at 4:20/km and no slower, any reps you like, and this one has to be readable — outdoors on GPS if you can. Last Thursday landed and it was genuinely hard, max heart rate 172 and training effect 3.7, but it went indoors and came back 3.64km at a ground contact of 344ms, so there is no pace to read out of it. Base II’s threshold reps start from the number this session records, so if it has to be indoors put the treadmill speed in the title."}] },
     { date:"2026-11-06", dow:"FRI", label:"Nov 6", sessions:[{type:"plan",note:true,text:"Nothing written here: the long run sits on Saturday for the remainder of this block, because Friday has never produced a run inside it. Take it today if tomorrow is taken. A gym trip here is welcome."}] },
