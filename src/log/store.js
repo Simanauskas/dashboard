@@ -15,7 +15,9 @@ function write(db) {
   try { localStorage.setItem(KEY, JSON.stringify(db)) } catch { /* private mode: keep in memory */ }
 }
 
-let db = { entries: {}, settings: { mode: "github", token: "" }, ...read() }
+// Default: auth.simas.fit/log with a LOG_TOKEN (the phone never holds a GitHub token).
+// "github" mode — a fine-grained token, direct dispatch — is the fallback if the Worker is down.
+let db = { entries: {}, settings: { mode: "worker", token: "" }, ...read() }
 db.entries = db.entries || {}
 const listeners = new Set()
 const emit = () => { write(db); listeners.forEach(f => f()) }

@@ -400,7 +400,7 @@ function Home({ go }) {
   const drafts = list.filter(s => entries[s.id] && (!entries[s.id].sync || entries[s.id].sync === "draft"))
   return <div className="page">
     <Top title="Training log" right={<button className="back" onClick={() => go("settings")} aria-label="Settings">⚙︎</button>} />
-    {!store.settings.token && <div className="status warn" onClick={() => go("settings")}>Add your GitHub token in ⚙︎ Settings so logs can reach Garmin.</div>}
+    {!store.settings.token && <div className="status warn" onClick={() => go("settings")}>Add your LOG_TOKEN in ⚙︎ Settings so logs can reach Garmin.</div>}
     <button className="btn primary huge" onClick={() => go("new")}>+ New session</button>
     {drafts.length > 0 && <div className="sec">In progress</div>}
     {drafts.map(s => <Item key={s.id} s={s} entry={entries[s.id]} go={go} />)}
@@ -437,12 +437,12 @@ function Settings({ go }) {
     <Top title="Settings" onBack={() => go("home")} />
     <div className="card">
       <Field label="Send logs via">
-        <Chips value={st.mode} options={[["github", "GitHub (direct)"], ["worker", "auth.simas.fit"]]} onChange={m => m && store.setSettings({ mode: m })} />
+        <Chips value={st.mode} options={[["worker", "auth.simas.fit"], ["github", "GitHub (fallback)"]]} onChange={m => m && store.setSettings({ mode: m })} />
       </Field>
       <Field label={st.mode === "github" ? "GitHub fine-grained token" : "LOG_TOKEN"}
         hint={st.mode === "github"
           ? "github.com → Settings → Developer settings → Fine-grained tokens. Repository: Simanauskas/dashboard only. Permissions: Actions = Read and write, Contents = Read. Stored only on this phone."
-          : "The LOG_TOKEN secret set on the Worker."}>
+          : "The LOG_TOKEN secret set on the Worker (in your password manager). Stored only on this phone."}>
         <input className="in" type="password" autoComplete="off" value={st.token} onChange={e => store.setSettings({ token: e.target.value.trim() })} />
       </Field>
       <button className="btn" onClick={async () => { setMsg("checking…"); try { setMsg(await testToken()) } catch (e) { setMsg(e.message) } }}>Test</button>

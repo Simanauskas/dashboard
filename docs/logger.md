@@ -5,8 +5,8 @@ is written into the matching Garmin activity automatically.
 
 ```
 iPhone (simas.fit/log, works offline — every keystroke saved on the phone)
-  └─ Save → workflow_dispatch log-session.yml   (direct with a GitHub token,
-                                                  or via auth.simas.fit/log)
+  └─ Save → auth.simas.fit/log (LOG_TOKEN) → workflow_dispatch log-session.yml
+            (fallback: direct dispatch with a fine-grained GitHub token)
        └─ match_sessions.py --ingest
             ├─ data/sessions/<id>.json   ← the full record (read this, Claude)
             └─ matching Garmin activity  ← sets / distance / name / description
@@ -44,10 +44,16 @@ undoes and re-applies to a given activity id.
 ## Setup (once)
 
 1. Merge to `main` (workflows must be on main to dispatch).
-2. Make a GitHub fine-grained token: repository `Simanauskas/dashboard` only,
-   Actions: Read and write, Contents: Read. Paste it in the logger's ⚙︎ Settings → Test.
-   Optional instead: deploy `docs/worker-log-route.js` and use a LOG_TOKEN.
-3. Safari → simas.fit/log → Share → Add to Home Screen.
+2. Worker (`Simanauskas/garmin-auth-worker`, `/log` route): set the token and deploy
+   from the Mac —
+   `openssl rand -hex 32` → save it in the password manager →
+   `npx wrangler secret put LOG_TOKEN` → `npx wrangler deploy --dry-run` → `npx wrangler deploy`.
+   Deploy output must still list the cron, `env.TOKENS` and `auth.simas.fit (custom domain)`.
+3. Logger ⚙︎ Settings → auth.simas.fit → paste LOG_TOKEN → Test ("token accepted").
+4. Safari → simas.fit/log → Share → Add to Home Screen.
+
+Fallback if the Worker is down: Settings → GitHub, with a fine-grained token
+(repo `Simanauskas/dashboard` only; Actions read/write, Contents read).
 
 ## Session file (v1)
 
