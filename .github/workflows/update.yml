@@ -136,6 +136,14 @@ jobs:
             python body.py --days 30
           fi
 
+      # Sessions logged on the phone (simas.fit/log) whose Garmin activity had
+      # not synced when they were saved. Exits at once, with no Garmin call,
+      # when nothing is waiting — so it is cheap on every mode, polls included.
+      # Never allowed to fail the job.
+      - name: Write logged sessions into Garmin
+        continue-on-error: true
+        run: python match_sessions.py --pending --apply
+
       - name: Commit and push if changed
         run: |
           # poll mode leaves the file untouched when nothing new arrived, so the
@@ -143,6 +151,7 @@ jobs:
           git config user.name  "garmin-bot"
           git config user.email "bot@simanauskas.github.io"
           git add src/App.jsx
+          if [ -d data/sessions ]; then git add data/sessions; fi
 
           if git diff --staged --quiet; then
             echo "nothing to commit"

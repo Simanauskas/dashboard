@@ -1,0 +1,14 @@
+{
+  "name": "Training Log",
+  "short_name": "Log",
+  "description": "Log strength, erg, run, tennis and Hyrox sessions; they land in the matching Garmin activity.",
+  "start_url": "/log/",
+  "scope": "/log/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "icons": [
+    { "src": "/log/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/log/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

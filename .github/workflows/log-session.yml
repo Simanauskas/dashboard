@@ -1,0 +1,89 @@
+name: Log Session
+
+# Receives a session from the phone logger (simas.fit/log), saves it to
+# data/sessions/<id>.json and writes it into the matching Garmin activity
+# (match_sessions.py). If the watch activity hasn't synced yet the session stays
+# "pending" and the hourly update.yml run picks it up.
+#
+# Dispatched by the logger itself (fine-grained token on the phone) or by the
+# auth.simas.fit Worker's /log route. Must live on main to be dispatchable.
+on:
+  workflow_dispatch:
+    inputs:
+      session:
+        description: 'Session JSON (v1) — required for action=save'
+        required: false
+        default: ''
+      action:
+        description: 'save, undo or rematch'
+        required: false
+        default: 'save'
+      id:
+        description: 'Session id (undo / rematch)'
+        required: false
+        default: ''
+      activity_id:
+        description: 'Garmin activity id to force (rematch)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+# A re-save right after a save must not race the first run's push.
+concurrency:
+  group: log-session
+  cancel-in-progress: false
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 10
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install "garth==0.4.47" requests
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+      # Inputs via env, never interpolated into the shell: the JSON comes from a phone.
+      - name: Save and write to Garmin
+        env:
+          SESSION: ${{ inputs.session }}
+          ACTION: ${{ inputs.action }}
+          SID: ${{ inputs.id }}
+          AID: ${{ inputs.activity_id }}
+        run: |
+          case "$ACTION" in
+            undo|rematch)
+              args=(--action "$ACTION" --id "$SID")
+              if [ -n "$AID" ]; then args+=(--activity-id "$AID"); fi
+              python match_sessions.py "${args[@]}" --apply ;;
+            *)
+              python match_sessions.py --ingest "$SESSION" --apply ;;
+          esac
+      - name: Commit and push
+        run: |
+          git config user.name  "garmin-bot"
+          git config user.email "bot@simanauskas.github.io"
+          git add data/sessions
+          if git diff --staged --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "chore: log session ${{ inputs.id || 'save' }}"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "push rejected (attempt $attempt) — rebasing onto main"
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::rebase conflict on data/sessions — re-save from the phone"
+              exit 1
+            fi
+            sleep 3
+          done
+          exit 1
