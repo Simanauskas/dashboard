@@ -53,6 +53,215 @@ and never once done.
 
 ---
 
+## 2026-11-04
+- adherence: **ski 5 prescribed / 1 done — the ACTION REQUIRED flag is cleared, and not by an edit of
+  mine.** Yesterday it read 5-and-0; **3 Nov logged a Ski-ERG, 10:04 for 2330m, at 17:05 as the first
+  item of the gym trip**, then Upper body 48:57. Window 14 Oct–4 Nov: row 0/3 · hyrox 0/1 · strength
+  **4/5, on track** · cycle 0/10 · tennis 0/11 · **run 6/3, short by 3**. Nothing at 2-and-0, so **no
+  WATCH item.** Benchmarks already due: 15 Oct NOTHING LOGGED, 22 Oct TRAINED EASY INSTEAD, 29 Oct
+  type match. Next 14d: **Thu 5 Nov** and **Thu 12 Nov**, both Thursdays, neither deferred.
+- readiness: HRV **110** vs baseline **101** (**+9**), **RHR 42**, resp 12.0, sleep **458min (7h38)**,
+  sleep score 95. 153 daily / 152 sleep rows, contiguous, last row 2026-11-04. LAST_RUN and LAST_DATA
+  both 2026-11-04T07:07Z against TODAY 2026-11-04 — **sync healthy**. Engine, read live off the edited
+  file: readiness **6**, **TSB −24.19**, ATL **61.79**, CTL **37.60**, **ACWR 1.64**, `consecutiveHard`
+  **0**, **`daysSinceRest` 14**, `forceRest` **TRUE**, `easeHard` **FALSE**, `scale` 1, `unplanned7`
+  **345**. Week 9 governor: done 119 + remaining 237 = **projected 356 against a 400–560 band —
+  under the floor, `trimmedBy` 0.**
+- decision: **CHANGED — four lines, all of them in week 10, which he has not started. (1) Wed 11 Nov's
+  ski stops being a timed 1000m and becomes ten minutes for distance with 2380m to beat. (2) Wed
+  11 Nov's gym stops prescribing sled pull and lunges beside the lift and bolts the sled pull onto the
+  upper-body lift he actually does; the lunges come out. (3) Tue 10 Nov's note loses a sentence that
+  3 Nov made false. (4) TAPER_PLAN's Base II note names the ten-minute distance as the block's ski
+  progression.** The live week — 4, 5, 6, 7 and 8 Nov — is **byte-identical**, and so is week 9's
+  governor: projected 356 / raw 356 / trimmedBy 0 before and after.
+- why: **the ski landed, and what landed was not what was written.** 3 Nov asked for a thousand for
+  time and he skied **10:04 for 2330m — 2:09.6 per 500m, which is the split he raced Athens on (4:18)
+  and eleven seconds slower than his own 1000m TT pace of 1:58.5.** That is the third ten-minute piece
+  in five weeks (2290m, 2380m, 2330m) and the shape is now **3-for-3 while the timed thousand is
+  1-for-6**, so the prescription moves onto the shape that lands.
+- watching: whether **today, 4 Nov, lands under 5 TRIMP** and clears `daysSinceRest` 14 (decide Thu
+  5 Nov — still the highest-value fact of the week); whether **11 Nov beats 2380m** (decide Thu 12 Nov);
+  whether **the words "sled pull" appear in a title he saved on 11 Nov** — if not, it comes out of the
+  plan entirely (decide Thu 12 Nov); whether 5 Nov's KEY RUN records a readable pace, which Base II's
+  threshold reps are written off (decide Fri 6 Nov); the 7 Nov long run (decide Sun 8 Nov); whether
+  week 9 closes under 400 (decide Mon 9 Nov, with week 11); RHR's third Saturday above 46 (7 Nov).
+
+### 1. The ski flag is out, and the reason matters more than the fact
+Five mornings of this Routine reshaped the ski's wording and none of them moved it. **3 Nov moved it**,
+and the honest accounting of why is not flattering to the line that was written:
+
+| | written 3 Nov | logged 3 Nov |
+|---|---|---|
+| shape | 1000m for time, split in the title | **10:04 continuous, 2330m, no split typed** |
+| position | front of the trip, before the lifting | **17:05, first item; lift at 17:17** ✓ |
+| gym half | sled pull 8×25m, lunges 4×50m | **Upper body workout 48:57** |
+
+The position was obeyed exactly. Neither the erg's shape nor the gym's content was.
+
+**And the dashboard told him to drop the clock.** Yesterday's §3 recorded that 3 Nov's ski line
+classified `planIntensity` **162** — over `HARD_HR` 155 — because the word *"compromised"* appears in
+its evidence sentence, so R3 fired and the card read "drop the intervals, the timing and the max
+efforts" on a session whose whole point was the clock. **That prediction was correct and it is now
+confirmed by behaviour: he skied steady.** So 3 Nov is not evidence that a timed thousand fails. It is
+evidence that *this* athlete, told to drop the timing, does the ten-minute piece — which is what he
+does anyway.
+
+**The ten-minute piece, which is the only erg shape with a record:**
+
+| Date | Day | Piece | 500m split | Position in the trip |
+|---|---|---|---|---|
+| 30 Sep | Wed | ski 2290m in 10min **as the warmup**, then 1000m **3:57** | 2:11 / **1:58.5** | first, lift 24 min later |
+| 8 Oct | Thu | ski 10min **2380m** | 2:06 | first, lift 13 min later |
+| 3 Nov | Tue | ski 10:04 **2330m** | 2:09.6 | first, lift 12 min later |
+
+Three pieces, five weeks, **2290 → 2380 → 2330: flat.** All three sit between 2:06 and 2:11 per 500m,
+i.e. **at or just off the 2:09 he raced Athens on**, and eight to thirteen seconds off the 1:58.5 he
+has already produced over a thousand. Ski is top **29.8%**, his weakest element on the board, and a
+weekly ten minutes at race split will not move it. The piece is not the problem; **the absence of a
+number to beat is.**
+
+So 11 Nov now reads *"Ski 10min … one continuous piece — beat 2380m and nothing else is asked."* Three
+things recommend it over the thousand:
+- It is the shape that is **3-for-3**, written onto the position that is **3-for-3**.
+- **2380m is his own mark**, set on 8 Oct, and beating it requires about **2:06 per 500m** — faster
+  than race split, which is the point, without asking for TT pace off a court day.
+- **It is machine-readable without his cooperation.** 3 Nov's activity is titled bare "Ski-ERG" with
+  no split typed, yet `CSV_DATA` carries 2.33 km and 00:10:04 — so distance-in-ten-minutes is a
+  benchmark `adherence.py` and I can both read every morning, whatever he titles it. "Put the split in
+  the title" has been asked four times and typed once.
+- Costing improves as a side effect: the old line named no duration, so `estTrimp` used the 47-minute
+  median and priced it at **49.7**. Naming 10min prices it at **16.4**, which is what a ten-minute erg
+  actually costs. Week 10's written total falls 258 → **225**; against the Base II band 440–580 and
+  ~345 of weekly court load that is comfortably inside, so nothing else needed re-costing.
+
+Verified it classifies **146**, under `HARD_HR`, so unlike 3 Nov the engine will **not** ease it.
+
+### 2. The finding of the morning: a prescription that is 0-for-8 and reads "on track"
+`adherence.py` prints **strength 4/5, on track**. That is true by type and false by content. I checked
+the content because yesterday's entry flagged the by-type blind spot in prose but did not pursue it.
+
+**Sled pull and lunges have been written into SCHEDULE eight times since 28 Sep** — 30 Sep, 5, 12, 19,
+21, 27 Oct, 3 Nov, 11 Nov. Searching every Garmin title he has ever saved, the words *sled* or *lunge*
+appear **four times, and the most recent three predate this block**: 20 Jul, 16 Aug, 29 Aug, and then
+**29 Oct — inside a circle he designed himself** ("Circle: {1km run, 40m sled pull, 10BBJ, 500m row,
+50 FC}×2"). **Zero of the eight prescriptions produced a titled sled pull.** The lift always happened;
+the station work never did.
+
+What he lifts instead, ten sessions since 20 Sep:
+
+| Upper | Lower |
+|---|---|
+| 30 Sep Wed · 5 Oct Mon · 8 Oct Thu · 23 Oct Fri · **27 Oct Tue** · **3 Nov Tue** | 7 Oct **Wed** · 25 Oct **Sun** · 1 Nov **Sun** |
+
+**Both Tuesdays — the two trips the written gym line has ever caught — are upper body.** Every
+lower-body session he has done landed on a Wednesday or a Sunday and he chose all three himself. The
+plan has spent six weeks writing posterior-chain station work onto the day he lifts his arms.
+
+So 11 Nov's gym line stops prescribing it beside the lift and **attaches it to the lift**: upper body
+as usual, with sled pull 8×25m hand-over-hand bolted onto the end. Hand-over-hand sled pull *is* an
+upper-body pull, so this is a better fit physiologically than it is a concession. **The lunges come
+out** — 0-for-8, top 15.2% so not a priority, and he is not short of leg work between tennis, the
+long run and two self-chosen lower-body sessions in three weeks.
+
+This is the mechanism that has evidence behind it. 30 Oct wrote *"when you are on a machine anyway
+make it the ski"* instead of prescribing an erg, and on 3 Nov he used the **ski** — after three
+consecutive self-selected ergs on the rower (7 Oct, 25 Oct, 1 Nov). A session bolted to a behaviour
+he already has beats a session written on a date.
+
+### 3. Why the day did NOT move back to Tuesday, and the sentence that had to go
+3 Nov is a Tuesday on which he reached the gym with an erg written and **did the erg**. Yesterday moved
+the week-10 trip off Tuesday partly because *"the one Tuesday you did reach the gym with an erg written
+you did upper body and left the machine alone."* **That sentence is now false and it was shipping to
+his phone**, on both 10 and 11 Nov. It is gone.
+
+The corrected tally, which is thinner than either day's advocates would like:
+
+| Day | Gym trips this block | Erg landed | Court that day |
+|---|---|---|---|
+| **Tue** | 27 Oct, 3 Nov | 1 of 2 | **2:43** / **none** |
+| **Wed** | 30 Sep, 7 Oct | 2 of 2 | 1:33 / 2:25 |
+
+Tuesday's one success is **the only Tuesday in six weeks with no court at all**; Wednesday is 2-for-2
+*including* after a 2:25 court. Wednesday is still the better day on the evidence, so it keeps the
+trip — **and yesterday's move is 0-for-0, not 0-for-1: it has not been tested yet.** Reverting a
+day-of-week on one data point is precisely the churn that reshaping the wording five times already
+proved worthless. The 10 Nov note's stale "an hour fifty-six on average across the last four" also
+went: the last four Tuesday courts are 1:24, 1:19, 2:43 and nothing, a mean of **1:21**.
+
+Yesterday's standing trigger is kept and narrowed: **if 11 Nov comes back without a ski, the erg goes
+inside the gym line and stops being its own prescription. Decide Thu 12 Nov.** Added alongside it:
+**if 11 Nov's title carries no sled pull either, the sled comes out of the plan entirely.** Both are
+decidable on the same morning.
+
+### 4. Week 9 is under its floor for the first time this block
+Governor: done **119**, remaining **237**, projected **356** against **400–560**. `under` is true;
+the engine raises volume only at readiness 7+ and he is at **6**, so nothing was raised, and I added
+nothing. Two reasons that is right:
+- Today is the rest day the week turns on. `daysSinceRest` is **14** and `forceRest` is still **TRUE**;
+  writing volume into a week whose single purpose this morning is one day under 5 TRIMP would be
+  self-defeating.
+- The 356 excludes court. `unplanned7` is **345** and three of the week's remaining four days have
+  historically carried a fixture. Week 7 closed at 407 against 403 written with tennis supplying 244
+  of it; the same arithmetic puts this week inside the band without a single extra written minute.
+
+Worth noting for Monday: Base I will close **327 · 693 · 129 · 407 · 614 · ~400–450**, mean ~**425**
+against a 480 mid. **If week 9 does close under 400, the Base II band of 440–580 — raised on 2 Nov and
+still untested — is aimed above what he has actually absorbed in any week but one.** That is a band
+question, and the right morning for it is **Mon 9 Nov**, when week 9 is closed and week 11 needs
+writing anyway. Not today, on a projection.
+
+### 5. The physiology, read honestly
+- **No signal, and the cleanest morning of the block.** HRV **110** at **+9**, RHR **42**, 7h38 of
+  sleep, sleep score 95, `easeHard` **FALSE** and `consecutiveHard` **0** for the first time in a week.
+- **`hrvBaseline` 102 → 101, and the mean is flat.** 7-day HRV mean 29 Oct–4 Nov is **102.0** against
+  **102.6** for the seven before it. The falling-drift trigger set on 2 Nov ("96 or lower on a falling
+  mean") was discharged yesterday and stays discharged: a one-point baseline tick on a flat mean is
+  noise, not drift.
+- **RHR 42, inside 38–46.** The standing trigger is unchanged and now immediate: **a third Saturday
+  above 46** after 53 on 24 Oct and 54 on 31 Oct. **7 Nov is that Saturday.**
+- **ACWR 1.64, still rebound not spike** — CTL 37.60 is held down by the 129-TRIMP infection week,
+  which stays inside the 42-day window until early December. Same reading as the last four entries.
+
+### 6. Phase, bands, weaknesses
+- **Base I is right and ends on schedule, Sun 8 Nov.** Base II opens 9 Nov. No phase change.
+- **Bands left alone** — see §4 for why the Base II band is a Monday question rather than a today one.
+- **Do the next two weeks need different sessions rather than smaller ones?** Yes, and that is what
+  this run did: the ski's *shape* changed, the gym's *content* changed, the days did not, and nothing
+  got smaller. The volume question is settled; the specification question was not.
+- **Has a weakness moved? No — nothing has been raced.** RACE, PREV_RACE, STATION_TARGETS,
+  RACE_BUDGET, RACE_GAINS, HYROX_DATA and HYROX_STATIONS all verified byte-identical. Ski top
+  **29.8%** and the running block top **27.7%** remain the two priorities. §1 is the ski; running is
+  carried by Thursday's benchmark and Saturday's long run, both untouched. Row stays unprescribed at
+  top 11.4% and he chose the ski over it on 3 Nov, which is the first time in four self-selected ergs.
+
+### WATCH — nothing at 2×/0 this morning
+ski is now **5 prescribed / 1 done** and no longer an ACTION item. row 0/3, hyrox 0/1, cycle 0/10,
+tennis 0/11, strength 4/5 and run 6/3 are *unprescribed*, *on track* or *short by*; none is at
+2-and-0. **What would make me act: any type reaching 2 prescribed and 0 done is named here the morning
+it reaches 2 and resolved the morning it reaches 3.** Carried forward for the next run: **"on track"
+and "short by" are both type-level verdicts and neither can see content.** Strength read 4/5 on track
+this morning while the prescribed content was 0-for-8 (§2). Before trusting a green verdict, read the
+logged titles against what the line actually asked for.
+
+### What I deliberately left alone, with the trigger for each
+1. **The whole live week — 4, 5, 6, 7, 8 Nov — byte-identical.** Rewriting a week in progress needs a
+   physiological reason and there is none this morning: readiness 6, HRV +9, RHR 42, `easeHard` false.
+2. **Today's rest day.** It is the single intervention the week depends on and it was written
+   yesterday. **Decide Thu 5 Nov whether it landed under 5 TRIMP.**
+3. **Thu 5 Nov's KEY RUN.** Untouched. Base II's threshold reps are written off the pace it records,
+   so the thing to check is whether it comes back readable — 29 Oct was genuinely hard (max HR 172,
+   TE 3.7) but went indoors and returned 3.64km at 344ms GCT with no pace to read. **Decide Fri 6 Nov.**
+4. **Sat 7 Nov's long run, still 1h15.** The ladder climbs only after a rung lands and the last to
+   land is the 1h10 of 10 Oct. **Decide Sun 8 Nov.**
+5. **The `planIntensity` defect recorded in yesterday's §3** — one adjective about a five-week-old
+   session deciding whether a session is eased. Still not in my editable surface. Re-verified this
+   morning: 3 Nov's ski still classifies 162, 11 Nov's new line classifies 146.
+6. **Week 11, 16–22 Nov, is unwritten.** Week 10 ends the schedule. **Write it Mon 9 Nov**, together
+   with the Base II band question from §4.
+7. **Three previous entries: 3 Nov CHANGED, 2 Nov CHANGED, 31 Oct CHANGED. Consecutive NO CHANGE runs
+   preceding this one: zero.** The passivity check does not bite this morning.
+
+
 ## 2026-11-03
 - adherence: **ACTION REQUIRED — ski 5 prescribed / 0 done.** The dates moved: 12 Oct aged out and
   **today, 3 Nov, aged in** — 14, 19, 21, 27 Oct and 3 Nov. row 0/3 · hyrox 0/1 · strength **4/4,
