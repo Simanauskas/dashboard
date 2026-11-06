@@ -53,6 +53,195 @@ and never once done.
 
 ---
 
+## 2026-11-06
+- adherence: **no ACTION REQUIRED and no WATCH — nothing sits at 2-prescribed-and-0-done.** Window
+  16 Oct–6 Nov: ski **4/1, short by 3** · row 0/3 · hyrox 0/1 · strength **4/5, on track** · cycle
+  0/10 · tennis 0/11 · **run 6/3, short by 3**. Benchmarks already due: 22 Oct TRAINED EASY INSTEAD,
+  29 Oct type match, **5 Nov NOTHING LOGGED**. Next 14d: **Thu 12 Nov**, and Thursday is a day he
+  trains — 4 of its 6 days this block carried load and 3 of the block's 7 runs are Thursdays, more
+  than any other day — so it is not sitting on a day he does not train and needs no move.
+- readiness: HRV **84** vs baseline **100** (**−16**), **RHR 41**, resp 11.0, sleep **538min (8h58)**,
+  sleep score 88. 155 daily / 154 sleep rows, contiguous, last row 2026-11-06. LAST_RUN and LAST_DATA
+  both 2026-11-06T07:07Z against TODAY 2026-11-06 — **sync healthy**. Engine, read live off the edited
+  file: readiness **4**, **TSB −17.59**, ATL **55.20**, CTL **37.61**, `daysSinceHard` 5,
+  `consecutiveHard` **0**, `daysSinceRest` **0**, `forceRest` **FALSE**, `easeHard` **TRUE** ("HRV 84ms
+  is 16ms under the 100ms baseline"), `scale` 1, `unplanned7` 330. Week 9 governor: done 206 +
+  remaining 94 = **projected 300 against 400–560 — 100 under the floor**, and `scale` stays 1 because
+  up-scaling needs readiness 7.
+- decision: **CHANGED — three SCHEDULE lines and the Base II phase note. (1) Thu 12 Nov's KEY RUN
+  stops being written off a pace that does not exist and becomes 8×1km at 4:01, his own session of
+  1 Oct. (2) The TAPER_PLAN Base II note loses the same dead premise and its false court-load figure,
+  and the 440–580 band is settled rather than deferred a third time. (3) Fri 6 Nov — today — keeps its
+  day off and gets the real reason, HRV at −16, in place of a guard that is already clear. (4) Mon
+  9 Nov stops prescribing a rest day to reset a guard that cannot fire before 15 Nov.** Tue–Thu of
+  this week are byte-identical; so are 7, 8, 11, 13, 14 and 15 Nov.
+- why: **the prescribed hard run is 0-for-5 since 6 October, and yesterday it was 0 activities, not a
+  soft miss.** 5 Nov logged **nothing at all** — the first zero-load day since 19 Oct — on the day the
+  plan called its measurement, and **both** the 12 Nov line ("take the pace last Thursday recorded")
+  and the Base II phase note ("carry on from the pace Base I's closing hard run actually recorded on
+  5 Nov") were written off a number that now does not exist.
+- watching: whether **8×1km lands on 12 Nov** — the first test of this shape as a prescription rather
+  than as something he chose (decide Fri 13 Nov); whether **7 Nov's 1h10 lands**, which is the first
+  Saturday in five weeks the recovery guard is *not* converting (decide Sun 8 Nov); whether **11 Nov
+  beats 2380m** and whether "sled pull" ever appears in a title he saves (both decide Thu 12 Nov);
+  **RHR's third Saturday above 46** after 53 on 24 Oct and 54 on 31 Oct — 7 Nov is that Saturday and
+  the trigger is unchanged; whether **HRV rebounds tomorrow** (§6) — two straight days under 90 with
+  RHR climbing turns the long run conversational-or-shorter; the **third written run of the week**,
+  which I did not add (§4) and would write only if he logs three runs in a week unprompted.
+
+### 1. The finding: the prescribed hard run is 0-for-5, and the next one was written off a missing number
+`adherence.py` prints no ACTION REQUIRED and no WATCH, and both are right — run sits at 6-prescribed-
+and-3-done, not at zero, because Z2 running does land. What it cannot show is that **every one of the
+six prescriptions asked for a pace, and the pace has never once been run.** The whole record, from the
+SCHEDULE lines themselves:
+
+| Written | Asked | Logged |
+|---|---|---|
+| 6 Oct | 5×1km @ 4:06 | Z2 10km, 52:09, avg HR 138 |
+| 15 Oct | 5×1km @ 4:06 | nothing — the infection |
+| 22 Oct | 5×1km @ 4:06 | Z2 50min, 8.71km at **5:37**, avg HR 131, **max 143** |
+| 29 Oct | 5km @ 4:20 | indoor circle, 3.64km, max 172 — hard, **no readable pace** |
+| 5 Nov | 5km @ 4:20 | **no activity at all** |
+
+**Five written, five not run, across five weeks.** Two different prescribed paces, three writings of
+one and two of the other, and the ask "put the pace in the title" made three times and delivered zero.
+This is the across-days pattern the Routine exists to see: on any single morning it reads as one miss.
+
+And it is not a volume problem hiding as a quality problem. **He has not run since 30 October — seven
+days** — while running is his weakest block against the Athens field at top 27.7%, behind every station
+except the ski. The seven runs of Base I were 10.87km (1 Oct), 9.71km, 10.01km, 12.80km, 8.71km,
+3.64km and 10.14km, and exactly one of them was run at a hard pace.
+
+### 2. Why 8×1km at 4:01, which is not a prescription
+The only hard-paced run of this block is **1 Oct: "8x1km tempo 4:01", 10.87km in 52:12, avg HR 151,
+max 176, aerobic TE 4.4, TRIMP 96** — his own session, titled by him, unprompted. The 29 Oct line had
+already recorded the principle: "both tempo runs you picked yourself landed and were harder than the
+prescription, 8×1km at 4:01 on 1 Oct and 3×2km at 14kmh on 25 Sep." It then wrote a prescription
+anyway, twice, and both went.
+
+So 12 Nov now asks for **that session at that pace**, and the pace is read out of his own log rather
+than chosen. It is the same correction the 4 Nov run made to the ski — move the session onto the shape
+that lands and off the one that does not — and the same correction 5 Nov made to the long run's
+duration. Three applications of one rule now; this is the third and the most overdue.
+
+The readability problem solves itself rather than being asked for again. **8×1km outdoors gives Garmin
+eight kilometre splits on its own**, so there is nothing to type, which is exactly the trick that made
+the 11 Nov ski line work ("Garmin records the distance itself"). The ladder rule is stated too: a ninth
+rep only after eight land, same as the long run's.
+
+**What I did not do:** move it off Thursday. Thursday is 4-of-6 trained this block and holds 3 of the
+block's 7 runs, more than any other weekday, so this is not a day-placement failure and moving it
+would be a guess dressed as a decision. The two Thursday zeros were 15 Oct (infection) and 5 Nov.
+
+### 3. Today's line was buying something yesterday already paid for
+Yesterday's entry made 6 Nov the week's hinge: "whether 6 Nov lands under 5 TRIMP — that is now the
+whole week's hinge." It is moot. **5 Nov logged 0 TRIMP**, so the engine this morning reads
+`daysSinceRest` **0** and `forceRest` **FALSE**. The rest day the plan has been chasing since 26 Oct
+arrived — on the benchmark day instead of the rest day, which is its own comment on which ask he
+actually hears.
+
+The consequence is the one that mattered: **tomorrow's long run is not being converted.** The
+adjustments list from today forward is **empty** for the first time in five weeks, and 7 Nov renders
+`planned` with the 1h10 intact. The ladder finally has a rung to climb from, and it got there by a
+route nobody wrote.
+
+So today's line keeps its day off — `easeHard` is TRUE on its own evidence — but stops arguing for a
+counter that is already at zero, and drops the "not even the rides" ask, which was only ever there to
+protect that counter. `forceRest` needs nine consecutive loaded days to return, so it cannot fire again
+before **15 Nov** whatever he does today; asking him to skip two 4-TRIMP commutes for nothing is the
+kind of line that costs the next one its credibility.
+
+### 4. Mon 9 Nov: a rest day defending a guard that cannot fire
+Same mechanism, one week forward, and week 10 is not started so this is free of the partway-through
+rule. The 9 Nov line's *only* stated reason was resetting the recovery guard. That guard is clear and
+stays clear through the week, so the line had nothing left to say — and written rest days have gone
+**0-for-6 since 26 Oct at a mean of 91 TRIMP**, with Monday specifically **0-for-3 under 5 since the
+flu** (26 Oct 42, 2 Nov 82). A rest day with no reason, on a day he has never taken off, written for
+the seventh time.
+
+It becomes an unowed day (`note:true`, so the engine costs it 0 and `adherence.py` does not count it as
+prescribed), and it points at **Fri 13 Nov** as the week's one written day off — Friday being the
+block's lightest day at a mean of 37 against Wednesday's 100. One written day off per week, on the day
+that has a chance.
+
+**I did not put a session there.** Week 10 writes three — Wed ski+gym, Thu KEY RUN, Sat long run — which
+is the number the Base I note deliberately settled on, and Monday is a court day in practice. Adding a
+third run to a day he spends on court is prescribing something he will not do, which is the failure this
+entry is about. What would make me write it: three runs in a week logged unprompted.
+
+### 5. The band: resolved rather than deferred a third time, and its reason was false
+4 Nov deferred the Base II band to 9 Nov; 5 Nov re-deferred it to 9 Nov with the trigger "week 9 closing
+under 420 → cut to 420–560". **Week 9 now projects 300** and would need 214 TRIMP in two days to reach
+420, on a −16 HRV morning with a rest day written. The trigger is effectively met, so re-deferring it
+would be the third roll of the same decision — the passivity pattern.
+
+I looked, and **the band is right while its stated reason was wrong.** Base I closed 327 · 693 · 129
+(infection) · 407 · 614 · ~300 projected. Non-illness mean **468**, comfortably inside 440–580; the
+~434 figure that worried 5 Nov included the infection week. And the written side of Base II costs
+**285** against the engine's own estimates, so a typical week is 285 + the 216–322 of court load he
+actually carries = **501–607**. The band stands at 440–580, now stated as settled, with a reopen
+condition that distinguishes the two ways a week goes low: **two consecutive weeks under 400 with the
+court load intact** is the written work failing; a week under 400 because tennis was quiet, which is
+what week 9 is, is not.
+
+The sentence that justified it was simply untrue: "court load alone averaged 435 a week across the last
+fortnight." **The richest tennis fortnight of the entire block is 20 Oct–2 Nov at 644 TRIMP, which is
+322 a week, and the block mean is 216.** No 14-day window in Base I comes near 435. Corrected in place
+and the correction left visible in the note, same as 5 Nov did with its two false Friday sentences.
+
+### 6. The physiology: a 32ms drop with no autonomic corroboration
+- **HRV 84 against a baseline of 100, −16, down from 116 yesterday.** That fires `easeHard` on its own
+  and caps today's intensity. It is *not* the biggest drop of the block, and I checked rather than
+  assuming: 15 Oct was −53, 2 Oct −47, 6 Oct −42, and today −32 is fourth.
+- **Nothing else corroborates it.** RHR **41** is the lowest reading since 27 Oct, resp **11.0** is at
+  the bottom of his range, and he slept **8h58 with 161min deep and 134min REM** — not a block record
+  (4 Oct read 204/145 and 25 Oct ran to 561min) but his longest night since 25 Oct. Every illness dip of this block came with RHR and resp *up* together — 17 Oct 78/50/12,
+  24 Oct 80/53/14, 31 Oct 72/54/14. Today is the **27 Oct** shape instead (83/41/11), which rebounded
+  to 114 the next morning.
+- Reading: a single-night HRV dip, most likely the first zero-activity day in seventeen rather than a
+  problem. Today is already a day off, so the signal costs nothing to respect. The trigger is in
+  *watching*: two straight days under 90 with RHR climbing and tomorrow's long run goes conversational
+  or shorter.
+- **`hrvBaseline` 100, down 1 from 101** — rewritten by `update.py` this morning. Not a sustained shift:
+  the 7-day mean for 31 Oct–6 Nov is **101.4** against **100.6** for 24–30 Oct — flat to slightly up,
+  even with today's 84 inside it, on a series that swings 30ms day to day. The falling-drift trigger set on 2 Nov stays discharged.
+- **RHR 41, inside 38–46**, and the standing Saturday trigger is unchanged.
+- **ACWR**: ATL 55.20 / CTL 37.61 = **1.47**, down from 1.64 yesterday because two zero days have
+  entered the acute window. Still the post-infection rebound, not a spike — CTL remains held down by the
+  129-TRIMP infection week, which stays inside the 42-day window until early December. Sixth entry
+  reading it the same way.
+
+### 7. Phase, weaknesses, bands
+- **Base I is right and ends on schedule, Sun 8 Nov; Base II opens Mon 9 Nov. No phase change.** Base II
+  is a threshold block and the athlete's weakest block against the field is running, so the phase and
+  the weakness agree — which is why the fix this morning was the *content* of the threshold session, not
+  its existence.
+- **Do the next two weeks need different sessions rather than smaller ones?** Yes, and that is what
+  changed: the hard run needed a different *shape*, not a different duration. Nothing was trimmed or
+  grown. Week 10's written load moves 217 → 285, and all 68 of that is the costing artifact in §8 being
+  removed, not work being added.
+- **Weaknesses unmoved.** Ski is still the weakest element at top 29.8%; the 11 Nov ten-minute piece is
+  untested and 3 Nov's 2330m sits inside the flat 2290/2380/2330 band. Running stays the weakest block
+  at top 27.7%. Nothing in three weeks of data reorders them.
+- **Left alone deliberately:** Sat 7 Nov's 1h10 (the rung rule says it climbs only after a 1h10 lands,
+  and the last was 10 Oct); 11 Nov's ski and gym (one firing old, first test 11 Nov); 13 Nov's day off;
+  14 Nov's 1h10; every day of this week Mon–Thu; TAPER_PLAN's numbers, `RACE`, `PREV_RACE`,
+  `STATION_TARGETS`, `RACE_BUDGET` and `RACE_GAINS` — Athens is still the last race and no target moved.
+
+### 8. A third engine defect, recorded rather than fixed — outside my edit scope
+`isOptionalLine` tests `/\bOR\b/i`, so **any line containing the English word "or" is costed at half.**
+The 12 Nov KEY RUN ended with "…in the title, or next week has nothing to build on", which halved it
+from 136 TRIMP to **68** — the session was being priced as half a session because of a conjunction.
+It is why week 10 read 217 instead of 285. The rule is meant to catch "tennis or full rest, your call";
+it should require a genuine alternation (`\bor\b` between two session clauses, or just the existing
+`\bor full rest\b` / `your call` / `optional` tests) rather than the bare word. My replacement line
+avoids "or" deliberately — "4:01 a kilometre and no slower" — but writing around a defect is not a fix,
+and the next person to write a natural sentence will hit it again.
+
+The two defects recorded on 5 Nov still stand: `daysSinceRest` saturating at 14 (which, note, is why it
+read 14 for three days and then 0 this morning with no intermediate value), and R7's day guard matching
+every past date in SCHEDULE.
+
 ## 2026-11-05
 - adherence: **no ACTION REQUIRED and no WATCH — nothing sits at 2-prescribed-and-0-done.** Window
   15 Oct–5 Nov: ski **4/1, short by 3** · row 0/3 · hyrox 0/1 · strength **4/5, on track** · cycle
