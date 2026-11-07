@@ -38,7 +38,7 @@ export const EXERCISES = [
   ["Wall balls", "SQUAT", "WALL_BALL"],
   ["Burpees", "TOTAL_BODY", "BURPEE"],
   ["Burpee broad jumps", "TOTAL_BODY", "BURPEE"],
-  ["KB swing", "HIP_RAISE", "KETTLEBELL_SWING"],
+  ["Kettlebell swing", "HIP_RAISE", "KETTLEBELL_SWING"],
   ["Box jump", "PLYO", "BOX_JUMP"],
   ["Thrusters", "SQUAT", "THRUSTERS"],
   ["Hanging leg raise", "LEG_RAISE", "HANGING_LEG_RAISE"],
@@ -62,11 +62,19 @@ export const ALL_EXERCISES = (() => {
   const garmin = (GARMIN.exercises || [])
     .filter(([c, n]) => !seen.has(`${c}/${n}`))
     .map(([c, n]) => ({ name: human(n), cat: c, gname: n, unit: unitFor(c, n) }))
-  // A Garmin name used in two categories ("Push") gets its category added.
-  const count = {}
-  for (const e of garmin) count[e.name] = (count[e.name] || 0) + 1
-  for (const e of garmin) if (count[e.name] > 1 || EXERCISES.some(x => x.name === e.name)) e.name = `${e.name} (${human(e.cat).toLowerCase()})`
-  return [...EXERCISES, ...garmin].map(e => ({ ...e, catLabel: human(e.cat), hay: `${e.name} ${human(e.cat)}`.toLowerCase() }))
+  // A name in several categories keeps the plain name in the category it
+  // belongs to (Bicycle crunch → CRUNCH, Sit up → SIT_UP); the other copies,
+  // and any that clash with a hand-picked name, get "(category)" added.
+  const groups = {}
+  for (const e of garmin) (groups[e.name] = groups[e.name] || []).push(e)
+  for (const [name, list] of Object.entries(groups)) {
+    const lower = name.toLowerCase()
+    const home = EXERCISES.some(x => x.name === name) ? null
+      : list.length === 1 ? list[0]
+      : list.find(e => human(e.cat) === name) || list.find(e => lower.includes(human(e.cat).toLowerCase())) || null
+    for (const e of list) if (e !== home) e.name = `${name} (${human(e.cat).toLowerCase()})`
+  }
+  return [...EXERCISES, ...garmin].map(e => ({ ...e, catLabel: human(e.cat), hay: `${e.name} ${human(e.cat)}`.toLowerCase().replace(/-/g, " ") }))
 })()
 
 export const exByName = n => {
@@ -78,15 +86,15 @@ export const exByName = n => {
 // Garmin's category); "crunches"/"lunges" also match "crunch"/"lunge".
 // Hand-picked names first, then names that start with what was typed, then shorter.
 export function searchExercises(q, limit = 8) {
-  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  const words = q.trim().toLowerCase().replace(/-/g, " ").split(/\s+/).filter(Boolean)
   if (!words.length) return []
-  const stem = w => (w.length > 4 && w.endsWith("es") ? w.slice(0, -2) : w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w)
-  const ql = q.trim().toLowerCase()
+  const stem = w => (w.length > 4 && w.endsWith("es") ? w.slice(0, -2) : w.length > 2 && w.endsWith("s") ? w.slice(0, -1) : w)
+  const ql = words.join(" ")
   const hits = []
   for (const e of ALL_EXERCISES) {
     if (!words.every(w => e.hay.includes(w) || e.hay.includes(stem(w)))) continue
     const nl = e.name.toLowerCase()
-    const score = (e.curated ? 4 : 0) + (nl === ql || nl === stem(ql) ? 8 : 0) + (nl.startsWith(stem(words[0])) ? 3 : 0)
+    const score = (e.curated ? 10 : 0) + (nl === ql || nl === stem(ql) ? 8 : 0) + (nl.startsWith(stem(words[0])) ? 3 : 0)
       + (nl.split(" (")[0].split(/\s+/).some(t => t.startsWith(stem(words[0]))) ? 1 : 0) - nl.length / 100
     hits.push([score, e])
   }
