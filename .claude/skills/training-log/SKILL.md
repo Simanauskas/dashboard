@@ -220,6 +220,16 @@ number is minutes for erg/Hyrox and seconds for run reps. Decimal commas
 
 ## Gotchas
 
+- **iOS 26 home-screen app (his iPhone 15 Pro): keep `html { min-height:
+  calc(100% + env(safe-area-inset-top)) }` in log.css.** With the
+  black-translucent status bar iOS lays the app out 59pt short (viewport 793 on
+  an 852 screen), leaving an empty strip under the fixed tab bar. Don't
+  "fix" it in JS: measuring the gap and moving the bars made iOS resize in a
+  loop and the screen flickered (7 Nov 2026). The bottom inset itself is a
+  correct 34pt. Settings shows screen/viewport/inset for diagnosis; content on
+  tab screens starts at safe-area-top + 20px because iOS fades text right under
+  the status bar.
+
 - **Don't send a real save to test.** A save with a valid session is a real
   Garmin write. Test the Worker with no token (→ 401) or `{}` (→ 400).
 - Workflows must be on `main` to dispatch (simas-fit-update gotcha 19).
