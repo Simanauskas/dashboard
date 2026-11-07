@@ -500,7 +500,7 @@ function Editor({ id, go }) {
   const entry = entries[id]
   const built = DATA.sessions.find(x => x.id === id)
   const s = entry?.session
-  const set = next => store.put(next, { sync: "draft" })
+  const set = next => store.put(next, { sync: "draft", fresh: false })
 
   if (!s) return <Home go={go} />
   const st = status(entry, built)
@@ -583,9 +583,17 @@ function Home({ go }) {
   const last = key => sessions.find(s => tileOf(s)?.key === key && !isDraft(entries[s.id]))
   const begin = opt => {
     const ses = initSession(entries, opt)
-    store.put(ses, { sync: "draft" })
+    store.put(ses, { sync: "draft", fresh: true })
     go("edit", ses.id)
   }
+  // A tile tapped and left without entering anything leaves no draft behind.
+  useEffect(() => {
+    for (const [id, e] of Object.entries(entries)) {
+      const s = e.session
+      const empty = (s.kind === "strength" || s.kind === "circuit") && !s.template   // workout never chosen
+      if (isDraft(e) && !e.sentAt && (e.fresh || empty)) store.remove(id)
+    }
+  }, [])
   return <div className="page has-nav notop">
     {!store.settings.token && <div className="status warn" onClick={() => go("settings")}>Add your LOG_TOKEN in ⚙︎ Settings so logs can reach Garmin.</div>}
     {drafts.length > 0 && <>
@@ -679,6 +687,15 @@ function Settings({ go }) {
   const st = useSyncExternalStore(store.subscribe, () => store.settings)
   const entries = useStore()
   const [msg, setMsg] = useState("")
+  // What iOS reports as the bottom safe area, for diagnosing the tab bar.
+  const insets = useMemo(() => {
+    const d = document.createElement("div")
+    d.style.cssText = "position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)"
+    document.body.appendChild(d)
+    const bottom = parseFloat(getComputedStyle(d).paddingBottom) || 0
+    d.remove()
+    return { bottom: Math.round(bottom) }
+  }, [])
   return <div className="page has-nav notop">
     <div className="sec">Settings</div>
     <div className="card">
@@ -697,7 +714,7 @@ function Settings({ go }) {
     <div className="card hint">
       Install: open this page in Safari → Share → <b>Add to Home Screen</b>.<br />
       Data built {new Date(DATA.built).toLocaleString()} · {DATA.sessions.length} sessions synced from the repo.<br />
-      Screen {window.__viewport?.screen}pt · viewport {window.__viewport?.inner}pt · {window.__viewport?.standalone ? "home-screen app" : "browser"} · bar correction {window.__viewport?.gap ?? 0}pt
+      Screen {window.__viewport?.screen}pt · viewport {window.__viewport?.inner}pt · {window.__viewport?.standalone ? "home-screen app" : "browser"} · bottom inset {insets.bottom}pt − {window.__viewport?.gap ?? 0}pt
     </div>
     <Nav active="settings" go={go} entries={entries} />
   </div>

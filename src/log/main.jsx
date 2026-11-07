@@ -3,10 +3,11 @@ import { createRoot } from "react-dom/client"
 import LogApp from "./LogApp.jsx"
 import "./log.css"
 
-// iOS home-screen apps can report a viewport shorter than the screen (by about
-// the status-bar height), which floats the fixed tab bar above an empty strip.
-// Measure the gap and let the CSS pull the bar down by it. Only in the
-// home-screen app, in portrait, and only for a plausible gap.
+// iOS home-screen apps (seen on his iPhone 15 Pro, Nov 2026) report a viewport
+// ~59pt shorter than the screen AND a bottom safe-area inset that is 59pt too
+// big (93 instead of 34), which made the tab bar ~60pt too tall. The bar is in
+// the right place; only its padding is wrong. Measure the excess and let the
+// CSS (--sab in log.css) take it off. Home-screen app, portrait, plausible gap only.
 function fixViewportGap() {
   const standalone = navigator.standalone || matchMedia("(display-mode: standalone)").matches
   const portrait = innerHeight > innerWidth
