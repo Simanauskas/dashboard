@@ -7,6 +7,12 @@
   --ok: #34d399; --okBg: rgba(52,211,153,.12); --warn: #fbbf24; --warnBg: rgba(251,191,36,.12);
   --bad: #f87171; --badBg: rgba(248,113,113,.12); --info: #38bdf8; --infoBg: rgba(56,189,248,.12);
 }
+/* iOS 26 home-screen apps with a black-translucent status bar lay the page out
+   59pt (the status-bar height) short, leaving an empty strip under the fixed
+   tab bar. Making the document at least that much taller than the screen is
+   the known fix. (A JS correction measured the gap and moved the bars instead;
+   that fed back into iOS's resizing and made the screen flicker — 7 Nov 2026.) */
+html { min-height: calc(100% + env(safe-area-inset-top)); }
 body { background: var(--bg); -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
 .page { max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 4px) 14px calc(var(--sab) + 28px); }
 .page.has-bar { padding-bottom: calc(var(--sab) + 96px); }
@@ -93,10 +99,7 @@ details summary { font-size: 13px; color: var(--ink2); padding: 6px 0; }
 details[open] { display: flex; flex-direction: column; gap: 10px; }
 .link { font: inherit; background: none; border: none; color: var(--ink3); font-size: 13px; padding: 14px 0; width: 100%; }
 .link.danger { color: var(--bad); opacity: .8; }
-/* --vgap (main.jsx): how much shorter iOS's viewport is than the screen right
-   now — the home-screen app sometimes runs 59pt short. Fixed bars are pulled
-   down by it so they sit on the real screen bottom. */
-.bar { position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--vgap, 0px)); padding: 12px 14px calc(var(--sab) + 12px);
+.bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 14px calc(var(--sab) + 12px);
   background: linear-gradient(transparent, var(--bg) 30%); z-index: 6; }
 .bar .btn { max-width: 532px; margin: 0 auto; padding: 16px; font-size: 17px; }
 
@@ -134,7 +137,7 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
 
 /* Bottom tab bar (New / Log). */
 .page.has-nav { padding-bottom: calc(var(--sab) + 76px); }
-.tabbar { position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--vgap, 0px)); z-index: 8; display: flex; justify-content: center; gap: 8px;
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: flex; justify-content: center; gap: 8px;
   padding: 5px 16px max(var(--sab), 8px); background: rgba(11,15,25,.92);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
 .tabbar button { font: inherit; flex: 1; max-width: 160px; background: none; border: none; color: var(--ink3);
