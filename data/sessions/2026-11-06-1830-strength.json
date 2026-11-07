@@ -4,9 +4,9 @@
   "kind": "strength",
   "activity": "Strength training",
   "start": "2026-11-06T18:30:04+02:00",
-  "end": "2026-11-06T18:53:37+02:00",
-  "rpe": null,
-  "notes": "",
+  "end": null,
+  "rpe": 5,
+  "notes": "Slight left knee pain in one rep in squats, but nothing else!",
   "title": "",
   "template": "Lower body",
   "exercises": [
@@ -57,16 +57,16 @@
       "unit": "reps",
       "sets": [
         {
-          "kg": null,
-          "n": null
+          "kg": 35,
+          "n": 24
         },
         {
-          "kg": null,
-          "n": null
+          "kg": 35,
+          "n": 24
         },
         {
-          "kg": null,
-          "n": null
+          "kg": 35,
+          "n": 26
         }
       ]
     },
@@ -78,15 +78,15 @@
       "sets": [
         {
           "kg": null,
-          "n": null
+          "n": 75
         },
         {
           "kg": null,
-          "n": null
+          "n": 75
         },
         {
           "kg": null,
-          "n": null
+          "n": 75
         }
       ]
     },
@@ -97,16 +97,28 @@
       "unit": "reps",
       "sets": [
         {
-          "kg": null,
-          "n": null
+          "kg": 30,
+          "n": 15
         },
         {
-          "kg": null,
-          "n": null
+          "kg": 30,
+          "n": 15
         },
         {
+          "kg": 30,
+          "n": 15
+        }
+      ]
+    },
+    {
+      "name": "Crunch",
+      "cat": "CRUNCH",
+      "gname": "CRUNCH",
+      "unit": "reps",
+      "sets": [
+        {
           "kg": null,
-          "n": null
+          "n": 100
         }
       ]
     }
@@ -228,8 +240,8 @@
       ]
     },
     "garmin_id": "24988936677",
-    "hash": "558d472744b0",
-    "applied_at": "2026-11-06T17:30:24+00:00"
+    "hash": "b639491a52f3",
+    "applied_at": "2026-11-07T11:45:46+00:00"
   },
-  "received": "2026-11-06T16:53:50+00:00"
+  "received": "2026-11-07T11:45:45+00:00"
 }
