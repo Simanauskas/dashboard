@@ -49,11 +49,20 @@ description is a lossy summary.
               "distance": null, "sets": [ … ] } } }
 ```
 - `id` = `YYYY-MM-DD-HHMM-<activity key>` (regex `^\d{4}-\d{2}-\d{2}-[a-z0-9-]{1,48}$`).
-- `kind`: `strength | erg | run | tennis | hyrox | other`.
+- `kind`: `strength | circuit | erg | run | tennis | other` (`hyrox` = old "Hyrox
+  stations" sessions before 7 Nov 2026; still readable and written).
+- `id` is unique on the phone: a second session of the same kind in the same
+  minute gets `-2` (before 7 Nov a collision silently overwrote the first log).
 - Strength set `n` means reps, metres or seconds per the exercise's `unit`
   (`reps | m | s`); `kg: null` = bodyweight. A set with both null was not done.
-- `erg {machine: SkiErg|Row|BikeErg, pieces:[{m, sec, spm}], damper, rest_sec}`
-- `run {plan, reps:[sec|null], shoes, fuel}` — `template` is Speed session / Easy run / Long run / Other run
+- `erg {machine: SkiErg|Row|Bike|Treadmill, pieces:[{m, sec, spm}], damper, rest_sec, total_sec}`
+  — Treadmill = the "Indoor run" tile, Bike = "Indoor bike"; their distances are
+  typed in km in the app but stored in metres like everything else;
+  `total_sec` (Treadmill only) = the treadmill's total time.
+- `circuit {stations:[{name, cat, gname, unit, n, kg}], rounds:[[sec|null per station]], total_sec}`
+  — `n` is the amount per round (metres / reps / seconds by `unit`); rounds = `len(rounds)`.
+- `run {plan, reps:[sec|null]}` — `template` is Speed session / Easy run / Long run / Other run
+  (shoes/fuel were dropped 7 Nov 2026; old files may still have them)
 - `tennis {opponent, mode: match|sparring|training, score, plus:[], minus:[]}`
 - `hyrox {stations:[names], rounds:[[sec|null per station]], total_sec}`
 - `other` sessions carry `type_keys` (e.g. `["cycling"]`) plus notes/RPE only.
@@ -72,9 +81,13 @@ description is a lossy summary.
 2. `pending` — the watch activity isn't in Garmin yet, or nothing matched:
    - Matching needs the **same Garmin type**: strength → `strength_training`;
      SkiErg → `indoor_cardio` (that's how he records it); Row → `indoor_rowing`;
-     run → running/treadmill_running/indoor_running/trail_running/track_running;
-     tennis → `tennis_v2`/`tennis`; Hyrox stations → hyrox/indoor_cardio/hiit/
-     strength_training/other/multi_sport; other → its own type key.
+     Indoor run → treadmill_running/indoor_running; Indoor bike → indoor_cycling;
+     circuit → **hiit** (he records circuits as HIIT), then hyrox/indoor_cardio/
+     strength_training/other; run → running/treadmill_running/indoor_running/
+     trail_running/track_running; tennis → `tennis_v2`/`tennis`; old Hyrox
+     stations → hyrox/indoor_cardio/hiit/strength_training/other/multi_sport;
+     cycling tile → cycling/road_biking/gravel_cycling/mountain_biking; other →
+     its own type key.
    - …and **time**: the activity whose window overlaps the logged start→save
      window, else the closest start within 4 h. Logged afterwards with a wrong
      start time → no overlap. He can fix "Started" under "Garmin name & time".
@@ -107,11 +120,24 @@ session JSON in `session`; undo/rematch leave it empty.
   description). Carries: metres as reps (his convention). Timed sets (`unit: s`,
   e.g. treadmill sled push 70s): reps null, seconds as duration on appended sets.
   Sets are read back and compared — a mismatch fails the write.
-- **Erg**: `summaryDTO.distance` = total metres, read back (a "did not stick" is
-  a note, not a failure).
+- **Circuit** (HIIT): every station of every round, in order, as a set — Garmin
+  exercise, amount (metres as reps), kg, round split as duration — via the same
+  relabel/append as strength. If Garmin refuses sets on the activity the write
+  still succeeds (stations in the description, note says so). Custom stations
+  (`cat: null`) are description-only. All the Hyrox stations exist in Garmin's
+  catalog: RUN_INDOOR/TREADMILL, SLED/PULL, TOTAL_BODY/BURPEE_BROAD_JUMP,
+  ROW/INDOOR_ROW, CARRY/FARMERS_CARRY, CARDIO/CROSS_COUNTRY_SKI_MACHINE.
+- **Erg / Indoor bike**: `summaryDTO.distance` = total metres. **Indoor run**
+  also `summaryDTO.duration` = `total_sec` or the segments added up — he asked
+  for the treadmill's time to override Garmin's. Both read back (a "did not
+  stick" is a note, not a failure). `status.before` keeps the original duration
+  and `duration_written`, so undo restores the watch's time only when it was
+  changed.
 - **Name** (≤100 chars): `title` if he typed one, else built —
   `Lower body — Squat 72.5 · RDL 80 · Sled push` · `SkiErg 2325m 10:00 · 2:09/500m` ·
-  `SkiErg 4×500m · 1:58/500m` · run = the plan (`6×400m @ 5K pace (90s rest)`) ·
+  `SkiErg 4×500m · 1:58/500m` · `Indoor run 5.2km 27:30 · 5:00/km` ·
+  `Indoor bike 15.2km 30:00 · 30.4km/h` · `Hyrox circuit · 3 rounds · 41:20`
+  (total only when typed or every split is filled) · run = the plan (`6×400m @ 5K pace (90s rest)`) ·
   tennis `Rokas Mačiulaitis🎾6:4 3:6 10:8` (garmin-tennis-log format; training
   with no opponent → `Tennis training`) · `Hyrox stations 4 rounds · 52:10`.
   `other` keeps Garmin's name unless a title was typed.
@@ -124,8 +150,8 @@ session JSON in `session`; undo/rematch leave it empty.
 
 | File | What |
 |---|---|
-| `src/log/catalog.js` | `EXERCISES` (hand-picked friendly names → Garmin category/name/unit), `ALL_EXERCISES` (those + every Garmin exercise from `garmin-exercises.json`, named from the key: `BICYCLE_CRUNCH` → "Bicycle crunch"; a name used in two categories gets "(category)"), `searchExercises()`, `STRENGTH_TEMPLATES` (Lower body / Upper body / Empty, each exercise with `target` hint and first-time `seed`), `RUN_TEMPLATES`, `HYROX_TEMPLATE`, `activityOptions()` (Garmin type → logger kind) |
-| `src/log/LogApp.jsx` | Screens: Home, Editor (per-kind forms), Settings; status pills; "last time" prefill |
+| `src/log/catalog.js` | `TILES` (New session screen, his fixed order — Indoors: Strength, Circuit, Indoor run, Indoor bike, SkiErg, RowErg; Outdoors: Tennis, Run, Cycling), `otherOptions()` ("Other…": remaining last-year types; Inline skating deliberately excluded), `CIRCUIT_TEMPLATES` (Hyrox circuit: 1km treadmill run, 40m sled pull, 10 BBJ, 500m row, 50m farmers carry × 3), `EXERCISES` (hand-picked friendly names → Garmin category/name/unit), `ALL_EXERCISES` (those + every Garmin exercise from `garmin-exercises.json`, named from the key: `BICYCLE_CRUNCH` → "Bicycle crunch"; a name used in two categories gets "(category)"), `searchExercises()`, `STRENGTH_TEMPLATES` (Lower body / Upper body / Empty, each exercise with `target` hint and first-time `seed`), `RUN_TEMPLATES`, `HYROX_TEMPLATE`, `activityOptions()` (Garmin type → logger kind) |
+| `src/log/LogApp.jsx` | Screens: Home, New session (tiles), Editor (per-kind forms: Strength, Circuit, Erg incl. Indoor run/bike, Run, Tennis, old Hyrox), Settings; status pills; "last time" prefill; `ExercisePicker`; `customExercises()`; `pastWorkouts()` |
 | `src/log/store.js` | localStorage (`simaslog.v1`), send/queue/retry, dispatch (Worker default, GitHub fallback), live status fetch; `clean()` strips `ph`/`target` and makes numbers |
 | `src/log/log.css` | Same tokens as the dashboard's `T` — colour means status |
 | `log/index.html` | Second Vite page (`vite.config.js` `rollupOptions.input.log`) |
@@ -144,6 +170,12 @@ have `cat: null` and go to the description only. Tapping away without choosing:
 an exact name is taken, text with no matches becomes custom, otherwise the card
 keeps its old name.
 
+Saved workouts: the name typed at the top of a Strength or Circuit session is
+the workout name; the chooser offers built-ins plus "Repeat …" for up to 6
+past workout names (newest first). A built-in done before starts from last
+time's stations and loads. Custom exercises he added before (strength or
+circuit, `cat: null`) are offered again in search as "your custom".
+
 UX facts: weights/reps from the last session of the same exercise show as
 **placeholders**; the ✓ button accepts them (one tap per set), typing overrides.
 Time fields take `10:00` or `10.00` (iOS numeric keypad has no colon); a bare
@@ -161,7 +193,7 @@ number is minutes for erg/Hyrox and seconds for run reps. Decimal commas
 - **Change a workout template** → `STRENGTH_TEMPLATES` (`target` = plan text,
   `seed` = prefill until history exists). Run sessions → `RUN_TEMPLATES`;
   Friday stations → `HYROX_TEMPLATE`.
-- **New activity kind** → touch all of: `activityOptions()` + a form component
+- **New activity kind** → touch all of: `TILES` (or `otherOptions`) + a form component
   + `initSession()` + `summary()` in LogApp.jsx; `KIND_TYPES`/`ERG_TYPES`,
   `default_name()`, `description()` and the `ingest()` kind whitelist in
   match_sessions.py; the Worker needs nothing.

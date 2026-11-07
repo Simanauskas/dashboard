@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import DATA from "virtual:log-data"
-import { exByName, searchExercises, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, activityOptions } from "./catalog.js"
+import { exByName, searchExercises, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, CIRCUIT_TEMPLATES, TILES, otherOptions } from "./catalog.js"
 import { store, send, sendAction, flush, fetchStatus, testToken } from "./store.js"
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -29,7 +29,18 @@ const dayName = iso => new Date(iso).toLocaleDateString(undefined, { weekday: "s
 const timeOf = iso => (iso || "").slice(11, 16)
 const sortedSessions = list => [...list].sort((a, b) => ((a.start || "") < (b.start || "") ? 1 : -1))
 
-const OPTIONS = activityOptions(DATA.types)
+const OTHER = otherOptions(DATA.types)
+const OPTIONS = [...TILES.Indoors, ...TILES.Outdoors, ...OTHER]
+// Treadmill and bike distances are typed in km; everything is stored in metres.
+const MACHINE = {
+  SkiErg: { unit: "m", pace: "500" }, Row: { unit: "m", pace: "500" }, BikeErg: { unit: "m", pace: "500" },
+  Treadmill: { unit: "km", pace: "km", total: true }, Bike: { unit: "km", pace: "kmh" },
+}
+const paceText = (machine, m, sec) => {
+  if (!m || !sec) return ""
+  const k = (MACHINE[machine] || MACHINE.SkiErg).pace
+  return k === "km" ? `${clock(sec * 1000 / m)}/km` : k === "kmh" ? `${(m / sec * 3.6).toFixed(1)} km/h` : `${clock(sec * 500 / m)}/500m`
+}
 
 function useStore() {
   return useSyncExternalStore(store.subscribe, () => store.entries)
@@ -53,6 +64,30 @@ function lastExercise(entries, name, beforeStart) {
 }
 
 // `pick` is a name (templates, history) or an entry chosen in the picker.
+// Custom exercises he added before (not in Garmin's list), from strength and
+// circuit sessions on this phone and in the repo — offered again in search.
+function customExercises(entries) {
+  const seen = new Map()
+  for (const s of allSessions(entries))
+    for (const e of [...(s.exercises || []), ...(s.circuit?.stations || [])])
+      if (!e.cat && e.name && !seen.has(e.name.toLowerCase()))
+        seen.set(e.name.toLowerCase(), { name: e.name, cat: null, gname: null, unit: e.unit || "reps", catLabel: "your custom" })
+  return [...seen.values()]
+}
+
+// Distinct workout names of past sessions of a kind, newest first.
+function pastWorkouts(entries, kind, builtIn, selfId) {
+  const out = new Map()
+  for (const s of allSessions(entries))
+    if (s.kind === kind && s.template && s.id !== selfId && !builtIn[s.template] && !out.has(s.template)) out.set(s.template, s)
+  return [...out.values()].slice(0, 6)
+}
+
+function newStation(pick, n = null, kg = null) {
+  const c = (typeof pick === "object" && pick) || exByName(pick) || { name: pick, cat: null, gname: null, unit: "reps" }
+  return { name: c.name, cat: c.cat, gname: c.gname, unit: c.unit, n, kg }
+}
+
 function newExercise(entries, pick, tpl = {}) {
   const name = typeof pick === "string" ? pick : pick.name
   const cat = (typeof pick === "object" && pick) || exByName(name) || { name, cat: null, gname: null, unit: "reps" }
@@ -66,19 +101,28 @@ function newExercise(entries, pick, tpl = {}) {
 
 function initSession(entries, opt) {
   const now = new Date(), start = isoLocal(now)
-  const id = `${start.slice(0, 10)}-${pad(now.getHours())}${pad(now.getMinutes())}-${opt.key}`.toLowerCase().replace(/[^a-z0-9-]/g, "")
+  // Unique on this phone: a second session of the same kind in the same minute
+  // gets "-2" — reusing an id would overwrite the first log.
+  const stem = `${start.slice(0, 10)}-${pad(now.getHours())}${pad(now.getMinutes())}-${opt.key}`.toLowerCase().replace(/[^a-z0-9-]/g, "")
+  const taken = new Set([...Object.keys(entries), ...DATA.sessions.map(x => x.id)])
+  let id = stem
+  for (let k = 2; taken.has(id); k++) id = `${stem}-${k}`
   const base = { v: 1, id, kind: opt.kind, activity: opt.label, start, end: null, rpe: null, notes: "", title: "" }
   if (opt.typeKeys) base.type_keys = opt.typeKeys
   if (opt.kind === "strength") return { ...base, template: null, exercises: [] }
+  if (opt.kind === "circuit") return { ...base, template: null, circuit: { stations: [], rounds: [], total_sec: null } }
   if (opt.kind === "erg") {
     const last = allSessions(entries).find(s => s.kind === "erg" && s.erg?.machine === opt.machine)
-    return { ...base, erg: { machine: opt.machine, damper: last?.erg?.damper ?? null, rest_sec: null,
-      pieces: (last?.erg?.pieces?.length ? last.erg.pieces : [{}]).map(p => ({ m: null, sec: null, spm: null, ph: { m: p.m, sec: p.sec } })) } }
+    const erg = { machine: opt.machine, rest_sec: null,
+      pieces: (last?.erg?.pieces?.length ? last.erg.pieces : [{}]).map(p => ({ m: null, sec: null, spm: null, ph: { m: p.m, sec: p.sec } })) }
+    if (MACHINE[opt.machine]?.unit === "m") erg.damper = last?.erg?.damper ?? null
+    if (MACHINE[opt.machine]?.total) erg.total_sec = null
+    return { ...base, erg }
   }
   if (opt.kind === "run") {
     const dow = now.getDay()
     const tpl = dow === 2 ? "Speed session" : dow === 4 ? "Easy run" : dow === 6 ? "Long run" : "Other run"
-    return { ...base, template: tpl, run: { plan: RUN_TEMPLATES[tpl].options[0] || "", reps: [], shoes: "", fuel: "" } }
+    return { ...base, template: tpl, run: { plan: RUN_TEMPLATES[tpl].options[0] || "", reps: [] } }
   }
   if (opt.kind === "tennis") {
     const today = start.slice(0, 10)
@@ -133,15 +177,16 @@ const Field = ({ label, children, hint }) => (
 // ── strength ────────────────────────────────────────────────────────────────
 function StrengthForm({ s, set, entries }) {
   if (!s.template) {
-    const lastTpl = allSessions(entries).find(x => x.kind === "strength" && x.template && x.id !== s.id)
+    const past = pastWorkouts(entries, "strength", STRENGTH_TEMPLATES, s.id)
     return <div className="card">
       <div className="h">Which workout?</div>
       <div className="grid2">
         {Object.keys(STRENGTH_TEMPLATES).map(t => <button key={t} className="big" onClick={() =>
           set({ ...s, template: t, exercises: STRENGTH_TEMPLATES[t].map(x => newExercise(entries, x.name, x)) })}>{t}</button>)}
-        {lastTpl && !STRENGTH_TEMPLATES[lastTpl.template] && <button className="big" onClick={() =>
-          set({ ...s, template: lastTpl.template, exercises: lastTpl.exercises.map(e => newExercise(entries, e.name)) })}>Repeat “{lastTpl.template}”</button>}
+        {past.map(p => <button key={p.template} className="big" onClick={() =>
+          set({ ...s, template: p.template, exercises: p.exercises.map(e => newExercise(entries, e.cat ? e : e.name)) })}>Repeat “{p.template}”</button>)}
       </div>
+      <div className="hint">Name a workout at the top and it's offered here next time.</div>
     </div>
   }
   const upd = (i, e) => set({ ...s, exercises: s.exercises.map((x, j) => (j === i ? e : x)) })
@@ -159,12 +204,19 @@ function StrengthForm({ s, set, entries }) {
 // exercise (it lands in the Sets tab). "Add as custom" is offered only when the
 // search finds nothing; a custom exercise goes to the notes only.
 function ExercisePicker({ value = "", onPick, placeholder, className = "", clearOnPick = false }) {
+  const entries = useStore()
   const [text, setText] = useState(value)
   const [open, setOpen] = useState(false)
   useEffect(() => { setText(value) }, [value])
   const q = text.trim()
-  const results = useMemo(() => (q ? searchExercises(q) : []), [q])
-  const exact = q && exByName(q)
+  const customs = useMemo(() => customExercises(entries), [entries])
+  const results = useMemo(() => {
+    if (!q) return []
+    const words = q.toLowerCase().split(/\s+/)
+    const mine = customs.filter(c => words.every(w => c.name.toLowerCase().includes(w)))
+    return [...mine, ...searchExercises(q)].slice(0, 8)
+  }, [q, customs])
+  const exact = q && (exByName(q) || customs.find(c => c.name.toLowerCase() === q.toLowerCase()))
   const choose = entry => {
     onPick(entry)
     setText(clearOnPick ? "" : entry.name)
@@ -192,7 +244,7 @@ function ExercisePicker({ value = "", onPick, placeholder, className = "", clear
         else setText(value)
       }} />
     {open && q && <div className="sugg" onPointerDown={keep} onMouseDown={keep}>
-      {results.map(r => <button type="button" key={`${r.cat}/${r.gname}`} onClick={() => choose(r)}>
+      {results.map(r => <button type="button" key={`${r.cat}/${r.gname}/${r.name}`} onClick={() => choose(r)}>
         <span>{r.name}</span><small>{r.catLabel}</small>
       </button>)}
       {!results.length && <button type="button" className="custom" onClick={custom}>
@@ -247,31 +299,120 @@ function ExerciseCard({ e, onChange, onRemove, entries, start }) {
 // ── erg ─────────────────────────────────────────────────────────────────────
 function ErgForm({ s, set }) {
   const e = s.erg
+  const cfg = MACHINE[e.machine] || MACHINE.SkiErg
+  const km = cfg.unit === "km"
+  const label = { Treadmill: "Indoor run", Bike: "Indoor bike" }[e.machine] || e.machine
   const up = p => set({ ...s, erg: { ...e, ...p } })
   const setP = (i, p) => up({ pieces: e.pieces.map((x, j) => (j === i ? { ...x, ...p } : x)) })
   const tot = e.pieces.reduce((a, p) => ({ m: a.m + (p.m || 0), sec: a.sec + (p.sec || 0) }), { m: 0, sec: 0 })
+  const shown = (m, ph) => (m == null ? null : km && typeof m === "number" ? +(m / 1000).toFixed(3) : m)
+  const dist = m => (km ? `${+(m / 1000).toFixed(2)} km` : `${m} m`)
   return <div className="card">
-    <div className="h">{e.machine} pieces</div>
+    <div className="h">{label} {km ? "segments" : "pieces"}</div>
     {e.pieces.map((p, i) => <div className="ergrow" key={i}>
       <span className="idx">{i + 1}</span>
-      <NumInput className="m" value={p.m} placeholder={p.ph?.m ?? "metres"} onChange={v => setP(i, { m: v })} />
-      <span className="u">m</span>
+      <KmInput km={km} value={p.m} placeholder={p.ph?.m != null ? String(shown(p.ph.m)) : km ? "km" : "metres"} onChange={v => setP(i, { m: v })} />
+      <span className="u">{km ? "km" : "m"}</span>
       <TimeInput className="t" value={p.sec} placeholder={p.ph?.sec ? clock(p.ph.sec) : "time"} onChange={v => setP(i, { sec: v })} />
-      <NumInput className="spm" value={p.spm} placeholder="spm" onChange={v => setP(i, { spm: v })} />
-      <span className="pace">{p.m && p.sec ? clock(p.sec * 500 / p.m) : ""}</span>
+      {!km && <NumInput className="spm" value={p.spm} placeholder="spm" onChange={v => setP(i, { spm: v })} />}
+      <span className="pace">{paceText(e.machine, p.m, p.sec)}</span>
       {e.pieces.length > 1 && <button className="x sm" onClick={() => up({ pieces: e.pieces.filter((_, j) => j !== i) })}>✕</button>}
     </div>)}
     <button className="btn ghost" onClick={() => {
       const prev = e.pieces[e.pieces.length - 1] || {}
       up({ pieces: [...e.pieces, { m: null, sec: null, spm: null, ph: { m: prev.m ?? prev.ph?.m, sec: prev.sec ?? prev.ph?.sec } }] })
-    }}>+ piece</button>
-    <div className="grid2">
+    }}>{km ? "+ segment" : "+ piece"}</button>
+    {!km && <div className="grid2">
       <Field label="Damper"><NumInput value={e.damper} onChange={v => up({ damper: v })} /></Field>
       <Field label="Rest between"><TimeInput value={e.rest_sec} plain="sec" placeholder="e.g. 1:30" onChange={v => up({ rest_sec: v })} /></Field>
-    </div>
-    {tot.m > 0 && <div className="total">{tot.m} m · {clock(tot.sec)}{tot.sec ? ` · ${clock(tot.sec * 500 / tot.m)}/500m` : ""}</div>}
-    <div className="hint">Time: 10:00 or 10.00 — a plain number is minutes. Distance goes into Garmin's distance field.</div>
+    </div>}
+    {cfg.total && <Field label="Total time on the treadmill" hint="replaces the time Garmin recorded — blank = the segments added up">
+      <TimeInput value={e.total_sec} placeholder={tot.sec ? clock(tot.sec) : "e.g. 32:10"} onChange={v => up({ total_sec: v })} />
+    </Field>}
+    {tot.m > 0 && <div className="total">{dist(tot.m)} · {clock(cfg.total && e.total_sec ? e.total_sec : tot.sec)}{tot.sec ? ` · ${paceText(e.machine, tot.m, tot.sec)}` : ""}</div>}
+    <div className="hint">Time: 10:00 or 10.00 — a plain number is minutes. {km ? "Distance (and for the treadmill, time) replaces what Garmin recorded." : "Distance goes into Garmin's distance field."}</div>
   </div>
+}
+
+// Distance input in km (treadmill, bike) or metres; always stores metres.
+function KmInput({ km, value, onChange, placeholder }) {
+  const [text, setText] = useState(value == null ? "" : km ? String(+(value / 1000).toFixed(3)) : String(value))
+  useEffect(() => { setText(value == null ? "" : km ? String(+(value / 1000).toFixed(3)) : String(value)) }, [value, km])
+  return <input className="in m" inputMode="decimal" placeholder={placeholder} value={text}
+    onChange={ev => setText(ev.target.value)}
+    onBlur={() => { const v = numOrNull(text); onChange(v == null ? null : km ? Math.round(v * 1000) : v) }} />
+}
+
+// ── circuit ─────────────────────────────────────────────────────────────────
+// HIIT on the watch. Stations are Garmin exercises (or his customs); every
+// station of every round becomes a set in the HIIT activity's Sets tab.
+function CircuitForm({ s, set, entries }) {
+  const c = s.circuit
+  if (!s.template) {
+    const past = pastWorkouts(entries, "circuit", CIRCUIT_TEMPLATES, s.id)
+    const start = (template, stations, rounds) => set({ ...s, template,
+      circuit: { stations, rounds: Array.from({ length: rounds }, () => stations.map(() => null)), total_sec: null } })
+    return <div className="card">
+      <div className="h">Which workout?</div>
+      <div className="grid2">
+        {Object.entries(CIRCUIT_TEMPLATES).map(([t, w]) => {
+          // Done before? Start from last time's stations and loads.
+          const prev = allSessions(entries).find(x => x.kind === "circuit" && x.template === t && x.id !== s.id && x.circuit?.stations?.length)
+          return <button key={t} className="big" onClick={() => prev
+            ? start(t, prev.circuit.stations.map(x => ({ ...x })), prev.circuit.rounds.length || w.rounds)
+            : start(t, w.stations.map(([n, amt]) => newStation(n, amt)), w.rounds)}>{t}</button>
+        })}
+        {past.map(p => <button key={p.template} className="big"
+          onClick={() => start(p.template, p.circuit.stations.map(x => ({ ...x })), p.circuit.rounds.length || 3)}>Repeat “{p.template}”</button>)}
+        <button className="big" onClick={() => start("Circuit", [], 3)}>Empty</button>
+      </div>
+      <div className="hint">Record it as <b>HIIT</b> on the watch. Name a workout at the top and it's offered here next time.</div>
+    </div>
+  }
+  const up = p => set({ ...s, circuit: { ...c, ...p } })
+  const setSt = (j, p) => up({ stations: c.stations.map((x, k) => (k === j ? { ...x, ...p } : x)) })
+  const sum = c.rounds.flat().reduce((a, x) => a + (x || 0), 0)
+  return <>
+    <div className="row between">
+      <input className="in title" value={s.template} onChange={e => set({ ...s, template: e.target.value })} aria-label="Workout name" />
+    </div>
+    <div className="card">
+      <div className="row between">
+        <div className="h">{c.rounds.length} rounds</div>
+        <div className="row">
+          <button className="x" aria-label="One round less" onClick={() => c.rounds.length > 1 && up({ rounds: c.rounds.slice(0, -1) })}>−</button>
+          <button className="x" aria-label="One round more" onClick={() => up({ rounds: [...c.rounds, c.stations.map(() => null)] })}>+</button>
+        </div>
+      </div>
+      <div className="hint">Split times per round are optional.</div>
+    </div>
+    {c.stations.map((st, j) => <div className="card" key={j}>
+      <div className="row">
+        <div className="grow"><ExercisePicker className="exname" value={st.name}
+          onPick={pick => setSt(j, { name: pick.name, cat: pick.cat, gname: pick.gname, unit: pick.cat ? pick.unit : st.unit })} /></div>
+        <button className="x" aria-label="Remove station" onClick={() => up({ stations: c.stations.filter((_, k) => k !== j), rounds: c.rounds.map(r => r.filter((_, k) => k !== j)) })}>✕</button>
+      </div>
+      {!st.cat && <div className="meta"><span className="warn">not in Garmin's list — notes only</span></div>}
+      <div className="setrow">
+        <NumInput className="reps" value={st.n} placeholder="amount" onChange={v => setSt(j, { n: v })} />
+        <Chips value={st.unit} options={[["m", "m"], ["reps", "reps"], ["s", "sec"]]} onChange={u => u && setSt(j, { unit: u })} />
+        <NumInput className="kg" value={st.kg} placeholder="kg" onChange={v => setSt(j, { kg: v })} />
+      </div>
+      <div className="hxrow" style={{ gridTemplateColumns: `repeat(${c.rounds.length}, minmax(0,1fr))` }}>
+        {c.rounds.map((row, r) => <TimeInput key={r} className="cell" value={row[j]} placeholder={`R${r + 1}`}
+          onChange={v => up({ rounds: c.rounds.map((rw, k) => (k === r ? rw.map((x, q) => (q === j ? v : x)) : rw)) })} />)}
+      </div>
+    </div>)}
+    <div className="card">
+      <ExercisePicker placeholder="Add station — type to search Garmin's list" clearOnPick
+        onPick={pick => up({ stations: [...c.stations, newStation(pick)], rounds: c.rounds.map(r => [...r, null]) })} />
+    </div>
+    <div className="card">
+      <Field label="Total time" hint={sum ? `splits add up to ${clock(sum)}` : "or leave blank"}>
+        <TimeInput value={c.total_sec} placeholder={sum ? clock(sum) : "e.g. 41:20"} onChange={v => up({ total_sec: v })} />
+      </Field>
+    </div>
+  </>
 }
 
 // ── run ─────────────────────────────────────────────────────────────────────
@@ -281,7 +422,6 @@ function RunForm({ s, set, entries }) {
   const tpl = RUN_TEMPLATES[s.template] || RUN_TEMPLATES["Other run"]
   const nReps = (r.plan.match(/^(\d+)\s*[×x]/) || [])[1]
   const reps = nReps ? Array.from({ length: +nReps }, (_, i) => r.reps[i] ?? null) : r.reps
-  const shoes = [...new Set(allSessions(entries).map(x => x.run?.shoes).filter(Boolean))]
   return <div className="card">
     <Chips value={s.template} options={Object.keys(RUN_TEMPLATES)} onChange={t => t && set({ ...s, template: t, run: { ...r, plan: RUN_TEMPLATES[t].options[0] || "" } })} />
     {tpl.goal && <div className="hint">{tpl.goal}</div>}
@@ -293,11 +433,6 @@ function RunForm({ s, set, entries }) {
         onChange={v => { const a = [...reps]; a[i] = v; up({ reps: a }) }} />)}</div>
       <div className="hint">1:22 or 1.22 — a plain number is seconds.</div>
     </>}
-    <div className="grid2">
-      <Field label="Shoes"><input className="in" list="shoes" value={r.shoes} onChange={e => up({ shoes: e.target.value })} /></Field>
-      <Field label="Fuel / water"><input className="in" value={r.fuel} onChange={e => up({ fuel: e.target.value })} placeholder={s.template === "Long run" ? "e.g. 1 gel @40', 500ml" : ""} /></Field>
-    </div>
-    <datalist id="shoes">{shoes.map(x => <option key={x} value={x} />)}</datalist>
   </div>
 }
 
@@ -349,27 +484,30 @@ function Editor({ id, go }) {
   const entries = useStore()
   const entry = entries[id]
   const built = DATA.sessions.find(x => x.id === id)
-  const [pick, setPick] = useState("")
+  const [showOther, setShowOther] = useState(false)
   const s = entry?.session
   const set = next => store.put(next, { sync: "draft" })
 
+  const begin = opt => {
+    const ses = initSession(entries, opt)
+    store.put(ses, { sync: "draft" })
+    go("edit", ses.id)
+  }
   if (!s) {
     return <div className="page">
       <Top title="New session" onBack={() => go("home")} />
-      <div className="card">
-        <Field label="Activity" hint="your activity types from the last 12 months, most frequent first">
-          <select className="in" value={pick} onChange={e => {
-            const opt = OPTIONS.find(o => o.key === e.target.value)
-            if (!opt) return
-            const ses = initSession(entries, opt)
-            store.put(ses, { sync: "draft" })
-            go("edit", ses.id)
-          }}>
-            <option value="">Choose activity…</option>
-            {OPTIONS.map(o => <option key={o.key} value={o.key}>{o.label}{o.sub ? ` · ${o.sub}` : ""}{o.n ? ` (${o.n})` : ""}</option>)}
-          </select>
-        </Field>
-      </div>
+      {Object.entries(TILES).map(([group, tiles]) => <div key={group}>
+        <div className="sec">{group}</div>
+        <div className="tiles">{tiles.map(o => <button key={o.key} className="tile" onClick={() => begin(o)}>
+          <span className="ic" aria-hidden="true">{o.icon}</span><b>{o.label}</b>{o.sub && <small>{o.sub}</small>}
+        </button>)}</div>
+      </div>)}
+      {OTHER.length > 0 && <>
+        <button className="link" onClick={() => setShowOther(v => !v)}>{showOther ? "Hide other activities" : "Other…"}</button>
+        {showOther && <div className="tiles">{OTHER.map(o => <button key={o.key} className="tile sm" onClick={() => begin(o)}>
+          <b>{o.label}</b><small>{o.n}× last year</small>
+        </button>)}</div>}
+      </>}
     </div>
   }
   const st = status(entry, built)
@@ -380,7 +518,7 @@ function Editor({ id, go }) {
     send(fixed.id)
     go("home")
   }
-  const Form = { strength: StrengthForm, erg: ErgForm, run: RunForm, tennis: TennisForm, hyrox: HyroxForm }[s.kind]
+  const Form = { strength: StrengthForm, circuit: CircuitForm, erg: ErgForm, run: RunForm, tennis: TennisForm, hyrox: HyroxForm }[s.kind]
   return <div className="page has-bar">
     <Top title={s.activity} sub={`${dayName(s.start)} · ${timeOf(s.start)}`} onBack={() => go("home")} />
     <div className={"status " + st.tone}>{st.text}{st.detail ? <small> — {st.detail}</small> : null}</div>
@@ -454,7 +592,12 @@ function Home({ go }) {
 
 function summary(s) {
   if (s.kind === "strength") return `${s.template || "Strength"} · ${(s.exercises || []).filter(e => e.sets?.some(x => x.n != null)).length} exercises`
-  if (s.kind === "erg") { const m = (s.erg?.pieces || []).reduce((a, p) => a + (p.m || 0), 0); return `${s.erg?.machine} ${m ? m + " m" : ""}` }
+  if (s.kind === "erg") {
+    const m = (s.erg?.pieces || []).reduce((a, p) => a + (p.m || 0), 0)
+    const label = { Treadmill: "Indoor run", Bike: "Indoor bike" }[s.erg?.machine] || s.erg?.machine
+    return `${label} ${m ? (MACHINE[s.erg?.machine]?.unit === "km" ? `${+(m / 1000).toFixed(2)} km` : `${m} m`) : ""}`
+  }
+  if (s.kind === "circuit") return `${s.template || "Circuit"} · ${s.circuit?.rounds?.length || 0} rounds`
   if (s.kind === "run") return s.run?.plan || s.template
   if (s.kind === "tennis") return [s.tennis?.opponent, s.tennis?.score || s.tennis?.mode].filter(Boolean).join(" · ")
   if (s.kind === "hyrox") return `Hyrox stations · ${s.hyrox?.rounds?.length} rounds`

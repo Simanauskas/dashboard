@@ -17,7 +17,7 @@ export const EXERCISES = [
   ["Bulgarian split squat", "LUNGE", "DUMBBELL_BULGARIAN_SPLIT_SQUAT"],
   ["Step-ups", "SQUAT", "DUMBBELL_STEP_UP"],
   ["Sled push", "SLED", "PUSH", "s"],
-  ["Sled pull", "SLED", "BACKWARD_DRAG", "m"],
+  ["Sled pull", "SLED", "PULL", "m"],
   ["Calf raises", "CALF_RAISE", "STANDING_CALF_RAISE"],
   ["Hip thrust", "HIP_RAISE", "BARBELL_HIP_THRUST_WITH_BENCH"],
   ["Nordic curl", "LEG_CURL", null],
@@ -37,7 +37,7 @@ export const EXERCISES = [
   ["Sandbag carry", "SANDBAG", "FRONT_CARRY", "m"],
   ["Wall balls", "SQUAT", "WALL_BALL"],
   ["Burpees", "TOTAL_BODY", "BURPEE"],
-  ["Burpee broad jumps", "TOTAL_BODY", "BURPEE"],
+  ["Burpee broad jumps", "TOTAL_BODY", "BURPEE_BROAD_JUMP"],
   ["Kettlebell swing", "HIP_RAISE", "KETTLEBELL_SWING"],
   ["Box jump", "PLYO", "BOX_JUMP"],
   ["Thrusters", "SQUAT", "THRUSTERS"],
@@ -46,6 +46,12 @@ export const EXERCISES = [
   ["Push-ups", "PUSH_UP", "PUSH_UP"],
   ["Plank", "PLANK", "PLANK", "s"],
   ["Crunch", "CRUNCH", "CRUNCH"],
+  // Hyrox / circuit stations
+  ["Treadmill run", "RUN_INDOOR", "TREADMILL", "m"],
+  ["Run", "RUN", "RUN", "m"],
+  ["Row (erg)", "ROW", "INDOOR_ROW", "m"],
+  ["SkiErg", "CARDIO", "CROSS_COUNTRY_SKI_MACHINE", "m"],
+  ["Bike (erg)", "INDOOR_BIKE", "STATIONARY_BIKE", "m"],
 ].map(([name, cat, gname, unit = "reps"]) => ({ name, cat, gname, unit, curated: true }))
 
 // Every exercise in Garmin's catalog (src/log/garmin-exercises.json, refreshed
@@ -132,37 +138,49 @@ export const RUN_TEMPLATES = {
   "Other run": { goal: "", options: [] },
 }
 
+// Old "Hyrox stations" sessions (kind hyrox) still open with this; new ones are circuits.
 export const HYROX_TEMPLATE = {
   rounds: 4,
   stations: ["1km run", "50m Sled pull", "10 Burpee broad jumps", "500m Row", "50m Farmers carry"],
 }
 
-// Garmin type display name (as update.py writes it into CSV_DATA) → how the
-// logger treats it. Types not listed log as "other" with notes + RPE only.
-const RUN_TYPES = ["Running", "Indoor Running", "Treadmill Running", "Trail Running", "Track Running"]
+// Circuit workouts offered before any history exists. Each station is an
+// exercise name (looked up in ALL_EXERCISES) with its amount; workouts he names
+// and saves are offered again from history ("Repeat …").
+export const CIRCUIT_TEMPLATES = {
+  "Hyrox circuit": { rounds: 3, stations: [
+    ["Treadmill run", 1000], ["Sled pull", 40], ["Burpee broad jumps", 10], ["Row (erg)", 500], ["Farmers carry", 50],
+  ] },
+}
+
+// The New session screen: fixed tiles in his order (7 Nov 2026). Everything
+// else he did in the last year sits under "Other…", most frequent first.
+// Inline skating is left out on purpose — nothing to log for it.
+const CYCLING_TYPES = ["cycling", "road_biking", "gravel_cycling", "mountain_biking"]
+export const TILES = {
+  Indoors: [
+    { key: "strength", label: "Strength", kind: "strength", icon: "🏋️" },
+    { key: "circuit", label: "Circuit", sub: "HIIT", kind: "circuit", icon: "🔁" },
+    { key: "treadmill", label: "Indoor run", kind: "erg", machine: "Treadmill", icon: "🏃" },
+    { key: "bike", label: "Indoor bike", kind: "erg", machine: "Bike", icon: "🚲" },
+    { key: "skierg", label: "SkiErg", sub: "Indoor Cardio", kind: "erg", machine: "SkiErg", icon: "⛷️" },
+    { key: "row", label: "RowErg", sub: "Indoor Rowing", kind: "erg", machine: "Row", icon: "🚣" },
+  ],
+  Outdoors: [
+    { key: "tennis", label: "Tennis", kind: "tennis", icon: "🎾" },
+    { key: "running", label: "Run", kind: "run", icon: "👟" },
+    { key: "cycling", label: "Cycling", kind: "other", typeKeys: CYCLING_TYPES, icon: "🚴" },
+  ],
+}
+
+// Garmin type display names (as update.py writes them into CSV_DATA) that a
+// tile already covers, or that are deliberately not offered.
+const COVERED = new Set(["Strength Training", "Indoor Cardio", "Indoor Rowing", "Rowing V2", "Running",
+  "Indoor Running", "Treadmill Running", "Trail Running", "Track Running", "Tennis", "Tennis V2",
+  "Cycling", "Road Biking", "Indoor Cycling", "Inline Skating"])
 const snake = t => t.toLowerCase().replace(/ v2$/, "_v2").replace(/\s+/g, "_")
 
-export function activityOptions(types) {
-  const seen = new Map()
-  const add = (key, o) => { if (!seen.has(key)) seen.set(key, o); else seen.get(key).n += o.n }
-  for (const { type, n } of types) {
-    if (type === "Strength Training") add("strength", { key: "strength", label: "Strength training", kind: "strength", n })
-    else if (type === "Indoor Cardio") {
-      add("skierg", { key: "skierg", label: "SkiErg", sub: "Indoor Cardio", kind: "erg", machine: "SkiErg", n })
-      add("hyrox", { key: "hyrox", label: "Hyrox stations", sub: "Indoor Cardio", kind: "hyrox", n: 0 })
-    } else if (type === "Indoor Rowing" || type === "Rowing V2")
-      add("row", { key: "row", label: "Row (erg)", sub: "Indoor Rowing", kind: "erg", machine: "Row", n })
-    else if (RUN_TYPES.includes(type)) add(snake(type), { key: snake(type), label: type, kind: "run", n })
-    else if (/^Tennis/.test(type)) add("tennis", { key: "tennis", label: "Tennis", kind: "tennis", n })
-    else add(snake(type), { key: snake(type), label: type, kind: "other", typeKeys: [snake(type)], n })
-  }
-  // The core sessions are always offered, even before they show up in a year of data.
-  for (const o of [
-    { key: "strength", label: "Strength training", kind: "strength", n: 0 },
-    { key: "skierg", label: "SkiErg", sub: "Indoor Cardio", kind: "erg", machine: "SkiErg", n: 0 },
-    { key: "hyrox", label: "Hyrox stations", sub: "Indoor Cardio", kind: "hyrox", n: 0 },
-    { key: "running", label: "Running", kind: "run", n: 0 },
-    { key: "tennis", label: "Tennis", kind: "tennis", n: 0 },
-  ]) if (!seen.has(o.key)) seen.set(o.key, o)
-  return [...seen.values()].sort((a, b) => b.n - a.n)
+export function otherOptions(types) {
+  return types.filter(t => !COVERED.has(t.type))
+    .map(({ type, n }) => ({ key: snake(type), label: type, kind: "other", typeKeys: [snake(type)], n }))
 }

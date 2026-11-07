@@ -6,8 +6,12 @@ Matches sessions logged in the phone logger (training.simas.fit/log) to the Garm
 activity the watch recorded, then writes into that activity:
 
     strength  → the Sets tab (exercise, kg, reps) + name + description
-    erg       → distance (SkiErg = indoor_cardio, Row = indoor_rowing) + name + description
-    run       → name + description (plan, rep times, shoes, fuel)
+    erg       → distance (SkiErg = indoor_cardio, Row = indoor_rowing,
+                Bike = indoor_cycling) + name + description; Treadmill
+                (indoor run) also overrides the duration with the treadmill's time
+    circuit   → HIIT activity: every station of every round as a set in the Sets
+                tab (non-fatal if Garmin refuses sets) + name + description
+    run       → name + description (plan, rep times)
     tennis    → name  "<opponent>🎾<score>"  + the +/- description
     hyrox     → name + description (station splits per round)
     other     → description only (name only when a title was typed)
@@ -51,8 +55,12 @@ KIND_TYPES = {
     "run": ["running", "treadmill_running", "indoor_running", "trail_running", "track_running"],
     "tennis": ["tennis_v2", "tennis"],
     "hyrox": ["hyrox", "indoor_cardio", "hiit", "strength_training", "other", "multi_sport"],
+    "circuit": ["hiit", "hyrox", "indoor_cardio", "strength_training", "other"],
 }
-ERG_TYPES = {"SkiErg": ["indoor_cardio"], "Row": ["indoor_rowing"], "BikeErg": ["indoor_cycling", "indoor_cardio"]}
+ERG_TYPES = {"SkiErg": ["indoor_cardio"], "Row": ["indoor_rowing"], "BikeErg": ["indoor_cycling", "indoor_cardio"],
+             "Bike": ["indoor_cycling"], "Treadmill": ["treadmill_running", "indoor_running"]}
+# How each machine is named and paced in Garmin. Treadmill/Bike show km.
+MACHINE_LABEL = {"Treadmill": "Indoor run", "Bike": "Indoor bike"}
 
 
 # ── formatting ───────────────────────────────────────────────────────────────
@@ -73,6 +81,24 @@ def num(x) -> str:
 
 def pace500(m, sec) -> str:
     return clock(sec * 500.0 / m) if m and sec else "—"
+
+
+def pace(machine, m, sec) -> str:
+    if not (m and sec):
+        return ""
+    if machine == "Treadmill":
+        return f"{clock(sec * 1000.0 / m)}/km"
+    if machine == "Bike":
+        return f"{m / sec * 3.6:.1f}km/h"
+    return f"{pace500(m, sec)}/500m"
+
+
+def dist(machine, m) -> str:
+    return f"{m / 1000:g}km" if machine in ("Treadmill", "Bike") else f"{num(m)}m"
+
+
+def erg_total_sec(e: dict) -> float:
+    return e.get("total_sec") or sum(p.get("sec") or 0 for p in e.get("pieces") or [])
 
 
 def short(name: str) -> str:
@@ -125,14 +151,17 @@ def default_name(s: dict) -> str | None:
         pieces = [p for p in e.get("pieces") or [] if p.get("m")]
         m = sum(p["m"] for p in pieces)
         sec = sum(p.get("sec") or 0 for p in pieces)
-        mach = e.get("machine") or "Erg"
+        machine = e.get("machine") or "Erg"
+        mach = MACHINE_LABEL.get(machine, machine)
+        tail = f" · {pace(machine, m, sec)}" if pace(machine, m, sec) else ""
         if not pieces:
             return mach
-        if len(pieces) == 1:
-            return f"{mach} {num(m)}m {clock(sec)} · {pace500(m, sec)}/500m"
+        if len(pieces) == 1 or machine in ("Treadmill", "Bike"):
+            total = erg_total_sec(e) if machine == "Treadmill" else sec
+            return f"{mach} {dist(machine, m)} {clock(total)}{tail}".replace(" —", "")
         if len({p['m'] for p in pieces}) == 1:
-            return f"{mach} {len(pieces)}×{num(pieces[0]['m'])}m · {pace500(m, sec)}/500m"
-        return f"{mach} {len(pieces)} pieces {num(m)}m · {pace500(m, sec)}/500m"
+            return f"{mach} {len(pieces)}×{dist(machine, pieces[0]['m'])}{tail}"
+        return f"{mach} {len(pieces)} pieces {dist(machine, m)}{tail}"
     if kind == "run":
         r = s.get("run") or {}
         return r.get("plan") or s.get("template") or None
@@ -148,7 +177,31 @@ def default_name(s: dict) -> str | None:
         n = len(h.get("rounds") or [])
         total = h.get("total_sec")
         return f"{s.get('template') or 'Hyrox stations'} {n} rounds" + (f" · {clock(total)}" if total else "")
+    if kind == "circuit":
+        c = s.get("circuit") or {}
+        n = len(c.get("rounds") or [])
+        total = circuit_total(c)
+        return f"{s.get('template') or 'Circuit'} · {n} rounds" + (f" · {clock(total)}" if total else "")
     return None
+
+
+def circuit_total(c: dict):
+    """The typed total, else the splits added up — but only when every split is
+    there (a sum of a few splits would read as a finish time)."""
+    if c.get("total_sec"):
+        return c["total_sec"]
+    times = [t for r in c.get("rounds") or [] for t in r]
+    return sum(times) if times and all(times) else None
+
+
+def station_label(st: dict) -> str:
+    amt = st.get("n")
+    unit = {"m": "m", "s": "s", "reps": ""}.get(st.get("unit") or "reps", "")
+    amount = (f"{amt / 1000:g}km" if unit == "m" and amt and amt >= 1000 else f"{num(amt)}{unit}") if amt is not None else ""
+    head = (f"{amount} " if amount else "") + st.get("name", "")
+    if st.get("unit") == "reps" and amt is not None:
+        head = f"{num(amt)} {st.get('name', '')}"
+    return head + (f" @{num(st['kg'])}kg" if st.get("kg") is not None else "")
 
 
 def description(s: dict) -> str:
@@ -161,10 +214,13 @@ def description(s: dict) -> str:
         for i, p in enumerate(e.get("pieces") or [], 1):
             if not p.get("m") and not p.get("sec"):
                 continue
-            bits = [f"{num(p.get('m'))}m" if p.get("m") else "", clock(p.get("sec")) if p.get("sec") else "",
-                    f"{pace500(p.get('m'), p.get('sec'))}/500m" if p.get("m") and p.get("sec") else "",
+            machine = e.get("machine")
+            bits = [dist(machine, p["m"]) if p.get("m") else "", clock(p.get("sec")) if p.get("sec") else "",
+                    pace(machine, p.get("m"), p.get("sec")),
                     f"{num(p['spm'])}spm" if p.get("spm") else ""]
             lines.append(f"{i}. " + " ".join(b for b in bits if b))
+        if e.get("machine") == "Treadmill" and erg_total_sec(e):
+            lines.append(f"Total {clock(erg_total_sec(e))} (treadmill)")
         if e.get("rest_sec"):
             lines.append(f"Rest {clock(e['rest_sec'])}")
         if e.get("damper"):
@@ -176,7 +232,7 @@ def description(s: dict) -> str:
         reps = [x for x in r.get("reps") or [] if x]
         if reps:
             lines.append("Reps: " + " ".join(clock(x) for x in reps))
-        if r.get("shoes"):
+        if r.get("shoes"):      # no longer asked by the app; kept for old sessions
             lines.append(f"Shoes: {r['shoes']}")
         if r.get("fuel"):
             lines.append(f"Fuel: {r['fuel']}")
@@ -197,6 +253,15 @@ def description(s: dict) -> str:
                 lines.append(f"{name}: " + " ".join(clock(t) for t in times))
         if h.get("total_sec"):
             lines.append(f"Total {clock(h['total_sec'])}")
+    elif kind == "circuit":
+        c = s.get("circuit") or {}
+        rounds = c.get("rounds") or []
+        lines.append(f"{len(rounds)} rounds:")
+        for j, st in enumerate(c.get("stations") or []):
+            times = [r[j] if j < len(r) else None for r in rounds]
+            lines.append(station_label(st) + (": " + " ".join(clock(t) for t in times) if any(times) else ""))
+        if circuit_total(c):
+            lines.append(f"Total {clock(circuit_total(c))}")
     if s.get("rpe"):
         lines.append(f"RPE {num(s['rpe'])}")
     if (s.get("notes") or "").strip():
@@ -208,9 +273,41 @@ def tag(s: dict) -> str:
     return f"#log v1 {s['id']}"
 
 
+def set_item(cat, gname, unit, n, kg, sec=None) -> dict:
+    """One Garmin set. Metres go in reps (his Garmin convention); a timed set
+    (unit s) has no reps and its seconds as the duration."""
+    item = {"category": cat, "name": gname, "kg": kg, "reps": None if unit == "s" else n}
+    if unit == "s":
+        item["sec"] = n
+    elif sec:
+        item["sec"] = sec
+    return item
+
+
+def relabel(flat: list[dict], existing: list[dict]) -> tuple[list[dict], str]:
+    """The first N logged sets go onto the watch's first N ACTIVE sets (keeping
+    its timing); the rest are appended."""
+    active = [i for i, x in enumerate(existing) if x.get("setType") == "ACTIVE"]
+    spec = [({"at": active[k], **item} if k < len(active) else item) for k, item in enumerate(flat)]
+    note = (f"watch had {len(active) - len(flat)} more sets than logged; left them as recorded"
+            if len(active) > len(flat) else "")
+    return spec, note
+
+
+def circuit_spec(s: dict, existing: list[dict]) -> tuple[list[dict], str]:
+    """Every station of every round, in order, as a set (round split as duration)."""
+    c = s.get("circuit") or {}
+    flat = []
+    for r in c.get("rounds") or []:
+        for j, st in enumerate(c.get("stations") or []):
+            if st.get("cat"):
+                flat.append(set_item(st["cat"], st.get("gname"), st.get("unit") or "reps",
+                                     st.get("n"), st.get("kg"), r[j] if j < len(r) else None))
+    return relabel(flat, existing)
+
+
 def strength_spec(s: dict, existing: list[dict]) -> tuple[list[dict], str]:
-    """Logged sets in order → strength_sets.build() edits. The first N go onto the
-    watch's first N ACTIVE sets (keeping its timing); the rest are appended."""
+    """Logged sets in order → strength_sets.build() edits (see relabel())."""
     flat = []
     for e in s.get("exercises") or []:
         cat, gname, unit = e.get("cat"), e.get("gname"), e.get("unit") or "reps"
@@ -219,21 +316,8 @@ def strength_spec(s: dict, existing: list[dict]) -> tuple[list[dict], str]:
         for st in e.get("sets") or []:
             if st.get("n") is None and st.get("kg") is None:
                 continue
-            item = {"category": cat, "name": gname, "kg": st.get("kg"),
-                    "reps": None if unit == "s" else st.get("n")}
-            if unit == "s":
-                item["sec"] = st.get("n")
-            flat.append(item)
-    active = [i for i, x in enumerate(existing) if x.get("setType") == "ACTIVE"]
-    spec, note = [], ""
-    for k, item in enumerate(flat):
-        if k < len(active):
-            spec.append({"at": active[k], **item})
-        else:
-            spec.append(item)
-    if len(active) > len(flat):
-        note = f"watch had {len(active) - len(flat)} more sets than logged; left them as recorded"
-    return spec, note
+            flat.append(set_item(cat, gname, unit, st.get("n"), st.get("kg")))
+    return relabel(flat, existing)
 
 
 # ── Garmin ───────────────────────────────────────────────────────────────────
@@ -355,18 +439,24 @@ def content_hash(s: dict) -> str:
 # ── apply / undo ─────────────────────────────────────────────────────────────
 def snapshot(gc: Garmin, aid: str, kind: str) -> dict:
     act = gc.activity(aid)
+    summary = act.get("summaryDTO") or {}
     snap = {"name": act.get("activityName") or "", "description": act.get("description") or "",
-            "distance": (act.get("summaryDTO") or {}).get("distance")}
-    if kind == "strength":
-        snap["sets"] = gc.sets(aid)
+            "distance": summary.get("distance"), "duration": summary.get("duration")}
+    if kind in ("strength", "circuit"):
+        try:
+            snap["sets"] = gc.sets(aid)
+        except Exception as e:           # an activity type without a Sets tab
+            if kind == "strength":
+                raise
+            print(f"  (no sets on this activity: {e})")
     return snap
 
 
 def write(gc: Garmin, s: dict, aid: str, before: dict, apply: bool) -> tuple[bool, str]:
     kind = s.get("kind")
     notes = []
-    if kind == "strength":
-        spec, note = strength_spec(s, before.get("sets") or [])
+    if kind in ("strength", "circuit"):
+        spec, note = (strength_spec if kind == "strength" else circuit_spec)(s, before.get("sets") or [])
         if note:
             notes.append(note)
         spec, bad = check_catalog(spec)
@@ -376,13 +466,21 @@ def write(gc: Garmin, s: dict, aid: str, before: dict, apply: bool) -> tuple[boo
             new_sets = build_sets(copy.deepcopy(before.get("sets") or []), spec)
             print(f"  sets: {sum(1 for x in new_sets if x['setType'] == 'ACTIVE')} active")
             if apply:
-                gc.put_sets(aid, new_sets)
-                after = gc.sets(aid)
-                want = [(x["exercises"][0]["category"], x.get("repetitionCount")) for x in new_sets if x["setType"] == "ACTIVE"]
-                got = [((x.get("exercises") or [{}])[0].get("category"), x.get("repetitionCount"))
-                       for x in after if x.get("setType") == "ACTIVE"]
-                if got != want:
-                    return False, f"sets read-back differs: want {want} got {got}"
+                err = ""
+                try:
+                    gc.put_sets(aid, new_sets)
+                    after = gc.sets(aid)
+                    want = [(x["exercises"][0]["category"], x.get("repetitionCount")) for x in new_sets if x["setType"] == "ACTIVE"]
+                    got = [((x.get("exercises") or [{}])[0].get("category"), x.get("repetitionCount"))
+                           for x in after if x.get("setType") == "ACTIVE"]
+                    if got != want:
+                        err = f"sets read-back differs: want {want} got {got}"
+                except Exception as e:
+                    err = f"Garmin refused the sets ({type(e).__name__}: {e})"
+                if err and kind == "strength":
+                    return False, err
+                if err:   # circuit: the stations are still in the description
+                    notes.append(err + " — stations are in the description")
 
     name = (s.get("title") or "").strip() or default_name(s)
     desc = description(s)
@@ -394,13 +492,21 @@ def write(gc: Garmin, s: dict, aid: str, before: dict, apply: bool) -> tuple[boo
     if name:
         payload["activityName"] = name[:100]
     if kind == "erg":
-        m = sum(p.get("m") or 0 for p in (s.get("erg") or {}).get("pieces") or [])
+        e = s.get("erg") or {}
+        m = sum(p.get("m") or 0 for p in e.get("pieces") or [])
+        summary = {}
         if m:
-            payload["summaryDTO"] = {"distance": float(m)}
+            summary["distance"] = float(m)
+        # Indoor run: the treadmill's time is the true one; Garmin's is overridden.
+        if e.get("machine") == "Treadmill" and erg_total_sec(e):
+            summary["duration"] = float(erg_total_sec(e))
+            before["duration_written"] = True     # so undo restores the watch's time
+        if summary:
+            payload["summaryDTO"] = summary
     print(f"  name: {payload.get('activityName', '(unchanged)')!r}")
     print("  description:\n    | " + desc.replace("\n", "\n    | "))
-    if "summaryDTO" in payload:
-        print(f"  distance: {payload['summaryDTO']['distance']:g} m")
+    for k, v in (payload.get("summaryDTO") or {}).items():
+        print(f"  {k}: {v:g}")
     if not apply:
         return True, "dry run"
     gc.put_activity(aid, payload)
@@ -409,10 +515,10 @@ def write(gc: Garmin, s: dict, aid: str, before: dict, apply: bool) -> tuple[boo
         return False, f"name did not stick (Garmin has {after.get('activityName')!r})"
     if (after.get("description") or "").strip() != desc.strip():
         return False, "description did not stick"
-    if "summaryDTO" in payload:
-        got = (after.get("summaryDTO") or {}).get("distance")
-        if got is None or abs(got - payload["summaryDTO"]["distance"]) > 1:
-            notes.append(f"distance did not stick (Garmin has {got})")
+    for k, want in (payload.get("summaryDTO") or {}).items():
+        got = (after.get("summaryDTO") or {}).get(k)
+        if got is None or abs(got - want) > 1:
+            notes.append(f"{k} did not stick (Garmin has {got})")
     return True, "; ".join(notes) or "ok"
 
 
@@ -424,8 +530,10 @@ def restore(gc: Garmin, aid: str, before: dict, apply: bool) -> tuple[bool, str]
         gc.put_sets(aid, before["sets"])
     payload = {"activityId": int(aid), "activityName": before.get("name") or "",
                "description": before.get("description") or ""}
-    if before.get("distance") is not None:
-        payload["summaryDTO"] = {"distance": before["distance"]}
+    summary = {k: before[k] for k in ("distance", "duration") if before.get(k) is not None
+               and (k != "duration" or before.get("duration_written"))}
+    if summary:
+        payload["summaryDTO"] = summary
     gc.put_activity(aid, payload)
     after = gc.activity(aid)
     ok = (after.get("activityName") or "") == (before.get("name") or "")
@@ -452,7 +560,7 @@ def ingest(raw: str) -> dict:
     s = json.loads(raw)
     if not isinstance(s, dict) or s.get("v") != 1 or not ID_RE.match(str(s.get("id", ""))):
         raise SystemExit("✗ not a v1 session with a valid id")
-    if s.get("kind") not in ("strength", "erg", "run", "tennis", "hyrox", "other"):
+    if s.get("kind") not in ("strength", "circuit", "erg", "run", "tennis", "hyrox", "other"):
         raise SystemExit(f"✗ unknown kind {s.get('kind')!r}")
     if not parse_ts(s.get("start")):
         raise SystemExit("✗ start must be ISO 8601 with a UTC offset")

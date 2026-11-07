@@ -106,3 +106,15 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
 .sugg button small { font-size: 12px; color: var(--ink3); flex: none; }
 .sugg button.custom span { color: var(--ink2); font-weight: 500; }
 .sugg button:active { background: var(--accentBg); }
+
+/* New session: activity tiles, two per row. */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 12px; min-height: 92px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 2px; text-align: left; }
+.tile:active { background: var(--accentBg); border-color: var(--accent); }
+.tile .ic { font-size: 24px; line-height: 1; margin-bottom: auto; }
+.tile b { font-size: 16px; }
+.tile small { font-size: 12px; color: var(--ink3); }
+.tile.sm { min-height: 64px; }
+.setrow .chips { flex-wrap: nowrap; }
+.setrow .chip { padding: 8px 10px; min-width: 0; }
