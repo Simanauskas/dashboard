@@ -1,9 +1,7 @@
 /* Same tokens as the dashboard (T in App.jsx): colour means status, not decoration. */
 :root {
-  /* The real home-indicator inset. On his iPhone 15 Pro home-screen app iOS
-     reports safe-area-inset-bottom ~93pt (34 + the 59pt status bar); main.jsx
-     measures that excess as --vgap and it is taken off here. */
-  --sab: max(calc(env(safe-area-inset-bottom) - var(--vgap, 0px)), 0px);
+  /* Home-indicator inset (34pt on his iPhone 15 Pro, reported correctly). */
+  --sab: env(safe-area-inset-bottom);
   --bg: #0b0f19; --bgSoft: #0e1422; --panel: #121a2b; --panelHi: #172136; --line: #232e45;
   --ink: #eef2fb; --ink2: #97a4bd; --ink3: #5f6b85; --accent: #8b5cf6; --accentIn: #c4b5fd; --accentBg: rgba(139,92,246,.14);
   --ok: #34d399; --okBg: rgba(52,211,153,.12); --warn: #fbbf24; --warnBg: rgba(251,191,36,.12);
@@ -95,7 +93,10 @@ details summary { font-size: 13px; color: var(--ink2); padding: 6px 0; }
 details[open] { display: flex; flex-direction: column; gap: 10px; }
 .link { font: inherit; background: none; border: none; color: var(--ink3); font-size: 13px; padding: 14px 0; width: 100%; }
 .link.danger { color: var(--bad); opacity: .8; }
-.bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 14px calc(var(--sab) + 12px);
+/* --vgap (main.jsx): how much shorter iOS's viewport is than the screen right
+   now — the home-screen app sometimes runs 59pt short. Fixed bars are pulled
+   down by it so they sit on the real screen bottom. */
+.bar { position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--vgap, 0px)); padding: 12px 14px calc(var(--sab) + 12px);
   background: linear-gradient(transparent, var(--bg) 30%); z-index: 6; }
 .bar .btn { max-width: 532px; margin: 0 auto; padding: 16px; font-size: 17px; }
 
@@ -133,7 +134,7 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
 
 /* Bottom tab bar (New / Log). */
 .page.has-nav { padding-bottom: calc(var(--sab) + 76px); }
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: flex; justify-content: center; gap: 8px;
+.tabbar { position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--vgap, 0px)); z-index: 8; display: flex; justify-content: center; gap: 8px;
   padding: 5px 16px max(var(--sab), 8px); background: rgba(11,15,25,.92);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
 .tabbar button { font: inherit; flex: 1; max-width: 160px; background: none; border: none; color: var(--ink3);

@@ -696,6 +696,9 @@ function Settings({ go }) {
     d.remove()
     return { bottom: Math.round(bottom) }
   }, [])
+  // Live, so a change in iOS's viewport shows up here.
+  const [vp, setVp] = useState(() => ({ ...window.__viewport }))
+  useEffect(() => { const t = setInterval(() => setVp({ ...window.__viewport }), 500); return () => clearInterval(t) }, [])
   return <div className="page has-nav notop">
     <div className="sec">Settings</div>
     <div className="card">
@@ -712,9 +715,9 @@ function Settings({ go }) {
       {msg && <div className="hint">{msg}</div>}
     </div>
     <div className="card hint">
-      Install: open this page in Safari → Share → <b>Add to Home Screen</b>.<br />
+      Install: in Safari, Share → Add to Home Screen.<br />
       Data built {new Date(DATA.built).toLocaleString()} · {DATA.sessions.length} sessions synced from the repo.<br />
-      Screen {window.__viewport?.screen}pt · viewport {window.__viewport?.inner}pt · {window.__viewport?.standalone ? "home-screen app" : "browser"} · bottom inset {insets.bottom}pt − {window.__viewport?.gap ?? 0}pt
+      Screen {vp.screen}pt · viewport {vp.inner}pt · {vp.standalone ? "home-screen app" : "browser"} · bottom inset {insets.bottom}pt · bar moved down {vp.gap}pt
     </div>
     <Nav active="settings" go={go} entries={entries} />
   </div>
