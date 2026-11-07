@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import DATA from "virtual:log-data"
 import { exByName, searchExercises, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, CIRCUIT_TEMPLATES, TILES, otherOptions } from "./catalog.js"
 import { store, send, sendAction, flush, fetchStatus, testToken } from "./store.js"
+import { TileIcon } from "./icons.jsx"
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 const pad = n => String(n).padStart(2, "0")
@@ -31,6 +32,20 @@ const sortedSessions = list => [...list].sort((a, b) => ((a.start || "") < (b.st
 
 const OTHER = otherOptions(DATA.types)
 const OPTIONS = [...TILES.Indoors, ...TILES.Outdoors, ...OTHER]
+
+// Which tile a session belongs to (for its emoji in the Log and the tile's
+// "last logged" line).
+function tileOf(s) {
+  const all = [...TILES.Indoors, ...TILES.Outdoors]
+  if (s.kind === "erg") return all.find(t => t.machine === s.erg?.machine)
+  if (s.kind === "hyrox") return all.find(t => t.key === "circuit")
+  if (s.kind === "other") return all.find(t => t.typeKeys?.some(k => s.type_keys?.includes(k))) || null
+  return all.find(t => t.kind === s.kind) || null
+}
+const ago = iso => {
+  const d = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(iso).setHours(0, 0, 0, 0)) / 864e5)
+  return d <= 0 ? "today" : d === 1 ? "yesterday" : d < 7 ? `${d} days ago` : dayName(iso)
+}
 // Treadmill and bike distances are typed in km; everything is stored in metres.
 const MACHINE = {
   SkiErg: { unit: "m", pace: "500" }, Row: { unit: "m", pace: "500" }, BikeErg: { unit: "m", pace: "500" },
@@ -484,43 +499,21 @@ function Editor({ id, go }) {
   const entries = useStore()
   const entry = entries[id]
   const built = DATA.sessions.find(x => x.id === id)
-  const [showOther, setShowOther] = useState(false)
   const s = entry?.session
   const set = next => store.put(next, { sync: "draft" })
 
-  const begin = opt => {
-    const ses = initSession(entries, opt)
-    store.put(ses, { sync: "draft" })
-    go("edit", ses.id)
-  }
-  if (!s) {
-    return <div className="page">
-      <Top title="New session" onBack={() => go("home")} />
-      {Object.entries(TILES).map(([group, tiles]) => <div key={group}>
-        <div className="sec">{group}</div>
-        <div className="tiles">{tiles.map(o => <button key={o.key} className="tile" onClick={() => begin(o)}>
-          <span className="ic" aria-hidden="true">{o.icon}</span><b>{o.label}</b>{o.sub && <small>{o.sub}</small>}
-        </button>)}</div>
-      </div>)}
-      {OTHER.length > 0 && <>
-        <button className="link" onClick={() => setShowOther(v => !v)}>{showOther ? "Hide other activities" : "Other…"}</button>
-        {showOther && <div className="tiles">{OTHER.map(o => <button key={o.key} className="tile sm" onClick={() => begin(o)}>
-          <b>{o.label}</b><small>{o.n}× last year</small>
-        </button>)}</div>}
-      </>}
-    </div>
-  }
+  if (!s) return <Home go={go} />
   const st = status(entry, built)
   const save = () => {
     const end = new Date(), start = new Date(s.start)
     const fixed = { ...s, end: end - start > 4 * 3600e3 || end < start ? null : isoLocal(end) }
     store.put(fixed, { sync: "queued" })
     send(fixed.id)
-    go("home")
+    go("log")
   }
   const Form = { strength: StrengthForm, circuit: CircuitForm, erg: ErgForm, run: RunForm, tennis: TennisForm, hyrox: HyroxForm }[s.kind]
   return <div className="page has-bar">
-    <Top title={s.activity} sub={`${dayName(s.start)} · ${timeOf(s.start)}`} onBack={() => go("home")} />
+    <Top title={s.activity} sub={`${dayName(s.start)} · ${timeOf(s.start)}`} onBack={() => (history.state ? history.back() : go("home"))} />
     <div className={"status " + st.tone}>{st.text}{st.detail ? <small> — {st.detail}</small> : null}</div>
     {Form && <Form s={s} set={set} entries={entries} />}
     <div className="card">
@@ -551,7 +544,7 @@ function Editor({ id, go }) {
         }}>Wrong activity…</button>
       </div>
     </div>}
-    <button className="link danger" onClick={() => { if (confirm("Delete this log from the phone?")) { store.remove(s.id); go("home") } }}>Delete from phone</button>
+    <button className="link danger" onClick={() => { if (confirm("Delete this log from the phone?")) { store.remove(s.id); go("log") } }}>Delete from phone</button>
     <div className="bar"><button className="btn primary" onClick={save}>{entry.sentAt ? "Save changes & update Garmin" : "Save & send to Garmin"}</button></div>
   </div>
 }
@@ -565,7 +558,7 @@ function Top({ title, sub, onBack, right }) {
   </header>
 }
 
-function Home({ go }) {
+function useSync() {
   const entries = useStore()
   useEffect(() => {
     flush()
@@ -576,18 +569,77 @@ function Home({ go }) {
     window.addEventListener("online", on)
     return () => window.removeEventListener("online", on)
   }, [])
-  const list = allSessions(entries).slice(0, 40)
-  const drafts = list.filter(s => entries[s.id] && (!entries[s.id].sync || entries[s.id].sync === "draft"))
-  return <div className="page">
-    <Top title="Training log" right={<button className="back" onClick={() => go("settings")} aria-label="Settings">⚙︎</button>} />
+  return entries
+}
+
+const isDraft = e => e && (!e.sync || e.sync === "draft")
+
+// Start screen: the tiles. Sessions still being filled in sit above them.
+function Home({ go }) {
+  const entries = useSync()
+  const [showOther, setShowOther] = useState(false)
+  const sessions = allSessions(entries)
+  const drafts = sessions.filter(s => isDraft(entries[s.id]))
+  const last = key => sessions.find(s => tileOf(s)?.key === key && !isDraft(entries[s.id]))
+  const begin = opt => {
+    const ses = initSession(entries, opt)
+    store.put(ses, { sync: "draft" })
+    go("edit", ses.id)
+  }
+  return <div className="page has-nav">
+    <Top title="New session" right={<button className="back" onClick={() => go("settings")} aria-label="Settings">⚙︎</button>} />
     {!store.settings.token && <div className="status warn" onClick={() => go("settings")}>Add your LOG_TOKEN in ⚙︎ Settings so logs can reach Garmin.</div>}
-    <button className="btn primary huge" onClick={() => go("new")}>+ New session</button>
-    {drafts.length > 0 && <div className="sec">In progress</div>}
-    {drafts.map(s => <Item key={s.id} s={s} entry={entries[s.id]} go={go} />)}
-    <div className="sec">Recent</div>
-    {list.filter(s => !drafts.includes(s)).map(s => <Item key={s.id} s={s} entry={entries[s.id]} go={go} />)}
-    {list.length === 0 && <div className="hint c">Nothing logged yet.</div>}
+    {drafts.length > 0 && <>
+      <div className="sec">In progress</div>
+      {drafts.map(s => <Item key={s.id} s={s} entry={entries[s.id]} go={go} />)}
+    </>}
+    {Object.entries(TILES).map(([group, tiles]) => <div key={group}>
+      <div className="sec">{group}</div>
+      <div className="tiles">{tiles.map(o => {
+        const l = last(o.key)
+        return <button key={o.key} className="tile" onClick={() => begin(o)}>
+          <span className="chip-ic"><TileIcon name={o.key} /></span>
+          <span className="tl"><b>{o.label}</b><small>{l ? `last ${ago(l.start)}` : o.sub || "\u00a0"}</small></span>
+        </button>
+      })}</div>
+    </div>)}
+    {OTHER.length > 0 && <>
+      <button className="link" onClick={() => setShowOther(v => !v)}>{showOther ? "Hide other activities" : "Other activities…"}</button>
+      {showOther && <div className="tiles">{OTHER.map(o => <button key={o.key} className="tile sm" onClick={() => begin(o)}>
+        <span className="chip-ic"><TileIcon name="other" /></span>
+        <span className="tl"><b>{o.label}</b><small>{o.n}× last year</small></span>
+      </button>)}</div>}
+    </>}
+    <Nav active="home" go={go} entries={entries} />
   </div>
+}
+
+// Everything logged, newest first, with its Garmin status.
+function LogList({ go }) {
+  const entries = useSync()
+  const list = allSessions(entries).filter(s => !isDraft(entries[s.id])).slice(0, 60)
+  return <div className="page has-nav">
+    <Top title="Log" right={<button className="back" onClick={() => go("settings")} aria-label="Settings">⚙︎</button>} />
+    {list.map(s => <Item key={s.id} s={s} entry={entries[s.id]} go={go} />)}
+    {list.length === 0 && <div className="hint c">Nothing logged yet.</div>}
+    <Nav active="log" go={go} entries={entries} />
+  </div>
+}
+
+function Nav({ active, go, entries }) {
+  // The Log tab counts what still needs attention: unsent, or not in Garmin yet / failed.
+  const waiting = Object.values(entries).filter(e => !isDraft(e) &&
+    (e.sync === "queued" || e.sync === "sending" || ["error", "no_match"].includes(e.remote?.state))).length
+  return <nav className="tabbar">
+    <button className={active === "home" ? "on" : ""} onClick={() => active !== "home" && go("home")}>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      <span>New</span>
+    </button>
+    <button className={active === "log" ? "on" : ""} onClick={() => active !== "log" && go("log")}>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>
+      <span>Log{waiting > 0 && <i className="badge">{waiting}</i>}</span>
+    </button>
+  </nav>
 }
 
 function summary(s) {
@@ -610,8 +662,11 @@ function Item({ s, entry, go }) {
     if (!entry) store.put(s, { sync: "sent", sentAt: s.received || s.start, remote: s.status })
     go("edit", s.id)
   }}>
-    <div className="row between"><b>{summary(s)}</b><span className="when">{dayName(s.start)} {timeOf(s.start)}</span></div>
-    <span className={"pill " + st.tone}>{st.text}</span>
+    <span className="emo" aria-hidden="true">{tileOf(s)?.icon || "•"}</span>
+    <span className="item-body">
+      <span className="row between"><b>{summary(s)}</b><span className="when">{dayName(s.start)} {timeOf(s.start)}</span></span>
+      <span className={"pill " + st.tone}>{st.text}</span>
+    </span>
   </button>
 }
 
@@ -657,7 +712,7 @@ export default function LogApp() {
     return () => window.removeEventListener("popstate", pop)
   }, [])
   if (route.screen === "settings") return <Settings go={go} />
-  if (route.screen === "new") return <Editor id={null} go={go} />
+  if (route.screen === "log") return <LogList go={go} />
   if (route.screen === "edit" && route.id) return <Editor id={route.id} go={go} />
   return <Home go={go} />
 }
