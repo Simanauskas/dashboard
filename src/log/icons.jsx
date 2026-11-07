@@ -8,11 +8,15 @@ const P = {
     <rect x="16" y="7" width="3" height="10" rx="1" />
     <path d="M3 9.5v5M21 9.5v5" />
   </>,
+  // Three stations on a ring, arrows between them: rounds going round.
   circuit: <>
-    <path d="M4.5 11.5a7.5 7.5 0 0 1 13-4.6l1.8 1.9" />
-    <path d="M19.5 4.5v4.5H15" />
-    <path d="M19.5 12.5a7.5 7.5 0 0 1-13 4.6l-1.8-1.9" />
-    <path d="M4.5 19.5V15H9" />
+    <circle cx="12" cy="12" r="7.5" />
+    <path d="M19.02 5.3 18.5 8.25l-2.82-1.03" />
+    <path d="M14.3 21.43 12 19.5l2.3-1.93" />
+    <path d="M2.68 9.28 5.5 8.25l.52 2.95" />
+    <circle cx="12" cy="4.5" r="2" fill="currentColor" stroke="none" />
+    <circle cx="18.5" cy="15.75" r="2" fill="currentColor" stroke="none" />
+    <circle cx="5.5" cy="15.75" r="2" fill="currentColor" stroke="none" />
   </>,
   treadmill: <>
     <circle cx="10" cy="4" r="1.6" />
@@ -29,11 +33,13 @@ const P = {
     <path d="M16.5 5.5h2.5M17.8 5.5l-1.6 9" />
     <path d="M13 14.5l-1 5M16.2 14.5l1.3 5M3.5 20h17" />
   </>,
+  // The machine: fan housing on a column, cables down to two grips.
   skierg: <>
-    <path d="M12 3v18M8 21h8" />
-    <path d="M8 4.5h8" />
-    <path d="M9 4.5v7.5M15 4.5v7.5" />
-    <path d="M7.5 12.5h3M13.5 12.5h3" />
+    <rect x="8" y="2.5" width="8" height="6" rx="2" />
+    <circle cx="12" cy="5.5" r="1.3" />
+    <path d="M12 8.5V20M7 20.5h10" />
+    <path d="M9.2 8.5 6.6 13M14.8 8.5l2.6 4.5" />
+    <path d="M6.6 13v3.6M17.4 13v3.6" />
   </>,
   row: <>
     <circle cx="18" cy="11" r="3.2" />

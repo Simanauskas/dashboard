@@ -109,26 +109,28 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
 
 /* New session: activity tiles, two per row. Icon in an accent chip, name, and
    when it was last logged. Status colours stay reserved for status. */
-.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tile { font: inherit; color: var(--ink); text-align: left; border-radius: 16px; padding: 14px;
-  min-height: 104px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
-  background: linear-gradient(160deg, var(--panelHi) 0%, var(--panel) 70%); border: 1px solid var(--line);
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { font: inherit; color: var(--ink); text-align: left; border-radius: 14px; padding: 10px 10px;
+  min-height: 68px; display: flex; flex-direction: row; align-items: center; gap: 10px;
+  background: linear-gradient(160deg, var(--panelHi) 0%, var(--panel) 75%); border: 1px solid var(--line);
   box-shadow: 0 1px 0 rgba(255,255,255,.04) inset; transition: transform .12s ease, border-color .12s ease; }
 .tile:active { transform: scale(.97); border-color: var(--accent); background: var(--accentBg); }
-.chip-ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+.chip-ic { width: 40px; height: 40px; flex: none; border-radius: 11px; display: grid; place-items: center;
   color: var(--accentIn, #c4b5fd); background: var(--accentBg); border: 1px solid rgba(139,92,246,.28); }
-.tl { display: flex; flex-direction: column; gap: 2px; }
-.tile b { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
-.tile small { font-size: 12px; color: var(--ink3); }
-.tile.sm { min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px; }
+.tl { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tile b { font-size: 15px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile small { font-size: 11.5px; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile.sm .chip-ic { width: 34px; height: 34px; border-radius: 10px; }
+/* Tab screens have no header: start just under the status bar. */
+.page.notop { padding-top: calc(env(safe-area-inset-top) + 6px); }
+.page.notop > .sec:first-child, .page.notop > .status:first-child { margin-top: 8px; }
 
 /* Bottom tab bar (New / Log). */
 .page.has-nav { padding-bottom: calc(env(safe-area-inset-bottom) + 92px); }
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: flex; justify-content: center; gap: 8px;
   padding: 8px 16px calc(env(safe-area-inset-bottom) + 8px); background: rgba(11,15,25,.92);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
-.tabbar button { font: inherit; flex: 1; max-width: 220px; background: none; border: none; color: var(--ink3);
+.tabbar button { font: inherit; flex: 1; max-width: 160px; background: none; border: none; color: var(--ink3);
   display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; border-radius: 12px; font-size: 12px; font-weight: 600; }
 .tabbar button.on { color: var(--accentIn, #c4b5fd); background: var(--accentBg); }
 .tabbar span { position: relative; }

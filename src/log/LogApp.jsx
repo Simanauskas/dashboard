@@ -586,8 +586,7 @@ function Home({ go }) {
     store.put(ses, { sync: "draft" })
     go("edit", ses.id)
   }
-  return <div className="page has-nav">
-    <Top title="New session" right={<button className="back" onClick={() => go("settings")} aria-label="Settings">⚙︎</button>} />
+  return <div className="page has-nav notop">
     {!store.settings.token && <div className="status warn" onClick={() => go("settings")}>Add your LOG_TOKEN in ⚙︎ Settings so logs can reach Garmin.</div>}
     {drafts.length > 0 && <>
       <div className="sec">In progress</div>
@@ -599,7 +598,7 @@ function Home({ go }) {
         const l = last(o.key)
         return <button key={o.key} className="tile" onClick={() => begin(o)}>
           <span className="chip-ic"><TileIcon name={o.key} /></span>
-          <span className="tl"><b>{o.label}</b><small>{l ? `last ${ago(l.start)}` : o.sub || "\u00a0"}</small></span>
+          <span className="tl"><b>{o.label}</b>{(l || o.sub) && <small>{l ? `last ${ago(l.start)}` : o.sub}</small>}</span>
         </button>
       })}</div>
     </div>)}
@@ -618,8 +617,7 @@ function Home({ go }) {
 function LogList({ go }) {
   const entries = useSync()
   const list = allSessions(entries).filter(s => !isDraft(entries[s.id])).slice(0, 60)
-  return <div className="page has-nav">
-    <Top title="Log" right={<button className="back" onClick={() => go("settings")} aria-label="Settings">⚙︎</button>} />
+  return <div className="page has-nav notop">
     {list.map(s => <Item key={s.id} s={s} entry={entries[s.id]} go={go} />)}
     {list.length === 0 && <div className="hint c">Nothing logged yet.</div>}
     <Nav active="log" go={go} entries={entries} />
@@ -638,6 +636,13 @@ function Nav({ active, go, entries }) {
     <button className={active === "log" ? "on" : ""} onClick={() => active !== "log" && go("log")}>
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>
       <span>Log{waiting > 0 && <i className="badge">{waiting}</i>}</span>
+    </button>
+    <button className={active === "settings" ? "on" : ""} onClick={() => active !== "settings" && go("settings")}>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+      </svg>
+      <span>Settings</span>
     </button>
   </nav>
 }
@@ -672,9 +677,10 @@ function Item({ s, entry, go }) {
 
 function Settings({ go }) {
   const st = useSyncExternalStore(store.subscribe, () => store.settings)
+  const entries = useStore()
   const [msg, setMsg] = useState("")
-  return <div className="page">
-    <Top title="Settings" onBack={() => go("home")} />
+  return <div className="page has-nav notop">
+    <div className="sec">Settings</div>
     <div className="card">
       <Field label="Send logs via">
         <Chips value={st.mode} options={[["worker", "auth.simas.fit"], ["github", "GitHub (fallback)"]]} onChange={m => m && store.setSettings({ mode: m })} />
@@ -692,6 +698,7 @@ function Settings({ go }) {
       Install: open this page in Safari → Share → <b>Add to Home Screen</b>.<br />
       Data built {new Date(DATA.built).toLocaleString()} · {DATA.sessions.length} sessions synced from the repo.
     </div>
+    <Nav active="settings" go={go} entries={entries} />
   </div>
 }
 
