@@ -696,7 +696,8 @@ function Settings({ go }) {
     </div>
     <div className="card hint">
       Install: open this page in Safari → Share → <b>Add to Home Screen</b>.<br />
-      Data built {new Date(DATA.built).toLocaleString()} · {DATA.sessions.length} sessions synced from the repo.
+      Data built {new Date(DATA.built).toLocaleString()} · {DATA.sessions.length} sessions synced from the repo.<br />
+      Screen {window.__viewport?.screen}pt · viewport {window.__viewport?.inner}pt · {window.__viewport?.standalone ? "home-screen app" : "browser"} · bar correction {window.__viewport?.gap ?? 0}pt
     </div>
     <Nav active="settings" go={go} entries={entries} />
   </div>
