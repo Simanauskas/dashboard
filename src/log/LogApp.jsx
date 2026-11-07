@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import DATA from "virtual:log-data"
-import { EXERCISES, exByName, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, activityOptions } from "./catalog.js"
+import { exByName, searchExercises, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, activityOptions } from "./catalog.js"
 import { store, send, sendAction, flush, fetchStatus, testToken } from "./store.js"
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -52,9 +52,11 @@ function lastExercise(entries, name, beforeStart) {
   return null
 }
 
-function newExercise(entries, name, tpl = {}) {
-  const cat = exByName(name) || { name, cat: null, gname: null, unit: "reps" }
-  const last = lastExercise(entries, name)
+// `pick` is a name (templates, history) or an entry chosen in the picker.
+function newExercise(entries, pick, tpl = {}) {
+  const name = typeof pick === "string" ? pick : pick.name
+  const cat = (typeof pick === "object" && pick) || exByName(name) || { name, cat: null, gname: null, unit: "reps" }
+  const last = lastExercise(entries, cat.name)
   const seed = last || (tpl.seed ? Array.from({ length: tpl.seed.sets }, () => ({ kg: tpl.seed.kg, n: tpl.seed.n })) : [{ kg: null, n: null }])
   return {
     name: cat.name, cat: cat.cat, gname: cat.gname, unit: cat.unit, target: tpl.target || "",
@@ -149,17 +151,60 @@ function StrengthForm({ s, set, entries }) {
     </div>
     {s.exercises.map((e, i) => <ExerciseCard key={i} e={e} entries={entries} start={s.start}
       onChange={x => upd(i, x)} onRemove={() => set({ ...s, exercises: s.exercises.filter((_, j) => j !== i) })} />)}
-    <AddExercise onAdd={name => set({ ...s, exercises: [...s.exercises, newExercise(entries, name)] })} />
+    <AddExercise onAdd={pick => set({ ...s, exercises: [...s.exercises, newExercise(entries, pick)] })} />
   </>
 }
 
+// Exercise search over Garmin's whole catalog. Tapping a result uses Garmin's
+// exercise (it lands in the Sets tab). "Add as custom" is offered only when the
+// search finds nothing; a custom exercise goes to the notes only.
+function ExercisePicker({ value = "", onPick, placeholder, className = "", clearOnPick = false }) {
+  const [text, setText] = useState(value)
+  const [open, setOpen] = useState(false)
+  useEffect(() => { setText(value) }, [value])
+  const q = text.trim()
+  const results = useMemo(() => (q ? searchExercises(q) : []), [q])
+  const exact = q && exByName(q)
+  const choose = entry => {
+    onPick(entry)
+    setText(clearOnPick ? "" : entry.name)
+    setOpen(false)
+  }
+  const custom = () => choose({ name: q, cat: null, gname: null, unit: "reps" })
+  const keep = ev => ev.preventDefault()          // keep focus while tapping a result
+  return <div className="picker">
+    <input className={"in " + className} placeholder={placeholder} value={text} autoComplete="off" autoCorrect="off" spellCheck={false}
+      enterKeyHint="done"
+      onFocus={() => setOpen(true)}
+      onChange={ev => { setText(ev.target.value); setOpen(true) }}
+      onKeyDown={ev => {
+        if (ev.key !== "Enter" || !q) return
+        ev.preventDefault()
+        choose(exact || results[0] || { name: q, cat: null, gname: null, unit: "reps" })
+      }}
+      onBlur={() => {
+        setOpen(false)
+        if (clearOnPick || q === value) return
+        // Tapped away without choosing: an exact Garmin name is taken, text with
+        // no matches becomes custom, anything else goes back to what it was.
+        if (exact) choose(exact)
+        else if (q && !results.length) custom()
+        else setText(value)
+      }} />
+    {open && q && <div className="sugg" onPointerDown={keep} onMouseDown={keep}>
+      {results.map(r => <button type="button" key={`${r.cat}/${r.gname}`} onClick={() => choose(r)}>
+        <span>{r.name}</span><small>{r.catLabel}</small>
+      </button>)}
+      {!results.length && <button type="button" className="custom" onClick={custom}>
+        <span>+ Add “{q}” as custom</span><small>not in Garmin — notes only</small>
+      </button>}
+    </div>}
+  </div>
+}
+
 function AddExercise({ onAdd }) {
-  const [v, setV] = useState("")
-  return <div className="card"><div className="row">
-    <input className="in grow" list="ex-list" placeholder="Add exercise…" value={v} onChange={e => setV(e.target.value)} />
-    <button className="btn" disabled={!v.trim()} onClick={() => { onAdd(v.trim()); setV("") }}>Add</button>
-    </div>
-    <datalist id="ex-list">{EXERCISES.map(x => <option key={x.name} value={x.name} />)}</datalist>
+  return <div className="card">
+    <ExercisePicker placeholder="Add exercise — type to search Garmin's list" clearOnPick onPick={onAdd} />
   </div>
 }
 
@@ -167,13 +212,10 @@ function ExerciseCard({ e, onChange, onRemove, entries, start }) {
   const unitLbl = { reps: "reps", m: "m", s: "sec" }[e.unit]
   const last = useMemo(() => lastExercise(entries, e.name, start), [entries, e.name, start])
   const setSet = (k, p) => onChange({ ...e, sets: e.sets.map((x, j) => (j === k ? { ...x, ...p } : x)) })
-  const rename = name => {
-    const c = exByName(name)
-    onChange(c ? { ...e, name: c.name, cat: c.cat, gname: c.gname, unit: c.unit } : { ...e, name, cat: null, gname: null })
-  }
+  const rename = c => onChange({ ...e, name: c.name, cat: c.cat, gname: c.gname, unit: c.cat ? c.unit : e.unit })
   return <div className="card">
     <div className="row">
-      <input className="in exname grow" list="ex-list" value={e.name} onChange={x => rename(x.target.value)} />
+      <div className="grow"><ExercisePicker className="exname" value={e.name} onPick={rename} /></div>
       <button className="x" onClick={onRemove} aria-label="Remove exercise">✕</button>
     </div>
     <div className="meta">

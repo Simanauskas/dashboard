@@ -124,14 +124,25 @@ session JSON in `session`; undo/rematch leave it empty.
 
 | File | What |
 |---|---|
-| `src/log/catalog.js` | `EXERCISES` (name → Garmin category/name/unit), `STRENGTH_TEMPLATES` (Lower body / Upper body / Empty, each exercise with `target` hint and first-time `seed`), `RUN_TEMPLATES`, `HYROX_TEMPLATE`, `activityOptions()` (Garmin type → logger kind) |
+| `src/log/catalog.js` | `EXERCISES` (hand-picked friendly names → Garmin category/name/unit), `ALL_EXERCISES` (those + every Garmin exercise from `garmin-exercises.json`, named from the key: `BICYCLE_CRUNCH` → "Bicycle crunch"; a name used in two categories gets "(category)"), `searchExercises()`, `STRENGTH_TEMPLATES` (Lower body / Upper body / Empty, each exercise with `target` hint and first-time `seed`), `RUN_TEMPLATES`, `HYROX_TEMPLATE`, `activityOptions()` (Garmin type → logger kind) |
 | `src/log/LogApp.jsx` | Screens: Home, Editor (per-kind forms), Settings; status pills; "last time" prefill |
 | `src/log/store.js` | localStorage (`simaslog.v1`), send/queue/retry, dispatch (Worker default, GitHub fallback), live status fetch; `clean()` strips `ph`/`target` and makes numbers |
 | `src/log/log.css` | Same tokens as the dashboard's `T` — colour means status |
 | `log/index.html` | Second Vite page (`vite.config.js` `rollupOptions.input.log`) |
 | `log-data.plugin.js` | Build-time `virtual:log-data`: activity types of the last 365 days with counts (from `CSV_DATA`), past tennis opponents (`Name🎾…` activity names), calendar tennis fixtures (`cal:true` SCHEDULE lines), last 80 `data/sessions` records. Rebuilt on every hourly bot deploy |
+| `src/log/garmin-exercises.json` | Garmin's whole exercise catalog as `[category, name]` pairs. Written by `exercise_catalog.py`, which `update.yml` runs on every non-poll sync (connect.garmin.com is reachable from Actions, not from Claude's cloud sessions); commits only when Garmin's list changed; keeps the file on any error or a suspiciously short response |
 | `public/log/` | `manifest.webmanifest`, `sw.js` (network-first HTML, cache-first assets), icons |
 | `public/_headers` | `/log/`, `/log/index.html`, `/log/sw.js` no-cache — keep them |
+
+Exercise picker (`ExercisePicker` in LogApp.jsx), used for "Add exercise" and
+for renaming a card: typing searches `ALL_EXERCISES` (every word must match the
+name or Garmin category; plurals like "crunches" match; hand-picked names rank
+first). Tapping a result uses that Garmin exercise. "+ Add … as custom" appears
+**only when the search finds nothing** — he asked for that on 7 Nov 2026 after
+"Crunches" went in as custom though Garmin has CRUNCH/CRUNCH. Custom exercises
+have `cat: null` and go to the description only. Tapping away without choosing:
+an exact name is taken, text with no matches becomes custom, otherwise the card
+keeps its old name.
 
 UX facts: weights/reps from the last session of the same exercise show as
 **placeholders**; the ✓ button accepts them (one tap per set), typing overrides.
@@ -142,9 +153,11 @@ number is minutes for erg/Hyrox and seconds for run reps. Decimal commas
 
 ### Common changes
 
-- **New exercise / fix a Garmin name** → `EXERCISES` in catalog.js. Verify the
-  name first: dispatch `strength-sets.yml` with `find: "<terms>"` (see
-  garmin-strength-sets). Unverified names still work (category-only fallback).
+- **Exercise missing from search** → it's not in Garmin's catalog (the picker
+  already offers all of it), or `garmin-exercises.json` hasn't been refreshed:
+  check the "Refresh Garmin exercise catalog" step of the last non-poll
+  update.yml run. **Friendlier name for a Garmin exercise** → add it to
+  `EXERCISES` (same category/name; it then replaces the generated name).
 - **Change a workout template** → `STRENGTH_TEMPLATES` (`target` = plan text,
   `seed` = prefill until history exists). Run sessions → `RUN_TEMPLATES`;
   Friday stations → `HYROX_TEMPLATE`.

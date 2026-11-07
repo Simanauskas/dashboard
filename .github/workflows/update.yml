@@ -136,6 +136,14 @@ jobs:
             python body.py --days 30
           fi
 
+      # Garmin's exercise catalog for the phone logger's exercise search
+      # (src/log/garmin-exercises.json). One public GET; writes only when the
+      # catalog changed. Skipped on polls. Never allowed to fail the job.
+      - name: Refresh Garmin exercise catalog for the logger
+        if: steps.mode.outputs.mode != 'poll'
+        continue-on-error: true
+        run: python exercise_catalog.py
+
       # Sessions logged on the phone (training.simas.fit/log) whose Garmin activity had
       # not synced when they were saved. Exits at once, with no Garmin call,
       # when nothing is waiting — so it is cheap on every mode, polls included.
@@ -152,6 +160,7 @@ jobs:
           git config user.email "bot@simanauskas.github.io"
           git add src/App.jsx
           if [ -d data/sessions ]; then git add data/sessions; fi
+          if [ -f src/log/garmin-exercises.json ]; then git add src/log/garmin-exercises.json; fi
 
           if git diff --staged --quiet; then
             echo "nothing to commit"

@@ -1,3 +1,5 @@
+import GARMIN from "./garmin-exercises.json"
+
 // Exercise names → Garmin's exercise catalog (category / name), verified for
 // the garmin-strength-sets skill (Oct 2026). match_sessions.py re-checks every
 // name against Garmin's live catalog and falls back to category-only if one
@@ -43,9 +45,53 @@ export const EXERCISES = [
   ["Dips", "TRICEPS_EXTENSION", "BODY_WEIGHT_DIP"],
   ["Push-ups", "PUSH_UP", "PUSH_UP"],
   ["Plank", "PLANK", "PLANK", "s"],
-].map(([name, cat, gname, unit = "reps"]) => ({ name, cat, gname, unit }))
+  ["Crunch", "CRUNCH", "CRUNCH"],
+].map(([name, cat, gname, unit = "reps"]) => ({ name, cat, gname, unit, curated: true }))
 
-export const exByName = n => EXERCISES.find(e => e.name.toLowerCase() === (n || "").trim().toLowerCase())
+// Every exercise in Garmin's catalog (src/log/garmin-exercises.json, refreshed
+// from Garmin by exercise_catalog.py in the hourly sync), named from Garmin's
+// key: CRUNCH/BICYCLE_CRUNCH → "Bicycle crunch". The hand-picked list above
+// wins where both name the same Garmin exercise, so its friendlier names stay.
+const human = k => (k || "").toLowerCase().replace(/_/g, " ").replace(/^./, c => c.toUpperCase())
+const unitFor = (cat, name) =>
+  cat === "CARRY" || (cat === "SLED" && name !== "PUSH") ? "m"
+    : cat === "PLANK" || /(^|_)(HOLD|PLANK|HANG)(_|$)/.test(name || "") ? "s" : "reps"
+
+export const ALL_EXERCISES = (() => {
+  const seen = new Set(EXERCISES.map(e => `${e.cat}/${e.gname}`))
+  const garmin = (GARMIN.exercises || [])
+    .filter(([c, n]) => !seen.has(`${c}/${n}`))
+    .map(([c, n]) => ({ name: human(n), cat: c, gname: n, unit: unitFor(c, n) }))
+  // A Garmin name used in two categories ("Push") gets its category added.
+  const count = {}
+  for (const e of garmin) count[e.name] = (count[e.name] || 0) + 1
+  for (const e of garmin) if (count[e.name] > 1 || EXERCISES.some(x => x.name === e.name)) e.name = `${e.name} (${human(e.cat).toLowerCase()})`
+  return [...EXERCISES, ...garmin].map(e => ({ ...e, catLabel: human(e.cat), hay: `${e.name} ${human(e.cat)}`.toLowerCase() }))
+})()
+
+export const exByName = n => {
+  const k = (n || "").trim().toLowerCase()
+  return ALL_EXERCISES.find(e => e.name.toLowerCase() === k)
+}
+
+// Search for the exercise picker: every word typed must appear (in the name or
+// Garmin's category); "crunches"/"lunges" also match "crunch"/"lunge".
+// Hand-picked names first, then names that start with what was typed, then shorter.
+export function searchExercises(q, limit = 8) {
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  if (!words.length) return []
+  const stem = w => (w.length > 4 && w.endsWith("es") ? w.slice(0, -2) : w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w)
+  const ql = q.trim().toLowerCase()
+  const hits = []
+  for (const e of ALL_EXERCISES) {
+    if (!words.every(w => e.hay.includes(w) || e.hay.includes(stem(w)))) continue
+    const nl = e.name.toLowerCase()
+    const score = (e.curated ? 4 : 0) + (nl === ql || nl === stem(ql) ? 8 : 0) + (nl.startsWith(stem(words[0])) ? 3 : 0)
+      + (nl.split(" (")[0].split(/\s+/).some(t => t.startsWith(stem(words[0]))) ? 1 : 0) - nl.length / 100
+    hits.push([score, e])
+  }
+  return hits.sort((a, b) => b[0] - a[0]).slice(0, limit).map(h => h[1])
+}
 
 // Workout templates. `target` is the plan's prescription, shown as a hint;
 // `seed` is the first-time prefill (from the Apple Notes log) until real
