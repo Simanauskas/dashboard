@@ -53,6 +53,218 @@ and never once done.
 
 ---
 
+## 2026-11-08
+- adherence: **no ACTION REQUIRED and no WATCH — nothing sits at 2-prescribed-and-0-done.** Window
+  18 Oct–8 Nov: ski **4/1, short by 3** · row 0/3 · hyrox 0/1 · strength **4/6, on track** · cycle
+  0/10 · tennis 0/11 · **run 7/4, short by 3**. Benchmarks already due: 22 Oct TRAINED EASY INSTEAD,
+  29 Oct type match, 5 Nov NOTHING LOGGED. Next 14d: **Thu 12 Nov**, unmoved and on a day he trains.
+- readiness: HRV **96** vs baseline **104** (**−8**), **RHR 42**, resp 12.0, sleep **467min (7h47)**,
+  106 deep / **59 REM** / 302 light / **45 awake**. 156 daily / 155 sleep rows, contiguous, **last row
+  2026-11-07 — today's own row is not written yet** (§6). LAST_RUN and LAST_DATA both 2026-11-08T07:07Z
+  against TODAY 2026-11-08 — **sync healthy**. Engine, read live off the edited file: readiness **5**,
+  **TSB −13.15**, ATL **49.70**, CTL **36.56**, `daysSinceHard` 2, `consecutiveHard` **0**,
+  `daysSinceRest` **2**, `forceRest` **FALSE**, `easeHard` **FALSE**, `scale` 1, `unplanned7` **251**.
+  Week 9 governor, on its closing day: done **288** + remaining 0 = **288 against 400–560 — 112 under
+  the floor**, `trimmedBy` 0, **`adjustments` empty**.
+- decision: **CHANGED — Sat 14 Nov's long run and the Base II phase note, both on the same finding.
+  (1) 14 Nov stops asking 1h10 and asks 55min / about 10km — the 54:38 and 10.14km he chose for himself
+  on 30 Oct, which is his longest run since the infection. (2) The Base II note carries the same
+  correction, and three figures in it that week 9 has now overtaken are fixed: week 9 closed at 288
+  rather than the ~375 the note projected, which makes the non-illness Base I mean 466 rather than ~483
+  and the typical Base II week 482–588 rather than 501–607, and the band's reopen condition becomes a
+  number instead of a judgement.** Nothing else moved: today, every other day of week 10, and the
+  12 Nov key run written yesterday are byte-identical.
+- why: **the long run is the single worst-adhered line on the board and no previous entry has counted
+  it.** As a prescription it has gone **1-for-8 across this whole block**; its one landing was 10 Oct,
+  and the four writings since — 17, 23 and 31 Oct, 7 Nov — produced **no run at all**, yesterday's
+  included, where the day logged a **1h02 walk, 4.53km, 7 TRIMP**. His longest run since the infection
+  is **54:38**.
+- watching: whether **55min lands on 14 Nov** (decide Sun 15 Nov) and, if it does not *and* a run
+  appears on Fri 13 Nov instead, the long run moves to Friday for week 11 (§2); whether **3×2km at 14.5
+  lands on 12 Nov** (decide Fri 13 Nov) — unchanged from yesterday, and deliberately untouched (§2);
+  whether **11 Nov beats 2380m** (decide Thu 12 Nov) — ski at 4-prescribed-1-done is still the closest
+  thing on the board to a flag; whether **week 10 closes under 400 with court load ≥216**, which is the
+  first half of the band's new reopen condition (decide Sun 15 Nov, §4); **week 11, 16–22 Nov, which
+  SCHEDULE still does not contain** and which is now four days from its deadline (§5); the **third
+  written run of the week**, condition unchanged and still unmet (§7); **today's missing wellness row**
+  (decide Mon 9 Nov, §6).
+
+### 1. The finding: the long run is 1-for-8, and the rung it is held at belongs to a different athlete
+`adherence.py` prints no flag against running and is right to: `run` sits at **7 prescribed / 4 done**,
+because Z2 running does land. What the per-type bucket cannot show is that one *particular* run line
+accounts for almost the whole deficit. Every non-`note` long-run prescription in the Copenhagen block,
+and what the log actually holds for that day:
+
+| Written | Asked | Logged |
+|---|---|---|
+| 19 Sep SAT | 60min | no run |
+| 26 Sep SAT | 70min | no run |
+| 9 Oct FRI | 75min | no run |
+| **10 Oct SAT** | **70min** | **Z2 70min — 1:10:05, 12.80km, treadmill · LANDED** |
+| 17 Oct SAT | 1h10 | no run (infection week) |
+| 23 Oct FRI | 1h15 | no run — strength + two rides, 18 TRIMP |
+| 31 Oct SAT | 1h15 | no run — tennis 1:27 only |
+| **7 Nov SAT** | **1h10** | **no run — Walking 1:02:16, 4.53km, 7 TRIMP** |
+
+**Eight prescriptions, one landing.** That is worse than the hard run was when yesterday rewrote it
+(0-for-5), and worse than the timed thousand was when 7 Nov's note retired it (1-for-6). It has never
+been counted because it hides inside a type that passes.
+
+The number being asked for is the problem, and it is datable. The 1h10 rung was set by 10 Oct — a
+treadmill hour and ten inside the 693-TRIMP week, **two days before the infection week opened** at
+HRV 31 and RHR 68. Everything he has actually run since:
+
+| | | |
+|---|---|---|
+| 22 Oct | Z2 50min, 8.71km | **48:55** |
+| 29 Oct | indoor circle, 3.64km | 43:10 |
+| 30 Oct | Z2 10km, 10.14km, on a written day off | **54:38** |
+| 6 Nov | threshold 3×2km, 6.85km, on a written day off | 34:16 |
+
+**Nothing over 55 minutes in four weeks.** 1h10 is 28% longer than his longest. The rung rule the plan
+invokes — climb only after a rung lands — was being applied in one direction only; applied in the other
+it says the rung is **55min**, which is where four of his five Z2 runs in the block sat (48:55, 54:38,
+and before the illness 52:09 and 57:03). So 14 Nov asks 55min and about 10km, named off 30 Oct, and
+steps back up only after a 55 lands.
+
+### 2. Why the length and not the day, and what would move the day
+Saturday is not obviously the defect. **The one long run that has ever landed, 10 Oct, was a Saturday**,
+and the three Saturdays since went tennis (24 Oct, 120 TRIMP), tennis (31 Oct, 60) and a walk (7 Nov, 7)
+— busy days, not empty ones. Against that, both of his last two self-chosen runs were **Fridays**
+(30 Oct, 6 Nov), which is the pattern yesterday's §3 found for the hard run.
+
+I did not move the day, for the same three reasons yesterday gave plus one of its own. Both Friday runs
+landed on days with **nothing written** — so prescribing Friday tests the wrong hypothesis, since it may
+be the emptiness rather than the weekday. Fri 13 Nov is week 10's only written day off and the
+rest-guard arithmetic leans on it. A Friday long run collides with Thursday's key run the day before.
+And **changing length and day together makes 14 Nov unreadable**: with one variable moved, a miss next
+Saturday points squarely at the day and the move becomes evidence-led rather than a second guess. The
+trigger is narrow and dated: **14 Nov untrained *and* a run logged on 13 Nov instead → the long run goes
+to Friday in week 11, decided Sun 15 Nov.**
+
+For the same reason I left **Thu 12 Nov completely alone**. It is one firing old, yesterday set its test
+for Fri 13 Nov, and re-cutting it this morning would destroy the only clean read the week has.
+
+### 3. Week 9 closed at 288, and the floor was out of reach on court time rather than written work
+Week 9 is the first week this block whose closing number I can state rather than project, and it came in
+well under what yesterday expected:
+
+| | |
+|---|---|
+| projected yesterday (incl. 7 Nov's 1h10 at ~94) | **375** |
+| actual close | **288** |
+| Base I band | 400–560 |
+
+The arithmetic matters more than the miss. Week 9's **court load was 148** — tennis on 2 Nov (82) and
+4 Nov (88) and nothing else. Across Base I the court supplied 126 · 311 · 129 (illness) · 244 · 340 ·
+**148**: week 9 is the lowest outside the illness week, and 68 under the bottom of the 216–322 range the
+Base II note assumes. **Even crediting the missed long run back, week 9 reaches 382 — still 18 under the
+floor.** So the written plan did not fail the week; two court sessions instead of four did, and no
+re-write of the written sessions could have reached 400.
+
+That is also why I did not grow any week-10 session to compensate. The engine agrees and for a cleaner
+reason: `scale` stays **1** because up-scaling wants readiness 7 and today reads 5.
+
+### 4. The band: condition not met, and now a number rather than a judgement
+The reopen condition set on 7 Nov was "two consecutive weeks closing under 400 with the court load
+intact". Week 9 is under 400 — but week 8 was **614**, so they are not consecutive, and week 9's court
+at 148 was emphatically not intact. **Condition not met; the band stays 440–580.**
+
+"Intact" was doing work a word cannot do, and week 9 is exactly the case that exposes it. It is now
+**court load ≥216**, the low end of the range the note already quotes, so a future run decides it by
+reading one number instead of judging a vibe. Week 10 is the first test: under 400 *with* court ≥216 is
+the first of the two weeks. Decide Sun 15 Nov.
+
+The three figures in the note that week 9 overtook are corrected in the same edit, because leaving a
+projection in the justification after reality has answered it is the defect that produced the
+6 Nov → 7 Nov rewrite:
+
+| | was | now |
+|---|---|---|
+| week 9 | projecting ~375 | **closed 288** |
+| non-illness Base I mean | ~483 | **466** (327 · 693 · 407 · 614 · 288) |
+| typical Base II week | 285 written + 216–322 court = 501–607 | **266 written + 216–322 = 482–588** |
+
+266 is measured, not estimated: `estTrimp` over week 10 as now written reads **265.8** (ski 16.4 + gym
+39.4 + key run 136.1 + long run **74.0**, down from 94.1), verified against the engine.
+
+### 5. Week 11 does not exist, and the deadline holds at Thu 12 Nov
+SCHEDULE still ends **15 Nov**. Yesterday's §5 set the deadline at "on or before Thu 12 Nov" and added
+that a later run finding 16 Nov empty should write it rather than note it. Today is **8 Nov, four days
+inside that deadline**, and writing the week this morning would mean writing it before the two questions
+week 10 exists to answer — does 3×2km at 14.5 land on 12 Nov, does the ski beat 2380m on 11 Nov — which
+is precisely how the stale premise in yesterday's §1 got written.
+
+So this is a commitment rather than a deferral: the firings of **9, 10 and 11 Nov each inherit it, and
+the firing of Thu 12 Nov writes week 11 unconditionally**, with or without those two answers. If a run
+after 12 Nov finds this paragraph and 16 Nov still empty, that run has been failed by its predecessor
+and should write the week before reading anything else.
+
+### 6. The physiology: quiet, with one gap in the data and one night worth naming
+- **HRV 96 against a baseline of 104, −8.** `easeHard` is FALSE (the gate wants 10ms) and `adjustments`
+  is **empty for the third day running**. Nothing to act on.
+- **`hrvBaseline` 104, unchanged, and settled.** The 7-day means run 74.3 (to 17 Oct) → 105.6 → 99.4 →
+  **104.9**, the 14-day means 74.3 → 89.9 → 102.5 → **102.1** — flat at ~102 for a fortnight after
+  climbing 28ms off the infection trough. The October infection is fully absorbed and the baseline has
+  settled above where it sat before it. Fourth entry reading it this way; not a drift, no action.
+- **RHR 42, and the eight-day run is 43 · 42 · 43 · 42 · 43 · 41 · 42 · 42** — every one inside his
+  38–46 and the tightest stretch of the block. No excursion. The Saturday-RHR trigger retired yesterday
+  stays retired; today is the second Saturday-to-Sunday in a row with nothing in it.
+- **Sleep 7h47, but 45 minutes awake** — against a 30-day mean of 9.0 and a range of 0–50, that is the
+  **highest awake figure of the last 30 days outside the infection night of 15 Oct (50)**. REM at 59 was
+  also the low end for the second time in eight days (31 Oct read 54). One night, and it preceded the
+  day he replaced a long run with a walk, so it is worth naming rather than acting on. It goes in
+  `watching` only if a second such night follows.
+- **Today's wellness row is missing.** `daily` and `sleep` both end **2026-11-07**, while LAST_DATA
+  reads 2026-11-08T07:07Z — so the 07:07 run did fetch something but Garmin had no HRV or sleep for
+  last night yet. Not a broken sync: `REFRESH_DAYS = 4` means `missing_wellness_dates()` retries it on
+  every run today and it should self-heal within hours. **Decide Mon 9 Nov** — if 8 Nov is still absent
+  tomorrow morning with LAST_DATA fresh, that is a real fetch failure and not latency.
+- **ACWR**: ATL 49.70 / CTL 36.56 = **1.36**, down from 1.50 yesterday as 7 Nov's 7 TRIMP entered the
+  acute window. Still the post-infection artifact rather than a spike — CTL is held down by the
+  129-TRIMP infection week, inside the 42-day window until late November.
+
+### 7. Phase, weaknesses, and what was deliberately left alone
+- **Base I closed today; Base II opens tomorrow, 9 Nov, on schedule. No phase change.** The threshold
+  block is still the right content: running is his weakest element against the Athens field at **top
+  27.7%**, behind every station but the ski, and 6 Nov showed him reaching for a threshold session
+  unprompted on the last Friday of the aerobic block.
+- **Do the next two weeks need different sessions rather than smaller ones?** The long run needed a
+  different *number*, which is what changed. The week's session *mix* is not the problem — it needs the
+  mix it has, actually trained.
+- **Weaknesses unmoved.** Ski is still the weakest element at top 29.8% and its ten-minute series is
+  still flat — 2290m (30 Sep), 2380m (8 Oct), 2330m (3 Nov). Running stays the weakest block at top
+  27.7%. Four weeks without a reorder.
+- **Ski at 4-prescribed-1-done: not resolved today, and here is what would make me act.** It is not a
+  WATCH — 3 Nov landed a ten-minute piece — and the shape was already rebuilt on 7 Nov around the only
+  thing that lands (short, measured, bolted to a lift). Its first test as rebuilt is **11 Nov**. If
+  11 Nov logs no ski, that is 5-prescribed-1-done with the rebuilt shape having failed its own first
+  test, and the erg comes off Wednesday and onto the day he actually reaches a machine. **Decide Thu
+  12 Nov.**
+- **The third written run: condition unchanged and unmet.** Week 10 writes two runs, ~16km, which is
+  thin for a threshold block aimed at his weakest element. The condition set on 6 Nov was three runs in
+  a week logged unprompted; 1–7 Nov produced **one**. Not re-deferred — the number is the number.
+- **Left alone deliberately:** today, 8 Nov (rest, family day, last day of Base I, and the engine
+  renders it `planned`); Mon 9 Nov and Tue 10 Nov's `note:true` lines; Wed 11 Nov's ski and gym (one
+  firing old, first test 11 Nov); **Thu 12 Nov's key run** (§2); Fri 13 Nov's day off; Sun 15 Nov;
+  the TAPER_PLAN **bands** themselves (§4); `RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET` and
+  `RACE_GAINS` — Athens is still the last race, Copenhagen is still 27 Mar 2027, and no target moved.
+
+### 8. Engine defects, unchanged and still outside my edit scope
+All three stand: `isOptionalLine`'s `/\bOR\b/i` costing any line containing the word "or" at half (the
+new 14 Nov line avoids a standalone "or" deliberately, which is again writing around a defect rather
+than fixing one); `daysSinceRest` saturating at 14; and R7's day guard matching every past date in
+SCHEDULE.
+
+A fourth, found this morning while costing the replacement line and worth recording before it bites:
+**`planDurationMin` tries `/(\d+)\s*h\s*(\d{1,2})/i` before `/(\d+)\s*min/i`**, and it matches anywhere
+in the line. A line reading "55min … steps back up to 1h10" would therefore be costed at **70 minutes,
+not 55** — the engine would price the session at 94 while the athlete reads 55. The first draft of the
+14 Nov line said exactly that and was caught by running `estTrimp` against it. The line now says
+"seventy minutes" in words for that reason alone. **Any future line must not mention a second duration
+in `<digits>h<digits>` form**, and the real fix is to make `planDurationMin` prefer the first duration
+in the string rather than the first pattern in its own list.
+
 ## 2026-11-07
 - adherence: **no ACTION REQUIRED and no WATCH — nothing sits at 2-prescribed-and-0-done.** Window
   17 Oct–7 Nov: ski **4/1, short by 3** · row 0/3 · hyrox 0/1 · strength **4/6, on track** · cycle
