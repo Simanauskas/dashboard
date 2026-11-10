@@ -173,6 +173,7 @@ const HEALTH_DATA = {
     {date:"2026-11-07",hrv:96,rhr:42,spo2:98,resp:12.0,sleep_score:null},
     {date:"2026-11-08",hrv:64,rhr:39,spo2:98,resp:11.0,sleep_score:null},
     {date:"2026-11-09",hrv:105,rhr:38,spo2:98,resp:11.0,sleep_score:95},
+    {date:"2026-11-10",hrv:130,rhr:42,spo2:98,resp:11.0,sleep_score:75},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -332,6 +333,7 @@ const HEALTH_DATA = {
     {date:"2026-11-07",deep:106,rem:59,light:302,awake:45},
     {date:"2026-11-08",deep:160,rem:90,light:250,awake:36},
     {date:"2026-11-09",deep:88,rem:135,light:276,awake:4},
+    {date:"2026-11-10",deep:61,rem:40,light:217,awake:0},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1172,13 +1174,13 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-11-09";
+const TODAY = "2026-11-10";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-10T04:07:00Z";
-const LAST_DATA = "2026-11-10T04:07:00Z";
+const LAST_RUN  = "2026-11-10T05:07:00Z";
+const LAST_DATA = "2026-11-10T05:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-10T04:07:00Z";
+const LAST_MFP  = "2026-11-10T05:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2451,7 +2453,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 96; // updated 2026-11-09
+const hrvBaseline = 99; // updated 2026-11-10
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
