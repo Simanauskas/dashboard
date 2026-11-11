@@ -224,4 +224,12 @@ if __name__ == "__main__":
     a = ap.parse_args()
     today = datetime.date.today()
     since = a.since or (today - datetime.timedelta(days=a.days)).isoformat()
-    report(load(), since, today.isoformat())
+    code = load()
+    report(code, since, today.isoformat())
+    # Lines too long for the phone — see check_plan.py for the format.
+    import check_plan
+    bad = check_plan.violations(code)
+    if bad:
+        print()
+        print("PLAN LINES OVER THE CAP — shorten them, reasoning goes in PLAN_LOG.md:")
+        check_plan.report(bad)

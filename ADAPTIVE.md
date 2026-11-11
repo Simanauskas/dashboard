@@ -25,6 +25,21 @@ Adaptations are an overlay carrying their own reason, so the block stays
 readable and diffable and an adjustment can always be audited back to the
 number that caused it.
 
+### The week is a checklist
+
+A written session is done when a matching activity lands on **any** day of the
+live week, not only the day it was written against — he trains what the block
+asks for, rarely on the weekday it names. The matched activity is then not
+listed as extra work on the day it happened. Runs are matched by shape
+(`runFits()`): a long run needs 85% of the written duration, a key run needs a
+hard heart rate or a tempo/threshold/interval title, so an easy jog cannot tick
+the threshold session. Today shows this checklist plus one load bar; anything
+else he trains just fills the bar.
+
+Plan lines are `text` (≤ 60 characters) plus an optional `why` (≤ 120, behind a
+tap); an empty day is `sessions:[]`. `check_plan.py` enforces it and the UI
+clamps anything longer to two lines. See PLAN_LOG.md for the rule.
+
 ### What it decides
 
 - **Reconciliation.** Every planned line is matched against what was logged

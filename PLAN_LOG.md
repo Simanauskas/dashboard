@@ -25,13 +25,32 @@ already declined.
 - watching: <anything deliberately left alone, and what would make it act>
 ```
 
-**What goes in the dashboard, set by Simas on 9 Oct 2026.** A SCHEDULE line is
-**three sentences at most**: what to do, and why it changed. Nothing else. No
-reasoning chains, no evidence lists, no running commentary on previous runs —
-he reads these on a phone before training, and the long ones were being skipped.
-All of that belongs in THIS file, which is where the deliberation lives. If a
-line needs a fourth sentence to justify itself, the justification goes here and
-the line gets shorter. Deliberate at length, ship three sentences.
+**What goes in the dashboard, set by Simas on 9 Oct 2026 and tightened on
+11 Nov 2026.** The October rule was "three sentences at most". It did not hold:
+the sentences grew until a day averaged 100 words, and an empty day carried 60
+words on why it was empty. He asked again, so the limit is now a character
+count, which cannot drift:
+
+```
+{type:"plan", text:"<what to do, 60 characters at most>",
+              why:"<one reason, 120 characters at most — optional>"}
+```
+
+- `text` is the instruction only: session, duration, the one number to hit.
+  No dates, no history, no "because". The dashboard shows this and nothing else.
+- `why` is one short sentence, shown only when he taps the line.
+- A day that asks for nothing is `sessions:[]`. Never write a line to say a day
+  is empty or to explain why — the dashboard shows "Free".
+- Do not narrate what he did instead of the plan. The dashboard treats the week
+  as a checklist: a session is ticked whichever day it lands on, and anything
+  else he trains simply counts toward the week's load. Off-plan training is
+  information for THIS file, not something to tell him about on his phone.
+- `TAPER_PLAN` notes follow the same spirit: two sentences. The dashboard shows
+  three lines of them.
+
+Run `python3 check_plan.py` before committing. It exits 1 and lists every line
+over the cap; `adherence.py` prints the same list. All the reasoning belongs in
+THIS file. Deliberate at length here, ship sixty characters there.
 
 Also from him, and both of these are corrections no amount of split-reading
 would have produced:

@@ -594,6 +594,16 @@ function Home({ go }) {
       if (isDraft(e) && !e.sentAt && (e.fresh || empty)) store.remove(id)
     }
   }, [])
+  // Opened from a plan line on the dashboard (/log/?new=skierg): go straight
+  // into that form. The parameter is dropped first so a reload or Back does
+  // not start a second session.
+  useEffect(() => {
+    const key = new URLSearchParams(location.search).get("new")
+    if (!key) return
+    history.replaceState(null, "", location.pathname + location.hash)
+    const tile = Object.values(TILES).flat().find(o => o.key === key)
+    if (tile) begin(tile)
+  }, [])
   return <div className="page has-nav notop">
     {!store.settings.token && <div className="status warn" onClick={() => go("settings")}>Add your LOG_TOKEN in ⚙︎ Settings so logs can reach Garmin.</div>}
     {drafts.length > 0 && <>
@@ -637,6 +647,12 @@ function Nav({ active, go, entries }) {
   const waiting = Object.values(entries).filter(e => !isDraft(e) &&
     (e.sync === "queued" || e.sync === "sending" || ["error", "no_match"].includes(e.remote?.state))).length
   return <nav className="tabbar">
+    {/* Back to the dashboard: a real page load, on purpose — the logger stays its
+        own small offline bundle, and both live in the one home-screen app. */}
+    <a href="/">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="2.5" /></svg>
+      <span>Today</span>
+    </a>
     <button className={active === "home" ? "on" : ""} onClick={() => active !== "home" && go("home")}>
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       <span>New</span>
