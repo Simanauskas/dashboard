@@ -53,6 +53,209 @@ and never once done.
 
 ---
 
+## 2026-11-11
+- adherence: **no ACTION REQUIRED and no WATCH — nothing sits at 2-prescribed-and-0-done.** Window
+  21 Oct–11 Nov: ski **4/1, short by 3** (3/1 yesterday; today's own ski re-entered the window) ·
+  row 0/3 · hyrox 0/1 · strength **4/6, on track** · cycle 0/10 · tennis 0/11 · **run 7/5, short by
+  2**, unchanged. Benchmarks already due: 22 Oct TRAINED EASY INSTEAD, 29 Oct type match, 5 Nov
+  NOTHING LOGGED. Next 14d: **Thu 12 Nov** — and, after this morning's edit, **Thu 19 Nov**, which is
+  the first time in four firings the report has had a second one to print.
+- readiness: **there is no 2026-11-11 wellness row.** 159 daily / 158 sleep rows, contiguous, both
+  counts identical to yesterday's — the 07:07 run carried no same-day row, which has not happened on
+  any morning in this log's visible history. So every figure below is **10 Nov's**, read one day late:
+  HRV **130** vs baseline **99** (+31, the series high), **RHR 42**, resp 11.0, sleep **318min
+  (5h18)**. LAST_RUN and LAST_DATA both 2026-11-11T07:07Z against TODAY 2026-11-11 — **the sync
+  itself is healthy** (§5). Engine, read live off the edited file: readiness **7**, **TSB −17.25**
+  (from −24.57), ATL **56.46**, CTL **39.21**, **ACWR 1.44** (from 1.61), `daysSinceHard` 2,
+  `consecutiveHard` **0**, `daysSinceRest` **0** — yesterday was a genuine zero-load day —
+  `forceRest` FALSE, **`easeHard` TRUE** with `easeWhy` "5h18m of sleep last night", `scale` 1,
+  `unplanned7` **332** (from 420). Week 10 governor, day three: done **175** + remaining **286** =
+  **projectedRaw 461, projected 392 after `trimmedBy` 69**, against 440–580.
+- decision: **CHANGED — week 11 (16–22 Nov) is written, five days before it opens, and the ski comes
+  off Wednesday onto Tuesday 17 Nov with the lift. (1) SCHEDULE gains a seventh week: Mon 16 and Wed
+  18 Nov `note:true`, **Tue 17 Nov the gym trip — ski 10min for distance at the front, upper body
+  with sled pull behind it**, Thu 19 Nov the ⏱ key run, Fri 20 Nov the day off, Sat 21 Nov a
+  `note:true` fallback, Sun 22 Nov the long run. (2) The TAPER_PLAN Base II note gains the day finding
+  that moved it.** Nothing in week 10 moved: the whole of 9–15 Nov is byte-identical, the 440–580 band
+  is untouched, and `RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET` and `RACE_GAINS` are
+  unchanged.
+- why: **the ski and the lift have been written on exactly the same four dates since 21 October — 21
+  and 27 Oct, 3 and 11 Nov — and the ski landed on one of them while the lift landed six times, four
+  of those on days the plan asked for nothing.** The erg rides on the lift, the lift does not keep to
+  the plan's weekdays, and Wednesday has not held a gym trip since 7 October.
+- watching: whether **tonight's ski lands** (decide Thu 12 Nov) — the answer no longer decides the
+  day, because §1 settles that on four weeks of evidence rather than one evening, but a landing buys
+  Wednesday a written option back in week 12; whether **14.0 holds on all three reps on 12 Nov**
+  (decide Fri 13 Nov), which **19 Nov's line is written conditionally on and which must be resolved
+  into a single number by Friday** (§4); whether **1h10 lands on Sun 15 Nov** (decide Mon 16 Nov),
+  same conditional, same deadline, in 22 Nov's line; whether **Fri 13 Nov is a genuine rest day** —
+  written Friday rest has gone 0-for-2, 10.14km on 30 Oct and the threshold run plus a lower-body
+  lift on 6 Nov, and a third override moves the written rest day off Friday (decide Mon 16 Nov, §3);
+  whether **the 11 Nov wellness row appears** — if tomorrow's firing still finds it missing that is a
+  sync fault and not a late watch (decide Thu 12 Nov, §5); **weight 77.9kg and body fat 15.6% on
+  1 Nov**, the highest of both series, on a single reading now ten days old (§6); and whether **week
+  10 closes under 400 with court load ≥216** (decide Mon 16 Nov, §7).
+
+### 1. The finding: the ski is pinned to a date and the thing it rides on is not
+`adherence.py` has printed ski short-by-2-or-3 for five consecutive firings and each one dated the
+decision forward. The number it prints is not wrong, but it is the wrong cut of the data. Pull the
+prescribed dates out beside the dates the **lift** was prescribed and the dates it actually landed,
+and the mechanism is unambiguous:
+
+| | dates | count |
+|---|---|---|
+| **ski prescribed** | 21 Oct, 27 Oct, 3 Nov, 11 Nov | 4 |
+| **ski trained** | **3 Nov** | **1** |
+| **strength prescribed** | 21 Oct, 27 Oct, 3 Nov, 11 Nov — *the same four dates* | 4 |
+| **strength trained** | 23 Oct, 25 Oct, **27 Oct**, 1 Nov, **3 Nov**, 6 Nov | **6** |
+
+Two things fall out of that table. First, **every standalone erg he has logged this block was on a day
+he also lifted** — 30 Sep, 5 Oct, 7 Oct, 8 Oct, 25 Oct, 1 Nov, 3 Nov, seven for seven; the only other
+erg was the 500m row inside the 29 Oct circuit, which was not a gym trip. The 7 Nov entry had this
+right and built the session on it. Second, and this is what it missed: **four of his six gym trips
+landed on days with no gym session written at all** — 23 and 25 Oct, 1 and 6 Nov. The lift is
+6-for-6 wherever it falls. The erg, pinned to a weekday, is **1-for-4**, and the one time it landed
+was the one time the written lift day and the real lift day coincided.
+
+So the thing that has been failing is not the shape of the session — ten minutes for distance at the
+front of a trip is the shape that has landed — and not the choice of ski over row, which the field
+position settles at top 29.8% against top 11.4%. It is the **date**. Five firings have moved the
+number, the machine and the content; none has questioned whether a weekday is the right container.
+
+### 2. Why Tuesday, and why not Wednesday
+Gym trips in the three weeks to 10 Nov: Fri 23 Oct, Sun 25 Oct, Tue 27 Oct, Sun 1 Nov, Tue 3 Nov,
+Fri 6 Nov. **Tuesday, Friday and Sunday carried two each** — so "Tuesday is the day you reach the gym
+least", written into the 10 Nov line, is true of the whole block and false of the recent record.
+Friday is the week's one written day off and Sunday now carries the long run, which leaves **Tuesday
+as the only one of the three that is free**, and 3 Nov — a Tuesday — is the single ski of the block.
+
+Against that, the weekday profile across the block, 28 Sep to 10 Nov, computed rather than recalled:
+
+| | days | mean TRIMP | zero-load days | gym trips | court | runs | ergs |
+|---|---|---|---|---|---|---|---|
+| MON | 7 | 59 | 3 | 1 | 3 | 0 | 1 |
+| TUE | 7 | 66 | **1** | 2 | 5 | 1 | 1 |
+| **WED** | 6 | **100** | **0** | 2 | **6** | 0 | 2 |
+| THU | 6 | 49 | 2 | 1 | **0** | 3 | 2 |
+| FRI | 6 | 44 | 2 | 2 | 1 | 2 | 0 |
+| SAT | 6 | 45 | 2 | 0 | 2 | 1 | 0 |
+| SUN | 6 | 67 | 1 | 2 | 3 | 2 | 2 |
+
+**Wednesday is already the biggest day of his week** — the highest mean of any weekday, the only one
+with no zero-load day, and tennis on six of six — and its last gym trip was 7 Oct, five weeks before
+the session was written onto it. Week 10 put a two-part gym trip on top of that and blanked the
+Tuesday beside it, and **Tuesday 10 Nov then produced 0 TRIMP: the first zero-load Tuesday of the
+block** (the other six read 50, 150, 61, 59, 104, 37). One day is not proof, but it is the opposite of
+what the swap was for, and the swap's premise was already wrong.
+
+The same table settles the key run where it is: **Thursday is the only court-free weekday he has**,
+0 of 6, with three of the block's runs on it. It stays on Thursday in week 11.
+
+### 3. What week 11 asks for
+Written load **292.7 TRIMP** against week 10's 286, verified through the engine after the edit — so
+with court at the block mean of 216 to the 322 of his richest fortnight the week projects **509–615**
+into a 440–580 band, exactly the shape the Base II note already describes, with the governor trimming
+the top rather than the band moving. Per-line, through `estTrimp`: Tue ski **16.4** at `planIntensity`
+146 and `planDurationMin` 10, Tue gym **39.4** at 126 and 40, Thu key run **136.1** at 168 and 50,
+Sun long run **100.9** at 138 and 75. The three `note:true` days and Friday's `rest` cost 0, and
+`isOptionalLine` is false on all four costed lines — no stray standalone "or", which is the defect the
+9 Nov entry logged.
+
+Friday 20 Nov keeps the written day off, deliberately and for one more week only. Friday-as-rest has
+gone **0-for-2** — 30 Oct produced 10.14km and 91 TRIMP, 6 Nov produced the threshold run and a
+lower-body lift for 75 — and the honest reading is that his real zero days are Mondays (three of
+seven). But 13 Nov is still ahead and is itself the test; moving the rest day and the gym day in the
+same firing would mean neither could be read. One variable.
+
+### 4. Two conditional lines, on purpose
+Thursday 19 Nov reads "if the third rep held 14.0 on 12 November then all three go at 14.5 this week;
+if it faded again, 14.0 stays until it holds." Sunday 22 Nov reads "1h15 if 15 November landed its
+1h10, and 1h10 again if it did not." Both are the ladder rule stated as a branch rather than resolved
+into a figure, and that is the point: **yesterday's §1 was about a prescription resting on a number he
+had not produced**, and the number for 19 Nov does not exist until tomorrow evening. Writing 14.5 this
+morning would have repeated exactly the defect that was corrected yesterday; writing 14.0 would have
+pre-decided a test against its own result.
+
+This is a compromise, not a design, and it has a deadline. **Friday 13 Nov resolves 19 Nov into one
+speed and Monday 16 Nov resolves 22 Nov into one duration.** A conditional line is readable on a phone
+once; it is not something to leave in the block.
+
+### 5. The missing wellness row, and what it is doing to tomorrow's benchmark
+`LAST_RUN` and `LAST_DATA` are both 2026-11-11T07:07Z, 21 minutes before this firing, so the hourly
+chain is alive and the 28h rule in the brief is nowhere near tripping. But **`daily` and `sleep` both
+end at 10 Nov**, and their row counts — 159 and 158 — are the same two numbers yesterday's entry
+recorded. The likeliest cause is simply that the watch had not synced by 07:07; `REFRESH_DAYS = 4` and
+`missing_wellness_dates()` mean the row will self-heal on a later tick, as 8 Nov's did on 9 Nov. It is
+in `watching` with a one-day fuse rather than called a fault.
+
+What it does in the meantime is worth recording, because it is not visible from the dashboard. The
+readiness gate reads the **last** sleep row, so `sleepMin` is **318** and `easeHard` fires with
+"5h18m of sleep last night" — except that 5h18 was the night of **9→10 Nov**, and last night is
+unmeasured. The gate caps sessions priced at HR ≥155 today and tomorrow, so it lands on **Thursday's
+key run at `planIntensity` 168** and the engine now carries one adjustment: `{date:"2026-11-12",
+label:"Quality work eased to Z2", why:"5h18m of sleep last night"}`. The benchmark he has missed three
+Thursdays running — 22 Oct easy instead, 29 Oct unreadable, 5 Nov nothing at all — currently reads
+"hold it at Z2, drop the intervals" on a sleep figure from the night before last.
+
+Two consequences. First, it should clear itself the moment the 11 Nov row lands with an ordinary
+night, which is why nothing was done about it: the gate is engine code and outside what this Routine
+may edit, and fighting it with SCHEDULE text would be worse than the problem. Second, the trim it
+causes is **69 TRIMP**, which drops week 10's projection from 461 to **392 — 48 under the floor** —
+while `governor.under` still reads FALSE, because `over`/`under` are computed on the pre-adaptation
+projection and never recomputed after `trimmedBy`. So the volume governor cannot see an undershoot
+that its own readiness arm created. Added to the engine-defect list below.
+
+### 6. Physiology: nothing to act on, one thing to start counting
+- **HRV 130 vs baseline 99 is yesterday's reading and yesterday's entry already discounted it** —
+  it arrived on 5h18 of sleep with deep 61 and REM 40, both fortnight lows, and the trend did not move
+  with it. `hrvBaseline` is **99**, flat at about 99–102 for three weeks. No sustained shift.
+- **RHR 42, and the 21-day range is 38–46 — no excursion.** The two-day floor of 38 and 39 on 8 and
+  9 Nov retired yesterday and has not returned.
+- **The body is recovering, not accumulating.** A genuine rest day yesterday puts `daysSinceRest` at
+  0 and `consecutiveHard` at 0, TSB improved from −24.57 to −17.25, and ACWR fell 1.61 → 1.44. The
+  elevated ratio is still the post-infection artifact — the 129-TRIMP week of 12–18 Oct holds CTL down
+  inside the 42-day window until late November.
+- **Weight is the one number nobody has mentioned and it is drifting.** 1 Nov read **77.9kg at 15.6%
+  body fat** — his highest in both series, past the 76.9 of 29 Aug, against roughly 75kg at Athens.
+  It is a single reading and **no scale reading has arrived in the ten days since**, so there is
+  nothing to act on and no trend to claim. Starting the count here so a later firing has a date: a
+  second reading at or above 78.0 makes it a trend worth a line in the block.
+
+### 7. Phase, weaknesses, and what was left alone
+- **Base II · Threshold, day three of six weeks. No phase change, and no band change.** The reopen
+  condition set on 7 Nov is unchanged and still unmet: two consecutive weeks under 400 with court load
+  ≥216. Week closes re-measured this morning and identical to yesterday's: **327 · 693 · 129 · 407 ·
+  614 · 364**; week 9's 364 came with court of only 148, and week 8 was 614, so there is no
+  consecutive pair in any case.
+- **Do the next two weeks need different sessions rather than smaller ones?** They needed the same
+  sessions on a different day — which is the first time in this log that the answer has been "yes" at
+  all, and it is a container change rather than a content change. The mix is right: running is still
+  the weakest block against the Athens field at top 27.7% and ski the weakest element at 29.8%, and
+  the week aims at both.
+- **Weaknesses unmoved, seventh week running.** Ten-minute ski series still flat — 2290m (30 Sep),
+  2380m (8 Oct), 2330m (3 Nov) — and tonight is the fourth attempt at moving it.
+- **Left alone deliberately:** the entire week 10, 9–15 Nov, byte-identical, including today's
+  Wednesday ski whose test runs tonight and Thursday's eased key run; the 440–580 band; Friday as the
+  written rest day for one more week (§3); and `RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`,
+  `RACE_GAINS` — Athens is still the last race, Copenhagen still 27 Mar 2027, no target moved.
+- **Consecutive NO CHANGE runs preceding this one: zero.** 8, 9 and 10 Nov all changed something; the
+  last NO CHANGE morning was 14 Oct.
+- **Week 11 is written, so the 8 Nov commitment is discharged a day early and its fallback paragraph
+  retires.** It was inherited three times — 8, 9 and 10 Nov — each deferral defensible on the ground
+  that week 10's two tests were still in the future. That is the shape of the Sep 12–25 chain this log
+  exists to break, and the reason to stop at three rather than four is that §1's finding does not
+  depend on either test: today's ski changes the count by one and the conclusion by nothing.
+
+Engine defects from 9 and 10 Nov all stand and remain outside this Routine's edit scope:
+`isOptionalLine`'s `/\bOR\b/i` costing any line containing the word "or" at half (all four costed
+week-11 lines verified at `isOptional: false`); `planDurationMin` preferring
+`/(\d+)\s*h\s*(\d{1,2})/i` and matching anywhere (22 Nov's "1h15 if 15 November landed its 1h10"
+verified at **75**, taking the first match, not 15 or 110); `daysSinceRest` saturating at 14; R7's day
+guard matching every past date; the readiness gate keying on `planIntensity`, so a short maximal
+effort is invisible to it. Added by §5: **`governor.over` and `governor.under` are computed before the
+adaptation pass and never recomputed**, so a week pushed under its floor by the gate's own trim reads
+as in band.
+
 ## 2026-11-10
 - adherence: **no ACTION REQUIRED and no WATCH — nothing sits at 2-prescribed-and-0-done.** Window
   20 Oct–10 Nov: ski **3/1, short by 2** (4/1 yesterday; 19 Oct aged out) · row 0/3 · hyrox 0/1 ·
