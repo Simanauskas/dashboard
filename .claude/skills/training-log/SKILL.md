@@ -158,8 +158,8 @@ session JSON in `session`; undo/rematch leave it empty.
 | `log/index.html` | Second Vite page (`vite.config.js` `rollupOptions.input.log`) |
 | `log-data.plugin.js` | Build-time `virtual:log-data`: activity types of the last 365 days with counts (from `CSV_DATA`), past tennis opponents (`Name🎾…` activity names), calendar tennis fixtures (`cal:true` SCHEDULE lines), last 80 `data/sessions` records. Rebuilt on every hourly bot deploy |
 | `src/log/garmin-exercises.json` | Garmin's whole exercise catalog as `[category, name]` pairs. Written by `exercise_catalog.py`, which `update.yml` runs on every non-poll sync (connect.garmin.com is reachable from Actions, not from Claude's cloud sessions); commits only when Garmin's list changed; keeps the file on any error or a suspiciously short response |
-| `public/log/` | `manifest.webmanifest`, `sw.js` (network-first HTML, cache-first assets), icons |
-| `public/_headers` | `/log/`, `/log/index.html`, `/log/sw.js` no-cache — keep them |
+| `public/` | `manifest.webmanifest`, `sw.js` (one app-wide worker: network-first HTML, cache-first assets); icons in `public/log/` |
+| `public/_headers` | `/log/`, `/log/index.html`, `/sw.js` (app-wide service worker, `public/sw.js`) no-cache — keep them |
 
 Exercise picker (`ExercisePicker` in LogApp.jsx), used for "Add exercise" and
 for renaming a card: typing searches `ALL_EXERCISES` (every word must match the

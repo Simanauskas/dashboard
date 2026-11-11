@@ -16,7 +16,12 @@ addEventListener("resize", readViewport, { passive: true })
 createRoot(document.getElementById("root")).render(<LogApp />)
 
 // Offline shell: the gym often has no signal. Logs themselves live in
-// localStorage; the service worker only keeps the app itself loadable.
+// localStorage; the service worker only keeps the app itself loadable. It is
+// the app-wide worker now (dashboard + logger), so the old logger-only one is
+// retired — while it stays registered it would shadow the new one on /log/.
 if ("serviceWorker" in navigator && location.protocol === "https:") {
-  navigator.serviceWorker.register("/log/sw.js", { scope: "/log/" }).catch(() => {})
+  navigator.serviceWorker.getRegistrations()
+    .then(rs => rs.filter(r => new URL(r.scope).pathname === "/log/").forEach(r => r.unregister()))
+    .catch(() => {})
+  navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {})
 }

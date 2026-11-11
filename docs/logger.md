@@ -13,6 +13,16 @@ iPhone (training.simas.fit/log, works offline — every keystroke saved on the p
   hourly update.yml → match_sessions.py --pending   (activity synced later)
 ```
 
+## One app with the dashboard
+
+The logger is the **Log** tab of the home-screen app at training.simas.fit
+(manifest and service worker are at the site root: `public/manifest.webmanifest`,
+`public/sw.js`). It is still its own page and bundle, so it opens offline and
+a dashboard error cannot break it; its tab bar has a **Today** tab back to the
+dashboard. A plan line's **Log** button opens `/log/?new=<tile key>` and goes
+straight into that form. A session saved today ticks its plan line on the
+dashboard immediately (the dashboard reads the logger's `localStorage`).
+
 ## What goes where in Garmin
 
 | Logged as | Garmin type matched | Written |
@@ -50,7 +60,7 @@ undoes and re-applies to a given activity id.
    `npx wrangler secret put LOG_TOKEN` → `npx wrangler deploy --dry-run` → `npx wrangler deploy`.
    Deploy output must still list the cron, `env.TOKENS` and `auth.simas.fit (custom domain)`.
 3. Logger ⚙︎ Settings → auth.simas.fit → paste LOG_TOKEN → Test ("token accepted").
-4. Safari → training.simas.fit/log → Share → Add to Home Screen.
+4. Safari → training.simas.fit → Share → Add to Home Screen (one icon for dashboard + logger).
 
 Fallback if the Worker is down: Settings → GitHub, with a fine-grained token
 (repo `Simanauskas/dashboard` only; Actions read/write, Contents read).

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 const HEALTH_DATA = {
   fitnessAge: { bio: 27.8, chrono: 35, bmi: 24.2, rhr: 38, vo2max: 52.9 },
@@ -1638,22 +1638,22 @@ const SCHEDULE = [
   ]},
 
   { week:10, label:"Nov 9–15", theme:"Base II · Threshold", days:[
-    { date:"2026-11-09", dow:"MON", label:"Nov 9", sessions:[{type:"plan",note:true,text:"Nothing written here to open Base II. The full day off this slot asked for was only ever there to reset the recovery guard, and the zero-load Thursday of 5 November already did it — the guard needs nine straight loaded days to come back, which is 15 November at the earliest. Friday is this week’s one written day off, because Friday is the lightest day of the block at a mean of 37 against Wednesday’s 100."}] },
-    { date:"2026-11-10", dow:"TUE", label:"Nov 10", sessions:[{type:"plan",note:true,text:"Nothing written here — the machine and the lifting are on Wednesday. Tuesday keeps its court and it is still the day you reach the gym least: two trips in six weeks, and the erg landed on only one of them, the one Tuesday that had no court at all. The day is yours."}] },
-    { date:"2026-11-11", dow:"WED", label:"Nov 11", sessions:[{type:"plan",text:"Ski 10min at the front of the trip, before the lifting, one continuous piece — beat 2380m and nothing else is asked. That is your own ten-minute best and it has not moved in five weeks: 2290m on 30 Sep, 2380m on 8 Oct, 2330m on 3 Nov, every one of them at about the split you raced Athens on rather than faster. Garmin records the distance itself, so there is nothing to press and nothing to type, and if the trip moves to another evening the ski moves with it."},{type:"plan",text:"Gym 40min, second in the trip: your upper-body lift as usual, and bolt sled pull 8×25m hand-over-hand onto the end of it. Sled pull and lunges have been written eight times since 28 Sep and neither word has appeared in a title you saved, while the lift itself lands every time — so the station work rides on the lift from here instead of being prescribed beside it. Lunges are out: you put lower-body sessions in yourself on 25 Oct and 1 Nov, and that is where they belong."}] },
-    { date:"2026-11-12", dow:"THU", label:"Nov 12", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.0kmh, 50min all in, jog recoveries as long as you want. Your own title on 6 November reads 14, 14 and 13.5 — you faded on the last rep, and the only 14.5 in the log is 25 September, seven weeks and one infection ago. So all three go at 14.0 and the session is whether the third one holds; 14.5 across the board comes after that."}] },
-    { date:"2026-11-13", dow:"FRI", label:"Nov 13", sessions:[{type:"rest",text:"Second day off of the week, and the one most likely to actually happen: Friday has a mean of 37 across this block against Wednesday’s 100, and it holds two of the three lightest weekdays outside the illness week — a zero on 2 Oct and an 18 on 23 Oct. If Monday goes the way the last six written days off went, this is the one that has to land. Nothing structured, and that includes the rides."}] },
-    { date:"2026-11-14", dow:"SAT", label:"Nov 14", sessions:[{type:"plan",note:true,text:"Nothing written here — the long run moved to Sunday. Saturday has carried it six times this block and produced exactly one run, on 10 October, while ordinary Saturdays go to the court: tennis on 24 and 31 October, a walk last week. If Sunday fills up, run it today instead."}] },
-    { date:"2026-11-15", dow:"SUN", label:"Nov 15", sessions:[{type:"plan",text:"Long run 1h10 · all of it conversational, nothing to hold, and indoors is fine. Last Sunday, on a day the plan had left empty, you ran 10.00km in 1:12:53 at an average of 128 — the longest run of this whole block, past the 1:10:05 of 10 October. So 1h10 is a rung you have just cleared rather than a new one, and it sits on the day that produced it."}] },
+    { date:"2026-11-09", dow:"MON", label:"Nov 9", sessions:[] },
+    { date:"2026-11-10", dow:"TUE", label:"Nov 10", sessions:[] },
+    { date:"2026-11-11", dow:"WED", label:"Nov 11", sessions:[{type:"plan",text:"Ski 10min · one piece, before the lift · beat 2380m",why:"Your 10-min best has not moved in five weeks: 2290, 2380, 2330m."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"Station work only lands when it rides on the lift."}] },
+    { date:"2026-11-12", dow:"THU", label:"Nov 12", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.0kmh · 50min all in",why:"You faded to 13.5 on the third rep on 6 Nov — hold 14.0 on all three first."}] },
+    { date:"2026-11-13", dow:"FRI", label:"Nov 13", sessions:[{type:"rest",text:"Day off · nothing structured",why:"Friday is the lightest day of your block."}] },
+    { date:"2026-11-14", dow:"SAT", label:"Nov 14", sessions:[] },
+    { date:"2026-11-15", dow:"SUN", label:"Nov 15", sessions:[{type:"plan",text:"Long run 1h10 · conversational, indoors is fine",why:"You ran 1:12:53 last Sunday, so this rung is already cleared."}] },
   ]},
   { week:11, label:"Nov 16–22", theme:"Base II · Threshold", days:[
-    { date:"2026-11-16", dow:"MON", label:"Nov 16", sessions:[{type:"plan",note:true,text:"Nothing written here. Last Monday the plan asked for nothing and you put in two hours of court plus a 42-minute circuit at an average of 149 — 175 TRIMP, the biggest single day of the block outside 28 October. The day is yours."}] },
-    { date:"2026-11-17", dow:"TUE", label:"Nov 17", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Ski 10min for distance at the front of the trip, before the lifting, one continuous piece — beat 2380m and nothing else is asked. The erg has been written four times since 21 October and landed once, on Tuesday 3 November, and every erg you have ever logged was bolted to a lift on the same day. So it moves to the day the lift actually lands."},{type:"plan",text:"Gym 40min, second in the trip: upper body as usual, with sled pull 8×25m hand-over-hand bolted onto the end. Four of your six gym trips since 21 October landed on days with nothing written — 23 and 25 October, 1 and 6 November — so if the trip slides to another day, take the ski and the sled with it rather than adding a second trip."}] },
-    { date:"2026-11-18", dow:"WED", label:"Nov 18", sessions:[{type:"plan",note:true,text:"Nothing written here, and that is the change: all six Wednesdays of this block have carried tennis at a mean of 100 TRIMP, the biggest day of your week, and no gym trip has landed on one since 7 October. The machine and the lifting have gone back to Tuesday. Play, and nothing else is asked."}] },
-    { date:"2026-11-19", dow:"THU", label:"Nov 19", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km, 50min all in, jog recoveries as long as you want. If the third rep held 14.0 on 12 November then all three go at 14.5 this week; if it faded again, 14.0 stays until it holds. Put the speeds in the title either way."}] },
-    { date:"2026-11-20", dow:"FRI", label:"Nov 20", sessions:[{type:"rest",text:"Day off, the week’s only written one — nothing structured, and that includes the rides. The last two Fridays written as rest trained anyway, 10.14km on 30 October and the threshold run plus a lower-body lift on 6 November, so if it happens a third time the written rest day moves off Friday. Take it today if you can."}] },
-    { date:"2026-11-21", dow:"SAT", label:"Nov 21", sessions:[{type:"plan",note:true,text:"Nothing written here — the long run is on Sunday. Saturday went to the court on 24 and 31 October and to a walk on 7 November. If Sunday fills up, run it today instead."}] },
-    { date:"2026-11-22", dow:"SUN", label:"Nov 22", sessions:[{type:"plan",text:"Long run · 1h15 if 15 November landed its 1h10, and 1h10 again if it did not. The ladder climbs only after a rung lands, and 1h10 has landed once — 10.00km in 1:12:53 at an average of 128 on 8 November. All of it conversational, nothing to hold, and indoors is fine."}] },
+    { date:"2026-11-16", dow:"MON", label:"Nov 16", sessions:[] },
+    { date:"2026-11-17", dow:"TUE", label:"Nov 17", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Ski 10min · one piece, before the lift · beat 2380m",why:"Every erg you have logged was bolted to a lift, so it rides on the gym trip."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
+    { date:"2026-11-18", dow:"WED", label:"Nov 18", sessions:[] },
+    { date:"2026-11-19", dow:"THU", label:"Nov 19", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km · 50min all in · speeds in the title",why:"14.5 on all three if the third rep held 14.0 on 12 Nov; otherwise 14.0 again."}] },
+    { date:"2026-11-20", dow:"FRI", label:"Nov 20", sessions:[{type:"rest",text:"Day off · nothing structured",why:"The last two written Fridays were trained anyway — take this one if you can."}] },
+    { date:"2026-11-21", dow:"SAT", label:"Nov 21", sessions:[] },
+    { date:"2026-11-22", dow:"SUN", label:"Nov 22", sessions:[{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Only if 15 Nov landed its 1h10 — otherwise 1h10 again."}] },
   ]},
 ];
 
@@ -1820,11 +1820,23 @@ function isInfoLine(s) {
    half, because over a block that is what they average out to. */
 const isOptionalLine = (s) => /\byour call\b|\boptional\b|\bOR\b|\bor full rest\b|\bunconfirmed\b/i.test(String(s.text || ""));
 
+/* Runs are not interchangeable. An easy 70-minute jog must not tick the
+   threshold session, and a 35-minute run must not tick the long run — once a
+   session can be claimed from any day of the week, that would let a recovery
+   jog on Wednesday cross off Thursday's key run. */
+function runFits(session, a) {
+  const t = String(session.text || "");
+  if (/long run/i.test(t)) { const want = planDurationMin(t); return !want || a._dur / 60 >= want * 0.85; }
+  if (/⏱|KEY RUN|threshold|tempo|time trial|\bTT\b/i.test(t))
+    return a._avgHR >= 138 || parseNum(a["Max HR"]) >= 160 || /tempo|thr?eshold|interval|\d\s*[x×]\s*\d|\bTT\b/i.test(a.Title || "");
+  return true;
+}
+
 function sessionSatisfiedBy(session, done) {
   const t = String(session.text || "");
   if (session.type === "tennis" && done.some(isTennis)) return done.find(isTennis);
   for (const [re, match] of SESSION_MATCHERS) {
-    if (re.test(t)) { const hit = done.find(match); if (hit) return hit; }
+    if (re.test(t)) { const hit = done.find(a => match(a) && (!isRun(a) || runFits(session, a))); if (hit) return hit; }
   }
   return null;
 }
@@ -2031,6 +2043,27 @@ function adaptPlan({ ana, health, hrvBaseline: base }) {
   const weeks = SCHEDULE.map((w, i) => ({ ...w, days: w.days.map(d => adaptDay(d, i === wkIdx)) }));
   const todayDay = weeks.flatMap(w => w.days).find(d => d.date === TODAY) || null;
 
+  /* The week is a checklist, not a calendar. He trains the sessions the block
+     asks for, but rarely on the weekday they were written against — so a line
+     is done when a matching activity lands on ANY day of the live week, and
+     that activity stops being listed as extra work on the day it happened.
+     Until the week closes, a line whose day has passed is still open. */
+  if (wkIdx >= 0) {
+    const wdays = weeks[wkIdx].days;
+    wdays.forEach(day => day.sessions.forEach(s => {
+      if (s._status === "done" || isRestSession(s) || isInfoLine(s) || s.type === "tennis") return;
+      for (const other of wdays) {
+        if (other === day || other.date > TODAY) continue;
+        const hit = sessionSatisfiedBy(s, other._unplanned);
+        if (!hit) continue;
+        s._status = "done"; s._doneWith = hit; s._doneOn = other.date; s._adj = null;
+        other._unplanned = other._unplanned.filter(a => a !== hit);
+        break;
+      }
+      if (s._status === "missed") s._open = true;
+    }));
+  }
+
   /* Second pass: what the week costs once the adjustments above are honoured.
      The raw projection is what triggered the trim, so a budget card showing
      only that would keep claiming an overshoot the plan on screen no longer
@@ -2168,6 +2201,7 @@ a { color:${T.accentIn}; }
 .chrome-bar {
   background:${T.bgSoft}f2; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid ${T.line};
+  padding-top:env(safe-area-inset-top, 0px);   /* home-screen app: clear the status bar */
 }
 .chrome-inner { display:flex; align-items:center; gap:14px; padding-top:13px; padding-bottom:13px; flex-wrap:nowrap; }
 .race-line { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -2214,6 +2248,14 @@ a { color:${T.accentIn}; }
   .main-pad { padding-bottom:22px; }
   .foot-pad { padding-bottom:calc(78px + env(safe-area-inset-bottom, 0px)); }
 }
+.clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.narrow { max-width:640px; margin-left:auto; margin-right:auto; }
+.navbtn { text-decoration:none; }
+.logbtn { flex-shrink:0; align-self:center; padding:8px 14px; border-radius:10px; font-size:12.5px; font-weight:800;
+  color:#fff; background:${T.accent}; text-decoration:none; }
+.fold { display:flex; align-items:center; gap:12px; width:100%; padding:13px 14px; border-radius:12px; cursor:pointer;
+  background:${T.panel}; border:1px solid ${T.line}; text-align:left; }
 .fade { animation:fadeUp .3s cubic-bezier(.2,.7,.3,1) both; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 @keyframes breathe { 0%,100% { opacity:1; } 50% { opacity:.3; } }
@@ -2513,34 +2555,6 @@ function sessionMetrics(a) {
 }
 
 /* ── coaching notes, generated from the actual data in view ──────────────── */
-function buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, sleepMin, rhr }) {
-  const notes = [];
-  const hy = yesterday.find(isHyrox), rn = yesterday.find(a => isRun(a) && a._avgHR > 120);
-  const key = hy || rn;
-  if (key) {
-    notes.push({ tone:"accent", text:`${key.Title || key["Activity Type"]}: ${fmtDur(shownDur(key))}${key._avgHR ? ` · HR ${key._avgHR} avg` : ""}${parseNum(key["Max HR"]) ? `/${parseNum(key["Max HR"])} max` : ""}${key._dist > 0 ? ` · ${key._dist.toFixed(2)} km` : ""}.` });
-    const gct = parseNum(key["Avg Ground Contact Time"]);
-    if (gct) notes.push({ tone: gct < 380 ? "ok" : "warn", text:`Ground contact ${Math.round(gct)}ms — ${gct < 380 ? "inside the sub-380ms race-pace target." : "above the 380ms race target: raise cadence, cut the bounce."}` });
-    const vr = parseNum(key["Avg Vertical Ratio"]);
-    if (vr) notes.push({ tone: vr < 9 ? "ok" : "warn", text:`Vertical ratio ${vr}% — ${vr < 9 ? "efficient mechanics." : "too much vertical travel; lean forward and drive the hips."}` });
-  }
-  if (yesterday.some(isRecovery)) notes.push({ tone:"ok", text:"Sauna logged — speeds glycogen resynthesis and parasympathetic rebound, and doubles as Athens heat prep." });
-  if (hrv && hrvBaseline) {
-    const d = hrv - hrvBaseline;
-    notes.push({ tone: d >= 0 ? "ok" : d > -10 ? "warn" : "bad",
-      text:`HRV ${hrv}ms vs ${hrvBaseline}ms baseline (${d >= 0 ? "+" : ""}${d}). ${d >= 10 ? "Strongly recovered — the hard session is on." : d >= 0 ? "Recovered and absorbing load well." : d > -10 ? "Slightly suppressed — keep intensity honest." : "Suppressed — favour easy volume or rest."}${rhr ? ` RHR ${rhr}bpm.` : ""}` });
-  }
-  if (sleepMin) notes.push({ tone: sleepMin >= 420 ? "ok" : sleepMin >= 360 ? "warn" : "bad", text:`Slept ${fmtMin(sleepMin)} last night — ${sleepMin >= 420 ? "enough to support a quality session." : sleepMin >= 360 ? "short of ideal; protect tonight." : "well short. Cut intensity, not volume."}` });
-  notes.push({ tone:"mute", text:`Running ${weeklyKm.toFixed(1)} km logged over the last 7 days · ATL ${atl.toFixed(0)} · CTL ${ctl.toFixed(0)} · form ${tsb >= 0 ? "+" : ""}${tsb.toFixed(0)}.` });
-  return notes;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   ADAPTIVE PLAN — presentation
-   The plan on screen is never just SCHEDULE: it is SCHEDULE after the engine
-   has reconciled it with what was actually trained. Anything the engine
-   changed says so, and says why, right where the change is.
-   ═══════════════════════════════════════════════════════════════════════════ */
 const ADJ_TONE = { ease:"warn", trim:"warn", drop:"bad", add:"ok" };
 
 function AdjTag({ adj }) {
@@ -2548,124 +2562,170 @@ function AdjTag({ adj }) {
   return <Tag tone={ADJ_TONE[adj.kind] || "warn"}>{adj.label}</Tag>;
 }
 
-/* One line of the prescription. `size` trades detail for density: "full" on
-   Today, "tight" in the week board where seven of these sit side by side. */
-function PlanLine({ s, size = "full" }) {
+/* Which logger tile a plan line belongs to, so its Log button opens the right
+   form. Null = no obvious match; the button then opens the logger's home. */
+function logKeyFor(s) {
+  const t = String(s.text || "");
+  if (s.type === "tennis" || /tennis/i.test(t)) return "tennis";
+  if (/\bski\b/i.test(t)) return "skierg";
+  if (/\brow\b/i.test(t)) return "row";
+  if (/hyrox|circle|circuit|roxzone/i.test(t)) return "circuit";
+  if (/strength|gym|lift|sled|lunge|wall ball/i.test(t)) return "strength";
+  if (/treadmill/i.test(t)) return "treadmill";
+  if (/run|jog|\bkm\b/i.test(t)) return "running";
+  return null;
+}
+
+/* What the phone logger already holds for today. Same origin, so the logger's
+   localStorage is readable here: a session saved in the gym ticks its line at
+   once instead of waiting for Garmin to sync and the site to redeploy. */
+function loggedToday() {
+  const keys = new Set();
+  try {
+    const db = JSON.parse(localStorage.getItem("simaslog.v1")) || {};
+    const today = new Date().toLocaleDateString("sv-SE");
+    Object.values(db.entries || {}).forEach(e => {
+      const s = e.session;
+      if (!s || e.sync === "draft" || !String(s.start || "").startsWith(today)) return;
+      const m = s.erg?.machine;
+      keys.add(s.kind === "erg" ? (m === "SkiErg" ? "skierg" : m === "Row" ? "row" : m === "Treadmill" ? "treadmill" : "bike")
+        : s.kind === "run" ? "running" : s.kind === "hyrox" ? "circuit" : s.kind);
+    });
+  } catch { /* private mode, or the logger has never been opened */ }
+  return keys;
+}
+
+/* One line of the prescription: a status mark, what to do, and nothing else.
+   The reason, the adjustment detail and the matched activity sit behind a tap.
+   Older blocks carry paragraph-long lines; those are clamped to two lines here
+   so no amount of written text can take over the screen again. */
+function PlanLine({ s, size = "full", day, logged }) {
+  const [open, setOpen] = useState(false);
   const tight = size === "tight";
   const st = SS[s.type] || SS.plan;
-  const done = s._status === "done", missed = s._status === "missed", adj = s._adj;
-  const tone = done ? "ok" : adj ? (ADJ_TONE[adj.kind] || "warn") : null;
-
-  const bg     = done ? TONE_BG.ok : adj ? TONE_BG[tone] : st.bg;
-  const border = done ? `${T.ok}33` : adj ? `${TONE[tone]}44` : st.border;
-  const text   = done ? T.ok : adj ? T.ink : st.text;
+  const done = s._status === "done", adj = s._adj;
+  const missed = s._status === "missed" && !s._open;
+  const viaLog = !done && logged;
+  const tone = done ? "ok" : viaLog ? "info" : adj ? (ADJ_TONE[adj.kind] || "warn") : null;
+  const more = !!(s.why || adj || (done && s._doneWith) || String(s.text || "").length > 70);
+  const quiet = s.type === "rest" || isInfoLine(s);
+  const mark = done || viaLog ? "✓" : quiet ? "–" : "○";
 
   return (
-    <div style={{ display:"flex", gap: tight ? 7 : 11, padding: tight ? "7px 9px" : "12px 14px",
-                  marginBottom: tight ? 0 : 8, background:bg, border:`1px solid ${border}`,
-                  borderRadius: tight ? 8 : 12, opacity: missed ? 0.5 : 1 }}>
-      <div style={{ width: tight ? 6 : 8, height: tight ? 6 : 8, borderRadius:"50%", marginTop: tight ? 5 : 6,
-                    flexShrink:0, background: done ? T.ok : adj ? TONE[tone] : st.dot }} />
+    <div onClick={more ? () => setOpen(o => !o) : undefined}
+      style={{ display:"flex", gap: tight ? 9 : 11, alignItems:"flex-start",
+        padding: tight ? "8px 0" : "12px 14px", marginBottom: tight ? 0 : 8,
+        background: tight ? "transparent" : tone ? TONE_BG[tone] : st.bg,
+        border: tight ? "none" : `1px solid ${tone ? `${TONE[tone]}44` : st.border}`,
+        borderRadius:12, opacity: missed ? 0.45 : 1, cursor: more ? "pointer" : "default" }}>
+      <span style={{ width:18, flexShrink:0, textAlign:"center", fontSize: tight ? 13 : 15, fontWeight:800, lineHeight:1.4,
+        color: tone ? TONE[tone] : st.dot }}>{mark}</span>
       <div style={{ minWidth:0, flex:1 }}>
-        <div style={{ fontSize: tight ? 11 : 13.5, fontWeight: tight ? 400 : 600, color:text,
-                      lineHeight:1.5, overflowWrap:"anywhere",
-                      textDecoration: missed ? "line-through" : "none" }}>
-          {done ? "✓ " : ""}{s.text}
+        <div className={open ? "" : "clamp2"} style={{ fontSize: tight ? 12.5 : 14.5, fontWeight:600, lineHeight:1.4,
+          color: done ? T.ink2 : quiet ? T.ink3 : T.ink, overflowWrap:"anywhere",
+          textDecoration: missed ? "line-through" : "none" }}>
+          {s.text}
         </div>
-        {adj && (
-          <div style={{ marginTop: tight ? 4 : 7, display:"flex", gap:7, alignItems:"flex-start", flexWrap:"wrap" }}>
-            <AdjTag adj={adj} />
-            {!tight && (
-              <div style={{ fontSize:11.5, color:T.ink2, lineHeight:1.5, flex:"1 1 200px", minWidth:0 }}>
-                {adj.detail}
-                <span style={{ color:T.ink3 }}> — {adj.why}.</span>
+        {(adj || s.cal || viaLog || (done && s._doneOn)) && (
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginTop:5 }}>
+            {adj && <AdjTag adj={adj} />}
+            {viaLog && <Tag tone="info">LOGGED · WAITING FOR GARMIN</Tag>}
+            {done && s._doneOn && <Tag tone="ok">DONE {fmtISO(s._doneOn).toUpperCase()}</Tag>}
+            {s.cal && !adj && <Tag tone="info">CALENDAR</Tag>}
+          </div>
+        )}
+        {open && (
+          <div style={{ fontSize:12, color:T.ink2, lineHeight:1.55, marginTop:6 }}>
+            {adj && <div>{adj.detail} <span style={{ color:T.ink3 }}>({adj.why})</span></div>}
+            {s.why && <div style={{ marginTop: adj ? 4 : 0 }}>{s.why}</div>}
+            {done && s._doneWith && (
+              <div className="num" style={{ color:T.ink3, marginTop:4 }}>
+                {s._doneWith.Title || s._doneWith["Activity Type"]} · {fmtDur(shownDur(s._doneWith))}
+                {s._doneWith._avgHR > 0 ? ` · ♥${s._doneWith._avgHR}` : ""}
               </div>
             )}
           </div>
         )}
-        {!adj && missed && !tight && (
-          <div style={{ fontSize:11, color:T.ink3, marginTop:5 }}>Not logged — counted as a deficit in this week's total.</div>
-        )}
-        {done && s._doneWith && !tight && (
-          <div className="num" style={{ fontSize:11, color:T.ink3, marginTop:4 }}>
-            {s._doneWith.Title || s._doneWith["Activity Type"]} · {fmtDur(shownDur(s._doneWith))}
-            {s._doneWith._avgHR > 0 ? ` · ♥${s._doneWith._avgHR}` : ""}
-          </div>
-        )}
-        {s.cal && !adj && (
-          <div style={{ fontSize: tight ? 8.5 : 9, fontWeight:800, letterSpacing:"0.1em", color:st.dot, marginTop:5 }}>IN CALENDAR</div>
-        )}
       </div>
+      {day && <span style={{ fontSize:10, fontWeight:800, letterSpacing:"0.08em", color:T.ink3, paddingTop:3, flexShrink:0 }}>{day}</span>}
+      {!tight && !done && !viaLog && !quiet && (
+        <a href={`/log/${logKeyFor(s) ? `?new=${logKeyFor(s)}` : ""}`} onClick={e => e.stopPropagation()} className="logbtn">Log</a>
+      )}
+      {more && tight && !day && <span style={{ color:T.ink3, fontSize:11, paddingTop:2 }}>{open ? "▴" : "▾"}</span>}
     </div>
   );
 }
 
-/* Load logged with no line in the plan asking for it — the unplanned tennis
-   match that makes everything downstream move. */
-function UnplannedLine({ a, tight }) {
+/* Something he did that no line asked for. It is simply training: one row,
+   no label telling him it was off-plan — the load bar already counts it. */
+function DoneLine({ a, tight }) {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:7, padding: tight ? "6px 8px" : "9px 12px",
-      background:TONE_BG.info, border:`1px solid ${T.info}33`, borderRadius:8, marginBottom: tight ? 0 : 8 }}>
-      <span style={{ fontSize: tight ? 12 : 15 }}>{getEmoji(a)}</span>
-      <div style={{ minWidth:0, flex:1 }}>
-        <div style={{ fontSize: tight ? 10.5 : 12.5, fontWeight:700, color:T.info, lineHeight:1.35, overflowWrap:"anywhere" }}>
-          + {a.Title || a["Activity Type"]}
-        </div>
-        <div className="num" style={{ fontSize: tight ? 9.5 : 11, color:T.ink3 }}>
-          unplanned · {fmtDur(shownDur(a))}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""} · TRIMP {a._trimp.toFixed(0)}
-        </div>
-      </div>
+    <div style={{ display:"flex", alignItems:"center", gap: tight ? 9 : 11, padding: tight ? "6px 0" : "9px 14px", marginBottom: tight ? 0 : 8,
+      background: tight ? "transparent" : T.panel, border: tight ? "none" : `1px solid ${T.line}`, borderRadius:12 }}>
+      <span style={{ width:18, textAlign:"center", fontSize: tight ? 13 : 15, flexShrink:0 }}>{getEmoji(a)}</span>
+      <div style={{ minWidth:0, flex:1, fontSize: tight ? 12 : 13, fontWeight:600, color:T.ink2,
+        overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{a.Title || a["Activity Type"]}</div>
+      <span className="num" style={{ fontSize:11, color:T.ink3, flexShrink:0 }}>
+        {fmtDur(shownDur(a))}{a._avgHR > 0 ? ` · ♥${a._avgHR}` : ""}
+      </span>
     </div>
   );
+}
+
+/* A one-line row that opens to the full panel. Everything that used to sit
+   open on Today and push the plan off the first screen lives in one of these. */
+function Fold({ title, summary, tone = "ink2", children, startOpen = false }) {
+  const [open, setOpen] = useState(startOpen);
+  return (
+    <div style={{ marginBottom:10 }}>
+      <button className="tap fold" onClick={() => setOpen(o => !o)} aria-expanded={open}>
+        <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3, flexShrink:0 }}>{title}</span>
+        <span className="num" style={{ flex:1, minWidth:0, textAlign:"right", fontSize:12.5, fontWeight:600, color:TONE[tone] || T.ink2,
+          overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{summary}</span>
+        <span style={{ color:T.ink3, fontSize:11, flexShrink:0 }}>{open ? "▴" : "▾"}</span>
+      </button>
+      {open && <div className="fade" style={{ marginTop:8 }}>{children}</div>}
+    </div>
+  );
+}
+
+/* The week as a checklist. The sessions the block asks for are things to get
+   done this week, on whatever day they land — which is how he actually trains.
+   Rest days, notes and court time are not on it. */
+function weekChecklist(plan) {
+  const wk = plan.weeks.find(w => w.days.some(d => d.date === TODAY));
+  if (!wk) return [];
+  return wk.days.flatMap(d => d.sessions
+    .filter(s => !isRestSession(s) && !isInfoLine(s) && s.type !== "tennis")
+    .map(s => ({ s, day: d })));
 }
 
 /* The week's load budget: what the block asked for, what is banked, and where
    the week lands if the rest of it is trained as it now reads. */
-function WeekGovernor({ governor, signals, compact = false }) {
+function WeekGovernor({ governor }) {
   if (!governor || governor.target.hi <= 0) return null;
-  const { target, doneTrimp, projected, pace } = governor;
+  const { target, doneTrimp, projected } = governor;
   const max = Math.max(target.hi, projected, doneTrimp) * 1.08 || 1;
   const p = (v) => Math.min(100, (v / max) * 100);
-  const trimmed = governor.trimmedBy > 0;
   const tone = projected > target.hi ? "warn" : projected < target.lo ? "info" : "ok";
-  const verdict = projected > target.hi
-    ? `Projecting ${projected} against a ${target.hi} ceiling for ${target.theme}${trimmed ? `, already down from ${governor.projectedRaw} — the remaining sessions are trimmed as far as they go without deleting one` : ""}.`
-    : projected < target.lo
-    ? `Projecting ${projected}, under the ${target.lo} floor for ${target.theme}.`
-    : trimmed
-    ? `Projecting ${projected} — inside the ${target.lo}–${target.hi} band for ${target.theme}, after trimming ${governor.trimmedBy} TRIMP from the sessions below.`
-    : `Projecting ${projected} — inside the ${target.lo}–${target.hi} band for ${target.theme}.`;
+  const verdict = projected > target.hi ? "heading over" : projected < target.lo ? "heading under" : "on track";
 
   return (
-    <Card pad={compact ? 13 : 16} style={{ marginBottom:14 }}>
-      <div style={{ display:"flex", justifyContent:"space-between", gap:12, flexWrap:"wrap", alignItems:"baseline" }}>
-        <div style={{ fontSize:10, fontWeight:800, letterSpacing:"0.12em", color:T.ink3 }}>WEEK LOAD BUDGET</div>
-        <Tag tone={tone}>{pace >= 1.15 ? "AHEAD OF PACE" : pace <= 0.85 ? "BEHIND PACE" : "ON PACE"}</Tag>
-      </div>
-
-      <div style={{ position:"relative", marginTop:12 }}>
+    <div style={{ marginTop:12 }}>
+      <div style={{ position:"relative" }}>
         {/* target band sits behind the fill so the bar length still reads as the value */}
         <div style={{ position:"absolute", left:`${p(target.lo)}%`, width:`${p(target.hi) - p(target.lo)}%`,
           top:-3, bottom:-3, background:"rgba(139,92,246,0.16)", border:`1px solid ${T.accent}44`,
           borderRadius:4, pointerEvents:"none" }} />
-        <Bar value={p(doneTrimp)} tone={tone} height={12} />
-        <div title={`projected ${projected}`} style={{ position:"absolute", left:`${p(projected)}%`, top:-5,
-          width:2, height:22, background:T.ink, borderRadius:1 }} />
+        <Bar value={p(doneTrimp)} tone={tone} height={10} />
+        <div title={`projected ${projected}`} style={{ position:"absolute", left:`${p(projected)}%`, top:-4,
+          width:2, height:18, background:T.ink, borderRadius:1 }} />
       </div>
-
-      <div className="num" style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:T.ink3, marginTop:7 }}>
-        <span>banked {doneTrimp}</span>
-        <span>target {target.lo}–{target.hi}</span>
-        <span>projected {projected}</span>
+      <div className="num" style={{ display:"flex", justifyContent:"space-between", gap:8, fontSize:11, color:T.ink3, marginTop:8 }}>
+        <span>Load <strong style={{ color:T.ink }}>{doneTrimp}</strong> of {target.lo}–{target.hi}</span>
+        <span style={{ color:TONE[tone], fontWeight:700 }}>{verdict} · {projected}</span>
       </div>
-
-      <div style={{ fontSize:12, color:T.ink2, lineHeight:1.6, marginTop:10 }}>{verdict}</div>
-      {signals?.unplanned7 > 0 && (
-        <div style={{ fontSize:11.5, color:T.info, lineHeight:1.6, marginTop:6 }}>
-          {signals.unplanned7} TRIMP of the last seven days came from sessions the plan never asked for.
-        </div>
-      )}
-    </Card>
+    </div>
   );
 }
 
@@ -2681,7 +2741,7 @@ function PlanAdjustments({ plan }) {
   if (!drivers.length) drivers.push({ tone:"ok", text:"Load, readiness and the week's budget all agree with the plan as written. Nothing changed." });
 
   return (
-    <Sec title="Plan adjustments" sub="Recomputed from the last sync">
+    <Sec>
       <Card pad={13}>
         {drivers.map((d, i) => <Note key={i} tone={d.tone}>{d.text}</Note>)}
         {adjustments.length > 0 && (
@@ -2970,8 +3030,8 @@ function FuelCard({ ana, plan, health }) {
   );
 }
 
-function TodayView({ ana, health, plan }) {
-  const { yesterday, tsb, atl, ctl, daysSinceHard, weeklyKm } = ana;
+function TodayView({ ana, health, plan, go }) {
+  const { yesterday, tsb, daysSinceHard } = ana;
   const daily = health.daily;
   const today = daily[daily.length - 1] || {};
   const lastSleep = health.sleep[health.sleep.length - 1];
@@ -2980,150 +3040,97 @@ function TodayView({ ana, health, plan }) {
 
   const R = readiness(tsb, daysSinceHard, hrv, hrvBaseline);
   const tone = R >= 7 ? "ok" : R >= 4 ? "warn" : "bad";
-  const label = R >= 7 ? "READY TO PUSH" : R >= 4 ? "TRAIN SMART" : "TAKE IT EASY";
-  const headline = R >= 7
-    ? "Recovery is ahead of load — take the quality session as written."
-    : R >= 4
-    ? "Recovered enough for controlled work. Hold the prescribed paces, skip the extras."
-    : "Load is stacking faster than you're clearing it. Easy volume or rest.";
+  const label = R >= 7 ? "Ready to push" : R >= 4 ? "Train smart" : "Take it easy";
+  const facts = [
+    hrv ? `HRV ${hrv} / ${hrvBaseline}` : null,
+    sleepMin ? `slept ${fmtMin(sleepMin)}` : null,
+    `form ${tsb >= 0 ? "+" : "−"}${Math.abs(tsb).toFixed(0)}`,
+  ].filter(Boolean).join(" · ");
 
-  const todaySched = plan.today;
+  const day = plan.today;
+  const sessions = day?.sessions || [];
+  const extras = day?._unplanned || [];
+  const logged = useMemo(loggedToday, []);
+  const list = weekChecklist(plan);
+  const left = list.filter(x => x.s._status !== "done").length;
+
+  const f = fuelPlan({ ana, plan, health, date: new Date().toLocaleDateString("sv-SE") });
+  const gap = (k) => f.target[k] - (f.eaten?.[k] ?? 0);
+  const fuelLine = `${Math.max(0, gap("carbs"))}g carbs · ${Math.max(0, gap("protein"))}g protein left`;
+
   const keyAct = yesterday.find(isHyrox) || yesterday.find(a => isRun(a) && a._avgHR > 120) || yesterday[0];
   const metrics = sessionMetrics(keyAct);
-  const notes = buildNotes({ yesterday, weeklyKm, atl, ctl, tsb, hrv, hrvBaseline, sleepMin, rhr:today.rhr });
-
-  const hrvPct = hrv && hrvBaseline ? Math.min(140, (hrv / hrvBaseline) * 100) : 0;
-  const recent = daily.slice(-21);
 
   return (
-    <div className="fade">
-      <FuelCard ana={ana} plan={plan} health={health} />
+    <div className="fade narrow">
+      {/* ── READINESS — one row; the charts are a tap away in Stats ─────── */}
+      <button className="tap" onClick={() => go("stats", "body")} style={{ display:"flex", alignItems:"center", gap:14, width:"100%",
+        textAlign:"left", padding:"12px 14px", marginBottom:18, borderRadius:14, cursor:"pointer",
+        background:`linear-gradient(135deg, ${TONE_BG[tone]}, ${T.panel} 70%)`, border:`1px solid ${TONE[tone]}44` }}>
+        <span className="num" style={{ fontSize:30, fontWeight:900, color:TONE[tone], letterSpacing:"-0.03em", lineHeight:1 }}>
+          {R}<span style={{ fontSize:12, fontWeight:700, color:T.ink3 }}>/10</span>
+        </span>
+        <span style={{ minWidth:0, flex:1 }}>
+          <span style={{ display:"block", fontSize:14.5, fontWeight:800, color:T.ink }}>{label}</span>
+          <span className="num" style={{ display:"block", fontSize:11.5, color:T.ink3, marginTop:2,
+            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{facts}</span>
+        </span>
+        <span style={{ color:T.ink3, fontSize:14 }}>›</span>
+      </button>
 
-      {/* ── READINESS HERO ────────────────────────────────────────────── */}
-      <Card pad={0} lift={false} style={{ marginBottom:20, overflow:"hidden" }}>
-        <div style={{ display:"flex", gap:22, padding:"20px 22px", flexWrap:"wrap", alignItems:"center",
-                      background:`linear-gradient(135deg, ${TONE_BG[tone]}, transparent 60%)` }}>
-          <Ring value={R} max={10} tone={tone} label="/10" size={128} stroke={10} />
-          <div style={{ flex:1, minWidth:240 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:9, flexWrap:"wrap" }}>
-              <span style={{ fontSize:15, fontWeight:800, letterSpacing:"0.11em", color:TONE[tone] }}>{label}</span>
-              <Tag tone={tsb >= 5 ? "ok" : tsb >= -10 ? "info" : tsb >= -20 ? "warn" : "bad"}>
-                FORM {tsb >= 0 ? "+" : ""}{tsb.toFixed(0)}
-              </Tag>
-            </div>
-            <p style={{ margin:"8px 0 0", fontSize:14, color:T.ink, lineHeight:1.55, maxWidth:560 }}>{headline}</p>
-            {hrv && (
-              <div style={{ marginTop:14, maxWidth:400 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", fontSize:10.5, color:T.ink3, marginBottom:5 }}>
-                  <span>HRV vs baseline</span>
-                  <span className="num" style={{ color:TONE[tone], fontWeight:700 }}>{hrv}ms / {hrvBaseline}ms</span>
-                </div>
-                <div style={{ position:"relative" }}>
-                  <Bar value={(hrvPct / 140) * 100} tone={tone} height={7} />
-                  <div style={{ position:"absolute", left:`${(100/140)*100}%`, top:-3, width:2, height:13, background:T.ink3, borderRadius:1 }} title="baseline" />
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="grid g4" style={{ flex:"1 1 300px", minWidth:260 }}>
-            <Stat pad={12} label="HRV" value={hrv ?? "—"} unit="ms" sub={`base ${hrvBaseline}`} tone={hrv ? (hrv >= hrvBaseline ? "ok" : hrv >= hrvBaseline - 10 ? "warn" : "bad") : "mute"} />
-            <Stat pad={12} label="RHR" value={today.rhr ?? "—"} unit="bpm" sub="40–46 typical" tone={today.rhr && today.rhr <= 46 ? "ok" : "warn"} />
-            <Stat pad={12} label="Sleep" value={sleepMin ? fmtMin(sleepMin) : "—"} sub={today.sleep_score != null ? `score ${today.sleep_score}` : "last night"} tone={sleepMin ? (sleepMin >= 420 ? "ok" : sleepMin >= 360 ? "warn" : "bad") : "mute"} />
-            <Stat pad={12} label="Load" value={atl.toFixed(0)} sub={`fitness ${ctl.toFixed(0)}`} tone="info" />
-          </div>
-        </div>
-        {recent.length > 3 && (
-          <div style={{ borderTop:`1px solid ${T.lineDim}`, padding:"10px 22px 6px" }}>
-            <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:"0.12em", color:T.ink3, marginBottom:2 }}>HRV · LAST 3 WEEKS</div>
-            <Sparkline data={recent.map(d => [d.date, d.hrv])} color={T.accent} height={54} />
+      {/* ── TODAY ────────────────────────────────────────────────────── */}
+      <Sec title="Today" right={new Date(TODAY).toLocaleDateString(undefined, { weekday:"long", month:"short", day:"numeric" })} style={{ marginBottom:18 }}>
+        {sessions.map((s, i) => <PlanLine key={i} s={s} logged={logged.has(logKeyFor(s))} />)}
+        {extras.map((a, i) => <DoneLine key={`u${i}`} a={a} />)}
+        {sessions.length === 0 && extras.length === 0 && (
+          <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", border:`1px dashed ${T.line}`, borderRadius:12 }}>
+            <span style={{ flex:1, fontSize:14, fontWeight:600, color:T.ink2 }}>Free day — nothing asked.</span>
+            <a href="/log/" className="logbtn">Log</a>
           </div>
         )}
-      </Card>
+      </Sec>
 
-      <div className="split">
-        {/* ── LEFT: what to do, what was done ─────────────────────────── */}
-        <div>
-          <Sec title="Today's plan" sub={new Date(TODAY).toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" })}>
-            {(todaySched?.sessions || []).length === 0 && <Card><Empty>Nothing scheduled — the plan has you free today.</Empty></Card>}
-            {(todaySched?.sessions || []).map((s, i) => <PlanLine key={i} s={s} />)}
-            {(todaySched?._unplanned || []).map((a, i) => <UnplannedLine key={`u${i}`} a={a} />)}
-            <WeekGovernor governor={plan.governor} signals={plan.signals} compact />
-          </Sec>
-
-          <Sec title="Yesterday" right={yesterday.length ? `${yesterday.length} session${yesterday.length > 1 ? "s" : ""}` : null}>
-            {yesterday.length === 0 && <Card><Empty>No activity recorded yesterday.</Empty></Card>}
-            {yesterday.map((a, i) => (
-              <Card key={i} pad={13} style={{ marginBottom:8, display:"flex", alignItems:"center", gap:12 }}>
-                <span style={{ fontSize:20, width:26, textAlign:"center", flexShrink:0 }}>{getEmoji(a)}</span>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:13, fontWeight:700, color:getColor(a) }}>{a.Title || a["Activity Type"]}</div>
-                  <div className="num" style={{ fontSize:11.5, color:T.ink3, marginTop:3 }}>
-                    {fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}
-                    {a._avgHR > 0 ? ` · ♥ ${a._avgHR}${parseNum(a["Max HR"]) ? `/${parseNum(a["Max HR"])}` : ""}` : ""}
-                    {a._dist > 0 ? ` · ${a._dist.toFixed(1)} km` : ""}
-                    {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
-                  </div>
-                </div>
-                {a._trimp > 0 && <Tag tone={a._trimp > 80 ? "bad" : a._trimp > 40 ? "warn" : "ok"}>TRIMP {a._trimp.toFixed(0)}</Tag>}
-              </Card>
+      {/* ── THIS WEEK ────────────────────────────────────────────────── */}
+      {plan.governor && (
+        <Sec title="This week" right={list.length ? `${list.length - left} of ${list.length} done` : plan.governor.theme} style={{ marginBottom:18 }}>
+          <Card pad="6px 14px 14px" lift={false}>
+            {list.map(({ s, day: d }, i) => (
+              <div key={i} style={{ borderBottom:`1px solid ${T.lineDim}` }}>
+                <PlanLine s={s} size="tight" day={s._status === "done" ? null : d.date === TODAY ? "TODAY" : d.dow} />
+              </div>
             ))}
-          </Sec>
+            <WeekGovernor governor={plan.governor} />
+          </Card>
+        </Sec>
+      )}
 
-          {metrics.length > 0 && (
-            <Sec title="Session analysis" sub={keyAct ? `${keyAct.Title || keyAct["Activity Type"]} · ${keyAct._date}` : null}>
-              <div className="grid g4">
-                {metrics.map((m, i) => (
-                  <Stat key={i} pad={12} label={m.label} value={m.value} sub={m.note} tone={m.tone} accentBar />
-                ))}
+      {/* ── everything else: one row each ────────────────────────────── */}
+      <Fold title="FUEL" summary={fuelLine}>
+        <FuelCard ana={ana} plan={plan} health={health} />
+      </Fold>
+      <Fold title="YESTERDAY" summary={yesterday.length ? yesterday.map(a => a.Title || a["Activity Type"]).join(" · ") : "nothing recorded"}>
+        {yesterday.length === 0 && <Card><Empty>No activity recorded yesterday.</Empty></Card>}
+        {yesterday.map((a, i) => (
+          <Card key={i} pad={13} style={{ marginBottom:8, display:"flex", alignItems:"center", gap:12 }}>
+            <span style={{ fontSize:20, width:26, textAlign:"center", flexShrink:0 }}>{getEmoji(a)}</span>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:getColor(a) }}>{a.Title || a["Activity Type"]}</div>
+              <div className="num" style={{ fontSize:11.5, color:T.ink3, marginTop:3 }}>
+                {fmtDur(shownDur(a))}{officialDur(a) ? " 🏁" : ""}
+                {a._avgHR > 0 ? ` · ♥ ${a._avgHR}${parseNum(a["Max HR"]) ? `/${parseNum(a["Max HR"])}` : ""}` : ""}
+                {a._dist > 0 ? ` · ${a._dist.toFixed(1)} km` : ""}
+                {a["Avg Speed"] && a["Avg Speed"] !== "--" && isRun(a) ? ` · ${speedToPace(a["Avg Speed"])}` : ""}
               </div>
-            </Sec>
-          )}
-
-          <Sec title="Next up" sub="Rest of this week">
-            <Card pad={13}>
-              {plan.weeks.flatMap(w => w.days).filter(d => d.date > TODAY).slice(0, 5).map((d, i) => (
-                <div key={i} style={{ display:"flex", gap:11, padding:"8px 0", borderBottom: i < 4 ? `1px solid ${T.lineDim}` : "none" }}>
-                  <div style={{ minWidth:38, fontSize:10, fontWeight:800, letterSpacing:"0.08em", color:T.ink3, paddingTop:2 }}>{d.dow}</div>
-                  <div style={{ flex:1, minWidth:0, fontSize:11.5, color:T.ink2, lineHeight:1.5 }}>
-                    {d.sessions.map((s, si) => (
-                      <div key={si} style={{ marginBottom: si < d.sessions.length - 1 ? 3 : 0,
-                        color: s._adj ? TONE[ADJ_TONE[s._adj.kind] || "warn"] : T.ink2 }}>
-                        {s.text}{s._adj ? ` · ${s._adj.label.toLowerCase()}` : ""}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </Card>
-          </Sec>
-        </div>
-
-        {/* ── RIGHT RAIL: coaching ────────────────────────────────────── */}
-        <div>
-          <PlanAdjustments plan={plan} />
-
-          <Sec title="Coach notes">
-            <Card pad={13}>
-              {notes.map((n, i) => <Note key={i} tone={n.tone}>{n.text}</Note>)}
-              <div style={{ fontSize:10.5, color:T.ink3, marginTop:6, lineHeight:1.5 }}>
-                Generated from the last sync — no fixed text, so it moves with the data.
-              </div>
-            </Card>
-          </Sec>
-
-          <Sec title="Recovery snapshot" sub="Overnight, from Garmin">
-            <div className="grid g2">
-              <Stat label="HRV" value={today.hrv ?? "—"} unit="ms" sub={`7d avg ${avgOf(daily.slice(-7).map(d => d.hrv))} · baseline ${hrvBaseline}`} tone={hrv >= hrvBaseline ? "ok" : "warn"} />
-              <Stat label="Resting HR" value={today.rhr ?? "—"} unit="bpm" sub="athlete range 40–46" tone={today.rhr <= 46 ? "ok" : "warn"} />
-              <Stat label="SpO₂" value={today.spo2 != null ? `${today.spo2}%` : "—"} sub="normal >95%" tone={today.spo2 >= 95 ? "ok" : "warn"} />
-              <Stat label="Respiration" value={today.resp ?? "—"} unit="br/min" sub="baseline 10.7–13.7" tone={today.resp && today.resp <= 14 ? "ok" : "warn"} />
             </div>
-          </Sec>
-
-        </div>
-      </div>
-
-      <SyncPanel />
+            {a._trimp > 0 && <Tag tone={a._trimp > 80 ? "bad" : a._trimp > 40 ? "warn" : "ok"}>TRIMP {a._trimp.toFixed(0)}</Tag>}
+          </Card>
+        ))}
+        {metrics.length > 0 && (
+          <div className="grid g4" style={{ marginTop:8 }}>
+            {metrics.map((m, i) => <Stat key={i} pad={12} label={m.label} value={m.value} sub={m.note} tone={m.tone} accentBar />)}
+          </div>
+        )}
+      </Fold>
     </div>
   );
 }
@@ -3154,10 +3161,11 @@ function PlanBoard({ plan }) {
   const [wk, setWk] = useState(Math.max(0, todayWk));
   const week = WEEKS[wk];
   const raceIdx = WEEKS.findIndex(w => w.days.some(d => d.sessions.some(s => s.type === "race")));
-  const adjustedInWeek = week.days.reduce((n, d) => n + d.sessions.filter(s => s._adj).length, 0);
+  const target = getWeekTarget(week.days[0].date, week.days[week.days.length - 1].date);
+  const total = week.days.reduce((s, d) => s + (d._trimp || 0), 0);
 
   return (
-    <div>
+    <div className="narrow">
       <div className="scroll-x no-bar" style={{ display:"flex", gap:7, marginBottom:14 }}>
         {WEEKS.map((w, i) => (
           <Chip key={i} active={wk === i} tone={i === raceIdx ? "warn" : "accent"} onClick={() => setWk(i)}>
@@ -3166,52 +3174,51 @@ function PlanBoard({ plan }) {
         ))}
       </div>
 
-      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", gap:12, flexWrap:"wrap", marginBottom:14 }}>
-        <div>
-          <div style={{ fontSize:18, fontWeight:800, color:T.ink, letterSpacing:"-0.01em" }}>{week.theme}</div>
+      <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", gap:12, marginBottom:12 }}>
+        <div style={{ minWidth:0 }}>
+          <div style={{ fontSize:17, fontWeight:800, color:T.ink, letterSpacing:"-0.01em" }}>{week.theme}</div>
           <div style={{ fontSize:11.5, color:T.ink3, marginTop:2 }}>Week {week.week} · {week.label}</div>
         </div>
-        <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
-          {adjustedInWeek > 0 && <Tag tone="warn">{adjustedInWeek} ADJUSTED</Tag>}
-          {(() => {
-            const t = getWeekTarget(week.days[0].date, week.days[week.days.length-1].date);
-            return t.hi > 0 ? <Tag tone="accent">TARGET {t.lo}–{t.hi} TRIMP</Tag> : null;
-          })()}
-        </div>
+        {wk !== todayWk && target.hi > 0 && (
+          <span className="num" style={{ fontSize:11.5, color:T.ink3, flexShrink:0 }}>
+            {total > 0 ? <><strong style={{ color:T.ink }}>{total}</strong> of </> : ""}{target.lo}–{target.hi}
+          </span>
+        )}
       </div>
 
-      {wk === todayWk && <WeekGovernor governor={plan.governor} signals={plan.signals} />}
+      {wk === todayWk && plan.governor && (
+        <Card pad="4px 14px 14px" lift={false} style={{ marginBottom:14 }}><WeekGovernor governor={plan.governor} /></Card>
+      )}
 
-      <div className="weekgrid">
+      {/* One row per day: what was asked, then what was done. A day with
+          neither is a single quiet line, not a paragraph about why. */}
+      <Card pad="2px 14px" lift={false}>
         {week.days.map((day, di) => {
-          const isToday = day.date === TODAY, isPast = day.date < TODAY;
+          const isToday = day.date === TODAY;
+          const empty = day.sessions.length === 0 && (day._unplanned || []).length === 0;
           return (
-            <div key={di} style={{
-              background: isToday ? "rgba(139,92,246,0.07)" : T.panel,
-              border:`1px solid ${isToday ? T.accent : T.line}`,
-              borderRadius:13, padding:"11px 12px", opacity: isPast && !isToday ? 0.55 : 1,
-              display:"flex", flexDirection:"column", gap:7, minWidth:0,
-            }}>
-              <div style={{ display:"flex", alignItems:"baseline", justifyContent:"space-between", gap:6 }}>
-                <span style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.1em", color: isToday ? T.accentIn : T.ink2 }}>{day.dow}</span>
-                <span style={{ fontSize:10, color:T.ink3 }}>{day.label}</span>
+            <div key={di} style={{ display:"flex", gap:12, padding:"8px 0",
+              borderBottom: di < week.days.length - 1 ? `1px solid ${T.lineDim}` : "none" }}>
+              <div style={{ width:38, flexShrink:0, paddingTop:9 }}>
+                <div style={{ fontSize:10.5, fontWeight:800, letterSpacing:"0.08em", color: isToday ? T.accentIn : T.ink2 }}>{day.dow}</div>
+                <div className="num" style={{ fontSize:10, color:T.ink3, marginTop:1 }}>{day.label.split(" ")[1]}</div>
               </div>
-              {isToday && <div style={{ fontSize:9, fontWeight:800, letterSpacing:"0.14em", color:T.accent }}>● TODAY</div>}
-
-              {day.sessions.map((s, si) => <PlanLine key={si} s={s} size="tight" />)}
-
-              {(day._unplanned || []).map((a, ai) => <UnplannedLine key={`u${ai}`} a={a} tight />)}
-
+              <div style={{ flex:1, minWidth:0 }}>
+                {day.sessions.map((s, si) => <PlanLine key={si} s={s} size="tight" />)}
+                {(day._unplanned || []).map((a, ai) => <DoneLine key={`u${ai}`} a={a} tight />)}
+                {empty && <div style={{ fontSize:12, color:T.ink3, padding:"8px 0" }}>{day.date < TODAY ? "—" : "Free"}</div>}
+              </div>
               {day._trimp > 0 && (
-                <div className="num" style={{ fontSize:9, color:T.ink3, letterSpacing:"0.06em",
-                  paddingTop:5, borderTop:`1px solid ${T.lineDim}` }}>
-                  TRIMP {day._trimp}
-                </div>
+                <span className="num" style={{ fontSize:10.5, color:T.ink3, paddingTop:10, flexShrink:0 }}>{day._trimp}</span>
               )}
             </div>
           );
         })}
-      </div>
+      </Card>
+
+      {wk === todayWk && <div style={{ marginTop:14 }}><Fold title="ADJUSTMENTS" summary={plan.adjustments.length ? `${plan.adjustments.length} this week` : "none"}>
+        <PlanAdjustments plan={plan} />
+      </Fold></div>}
     </div>
   );
 }
@@ -3333,7 +3340,7 @@ function LoadPanel({ ana, activities }) {
                   <span style={{ fontSize:10, color:T.ink3 }}>{lbl}</span>
                 </div>
                 <div className="num" style={{ fontSize:11.5, color:T.accentIn, marginTop:6, fontWeight:700 }}>{b.lo}–{b.hi} TRIMP</div>
-                <div style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>{b.note}</div>
+                <div className="clamp3" style={{ fontSize:11, color:T.ink3, marginTop:4, lineHeight:1.5 }}>{b.note}</div>
               </Card>
             );
           })}
@@ -3455,11 +3462,11 @@ function LogPanel({ activities }) {
   );
 }
 
-function TrainView({ ana, activities, plan }) {
+function WeekView({ ana, activities, plan }) {
   const [tab, setTab] = useState("plan");
   return (
     <div className="fade">
-      <SubNav items={[["plan","PLAN"],["load","LOAD"],["log","LOG"]]} value={tab} onChange={setTab} />
+      <SubNav items={[["plan","PLAN"],["load","LOAD"],["log","HISTORY"]]} value={tab} onChange={setTab} />
       {tab === "plan" && <PlanBoard plan={plan} />}
       {tab === "load" && <LoadPanel ana={ana} activities={activities} />}
       {tab === "log"  && <LogPanel activities={activities} />}
@@ -5250,11 +5257,22 @@ function SyncPanel() {
   );
 }
 
+function StatsView({ ana, sub, setSub }) {
+  return (
+    <div className="fade">
+      <SubNav items={[["body","BODY"],["race","RACE"],["sync","SYNC"]]} value={sub} onChange={setSub} />
+      {sub === "body" && <BodyView ana={ana} />}
+      {sub === "race" && <RaceView ana={ana} />}
+      {sub === "sync" && <div className="narrow"><SyncPanel /></div>}
+    </div>
+  );
+}
+
 const TABS = [
   ["today", "Today",  "◎"],
-  ["train", "Train",  "▤"],
-  ["body",  "Body",   "♡"],
-  ["race",  "Race",   "⚑"],
+  ["log",   "Log",    "＋"],
+  ["week",  "Week",   "▤"],
+  ["stats", "Stats",  "♡"],
 ];
 
 export default function Dashboard() {
@@ -5262,6 +5280,8 @@ export default function Dashboard() {
   const [ana, setAna] = useState(null);
   const [plan, setPlan] = useState(null);
   const [view, setView] = useState("today");
+  const [statsSub, setStatsSub] = useState("body");
+  const go = (v, sub) => { if (sub) setStatsSub(sub); setView(v); };
 
   useEffect(() => {
     const a = analyze(parseCSV(CSV_DATA));
@@ -5297,7 +5317,7 @@ export default function Dashboard() {
               </span>
               {/* Only a dot while healthy; it names the problem when there is one,
                   so moving the detail to Today cannot hide a broken sync. */}
-              <button className="tap" onClick={() => setView("today")} title={sync.msg}
+              <button className="tap" onClick={() => go("stats", "sync")} title={sync.msg}
                 style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6, cursor:"pointer", flexShrink:0 }}>
                 <span className={sync.tone === "ok" ? "live" : ""} style={{ width:7, height:7, borderRadius:"50%",
                   background:TONE[sync.tone], flexShrink:0 }} />
@@ -5311,7 +5331,15 @@ export default function Dashboard() {
           {/* ── NAV — header row on desktop, bottom bar on phone ───────── */}
           <nav className="mainnav" aria-label="Sections">
             <div className="wrap mainnav-inner">
-              {TABS.map(([k, l, icon]) => (
+              {TABS.map(([k, l, icon]) => k === "log" ? (
+                /* The logger is its own page and bundle, so it opens offline in
+                   the gym and a dashboard error can never take it down. Same
+                   origin and same home-screen app, so this is a tab, not a link out. */
+                <a key={k} href="/log/" className="tap navbtn">
+                  <span className="navicon" aria-hidden="true">{icon}</span>
+                  <span>{l}</span>
+                </a>
+              ) : (
                 <button key={k} onClick={() => setView(k)}
                   className={`tap navbtn${view === k ? " is-active" : ""}`}
                   aria-current={view === k ? "page" : undefined}>
@@ -5330,10 +5358,9 @@ export default function Dashboard() {
             <Card pad={40}><Empty>Loading training data…</Empty></Card>
           ) : (
             <>
-              {view === "today" && <TodayView ana={ana} health={HEALTH_DATA} plan={plan} />}
-              {view === "train" && <TrainView ana={ana} activities={activities} plan={plan} />}
-              {view === "body"  && <BodyView ana={ana} />}
-              {view === "race"  && <RaceView ana={ana} />}
+              {view === "today" && <TodayView ana={ana} health={HEALTH_DATA} plan={plan} go={go} />}
+              {view === "week"  && <WeekView ana={ana} activities={activities} plan={plan} />}
+              {view === "stats" && <StatsView ana={ana} sub={statsSub} setSub={setStatsSub} />}
             </>
           )}
         </main>
