@@ -174,6 +174,7 @@ const HEALTH_DATA = {
     {date:"2026-11-08",hrv:64,rhr:39,spo2:98,resp:11.0,sleep_score:null},
     {date:"2026-11-09",hrv:105,rhr:38,spo2:98,resp:11.0,sleep_score:95},
     {date:"2026-11-10",hrv:130,rhr:42,spo2:98,resp:11.0,sleep_score:75},
+    {date:"2026-11-11",hrv:51,rhr:43,spo2:98,resp:12.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -334,6 +335,7 @@ const HEALTH_DATA = {
     {date:"2026-11-08",deep:160,rem:90,light:250,awake:36},
     {date:"2026-11-09",deep:88,rem:135,light:276,awake:4},
     {date:"2026-11-10",deep:61,rem:40,light:217,awake:0},
+    {date:"2026-11-11",deep:231,rem:43,light:100,awake:7},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1176,11 +1178,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-11";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-11T07:07:00Z";
-const LAST_DATA = "2026-11-11T07:07:00Z";
+const LAST_RUN  = "2026-11-11T08:07:00Z";
+const LAST_DATA = "2026-11-11T08:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-11T07:07:00Z";
+const LAST_MFP  = "2026-11-11T08:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1644,7 +1646,7 @@ const SCHEDULE = [
   ]},
   { week:11, label:"Nov 16–22", theme:"Base II · Threshold", days:[
     { date:"2026-11-16", dow:"MON", label:"Nov 16", sessions:[{type:"plan",note:true,text:"Nothing written here. Last Monday the plan asked for nothing and you put in two hours of court plus a 42-minute circuit at an average of 149 — 175 TRIMP, the biggest single day of the block outside 28 October. The day is yours."}] },
-    { date:"2026-11-17", dow:"TUE", label:"Nov 17", sessions:[{type:"plan",text:"Ski 10min for distance at the front of the trip, before the lifting, one continuous piece — beat 2380m and nothing else is asked. The erg has been written four times since 21 October and landed once, on Tuesday 3 November, and every erg you have ever logged was bolted to a lift on the same day. So it moves to the day the lift actually lands."},{type:"plan",text:"Gym 40min, second in the trip: upper body as usual, with sled pull 8×25m hand-over-hand bolted onto the end. Four of your six gym trips since 21 October landed on days with nothing written — 23 and 25 October, 1 and 6 November — so if the trip slides to another day, take the ski and the sled with it rather than adding a second trip."}] },
+    { date:"2026-11-17", dow:"TUE", label:"Nov 17", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Ski 10min for distance at the front of the trip, before the lifting, one continuous piece — beat 2380m and nothing else is asked. The erg has been written four times since 21 October and landed once, on Tuesday 3 November, and every erg you have ever logged was bolted to a lift on the same day. So it moves to the day the lift actually lands."},{type:"plan",text:"Gym 40min, second in the trip: upper body as usual, with sled pull 8×25m hand-over-hand bolted onto the end. Four of your six gym trips since 21 October landed on days with nothing written — 23 and 25 October, 1 and 6 November — so if the trip slides to another day, take the ski and the sled with it rather than adding a second trip."}] },
     { date:"2026-11-18", dow:"WED", label:"Nov 18", sessions:[{type:"plan",note:true,text:"Nothing written here, and that is the change: all six Wednesdays of this block have carried tennis at a mean of 100 TRIMP, the biggest day of your week, and no gym trip has landed on one since 7 October. The machine and the lifting have gone back to Tuesday. Play, and nothing else is asked."}] },
     { date:"2026-11-19", dow:"THU", label:"Nov 19", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km, 50min all in, jog recoveries as long as you want. If the third rep held 14.0 on 12 November then all three go at 14.5 this week; if it faded again, 14.0 stays until it holds. Put the speeds in the title either way."}] },
     { date:"2026-11-20", dow:"FRI", label:"Nov 20", sessions:[{type:"rest",text:"Day off, the week’s only written one — nothing structured, and that includes the rides. The last two Fridays written as rest trained anyway, 10.14km on 30 October and the threshold run plus a lower-body lift on 6 November, so if it happens a third time the written rest day moves off Friday. Take it today if you can."}] },
@@ -2462,7 +2464,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 99; // updated 2026-11-10
+const hrvBaseline = 88; // updated 2026-11-11
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
