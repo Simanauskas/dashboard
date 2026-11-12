@@ -1343,21 +1343,25 @@ function analyze(raw) {
   const daysSinceHard = hardSessions.length > 0 ? hardSessions[0]._days : 99;
   const weeklyKm = enriched.filter(a => (isRun(a) || isHyrox(a)) && a._days >= 1 && a._days <= 7).reduce((s,a) => s + (a._dist||0), 0);
 
-  // Weekly TRIMP (last 8 weeks), with real ISO date bounds so the LOAD tab
-  // can match each week against TAPER_PLAN without re-parsing display labels.
-  const fmtShort = (d) => d.toLocaleDateString('en', { month:'short', day:'numeric' });
+  // Weekly TRIMP for the last 8 calendar weeks, Monday to Sunday — the same
+  // weeks SCHEDULE and TAPER_PLAN are written in — with the current week last,
+  // partial. ISO bounds let the LOAD tab match each week against TAPER_PLAN.
+  // Dates are handled in UTC throughout: TODAY parses as UTC midnight, so
+  // local-time setters would shift a day either side of midnight.
+  const isoOf = (d) => d.toISOString().slice(0, 10);
+  const fmtShort = (d) => `${MON[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  const thisMonday = new Date(TODAY);
+  thisMonday.setUTCDate(thisMonday.getUTCDate() - ((thisMonday.getUTCDay() + 6) % 7));
   const weeklyTrimp = [];
   for (let w = 7; w >= 0; w--) {
-    const start = w * 7 + 1, end = (w + 1) * 7;
-    const trimp = enriched.filter(a => a._days >= start && a._days <= end).reduce((s,a) => s + a._trimp, 0);
-    const weekStart = new Date(TODAY); weekStart.setDate(weekStart.getDate() - end);
-    const weekEnd = new Date(TODAY); weekEnd.setDate(weekEnd.getDate() - start);
-    const weekStartISO = weekStart.toISOString().slice(0,10);
-    const weekEndISO = weekEnd.toISOString().slice(0,10);
-    const wLabel = weekStart.getMonth() === weekEnd.getMonth()
-      ? `${fmtShort(weekStart)}–${weekEnd.getDate()}`
+    const weekStart = new Date(thisMonday); weekStart.setUTCDate(weekStart.getUTCDate() - w * 7);
+    const weekEnd = new Date(weekStart); weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
+    const weekStartISO = isoOf(weekStart), weekEndISO = isoOf(weekEnd);
+    const trimp = enriched.filter(a => a._date >= weekStartISO && a._date <= weekEndISO).reduce((s,a) => s + a._trimp, 0);
+    const wLabel = weekStart.getUTCMonth() === weekEnd.getUTCMonth()
+      ? `${fmtShort(weekStart)}–${weekEnd.getUTCDate()}`
       : `${fmtShort(weekStart)}–${fmtShort(weekEnd)}`;
-    weeklyTrimp.push({ label: wLabel, trimp: Math.round(trimp), daysAgo: start, weekStartISO, weekEndISO });
+    weeklyTrimp.push({ label: wLabel, trimp: Math.round(trimp), weekStartISO, weekEndISO });
   }
 
   // HR Zone distribution (last 4 weeks) using CPET bike zones +10 for running
@@ -3283,7 +3287,7 @@ function LoadPanel({ ana, activities }) {
         </Card>
       </Sec>
 
-      <Sec title="Weekly roadmap" sub="Actual TRIMP against this phase's target band · rolling 7-day weeks">
+      <Sec title="Weekly roadmap" sub="Actual TRIMP against the target band · Monday to Sunday">
         <Card pad={16}>
           {weeklyTrimp.map((w, i) => {
             const isCurrent = w.weekStartISO <= TODAY && w.weekEndISO >= TODAY;
@@ -3292,7 +3296,8 @@ function LoadPanel({ ana, activities }) {
             // One shared scale across every row. Capping each bar at its own
             // target made a 703 week and a 500 week both render as a full bar.
             const p = roadmapMax > 0 ? (w.trimp / roadmapMax) * 100 : 0;
-            const status = w.trimp === 0 || hi === 0 ? "mute" : (w.trimp >= lo && w.trimp <= hi) ? "ok" : w.trimp > hi ? "warn" : "bad";
+            const status = w.trimp === 0 || hi === 0 ? "mute" : (w.trimp >= lo && w.trimp <= hi) ? "ok" : w.trimp > hi ? "warn"
+              : isCurrent ? "info" : "bad";   // still in progress — under the floor is not a miss yet
             const loPct = roadmapMax > 0 ? (lo / roadmapMax) * 100 : 0;
             const hiPct = roadmapMax > 0 ? (hi / roadmapMax) * 100 : 0;
             return (
