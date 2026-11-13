@@ -17,7 +17,9 @@ export const EXERCISES = [
   ["Bulgarian split squat", "LUNGE", "DUMBBELL_BULGARIAN_SPLIT_SQUAT"],
   ["Step-ups", "SQUAT", "DUMBBELL_STEP_UP"],
   ["Sled push", "SLED", "PUSH", "s"],
-  ["Sled pull", "SLED", "PULL", "m"],
+  // Not SLED/PULL: Garmin's catalog lists it, but Connect shows it as "Unknown"
+  // (13 Nov 2026). Backward drag is the hand-over-hand Hyrox sled pull.
+  ["Sled pull", "SLED", "BACKWARD_DRAG", "m"],
   ["Calf raises", "CALF_RAISE", "STANDING_CALF_RAISE"],
   ["Hip thrust", "HIP_RAISE", "BARBELL_HIP_THRUST_WITH_BENCH"],
   ["Nordic curl", "LEG_CURL", null],

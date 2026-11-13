@@ -273,9 +273,15 @@ def tag(s: dict) -> str:
     return f"#log v1 {s['id']}"
 
 
+# Names Garmin's catalog accepts but Connect renders as "Unknown". Sessions
+# logged before the logger's catalog was fixed still carry the old name.
+GNAME_FIX = {("SLED", "PULL"): ("SLED", "BACKWARD_DRAG")}
+
+
 def set_item(cat, gname, unit, n, kg, sec=None) -> dict:
     """One Garmin set. Metres go in reps (his Garmin convention); a timed set
     (unit s) has no reps and its seconds as the duration."""
+    cat, gname = GNAME_FIX.get((cat, gname), (cat, gname))
     item = {"category": cat, "name": gname, "kg": kg, "reps": None if unit == "s" else n}
     if unit == "s":
         item["sec"] = n
@@ -441,7 +447,8 @@ def snapshot(gc: Garmin, aid: str, kind: str) -> dict:
     act = gc.activity(aid)
     summary = act.get("summaryDTO") or {}
     snap = {"name": act.get("activityName") or "", "description": act.get("description") or "",
-            "distance": summary.get("distance"), "duration": summary.get("duration")}
+            "distance": summary.get("distance"), "duration": summary.get("duration"),
+            "rpe": summary.get("directWorkoutRpe")}
     if kind in ("strength", "circuit"):
         try:
             snap["sets"] = gc.sets(aid)
@@ -503,6 +510,12 @@ def write(gc: Garmin, s: dict, aid: str, before: dict, apply: bool) -> tuple[boo
             before["duration_written"] = True     # so undo restores the watch's time
         if summary:
             payload["summaryDTO"] = summary
+    # RPE into Garmin's own Perceived Effort (Self Evaluation), not only the
+    # description. Garmin stores it ×10: RPE 9 is 90. If Garmin ignores it the
+    # read-back below adds a note; the write itself still counts as done.
+    rpe = s.get("rpe")
+    if isinstance(rpe, (int, float)) and 1 <= rpe <= 10:
+        payload.setdefault("summaryDTO", {})["directWorkoutRpe"] = float(round(rpe) * 10)
     print(f"  name: {payload.get('activityName', '(unchanged)')!r}")
     print("  description:\n    | " + desc.replace("\n", "\n    | "))
     for k, v in (payload.get("summaryDTO") or {}).items():
@@ -532,6 +545,8 @@ def restore(gc: Garmin, aid: str, before: dict, apply: bool) -> tuple[bool, str]
                "description": before.get("description") or ""}
     summary = {k: before[k] for k in ("distance", "duration") if before.get(k) is not None
                and (k != "duration" or before.get("duration_written"))}
+    if before.get("rpe") is not None:
+        summary["directWorkoutRpe"] = before["rpe"]
     if summary:
         payload["summaryDTO"] = summary
     gc.put_activity(aid, payload)

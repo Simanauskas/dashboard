@@ -125,8 +125,16 @@ session JSON in `session`; undo/rematch leave it empty.
   relabel/append as strength. If Garmin refuses sets on the activity the write
   still succeeds (stations in the description, note says so). Custom stations
   (`cat: null`) are description-only. All the Hyrox stations exist in Garmin's
-  catalog: RUN_INDOOR/TREADMILL, SLED/PULL, TOTAL_BODY/BURPEE_BROAD_JUMP,
+  catalog: RUN_INDOOR/TREADMILL, SLED/BACKWARD_DRAG, TOTAL_BODY/BURPEE_BROAD_JUMP,
   ROW/INDOOR_ROW, CARRY/FARMERS_CARRY, CARDIO/CROSS_COUNTRY_SKI_MACHINE.
+- **Sled pull is SLED/BACKWARD_DRAG, never SLED/PULL.** PULL is in Garmin's
+  catalog, so `check_catalog` passes it, but Connect shows it as "Unknown"
+  (13 Nov 2026). `GNAME_FIX` in match_sessions.py remaps old logs on re-save.
+- **RPE** goes into Garmin's Perceived Effort as `summaryDTO.directWorkoutRpe`
+  = RPE × 10, as well as the `RPE n` line in the description. It is checked
+  on read-back; if Garmin ignores it the status message says
+  "directWorkoutRpe did not stick" and nothing else fails. Undo restores the
+  snapshot's `rpe` (sessions snapshotted before 13 Nov have none to restore).
 - **Erg / Indoor bike**: `summaryDTO.distance` = total metres. **Indoor run**
   also `summaryDTO.duration` = `total_sec` or the segments added up — he asked
   for the treadmill's time to override Garmin's. Both read back (a "did not
