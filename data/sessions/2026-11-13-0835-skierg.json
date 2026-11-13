@@ -1,0 +1,53 @@
+{
+  "v": 1,
+  "id": "2026-11-13-0835-skierg",
+  "kind": "erg",
+  "activity": "SkiErg",
+  "start": "2026-11-13T08:35:17+00:00",
+  "end": "2026-11-13T08:37:18+00:00",
+  "rpe": 9,
+  "notes": "Out of breath - gym in Lisbon / morning",
+  "title": "",
+  "erg": {
+    "machine": "SkiErg",
+    "rest_sec": 45,
+    "pieces": [
+      {
+        "m": 560,
+        "sec": 150,
+        "spm": null
+      },
+      {
+        "m": 560,
+        "sec": 150,
+        "spm": null
+      },
+      {
+        "m": 560,
+        "sec": 150,
+        "spm": null
+      },
+      {
+        "m": 560,
+        "sec": 150,
+        "spm": null
+      }
+    ],
+    "damper": 4
+  },
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Ski-ERG",
+      "description": "",
+      "distance": 0.0,
+      "duration": 644.822
+    },
+    "garmin_id": "25062582659",
+    "message": "ok",
+    "hash": "5ddd888c5303",
+    "applied_at": "2026-11-13T08:37:29+00:00"
+  },
+  "received": "2026-11-13T08:37:28+00:00"
+}
