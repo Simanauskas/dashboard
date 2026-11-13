@@ -1,0 +1,132 @@
+{
+  "v": 1,
+  "id": "2026-11-13-0837-strength",
+  "kind": "strength",
+  "activity": "Strength",
+  "start": "2026-11-13T08:37:44+00:00",
+  "end": "2026-11-13T09:35:33+00:00",
+  "rpe": 9,
+  "notes": "Really hard, Lisbon",
+  "title": "",
+  "template": "Upper body",
+  "exercises": [
+    {
+      "name": "Pull-ups",
+      "cat": "PULL_UP",
+      "gname": "PULL_UP",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": null,
+          "n": 12
+        },
+        {
+          "kg": null,
+          "n": 7
+        },
+        {
+          "kg": null,
+          "n": 7
+        },
+        {
+          "kg": null,
+          "n": 7
+        }
+      ]
+    },
+    {
+      "name": "Barbell shoulder press",
+      "cat": "SHOULDER_PRESS",
+      "gname": "BARBELL_SHOULDER_PRESS",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 60,
+          "n": 2
+        },
+        {
+          "kg": 55,
+          "n": 4
+        },
+        {
+          "kg": 50,
+          "n": 6
+        }
+      ]
+    },
+    {
+      "name": "Sled pull",
+      "cat": "SLED",
+      "gname": "PULL",
+      "unit": "m",
+      "sets": [
+        {
+          "kg": 60,
+          "n": 40
+        },
+        {
+          "kg": 60,
+          "n": 40
+        },
+        {
+          "kg": 60,
+          "n": 40
+        }
+      ]
+    }
+  ],
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Strength",
+      "description": "",
+      "distance": 0.0,
+      "duration": 3456.612,
+      "sets": [
+        {
+          "exercises": [
+            {
+              "category": "UNKNOWN",
+              "name": null,
+              "probability": 98.828125
+            }
+          ],
+          "duration": 3456.612,
+          "repetitionCount": null,
+          "weight": null,
+          "setType": "ACTIVE",
+          "startTime": "2026-11-13T08:37:43.0",
+          "wktStepIndex": null,
+          "messageIndex": 0,
+          "minimalViableThreshold": null,
+          "avgConcentricMeanVelocity": null,
+          "maxConcentricMeanVelocity": null,
+          "avgEccentricMeanVelocity": null,
+          "maxEccentricMeanVelocity": null,
+          "avgConcentricPeakVelocity": null,
+          "maxConcentricPeakVelocity": null,
+          "avgEccentricPeakVelocity": null,
+          "maxEccentricPeakVelocity": null,
+          "avgMeanPropulsiveVelocity": null,
+          "maxMeanPropulsiveVelocity": null,
+          "avgConcentricMeanPower": null,
+          "maxConcentricMeanPower": null,
+          "avgConcentricPeakPower": null,
+          "maxConcentricPeakPower": null,
+          "avgConcentricDuration": null,
+          "maxConcentricDuration": null,
+          "avgEccentricDuration": null,
+          "maxEccentricDuration": null,
+          "avgConcentricRom": null,
+          "maxConcentricRom": null
+        }
+      ]
+    },
+    "garmin_id": "25063013725",
+    "message": "ok",
+    "hash": "f9492c213544",
+    "applied_at": "2026-11-13T09:35:44+00:00"
+  },
+  "received": "2026-11-13T09:35:42+00:00"
+}
