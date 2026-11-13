@@ -262,6 +262,8 @@ def description(s: dict) -> str:
             lines.append(station_label(st) + (": " + " ".join(clock(t) for t in times) if any(times) else ""))
         if circuit_total(c):
             lines.append(f"Total {clock(circuit_total(c))}")
+    if s.get("feel") in FEEL:
+        lines.append(f"Felt {FEEL[s['feel']]}")
     if s.get("rpe"):
         lines.append(f"RPE {num(s['rpe'])}")
     if (s.get("notes") or "").strip():
@@ -271,6 +273,10 @@ def description(s: dict) -> str:
 
 def tag(s: dict) -> str:
     return f"#log v1 {s['id']}"
+
+
+# Garmin's "How did you feel?" — the logger stores Garmin's own value.
+FEEL = {0: "very weak", 25: "weak", 50: "normal", 75: "strong", 100: "very strong"}
 
 
 # Names Garmin's catalog accepts but Connect renders as "Unknown". Sessions
@@ -448,7 +454,7 @@ def snapshot(gc: Garmin, aid: str, kind: str) -> dict:
     summary = act.get("summaryDTO") or {}
     snap = {"name": act.get("activityName") or "", "description": act.get("description") or "",
             "distance": summary.get("distance"), "duration": summary.get("duration"),
-            "rpe": summary.get("directWorkoutRpe")}
+            "rpe": summary.get("directWorkoutRpe"), "feel": summary.get("directWorkoutFeel")}
     if kind in ("strength", "circuit"):
         try:
             snap["sets"] = gc.sets(aid)
@@ -516,6 +522,9 @@ def write(gc: Garmin, s: dict, aid: str, before: dict, apply: bool) -> tuple[boo
     rpe = s.get("rpe")
     if isinstance(rpe, (int, float)) and 1 <= rpe <= 10:
         payload.setdefault("summaryDTO", {})["directWorkoutRpe"] = float(round(rpe) * 10)
+    # "How did you feel?" — same Self Evaluation panel, Garmin's 0–100 scale.
+    if s.get("feel") in FEEL:
+        payload.setdefault("summaryDTO", {})["directWorkoutFeel"] = float(s["feel"])
     print(f"  name: {payload.get('activityName', '(unchanged)')!r}")
     print("  description:\n    | " + desc.replace("\n", "\n    | "))
     for k, v in (payload.get("summaryDTO") or {}).items():
@@ -547,6 +556,8 @@ def restore(gc: Garmin, aid: str, before: dict, apply: bool) -> tuple[bool, str]
                and (k != "duration" or before.get("duration_written"))}
     if before.get("rpe") is not None:
         summary["directWorkoutRpe"] = before["rpe"]
+    if before.get("feel") is not None:
+        summary["directWorkoutFeel"] = before["feel"]
     if summary:
         payload["summaryDTO"] = summary
     gc.put_activity(aid, payload)

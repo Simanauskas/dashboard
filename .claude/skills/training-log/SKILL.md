@@ -135,6 +135,10 @@ session JSON in `session`; undo/rematch leave it empty.
   on read-back; if Garmin ignores it the status message says
   "directWorkoutRpe did not stick" and nothing else fails. Undo restores the
   snapshot's `rpe` (sessions snapshotted before 13 Nov have none to restore).
+- **How did you feel** (`feel`: 0 very weak · 25 weak · 50 normal · 75 strong ·
+  100 very strong — Garmin's own scale) goes into `summaryDTO.directWorkoutFeel`
+  unchanged, plus a `Felt …` line in the description; read back and undone
+  like RPE.
 - **Erg / Indoor bike**: `summaryDTO.distance` = total metres. **Indoor run**
   also `summaryDTO.duration` = `total_sec` or the segments added up — he asked
   for the treadmill's time to override Garmin's. Both read back (a "did not

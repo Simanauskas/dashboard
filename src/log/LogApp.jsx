@@ -122,7 +122,7 @@ function initSession(entries, opt) {
   const taken = new Set([...Object.keys(entries), ...DATA.sessions.map(x => x.id)])
   let id = stem
   for (let k = 2; taken.has(id); k++) id = `${stem}-${k}`
-  const base = { v: 1, id, kind: opt.kind, activity: opt.label, start, end: null, rpe: null, notes: "", title: "" }
+  const base = { v: 1, id, kind: opt.kind, activity: opt.label, start, end: null, feel: null, rpe: null, notes: "", title: "" }
   if (opt.typeKeys) base.type_keys = opt.typeKeys
   if (opt.kind === "strength") return { ...base, template: null, exercises: [] }
   if (opt.kind === "circuit") return { ...base, template: null, circuit: { stations: [], rounds: [], total_sec: null } }
@@ -165,6 +165,10 @@ function status(entry, built) {
 }
 
 // ── small UI pieces ─────────────────────────────────────────────────────────
+// Garmin's "How did you feel?" (Self Evaluation), on Garmin's own 0–100 scale,
+// so the value goes into the activity unchanged (match_sessions.py).
+const FEEL = [[0, "😫 Very weak"], [25, "🙁 Weak"], [50, "😐 Normal"], [75, "🙂 Strong"], [100, "💪 Very strong"]]
+
 function Chips({ value, options, onChange }) {
   return <div className="chips">{options.map(o => {
     const [v, l] = Array.isArray(o) ? o : [o, o]
@@ -517,7 +521,9 @@ function Editor({ id, go }) {
     <div className={"status " + st.tone}>{st.text}{st.detail ? <small> — {st.detail}</small> : null}</div>
     {Form && <Form s={s} set={set} entries={entries} />}
     <div className="card">
-      <div className="lbl">How hard (RPE)</div>
+      <div className="lbl">How did you feel?</div>
+      <Chips value={s.feel ?? null} options={FEEL} onChange={v => set({ ...s, feel: v })} />
+      <div className="lbl" style={{ marginTop: 14 }}>How hard (RPE)</div>
       <Chips value={s.rpe} options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => [n, String(n)])} onChange={v => set({ ...s, rpe: v })} />
       <Field label="Notes"><textarea className="in" rows={3} value={s.notes} onChange={e => set({ ...s, notes: e.target.value })} placeholder="how it felt, pain, conditions…" /></Field>
       <details>
