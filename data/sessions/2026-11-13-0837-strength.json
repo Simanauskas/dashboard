@@ -4,7 +4,7 @@
   "kind": "strength",
   "activity": "Strength",
   "start": "2026-11-13T08:37:44+00:00",
-  "end": "2026-11-13T09:35:33+00:00",
+  "end": "2026-11-13T10:09:08+00:00",
   "rpe": 9,
   "notes": "Really hard, Lisbon",
   "title": "",
@@ -57,7 +57,7 @@
     {
       "name": "Sled pull",
       "cat": "SLED",
-      "gname": "BACKWARD_DRAG",
+      "gname": "PULL",
       "unit": "m",
       "sets": [
         {
@@ -75,6 +75,7 @@
       ]
     }
   ],
+  "feel": 0,
   "status": {
     "state": "applied",
     "errors": 0,
@@ -125,8 +126,8 @@
     },
     "garmin_id": "25063013725",
     "message": "ok",
-    "hash": "5c5a6ed83780",
-    "applied_at": "2026-11-13T09:41:11+00:00"
+    "hash": "78249351bd94",
+    "applied_at": "2026-11-13T10:09:20+00:00"
   },
-  "received": "2026-11-13T09:35:42+00:00"
+  "received": "2026-11-13T10:09:18+00:00"
 }
