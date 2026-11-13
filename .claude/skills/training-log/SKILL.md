@@ -220,6 +220,11 @@ number is minutes for erg/Hyrox and seconds for run reps. Decimal commas
 
 ## Gotchas
 
+- **The editor's Save bar (`.bar`) is `position: sticky`, never `fixed`.** In
+  the iOS home-screen app a fixed bar scrolled along with a long strength form
+  and ended up under the status bar at the bottom of the page (13 Nov 2026).
+  Sticky is pinned by the scroller itself. It must stay the last child of
+  `.page`, and `.page` must not get an `overflow` value, or it stops sticking.
 - **iOS 26 home-screen app (his iPhone 15 Pro): keep `html { min-height:
   calc(100% + env(safe-area-inset-top)) }` in log.css.** With the
   black-translucent status bar iOS lays the app out 59pt short (viewport 793 on
