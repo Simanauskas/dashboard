@@ -177,6 +177,7 @@ const HEALTH_DATA = {
     {date:"2026-11-11",hrv:51,rhr:43,spo2:98,resp:12.0,sleep_score:null},
     {date:"2026-11-12",hrv:53,rhr:42,spo2:98,resp:11.0,sleep_score:null},
     {date:"2026-11-13",hrv:42,rhr:39,spo2:98,resp:11.0,sleep_score:88},
+    {date:"2026-11-14",hrv:45,rhr:37,spo2:98,resp:10.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -340,6 +341,7 @@ const HEALTH_DATA = {
     {date:"2026-11-11",deep:231,rem:43,light:100,awake:7},
     {date:"2026-11-12",deep:175,rem:60,light:234,awake:2},
     {date:"2026-11-13",deep:165,rem:129,light:200,awake:3},
+    {date:"2026-11-14",deep:175,rem:72,light:193,awake:5},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1188,11 +1190,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-14";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-14T06:07:00Z";
-const LAST_DATA = "2026-11-14T06:07:00Z";
+const LAST_RUN  = "2026-11-14T07:07:00Z";
+const LAST_DATA = "2026-11-14T07:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-14T06:07:00Z";
+const LAST_MFP  = "2026-11-14T07:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2520,7 +2522,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 72; // updated 2026-11-13
+const hrvBaseline = 64; // updated 2026-11-14
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
