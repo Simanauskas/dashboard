@@ -1490,7 +1490,7 @@ const TAPER_PLAN = [
   { start:"2026-09-14", end:"2026-09-27", theme:"Aerobic Reset", lo:280, hi:400, note:"Rebuild base · Z2 volume · strength back in, specificity later" },
   // ── Copenhagen block · sub-65 ──
   { start:"2026-09-28", end:"2026-11-08", theme:"Base I · Aerobic",    lo:400, hi:560, note:"Six weeks of aerobic base, 400–560 a week. The band is TOTAL load and court time is most of it: week 7 closed at 407 measured against 403 written, with tennis supplying 244 of it and running 49 minutes. The week asks for three sessions and nothing else — Tuesday’s erg behind the court with the lifting in the same trip, Thursday’s hard run in whatever shape you like, Saturday’s long run — and everything else in the week is yours."},
-  { start:"2026-11-09", end:"2026-12-20", theme:"Base II · Threshold", lo:440, hi:580, note:"Threshold reps are 3×2km at 14.0kmh held to the end, and the rung moves to 14.5 only once all three hold. The week asks for three sessions — a 10min ski for distance at the front of the gym trip, the threshold run, and the long run — and everything else in the week is yours." },
+  { start:"2026-11-09", end:"2026-12-20", theme:"Base II · Threshold", lo:440, hi:580, note:"Threshold reps are 3×2km at 14.0kmh held to the end, and the rung moves to 14.5 only once all three hold. The week asks for four sessions — a 10min ski at the front of the gym trip, an easy Z2 run, the threshold run and the long run — and everything else in the week is yours." },
   { start:"2026-12-21", end:"2027-01-03", theme:"Holiday Deload",      lo:200, hi:300, note:"Planned, not accidental · absorb the base" },
   { start:"2027-01-04", end:"2027-02-14", theme:"Specificity Build",   lo:440, hi:520, note:"Compromised running · Full Sim #1 on Sat 30 Jan" },
   { start:"2027-02-15", end:"2027-02-21", theme:"Specificity",         lo:400, hi:460, note:"Race block wk −6 · reset erg benchmarks" },
@@ -1661,7 +1661,7 @@ const SCHEDULE = [
     { date:"2026-11-15", dow:"SUN", label:"Nov 15", sessions:[{type:"plan",text:"Long run 1h10 · conversational, indoors is fine",why:"You ran 1:12:53 last Sunday, so this rung is already cleared."}] },
   ]},
   { week:11, label:"Nov 16–22", theme:"Base II · Threshold", days:[
-    { date:"2026-11-16", dow:"MON", label:"Nov 16", sessions:[] },
+    { date:"2026-11-16", dow:"MON", label:"Nov 16", sessions:[{type:"plan",text:"Z2 run 50min · conversational, nothing to hold",why:"Running is your weakest block against the field — top 27.7% at Athens."}] },
     { date:"2026-11-17", dow:"TUE", label:"Nov 17", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Ski 10min · one piece, before the lift · beat 2380m",why:"Every erg you have logged was bolted to a lift, so it rides on the gym trip."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
     { date:"2026-11-18", dow:"WED", label:"Nov 18", sessions:[] },
     { date:"2026-11-19", dow:"THU", label:"Nov 19", sessions:[{type:"rest",text:"Day off · nothing structured",why:"Rest here so the threshold reps land tomorrow."}] },
