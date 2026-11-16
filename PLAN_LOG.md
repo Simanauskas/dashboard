@@ -72,6 +72,295 @@ and never once done.
 
 ---
 
+## 2026-11-16
+- adherence: **no ACTION REQUIRED and no WATCH — the report closes with "Every prescribed session
+  type has been trained at least once."** Window 26 Oct–16 Nov: ski **3/2, short by 1** · row 0/2 ·
+  hyrox 0/1 · strength 3/5 on track · cycle 0/8 · tennis 0/9 · **run 8/6, short by 2**. Benchmarks
+  already due: 29 Oct type match, 5 Nov NOTHING LOGGED, 12 Nov NOTHING LOGGED. Next 14d: **Fri
+  20 Nov**, the 3×2km, where 13 Nov put it. `check_plan.py` exit 0.
+- readiness: **HRV 108 against a baseline of 67 — +41, the largest positive delta of the block**,
+  and up from 85 and 45 on the two previous mornings. **RHR 40 — back inside the 38–46 range after
+  two days below a 165-day floor (36, 37).** Resp 11.0, SpO2 95, sleep **8h18 but only 58min of
+  deep**, the window's low after 231 · 175 · 165 · 175 · 115. Baseline 99 → 88 → 79 → 72 → 64 → 67
+  → **67**, flat for the first time in a week. 165 daily / 164 sleep rows, contiguous. LAST_RUN and
+  LAST_DATA both 2026-11-16T07:07Z against TODAY 2026-11-16 — **sync healthy**. Engine, read live
+  off the committed file: readiness **8/10**, TSB **−10.18** (from −4.85), ATL **47.31** (from
+  40.99), CTL **37.12**, **ATL/CTL 1.27**, `consecutiveHard` 1, `daysSinceRest` 3, `forceRest`
+  FALSE, `easeHard` **FALSE**, `scale` **1.00**, `unplanned7` **203**. Week 11, day one: done 0,
+  `remainingPlanned` **461**, projected 461 against **440–580**, `over` FALSE, `under` FALSE.
+- decision: **NO CHANGE.** Both tests pre-registered for tomorrow resolved this morning, a day
+  early and both with a pass; week 11 opens today exactly as written and is itself the pre-registered
+  test; and the one shortfall I found is one the engine fixes by itself from Wednesday.
+- why: **HRV 108 at +41 and RHR back to 40 close the 15 Nov bradycardia watch as rebound, and
+  15 Nov's 36-minute indoor run at avg 154 / max 178 closes the working-heart-rate watch with a
+  pass — so Friday's 3×2km can be read as a benchmark after all**, which is what week 11 was written
+  to do.
+- watching: **the baseline reversal, which now threatens Friday from the opposite direction** — once
+  11–14 Nov's 51/53/42/45 roll out of the window the baseline climbs back toward ~90, and an
+  entirely ordinary reading of 81 or below on Fri 20 Nov would cap the benchmark by arithmetic
+  (§2; nothing to do, Sat 21 Nov is empty and the checklist ticks it either way); **the ski target**
+  — 2240m on 13 Nov against a written "beat 2380m", tomorrow is the clean test (decide Wed 18 Nov,
+  §6); **week 12 does not exist** and must be written by Sat 21 Nov (§6); **deep sleep 58min** — if
+  it stays under 70 for three nights *with* HRV falling, that is a new signal and not this one
+  closing (decide Thu 19 Nov); and **weight 77.9kg / body fat 15.6% on 1 Nov**, the highest of both
+  series and now a single reading **fifteen** days old.
+
+### 1. Both Tuesday tests resolved this morning, and both passed
+13 Nov pre-registered an illness test and 15 Nov pre-registered two more for Tue 17 Nov. All three
+are now answered and none of them fires.
+
+**The bradycardia watch (15 Nov §2).** The trigger was: 16 or 17 Nov coming in **under 38 with HRV
+back below baseline** would mean 36 and 37 were not rebound. RHR is **40** — inside 38–46 — and HRV
+is **108**, forty-one *above* baseline. Both limbs fail. 36/37 were parasympathetic rebound paying
+off the 9 Nov bill, exactly as read, and the watch closes.
+
+**The working-heart-rate watch (14 Nov §3, carried by 15 Nov).** The trigger was: if Tue 17 Nov's
+ski again ran under 130 bpm at a hard RPE, Friday's 3×2km must be run as a session and **not** read
+as a benchmark, because a threshold rung set off a suppressed HR response would mis-set Base II for
+five weeks. This resolved a day early and from a session nobody wrote. On **Sun 15 Nov at 10:43 he
+ran 4.97km in 36:07 at avg HR 154, max 178, aerobic TE 3.7** — 14 laps, 27:18 of moving time inside
+36:07 elapsed, cadence 133, GCT 249ms. **178 is the highest max HR in the window and 154 the highest
+average since 9 Nov's 149.** His heart rises under load. The 13 Nov Lisbon pair (ski avg 120, a
+92-minute RPE-9 lift at avg 81) was transient suppression on the morning HRV hit its series low of
+42, not a broken response and not a broken strap. **Friday's 3×2km is a benchmark.** This watch
+closes too, and it is why week 11 needs no change: it was written on the assumption this test would
+pass, and it has.
+
+What this also means, and it is worth stating because it cuts the other way: the *reason* to hold
+is now stronger than it was yesterday. Yesterday held because nothing had changed. Today holds
+because the two things that could have forced a change were tested and came back clean.
+
+### 2. The physiological signal: the crash is over, and the baseline is now the hazard
+The eight-day HRV series is the most volatile stretch in the record: **130 (10 Nov, series high) →
+51 → 53 → 42 (series low) → 45 → 85 → 108.** A 42-to-130 range inside eight days. RHR tracked it
+down to two readings below a 165-day floor and is back at 40. Respiration ran 12 · 11 · 11 · 10 ·
+10 · 11. Deep sleep ran 231 · 175 · 165 · 175 · 115 · **58**.
+
+The crash is resolved and resolved cleanly. Two things in that data deserve naming rather than a
+shrug.
+
+**First, 58 minutes of deep sleep on 8h18.** That is the window's low by a wide margin and it
+arrives the night after the hardest session in a week. On its own it would read as a cost. Against
+HRV 108 and RHR 40 it reads as sleep architecture **normalising** — four consecutive nights of
+165–231min of deep were compensatory, his usual range is 90–160, and one night at 58 on a full eight
+hours is an undershoot on the way back rather than a new debt. Not acted on. Trigger: three nights
+under 70 *with* HRV falling. Decide Thu 19 Nov.
+
+**Second, and this is the one that matters, the baseline is about to reverse and it lands on
+Friday.** `hrvBaseline` fell 99 → 67 in six days chasing the crash down, and is flat at 67 for the
+first time. 14 Nov §3 flagged the hazard in that fall — that `easeHard` could release *by
+arithmetic* as 9–10 Nov's 105 and 130 rolled out. That hazard is void; the cap came off because HRV
+went to 85 and then 108.
+
+The mirror image is now live. 11–14 Nov's four low readings (51, 53, 42, 45) all roll out of a
+7-day window by Fri 20 Nov. If his readings hold near 100, the window on Friday is 14–20 Nov and the
+baseline sits around **90**. `easeHard` fires on `hrv − base ≤ −10`, so **a reading of 81 or below
+on Friday morning caps the benchmark** — and 81 is not a bad morning for him: he read 84 on 6 Nov,
+83 on 27 Oct, 85 as recently as Sunday. The cap could fire on an ordinary day purely because the
+baseline is rebounding faster than the readings.
+
+I am recording this rather than acting on it, for two reasons. The engine capping a hard session on
+a suppressed morning is correct behaviour and not something to design around from four days out. And
+the structure already absorbs it: the week is a checklist, **Sat 21 Nov is empty**, and a Friday
+session the engine downgrades can land Saturday and still tick. Nothing to write. Whoever reads this
+on Friday: if `easeHard` is TRUE with HRV in the 80s and RHR inside 38–46, that is the arithmetic
+and not fatigue — the session moves to Saturday, it does not get softened.
+
+### 3. Week 10 closed at 378, not 276 — and Sunday was not a long run
+Yesterday's entry recorded week 10 "closing at 276 against 440–580" and built its §4 band argument
+on that figure. It ran at 07:07; Sunday's training started at 10:03. **Week 10 actually closed at
+378.** The correction matters because 276 was the fourth-consecutive-week-under-floor headline and
+378 is a 62-TRIMP miss, not a 164-TRIMP one.
+
+What he did on Sun 15 Nov, from Garmin only — nothing for 15 Nov exists in `data/sessions`, so the
+phone logger was not used and there is no RPE or note:
+
+| time | activity | detail |
+|---|---|---|
+| 10:03 | Indoor Running | 1.56km / 26:07, **10:49 moving**, 1 lap, avg 100, max 134, TE 1.2 |
+| 10:43 | Indoor Running | 4.97km / 36:07, **27:18 moving**, **14 laps**, avg **154**, max **178**, TE 3.7 |
+| 11:33 | Indoor Cycling | 15:00, avg 122 |
+| 18:30 | Sauna | 1:18:16 |
+
+102 TRIMP. The written line asked for a conversational long run and that line was already ticked by
+11 Nov's 71-minute Z1, so the checklist was satisfied and this is surplus. The shape — a stop-start
+warm-up, then fourteen laps at 154 with eight minutes of standing inside 36 — is a station circuit
+or a group session, not a run, and `isHyrox` in App.jsx classifies "Indoor Running" with distance as
+hyrox. It is also **the first hard session he has taken since the crash, on the first morning HRV
+came back**, which is what moved ATL 40.99 → 47.31 and TSB −4.85 → −10.18 overnight. ATL/CTL 1.27
+is the highest of the block, and worth watching, but readiness is 8/10 and `forceRest` is FALSE on a
+`daysSinceRest` of 3. Nothing to do about a session he has already banked.
+
+Per the standing rule this is not narrated anywhere on the dashboard. It is information for this
+file.
+
+### 4. Week 11 prices at 461 and will cost about 414 — and why I am not topping it up
+Week 11 priced live at **461**, reproducing 14 and 15 Nov exactly:
+
+| day | line | est |
+|---|---|---|
+| Mon | Z2 run 50min | 67 |
+| Tue | Tennis 🎾 Edvinas (`cal:true`) | **101** |
+| Tue | Ski 10min | 16 |
+| Tue | Gym 40min | 39 |
+| Thu | rest | 0 |
+| Fri | ⏱ KEY RUN 3×2km | 136 |
+| Sun | Long run 1h15 | 101 |
+| | **total** | **461** |
+
+That 101 for tennis is wrong, and by a known defect rather than a judgement. `isTennis`
+(src/App.jsx) is `=== "tennis"` while Garmin types every court session **`Tennis V2`**, so
+`loadModel.tennis` reads **n=0** — confirmed live again this morning — and the line prices from the
+fallback HR 138 / 75min instead of his own history. His real median over **31 court sessions in 90
+days is HR 109 / 89min**, which costs **54**. So the week's honest written load is about **414,
+twenty-six under the 440 floor**, and `scale` is 1.00 — the governor will not raise anything,
+because it believes the week is already in band.
+
+This was the strongest case for acting this morning and I am not taking it, for a reason I checked
+rather than assumed. `remainingPlanned` only counts days **from TODAY forward**, while `doneTrimp`
+counts measured TRIMP on days already past, regardless of type. The over-pricing therefore misleads
+the governor **only on Monday and Tuesday**. From Wed 18 Nov the Tuesday tennis has moved into
+`doneTrimp` at its real cost, projected falls to roughly the honest figure, and if the week is
+genuinely under floor with readiness ≥ 7 the governor raises written work by up to 1.25×. A 26-TRIMP
+gap, 6% of the week, is precisely what `scale` exists for, and it is the instrument the brief says
+not to duplicate. It self-corrects in two days.
+
+The alternative was to add a session, and both empty days are documented bad slots: **Wed 18 is his
+heaviest weekday** (mean 94 TRIMP, active 7-for-7, tennis on 6 of them — 15 Nov §3's trap, and the
+number that springs it is 94), and **Sat 21 sits between Friday's benchmark and Sunday's 1h15**.
+Raising the Sunday long run breaks the block's own ladder rule: 1h15 has not landed yet — 8 Nov gave
+1:12:53 and 11 Nov 1:11:03, both under it — and the rung climbs only after a rung lands. Changing
+today's Monday Z2 on the first morning of its first test is churn. There was nothing good to do with
+the 26.
+
+**The fix is not mine to make.** `isTennis` is in App.jsx outside SCHEDULE/TAPER_PLAN, so this
+Routine cannot touch it. It is the seventh-plus entry for this defect in this file. Two consequences
+for whoever does fix it: planned tennis lines would start pricing from history, **and they would
+start ticking at all** — `SESSION_MATCHERS`' first rule is `[/tennis/i, isTennis]`, so Tue 17 Nov's
+`cal:true` line will read `missed` all week no matter what he plays.
+
+### 5. The band survives, but yesterday's reopen condition cannot fire as written
+With week 10 corrected to 378, the Copenhagen block reads:
+
+| week | total | band | court | running | other |
+|---|---|---|---|---|---|
+| Sep 28–Oct 4 | 327 | 400–560 | 126 | 148 | 53 |
+| Oct 5–11 | **693** | 400–560 | 311 | 149 | 233 |
+| Oct 12–18 | 129 *(illness)* | 400–560 | 129 | 0 | 0 |
+| Oct 19–25 | 407 | 400–560 | 244 | 55 | 108 |
+| Oct 26–Nov 1 | **614** | 400–560 | 340 | 141 | 132 |
+| Nov 2–8 | 364 | 400–560 | 148 | 133 | 83 |
+| Nov 9–15 | **378** | 440–580 | **121** | 136 | 121 |
+
+Non-illness mean **464**, median **392**, against a 440 floor. Yesterday's figures (447 and 385)
+were computed off the 276 and are superseded; the direction of the conclusion does not change.
+
+15 Nov §5 set the reopen condition as **"two consecutive weeks closing under 400 while court load is
+at least 216."** Week 9 (364, court 148) and week 10 (378, court 121) are two consecutive weeks under
+400 — but both fail the court clause, so the condition does not fire and the band stands. That is
+the right answer and the wrong test, because **court load has halved and is still falling**: 311 →
+244 → 340 → **148 → 121**. The last two weeks are the lowest non-illness court stretch in the block
+against a block mean of 216, and week 11 has exactly one booked fixture. A condition keyed to court
+≥ 216 is close to unfalsifiable at his current court volume, which makes the band untestable rather
+than confirmed — a trigger that cannot be pulled is not insurance.
+
+Restating it so it can fire. **Reopen the 440–580 band if either holds:**
+- two consecutive weeks close under **400** while the *written* plan for each priced at **440 or
+  above** — i.e. the floor was asked for and missed, whatever court did; or
+- court load closes under **160** for **four** consecutive weeks, in which case the band's own
+  premise ("the band is TOTAL load and court time is most of it") has stopped being true and the
+  floor needs re-cutting against written work instead.
+
+Week 11 is the first half of the first clause: written 461 by the engine, 414 honestly, against a
+440 floor, with court light. Weeks 9 and 10 are the second and third of a possible four on the court
+clause. Both counters are live from this morning. The thing **not** to do is re-cut the band on two
+weeks of court data: the series runs 121 to 340 at a factor of 2.8 and fitting a floor to that is
+fitting a line to noise.
+
+### 6. What I deliberately left alone
+- **Week 11, entirely.** It opens today, it was written five days ago on the assumption that both of
+  §1's tests would pass, and they have. Mon Z2 50min, Tue ski + gym + booked tennis, Wed free, Thu
+  rest, Fri the 3×2km, Sat free, Sun long run 1h15. Rewriting a week on the morning it opens, with
+  readiness 8/10 and nothing flagged, is the churn the brief names.
+- **Today's Z2 run 50min.** Written 14 Nov onto a Monday after 15 Nov §3 priced every weekday and
+  found Monday is **0-for-0 on prescribed runs, not 0-for-7** — a run had never been written there.
+  Today is its first test and it has not had the chance to fail. The move that would change it is
+  adherence.py still showing run short after week 11 closes with this line specifically unticked.
+  **Do not move it to Wednesday** — that is the 94-TRIMP trap, re-confirmed in §4.
+- **The ski.** 3/2, short by 1, no WATCH. 11 Nov bolted it to the front of the gym trip, 13 Nov
+  confirmed the fix in a Lisbon hotel gym on the worst readiness of the block. The open question is
+  the written "beat 2380m" against 13 Nov's 2240m, done as 4×560m with rest at avg HR 120 on an
+  unfamiliar machine at damper 4 — too confounded to re-target from. **Tomorrow is the clean test.**
+  Also still open and deliberately untouched: the skill is explicit that the ski problem is pacing
+  and fatigue resistance, not fitness (3:54 fresh, 4:18 raced) and that it should be trained
+  *compromised*, while the written line trains it fresh at the front of the trip — a clause that
+  exists for adherence and has now worked twice. Sequence unchanged: one clean test, then consider
+  moving it behind the lift. **Decide Wed 18 Nov.** Pre-empting that today would destroy tomorrow's
+  only data point.
+- **Fri 20 Nov's key run.** Four days out, on a day he has now trained four Fridays running (30 Oct,
+  6 Nov, 13 Nov, and 20 Nov pending), carrying the shape that has landed once readably — 6 Nov's
+  3×2km at 14.0/14.0/13.5. 13 Nov moved it off Thursday on a 0-for-5 for hard Thursday benchmarks
+  and that move has not been tested once. If Friday also fails to produce a readable session,
+  **Thursday is the place to look next** — 3 of the block's 10 runs, zero tennis ever recorded there,
+  and 1 Oct's 8×1km tempo landed on a Thursday — not a third weekday.
+- **Week 12 does not exist, and the deadline stands at Sat 21 Nov.** Week 11 is the last week in
+  SCHEDULE; Base II runs to 20 Dec, so weeks 12–16 are unwritten and on Mon 23 Nov the week board
+  would have no week to show. Friday's result sets the rung (14.0 holds, or 14.5 if all three reps
+  clear), so the key-run line cannot be written honestly before then. **Write week 12 on Sat
+  21 Nov**, at the rung Friday actually produced, and at a written load that reaches 440 on §4's
+  reasoning. **If Friday's session does not happen, write it anyway on 21 Nov at rung 14.0.** Hard
+  deadline: before Mon 23 Nov. Four days of slack remain, which is why it is not being written today.
+- **The phase.** Base II · Threshold, week 3 of 6 opening, rung 14.0. A crash that resolved inside a
+  week is not an argument for a different block, and HRV at +41 with `easeHard` FALSE means week 11
+  can actually execute threshold work.
+- **The Base I and Base II notes.** Base II's is two sentences and still accurate — it names four
+  sessions and week 11 asks for exactly those four. Base I's note is far longer than two sentences,
+  but its weeks are over and the rules forbid rewriting a closed week.
+- **`RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`, `RACE_GAINS`.** Copenhagen is 131 days
+  out, no result is known, no target has moved. Field position unchanged: ski 29.8% and running
+  27.7% are still the two weakest elements and still what the block is aimed at.
+- **Tue 17 Nov's `cal:true` tennis line.** calendar_sync.py writes it. Still the only
+  calendar-synced line in SCHEDULE, and per §4 it will read `missed` all week through no fault of
+  his.
+- **`hyrox` 0 prescribed.** The athlete profile calls group sessions the specificity backbone at
+  2–3×/week, and the plan writes none. That is phase-correct — specificity is scheduled from 4 Jan
+  2027 — and he is taking them unprescribed anyway: 29 Oct, 9 Nov, 15 Nov. `unplanned7` is 203.
+- **`row` 0 prescribed, 2 done.** Row is top 11.4%, a strength to defend rather than chase. The
+  1000m row TT is still owed, deferred twice for heavy legs, but a fresh TT on a strength is not
+  worth a slot in a threshold week.
+
+### 7. Checks
+No edit to `src/App.jsx` this morning, so all four pre-push gates were run against the committed
+file to confirm the overnight bot pushes left it sound.
+
+- `python3 check_plan.py` → exit 0, "plan lines OK (text ≤ 60, why ≤ 120, from 2026-11-09)".
+- `npm run build` → clean after `npm ci`, **41 modules**, both pages, main bundle **332.63 kB**.
+- All **eleven** patch anchors from gotcha 14 present, `body` included.
+- `update.patch()` round-tripped against a copy of the real `src/App.jsx` with a synthetic 17 Nov
+  wellness payload, a weigh-in tuple and a **44-field** probe CSV row (`COLS_BOT`, per gotcha 1):
+  the daily row patched **165 → 166** and sleep **164 → 165**, **0 rows with a wrong indent** across
+  all 331 and none lost, the weight upsert landed inside the weight array as `["2026-11-17",77.1]`
+  with `vo2max` byte-identical, the CSV row upserted, TODAY advanced to 2026-11-18, and **SCHEDULE
+  (36,491 chars), TAPER_PLAN (3,171) and HYROX_DATA (25,457) all came back byte-identical**.
+
+Two harness notes for the next run, both costing a false start this morning and neither a code bug.
+**`wellness['sleep']` is a nested dict** — `{'deep':…,'rem':…,'light':…,'awake':…}`, not flat keys on
+`wellness`; with the stages flattened, `has_real_sleep` is correctly False and the sleep row silently
+does not patch, which looks exactly like a regression. And **`csv_rows` takes fully quoted CSV
+lines**: his rows carry Lithuanian decimal commas (`"5,00"`), so an unquoted join reads as 49 fields
+rather than 44.
+
+One note on reading the engine live, because it saves twenty minutes: a Python
+re-implementation of `estTrimp` got week 11 wrong by 47 TRIMP (414 instead of 461) purely because it
+used his real tennis median where the engine uses the broken fallback. Read the engine, do not
+reimplement it. `node` can run lines 2–2289 of `src/App.jsx` directly as an `.mjs` — everything above
+`function GlobalStyle()` is plain JS with no JSX — plus the `MON` constant from line 2309 and
+`hrvBaseline` from 2537, both of which are declared below that cut and are the only two forward
+references in the slice. Then call `analyze(parseCSV(CSV_DATA))` and `adaptPlan(...)`. Note
+`governor` is a top-level key of `adaptPlan`'s return, **not** a member of `signals`.
+
+---
+
 ## 2026-11-15
 - adherence: **no ACTION REQUIRED and no WATCH — the report closes with "every prescribed session
   type has been trained at least once."** Window 25 Oct–15 Nov: ski **3/2, short by 1** · row 0/3 ·
