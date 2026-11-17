@@ -279,11 +279,26 @@ function AddExercise({ onAdd }) {
   </div>
 }
 
+// Last time's sets: "60kg × 2·4·6" when every set had the same weight,
+// otherwise each set — "60×2 · 55×4 · 50×6 kg" — so a drop set shows as one.
+function lastText(sets) {
+  const kgs = sets.map(x => x.kg)
+  if (kgs.every(k => k === kgs[0])) return `${kgs[0] != null ? `${fmtKg(kgs[0])}kg × ` : ""}${sets.map(x => x.n ?? "–").join("·")}`
+  return sets.map(x => `${x.kg != null ? fmtKg(x.kg) : "BW"}×${x.n ?? "–"}`).join(" · ") + " kg"
+}
+
 function ExerciseCard({ e, onChange, onRemove, entries, start }) {
   const unitLbl = { reps: "reps", m: "m", s: "sec" }[e.unit]
   const last = useMemo(() => lastExercise(entries, e.name, start), [entries, e.name, start])
   const setSet = (k, p) => onChange({ ...e, sets: e.sets.map((x, j) => (j === k ? { ...x, ...p } : x)) })
-  const rename = c => onChange({ ...e, name: c.name, cat: c.cat, gname: c.gname, unit: c.cat ? c.unit : e.unit })
+  // Renaming before any set is entered re-seeds the placeholders from that
+  // exercise's own last session, so they are its numbers, not the old name's.
+  const rename = c => {
+    const prev = lastExercise(entries, c.name, start)
+    const fresh = prev && e.sets.every(x => x.n == null && x.kg == null)
+    onChange({ ...e, name: c.name, cat: c.cat, gname: c.gname, unit: c.cat ? c.unit : e.unit,
+      ...(fresh ? { sets: prev.map(x => ({ kg: null, n: null, ph: { kg: x.kg, n: x.n } })) } : {}) })
+  }
   return <div className="card">
     <div className="row">
       <div className="grow"><ExercisePicker className="exname" value={e.name} onPick={rename} /></div>
@@ -291,7 +306,7 @@ function ExerciseCard({ e, onChange, onRemove, entries, start }) {
     </div>
     <div className="meta">
       {e.target && <span>plan {e.target}</span>}
-      {last && <span>last {fmtKg(last[0].kg)}{last[0].kg != null ? "kg" : ""} × {last.map(x => x.n).join("·")}</span>}
+      {last && <span>last {lastText(last)}</span>}
       {!e.cat && <span className="warn">not in Garmin's list — notes only</span>}
     </div>
     <Chips value={e.unit} options={[["reps", "reps"], ["m", "metres"], ["s", "seconds"]]} onChange={u => u && onChange({ ...e, unit: u })} />
@@ -309,8 +324,12 @@ function ExerciseCard({ e, onChange, onRemove, entries, start }) {
       </div>
     })}
     <button className="btn ghost" onClick={() => {
-      const prev = e.sets[e.sets.length - 1] || {}
-      onChange({ ...e, sets: [...e.sets, { kg: null, n: null, ph: { kg: prev.kg ?? prev.ph?.kg ?? null, n: prev.n ?? prev.ph?.n ?? null } }] })
+      // A new set is pre-filled with that set number from last time (set 2
+      // after a drop is 55×4, not set 1's 60×2); past last time's count, it
+      // repeats the set above.
+      const k = e.sets.length, prev = e.sets[k - 1] || {}
+      const ph = last?.[k] ? { kg: last[k].kg, n: last[k].n } : { kg: prev.kg ?? prev.ph?.kg ?? null, n: prev.n ?? prev.ph?.n ?? null }
+      onChange({ ...e, sets: [...e.sets, { kg: null, n: null, ph }] })
     }}>+ set</button>
   </div>
 }
