@@ -72,6 +72,232 @@ and never once done.
 
 ---
 
+## 2026-11-17
+- adherence: **no ACTION REQUIRED and no WATCH — the report closes with "Every prescribed session
+  type has been trained at least once."** Window 27 Oct–17 Nov: ski **4/2, short by 2** · row 0/2 ·
+  hyrox **0 prescribed / 1 done** · strength 4/5 on track · cycle 0/8 · tennis 1/8 · **run 8/7,
+  short by 1**. Benchmarks already due: **29 Oct "type match — CHECK IT", logged as "Indoor Running
+  Circle: {1km run, 40m sled pull"** · 5 Nov NOTHING LOGGED · 12 Nov NOTHING LOGGED. Next 14d:
+  **Fri 20 Nov**, the 3×2km. `check_plan.py` exit 0. The ski going 3/2 → 4/2 overnight is today's
+  own ski line counted as prescribed before the day has happened, not a deterioration.
+- readiness: **HRV 80 against a baseline of 63 — +17**, down from 108 but the third consecutive
+  morning above baseline. **RHR 38 — inside 38–46, at its lower edge** (39 · 37 · 36 · 40 · 38),
+  resp 10.0, SpO2 94, sleep 8h18 with **deep back to 171min** from 58. Baseline 99 → 88 → 79 → 72 →
+  64 → 67 → **63**. 166 daily / 165 sleep rows, contiguous. LAST_RUN and LAST_DATA both
+  2026-11-17T07:07Z against TODAY 2026-11-17 — **sync healthy**. Engine, read live off the committed
+  file: readiness **8/10**, TSB **−10.84**, ATL **47.41**, CTL **36.57**, **ATL/CTL 1.30**,
+  `consecutiveHard` **2**, `daysSinceRest` **4**, `forceRest` FALSE, `easeHard` **FALSE**, `scale`
+  **1.00**, `unplanned7` **203**. Week 11, day two: done **56**, remaining 394, projected **450**
+  against 440–580, `over` FALSE, `under` FALSE.
+- decision: **CHANGED — two edits, neither of them an existing session line. (1) Wed 18 Nov, the
+  week's empty day, now carries `{type:"hyrox", text:"Hyrox group 45min · station circuit, go
+  hard"}`. (2) The Base II TAPER_PLAN note goes from "four sessions" to "five sessions — the Hyrox
+  group, …".** Nothing already written was moved, shortened or re-timed.
+- why: **the group circuit was silently eating the threshold benchmark.** `isHyrox` is true for any
+  "Indoor Running" with distance — which is how every one of his group sessions logs — and `isRun`
+  is true for it too, so with no `hyrox` line in the week the circuit falls through to the run
+  matcher and **ticks the ⏱ KEY RUN**. Simulated against the real file: a circuit on Wed 18 Nov
+  makes **Fri 20 Nov read `done`, `doneOn 2026-11-18`**, with the hyrox line written it reads open.
+  That has already happened twice — 29 Oct and 15 Nov — and Friday is the fourth consecutive
+  attempt at a benchmark that has genuinely landed **once in four prescriptions**.
+- watching: **the Hiit-typed circuit**, which this edit does not cover (§3); **the ski target** —
+  2240m on 13 Nov against a written "beat 2380m", today is the clean test, unchanged (decide
+  Wed 18 Nov, §5); **week 12 does not exist** and the deadline stands at Sat 21 Nov (§5); **the
+  baseline reversal** into Friday, now a smaller hazard than yesterday thought — roughly 72 rather
+  than 81 (§4); and **weight 77.9kg / body fat 15.6% on 1 Nov**, still a single reading, now
+  **sixteen** days old.
+
+### 1. Why this morning genuinely differs from the last two
+15 and 16 Nov both closed NO CHANGE, and both were right to: 15 Nov had three pre-registered tests
+resolve negative, 16 Nov had the last two resolve with a pass. Today would have been the third, and
+the brief says to treat that as evidence of passivity. It is not the streak that moved me, though.
+It is that I went looking for the mechanism behind adherence.py's one flagged oddity — **29 Oct,
+"type match — CHECK IT"** — instead of accepting it as noise, and the mechanism turned out to be
+live, reproducible, and pointed at Friday.
+
+Yesterday's §6 recorded Friday's benchmark as "four days out … carrying the shape that has landed
+once readably" and left it alone. That was the right call on the *content* of the line. What neither
+of the last two runs checked is whether the line can still be **reached**, and it cannot be, if a
+circuit lands first.
+
+### 2. The defect, and the proof
+`SESSION_MATCHERS` (src/App.jsx:1818) is ordered most-specific-first, and the checklist pass at
+:2081 walks the week's days in order, letting the first open session line claim a matching
+unplanned activity and then **consuming** it. Two facts collide:
+
+- `isHyrox = a => title has "hyrox"/"circle", OR activity type is "indoor running" with distance>0`
+- `isRun   = a => activity type matches /running|trail/`
+
+His group sessions log as Garmin **"Indoor Running"** with a distance, so **both are true**. The
+hyrox matcher's regex is tested against the *plan text*, and "⏱ KEY RUN · 3×2km at 14.0kmh" does
+not contain hyrox/circle/roxzone — so the hyrox matcher never applies, the line falls through to
+`/run|jog|km\b|\bTT\b/`, and `runFits` waves the circuit through on `_avgHR >= 138`.
+
+Simulated against the committed file, TODAY forced to 20 Nov, with one synthetic circuit on Wed
+18 Nov logged exactly as 15 Nov's was (Indoor Running, 4.60km, 40:00, avg 152, max 176):
+
+| | Fri 20 Nov ⏱ KEY RUN |
+|---|---|
+| SCHEDULE as written | **`done`, `doneOn 2026-11-18`** |
+| with a hyrox line on Wed 18 | **open** |
+
+Re-run on a realistic heavy week (Tue tennis 2h + ski + gym, Wed circuit + tennis, `doneTrimp` 331)
+the result is the same: without the line Friday reads `done`; with it Friday stays open. `over` is
+FALSE in both branches and `easeHard` is identical in both, so the edit cannot cause a trim or a cap
+it would not otherwise have had — that was the thing I most needed to rule out, since trimming the
+benchmark I am trying to protect would be worse than the defect.
+
+This has already cost two benchmarks:
+
+| written | what landed | read as |
+|---|---|---|
+| Thu 29 Oct ⏱ KEY RUN | Thu 29 Oct "Circle: {1km run, 40m sled pull, 10BBJ, 500m row…" 43m avg142 | claimed — adherence.py caught this one |
+| Thu 5 Nov ⏱ KEY RUN | **Fri 6 Nov "Treshold 3x2km 14kmh 14kmh 13.5kmh" 34m avg147** | genuinely done |
+| Thu 12 Nov ⏱ KEY RUN | Sun 15 Nov "Indoor Running" 36m avg154 max178 | **claimed, and nobody caught it** |
+
+So the rung has sat at 14.0 since **6 Nov** with no new data, and the written record says otherwise.
+adherence.py could only flag 29 Oct because its benchmark check is same-day; 15 Nov is a different
+day from 12 Nov, so the week-as-checklist pass hid it. That gap is worth knowing about: **a
+benchmark falsely ticked by a later day in the same week is invisible to adherence.py.**
+
+### 3. Why writing the circuit is the right fix and not a workaround
+The matcher is in App.jsx outside SCHEDULE/TAPER_PLAN, so this Routine cannot touch it. But the fix
+inside scope is the better one anyway, for three reasons that stand on their own:
+
+- **`hyrox` is 0 prescribed and he has taken the group session twelve times**, six of them since
+  mid-September: 16 Sep, 20 Sep, 25 Sep, 29 Oct, 9 Nov, 15 Nov. `model.hyrox` reads **n=12, HR 142,
+  43min**. The athlete profile calls group work the specificity backbone; the plan wrote none of it.
+  16 Nov §6 held that this was phase-correct because specificity is scheduled from 4 Jan 2027, and
+  as a *training* argument that is still true. As a *bookkeeping* argument it was wrong: an
+  unwritten session type does not sit quietly outside the plan, it goes looking for a line to tick.
+- **Stations are top 9.6% at Athens, running top 27.7%.** The circuit is the session that built the
+  first number. It is not surplus to the block, it is unlabelled.
+- **It makes the week's load honest.** Yesterday's §4 argued week 11 was ~26 TRIMP under floor once
+  the over-priced tennis line is discounted, and that the governor would raise written work from
+  Wednesday to cover it. With the circuit written, projected goes **450 → 557** inside 440–580, and
+  the right conclusion is that the week was never under floor — it contained a ~70-TRIMP circuit
+  nobody had written down. Letting `scale` inflate the Sunday long run to cover a gap that was an
+  accounting artifact would have been the wrong correction, and this removes the need for it.
+
+**What this edit does not cover.** 9 Nov's circuit logged as Garmin type **Hiit**, title "Circuit ·
+2 rounds · 30:00". `isHyrox` is false for it (the title regex wants "circle", not "circuit") and so
+is `isRun`, so it ticks nothing — which is honest, if unhelpful: it never threatened the key run and
+it will not tick the new hyrox line either. Both activity types are in play, so **a Hiit-typed
+circuit this week will read as unplanned load and the Wed line will read missed.** That is the
+correct failure direction and needs no action. The thing to watch is the reverse: if he starts
+logging group work as Hiit consistently, the new line stops earning its place and should come out.
+
+### 4. The physiological signal, and one non-signal worth killing before tomorrow chases it
+**SpO2 is not a signal.** It read 98 for thirty-six consecutive days to 14 Nov and has now come in
+95 · 95 · **94**. That looks like a three-day decline, and it is not: across the 166-day series 94
+appears **17** times and 95 **18** times, with sustained 93–95 stretches through late May, August
+and September. The anomaly was the 98 plateau, not the return from it. Recording this explicitly so
+tomorrow's cold session does not build a watch on it.
+
+**The real reading is that the crash is fully paid off.** HRV 130 → 51 → 53 → 42 → 45 → 85 → 108 →
+**80**; +17 over a baseline that has now fallen to 63. RHR 38 is back inside 38–46 from two days
+below a 165-day floor. And **deep sleep is 171min from 58** — which closes 16 Nov §2's watch with a
+pass four days early, since the trigger needed three nights under 70 *with* HRV falling and got one
+night at 58 followed by a 171. Resp 10.0 twice in three days is the lowest in the series, and paired
+with RHR in the high 30s that is parasympathetic dominance, not depression.
+
+`consecutiveHard` is **2** and `daysSinceRest` **4**, both up from 1 and 3. ATL/CTL **1.30** is the
+highest of the block, ahead of yesterday's 1.27. That is a loaded but not alarming state at
+readiness 8/10 with `forceRest` FALSE, and Thursday is written as rest four days into the count.
+Nothing to do, but if ATL/CTL clears 1.35 with `daysSinceRest` past 7 before Thursday, Thursday's
+rest stops being optional and Friday should move to Saturday. **Decide Thu 19 Nov.**
+
+**The baseline hazard into Friday is smaller than yesterday's estimate.** 16 Nov §2 put the cap
+threshold at "81 or below on Friday morning" on the assumption that readings would hold near 100.
+Today came in at 80, which drags the projection down. `hrvBaseline` is Garmin's own 7-day
+`weeklyAvg` (update.py:997), so Friday's window is 14–20 Nov: 45 · 85 · 108 · 80 plus three
+unknowns. At readings near 85 the baseline lands around **82**, and `easeHard` fires on
+`hrv − base ≤ −10`, so the capping threshold is roughly **72, not 81**. Still an ordinary morning
+for him, and the mitigation is unchanged and already in place: **Sat 21 Nov is empty**, the week is
+a checklist, and a Friday session the engine caps lands Saturday and still ticks. Whoever reads this
+on Friday: if `easeHard` is TRUE with HRV in the 70s and RHR inside 38–46, **move the session to
+Saturday, do not soften it.**
+
+### 5. What I deliberately left alone
+- **Every existing line in week 11.** It opened yesterday and Monday's line passed its first test
+  cleanly: 16 Nov logged **8.59km in 50:53 at avg HR 130, max 157**, and `data/sessions/
+  2026-11-16-2201-running.json` records it at **RPE 4, feel 25**, applied to Garmin. The Monday Z2
+  slot written on 14 Nov onto a weekday that had never carried a run landed on its first attempt.
+  Adding a line to an empty day is not rewriting a week he is partway through; moving or re-timing
+  one would be, and I did neither.
+- **Today's ski, and the "beat 2380m" target.** 16 Nov §6 pre-registered today as the clean test
+  against 13 Nov's 2240m (done as 4×560m with rest, avg HR 120, unfamiliar hotel machine at damper
+  4 — too confounded to re-target from). **Decide Wed 18 Nov.** Pre-empting it today destroys the
+  only data point. The deeper question is still open and still deliberately untouched: the skill is
+  explicit that his ski problem is pacing and fatigue resistance rather than fitness (3:54 fresh,
+  4:18 raced) and that it should be trained **compromised**, while the line trains it fresh at the
+  front of the trip — a clause that exists for adherence and has worked twice. Sequence unchanged:
+  one clean test, then consider moving it behind the lift. Note the new Wed 18 circuit is now a
+  second candidate home for compromised ski work; that is for tomorrow's decision, not today's.
+- **Fri 20 Nov's key run, in content and in day.** Friday is a day he trains — 30 Oct, 6 Nov,
+  13 Nov, and the one genuine 3×2km of this block landed on **Fri 6 Nov**. 13 Nov moved it off
+  Thursday on an 0-for-5 for hard Thursday benchmarks and that move has still never been tested,
+  because the test was being cancelled by a bookkeeping defect rather than failing. It can now
+  actually run. If Friday still produces nothing readable, **Thursday is the place to look next**,
+  not a third weekday.
+- **Week 12, and the Sat 21 Nov deadline.** Week 11 is still the last week in SCHEDULE and Base II
+  runs to 20 Dec. Yesterday's reason for waiting holds and is now stronger: Friday's result sets the
+  rung, and for the first time Friday can genuinely produce one. **Write week 12 on Sat 21 Nov at
+  the rung Friday actually produced, and if Friday does not happen write it anyway at rung 14.0.**
+  It must carry a `hyrox` line of its own on a day **before** the key run — the checklist pass walks
+  days in order, so a hyrox line written after the benchmark does not protect it. Hard deadline
+  before Mon 23 Nov; four days of slack remain.
+- **The phase.** Base II · Threshold, week 3 of 6. Readiness 8/10, `easeHard` FALSE, the crash
+  resolved. Nothing here argues for a different block — and the one thing that looked like a
+  five-week plateau in threshold work turns out to be three weeks of a benchmark that was being
+  ticked without being run, which is a bookkeeping failure, not a training-response failure. That
+  distinction is the reason not to re-cut the block today.
+- **The TAPER_PLAN bands.** 16 Nov §5 restated the reopen condition in two falsifiable limbs
+  (two consecutive weeks under 400 against a *written* plan of ≥440, or court under 160 for four
+  consecutive weeks). Both counters stay live and neither advances today. Writing the circuit does
+  change the premise slightly in the band's favour: a week that reads 557 written is a week whose
+  440 floor is reachable without inflating anything, so the floor looks less unrealistic than it did
+  yesterday. Not enough to close the condition — two weeks of court data between 121 and 340 is
+  still noise.
+- **The Base I note.** Far longer than two sentences, but its weeks are closed and the rules forbid
+  rewriting a closed week.
+- **`RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`, `RACE_GAINS`.** Copenhagen is 130 days
+  out, no result known, no target moved. Ski 29.8% and running 27.7% remain the two weakest
+  elements and the block is still aimed at them.
+- **Tue 17 Nov's `cal:true` tennis line.** calendar_sync.py writes it. `isTennis` is still
+  `=== "tennis"` against Garmin's `Tennis V2`, so `model.tennis` reads **n=0** — confirmed live
+  again — the line prices from the HR 138 / 75min fallback at **101** against a real median of
+  **HR 109 / 89min ≈ 54**, and it will read `missed` all week whatever he plays. Outside this
+  Routine's scope; eighth-plus entry for this defect.
+- **`row` 0 prescribed, 2 done.** Top 11.4%, a strength to defend rather than chase. The 1000m row
+  TT is still owed and still not worth a slot in a threshold week.
+- **Body composition.** One reading on 1 Nov (77.9kg, 15.6%, BMI 25.1), the highest of both series,
+  now sixteen days old and eleven days older than the next-most-recent (14 Oct). Nothing to act on
+  from a single stale point, but a weigh-in would be worth more than most of what is written above.
+
+### 6. Checks
+All four pre-push gates run against the edited file.
+
+- `python3 check_plan.py` → **exit 0**, "plan lines OK (text ≤ 60, why ≤ 120, from 2026-11-09)".
+  New line is **44** chars of `text` and **71** of `why`.
+- `npm run build` → **clean**, 41 modules, both pages, main bundle **333.26 kB** (from 332.63).
+- All **eleven** patch anchors from gotcha 14 present, `body` included.
+- `update.patch()` round-tripped against a copy of the real `src/App.jsx` with an 18 Nov wellness
+  payload, a weigh-in and a **44-field** probe CSV row (`COLS_BOT`, gotcha 1): daily patched
+  **166 → 167** and sleep **165 → 166**, **0 rows with a wrong indent** across all 333 and none
+  lost, the weight upsert landed inside the weight array as `["2026-11-18",77.1]` with `vo2max`
+  byte-identical, the CSV row upserted, TODAY advanced to 2026-11-19, and **SCHEDULE (36,635 chars,
+  carrying the new Wed 18 line), TAPER_PLAN (3,176, carrying the new note) and HYROX_DATA (25,457)
+  all came back byte-identical**.
+
+One harness note on top of 16 Nov's two, which cost a false start again: **`wellness["weight"]` is
+a `(date, kg)` tuple**, not a float (update.py:762 unpacks it). And the node-slice trick still
+works but the cut has moved — `sed -n '2,2294p'` plus line 2313 (`MON`) and line 2541
+(`hrvBaseline`); 2289 and 2293 both truncate mid-template-literal and fail with
+"Unexpected end of input".
+
+---
+
 ## 2026-11-16
 - adherence: **no ACTION REQUIRED and no WATCH — the report closes with "Every prescribed session
   type has been trained at least once."** Window 26 Oct–16 Nov: ski **3/2, short by 1** · row 0/2 ·
