@@ -35,9 +35,9 @@
       ]
     },
     {
-      "name": "Barbell shoulder press",
+      "name": "Barbell overhead press",
       "cat": "SHOULDER_PRESS",
-      "gname": "BARBELL_SHOULDER_PRESS",
+      "gname": "OVERHEAD_BARBELL_PRESS",
       "unit": "reps",
       "sets": [
         {

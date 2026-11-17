@@ -103,7 +103,7 @@ def erg_total_sec(e: dict) -> float:
 
 def short(name: str) -> str:
     words = {"romanian deadlift": "RDL", "walking lunges": "Lunges", "back squat": "Squat",
-             "calf raises": "Calf", "farmers carry": "Farmers", "shoulder press": "Press",
+             "calf raises": "Calf", "farmers carry": "Farmers", "shoulder press": "OHP", "barbell overhead press": "OHP",
              "lat pulldown": "Pulldown", "wall balls": "Wall balls"}
     return words.get(name.lower(), name)
 

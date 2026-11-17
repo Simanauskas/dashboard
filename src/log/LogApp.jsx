@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import DATA from "virtual:log-data"
-import { exByName, searchExercises, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, CIRCUIT_TEMPLATES, TILES, otherOptions } from "./catalog.js"
+import { exByName, canonName, searchExercises, STRENGTH_TEMPLATES, RUN_TEMPLATES, HYROX_TEMPLATE, CIRCUIT_TEMPLATES, TILES, otherOptions } from "./catalog.js"
 import { store, send, sendAction, flush, fetchStatus, testToken } from "./store.js"
 import { TileIcon } from "./icons.jsx"
 
@@ -69,10 +69,10 @@ function allSessions(entries) {
 }
 
 function lastExercise(entries, name, beforeStart) {
-  const n = name.toLowerCase()
+  const n = canonName(name)    // "Shoulder press" history counts for "Barbell overhead press"
   for (const s of allSessions(entries)) {
     if (s.kind !== "strength" || (beforeStart && s.start >= beforeStart)) continue
-    const ex = (s.exercises || []).find(e => e.name.toLowerCase() === n && e.sets?.some(x => x.n != null))
+    const ex = (s.exercises || []).find(e => canonName(e.name) === n && e.sets?.some(x => x.n != null))
     if (ex) return ex.sets.filter(x => x.n != null || x.kg != null)
   }
   return null

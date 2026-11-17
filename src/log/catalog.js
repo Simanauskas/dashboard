@@ -30,7 +30,11 @@ export const EXERCISES = [
   ["Seated row", "ROW", "SEATED_CABLE_ROW"],
   ["One-arm DB row", "ROW", "ONE_ARM_BENT_OVER_ROW"],
   ["Face pull", "ROW", "FACE_PULL"],
-  ["Shoulder press", "SHOULDER_PRESS", "OVERHEAD_BARBELL_PRESS"],
+  // His PR lift. Garmin calls it "Overhead Barbell Press"; the old name
+  // "Shoulder press" and Garmin's separate BARBELL_SHOULDER_PRESS (picked by
+  // search on 13 Nov, logged under a different Garmin exercise) are aliases of
+  // this one, so search, placeholders and history all land here.
+  ["Barbell overhead press", "SHOULDER_PRESS", "OVERHEAD_BARBELL_PRESS"],
   ["DB shoulder press", "SHOULDER_PRESS", "OVERHEAD_DUMBBELL_PRESS"],
   ["Push press", "SHOULDER_PRESS", "BARBELL_PUSH_PRESS"],
   ["Bench press", "BENCH_PRESS", "BARBELL_BENCH_PRESS"],
@@ -56,6 +60,14 @@ export const EXERCISES = [
   ["Bike (erg)", "INDOOR_BIKE", "STATIONARY_BIKE", "m"],
 ].map(([name, cat, gname, unit = "reps"]) => ({ name, cat, gname, unit, curated: true }))
 
+// Other names for a hand-picked exercise: found by search, resolved by
+// exByName, and treated as the same exercise in history (canonName).
+const ALIASES = {
+  "Barbell overhead press": ["Shoulder press", "Barbell shoulder press", "Overhead press", "OHP", "Military press"],
+}
+// Garmin exercises folded into a hand-picked one, so the picker never offers both.
+const FOLDED = new Set(["SHOULDER_PRESS/BARBELL_SHOULDER_PRESS"])
+
 // Every exercise in Garmin's catalog (src/log/garmin-exercises.json, refreshed
 // from Garmin by exercise_catalog.py in the hourly sync), named from Garmin's
 // key: CRUNCH/BICYCLE_CRUNCH → "Bicycle crunch". The hand-picked list above
@@ -66,7 +78,7 @@ const unitFor = (cat, name) =>
     : cat === "PLANK" || /(^|_)(HOLD|PLANK|HANG)(_|$)/.test(name || "") ? "s" : "reps"
 
 export const ALL_EXERCISES = (() => {
-  const seen = new Set(EXERCISES.map(e => `${e.cat}/${e.gname}`))
+  const seen = new Set([...EXERCISES.map(e => `${e.cat}/${e.gname}`), ...FOLDED])
   const garmin = (GARMIN.exercises || [])
     .filter(([c, n]) => !seen.has(`${c}/${n}`))
     .map(([c, n]) => ({ name: human(n), cat: c, gname: n, unit: unitFor(c, n) }))
@@ -82,11 +94,18 @@ export const ALL_EXERCISES = (() => {
       : list.find(e => human(e.cat) === name) || list.find(e => lower.includes(human(e.cat).toLowerCase())) || null
     for (const e of list) if (e !== home) e.name = `${name} (${human(e.cat).toLowerCase()})`
   }
-  return [...EXERCISES, ...garmin].map(e => ({ ...e, catLabel: human(e.cat), hay: `${e.name} ${human(e.cat)}`.toLowerCase().replace(/-/g, " ") }))
+  return [...EXERCISES, ...garmin].map(e => ({ ...e, catLabel: human(e.cat),
+    alias: (ALIASES[e.name] || []).map(a => a.toLowerCase()),
+    hay: `${e.name} ${(ALIASES[e.name] || []).join(" ")} ${human(e.cat)}`.toLowerCase().replace(/-/g, " ") }))
 })()
 
+const ALIAS_OF = Object.fromEntries(Object.entries(ALIASES).flatMap(([name, list]) => list.map(a => [a.toLowerCase(), name.toLowerCase()])))
+
+// The one name an exercise goes by: an alias resolves to its hand-picked name.
+export const canonName = n => { const k = (n || "").trim().toLowerCase(); return ALIAS_OF[k] || k }
+
 export const exByName = n => {
-  const k = (n || "").trim().toLowerCase()
+  const k = canonName(n)
   return ALL_EXERCISES.find(e => e.name.toLowerCase() === k)
 }
 
@@ -102,7 +121,7 @@ export function searchExercises(q, limit = 8) {
   for (const e of ALL_EXERCISES) {
     if (!words.every(w => e.hay.includes(w) || e.hay.includes(stem(w)))) continue
     const nl = e.name.toLowerCase()
-    const score = (e.curated ? 10 : 0) + (nl === ql || nl === stem(ql) ? 8 : 0) + (nl.startsWith(stem(words[0])) ? 3 : 0)
+    const score = (e.curated ? 10 : 0) + (nl === ql || nl === stem(ql) || e.alias.includes(ql) ? 8 : 0) + (nl.startsWith(stem(words[0])) ? 3 : 0)
       + (nl.split(" (")[0].split(/\s+/).some(t => t.startsWith(stem(words[0]))) ? 1 : 0) - nl.length / 100
     hits.push([score, e])
   }
@@ -123,7 +142,7 @@ export const STRENGTH_TEMPLATES = {
   "Upper body": [
     { name: "Pull-ups", target: "4×6-10" },
     { name: "Barbell row", target: "3×6-8" },
-    { name: "Shoulder press", target: "3×6-8" },
+    { name: "Barbell overhead press", target: "3×6-8" },
     { name: "Farmers carry", target: "4×40m" },
     { name: "Wall balls", target: "4×20" },
   ],

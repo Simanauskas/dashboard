@@ -103,7 +103,7 @@ doesn't settle it, ask. Kg is the default unit. A per-hand weight
 
 | Exercise | category / name |
 |---|---|
-| Overhead press (barbell) | SHOULDER_PRESS / OVERHEAD_BARBELL_PRESS |
+| Overhead press (barbell) — his PR lift; never BARBELL_SHOULDER_PRESS | SHOULDER_PRESS / OVERHEAD_BARBELL_PRESS |
 | DB shoulder press | SHOULDER_PRESS / OVERHEAD_DUMBBELL_PRESS |
 | Push press | SHOULDER_PRESS / BARBELL_PUSH_PRESS |
 | Bench press | BENCH_PRESS / BARBELL_BENCH_PRESS (DB: DUMBBELL_BENCH_PRESS) |
