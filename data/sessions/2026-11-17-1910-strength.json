@@ -1,0 +1,167 @@
+{
+  "v": 1,
+  "id": "2026-11-17-1910-strength",
+  "kind": "strength",
+  "activity": "Strength",
+  "start": "2026-11-17T19:10:40+02:00",
+  "end": "2026-11-17T20:11:24+02:00",
+  "feel": 25,
+  "rpe": 6,
+  "notes": "Split into two workouts due to skierg in the middle",
+  "title": "",
+  "template": "Upper body",
+  "exercises": [
+    {
+      "name": "Pull-ups",
+      "cat": "PULL_UP",
+      "gname": "PULL_UP",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": null,
+          "n": 13
+        },
+        {
+          "kg": null,
+          "n": 10
+        },
+        {
+          "kg": null,
+          "n": 9
+        },
+        {
+          "kg": null,
+          "n": 8
+        }
+      ]
+    },
+    {
+      "name": "Barbell overhead press",
+      "cat": "SHOULDER_PRESS",
+      "gname": "OVERHEAD_BARBELL_PRESS",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 60,
+          "n": 2
+        },
+        {
+          "kg": 50,
+          "n": 5
+        },
+        {
+          "kg": 50,
+          "n": 6
+        }
+      ]
+    },
+    {
+      "name": "Bench press",
+      "cat": "BENCH_PRESS",
+      "gname": "BARBELL_BENCH_PRESS",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 80,
+          "n": 4
+        },
+        {
+          "kg": 70,
+          "n": 6
+        },
+        {
+          "kg": 70,
+          "n": 6
+        }
+      ]
+    },
+    {
+      "name": "Barbell row",
+      "cat": "ROW",
+      "gname": "BARBELL_ROW",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 40,
+          "n": 15
+        },
+        {
+          "kg": 45,
+          "n": 12
+        },
+        {
+          "kg": 45,
+          "n": 12
+        }
+      ]
+    },
+    {
+      "name": "Crunch",
+      "cat": "CRUNCH",
+      "gname": "CRUNCH",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": null,
+          "n": 100
+        }
+      ]
+    }
+  ],
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Strength",
+      "description": "",
+      "distance": 0.0,
+      "duration": 1810.7,
+      "rpe": null,
+      "feel": null,
+      "sets": [
+        {
+          "exercises": [
+            {
+              "category": "UNKNOWN",
+              "name": null,
+              "probability": 98.828125
+            }
+          ],
+          "duration": 1810.7,
+          "repetitionCount": null,
+          "weight": null,
+          "setType": "ACTIVE",
+          "startTime": "2026-11-17T17:06:10.0",
+          "wktStepIndex": null,
+          "messageIndex": 0,
+          "minimalViableThreshold": null,
+          "avgConcentricMeanVelocity": null,
+          "maxConcentricMeanVelocity": null,
+          "avgEccentricMeanVelocity": null,
+          "maxEccentricMeanVelocity": null,
+          "avgConcentricPeakVelocity": null,
+          "maxConcentricPeakVelocity": null,
+          "avgEccentricPeakVelocity": null,
+          "maxEccentricPeakVelocity": null,
+          "avgMeanPropulsiveVelocity": null,
+          "maxMeanPropulsiveVelocity": null,
+          "avgConcentricMeanPower": null,
+          "maxConcentricMeanPower": null,
+          "avgConcentricPeakPower": null,
+          "maxConcentricPeakPower": null,
+          "avgConcentricDuration": null,
+          "maxConcentricDuration": null,
+          "avgEccentricDuration": null,
+          "maxEccentricDuration": null,
+          "avgConcentricRom": null,
+          "maxConcentricRom": null
+        }
+      ]
+    },
+    "garmin_id": "25110907277",
+    "message": "ok",
+    "hash": "a15842fc6076",
+    "applied_at": "2026-11-17T18:11:35+00:00"
+  },
+  "received": "2026-11-17T18:11:34+00:00"
+}
