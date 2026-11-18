@@ -417,12 +417,30 @@ def allowed_types(s: dict) -> list[str]:
     return KIND_TYPES.get(s.get("kind"), [])
 
 
+def logged_duration(s: dict) -> float | None:
+    """How long the session itself says it lasted, when it says so."""
+    if s.get("kind") == "circuit":
+        return circuit_total(s.get("circuit") or {})
+    if s.get("kind") == "erg":
+        return erg_total_sec(s.get("erg") or {}) or None
+    if s.get("kind") == "hyrox":
+        return (s.get("hyrox") or {}).get("total_sec")
+    return None
+
+
 def match(s: dict, acts: list[dict], claimed: set[str]) -> dict | None:
+    """The activity the session belongs to. First the one its start→save window
+    overlaps; then, among activities nearby, one whose length matches the
+    duration the session states (circuit total, erg time) — a session logged
+    AFTER the workout overlaps nothing, and the nearest start alone put a
+    47-minute circuit onto a 1-minute wall-ball activity (18 Nov 2026); then
+    the closest start."""
     start, end = parse_ts(s.get("start")), parse_ts(s.get("end"))
     if not start:
         return None
     end = end or start + timedelta(hours=1)
     types = allowed_types(s)
+    want = logged_duration(s)
     best, best_key = None, None
     for a in acts:
         tk = (a.get("activityType") or {}).get("typeKey")
@@ -437,7 +455,9 @@ def match(s: dict, acts: list[dict], claimed: set[str]) -> dict | None:
         gap = abs((a0 - start).total_seconds())
         if overlap <= 0 and gap > 4 * 3600:
             continue
-        key = (max(overlap, 0), -gap)
+        a_dur = (a1 - a0).total_seconds()
+        fits = bool(want) and abs(a_dur - want) <= max(0.25 * want, 60)
+        key = (overlap > 0, fits, max(overlap, 0), -gap)
         if best_key is None or key > best_key:
             best, best_key = a, key
     return best
