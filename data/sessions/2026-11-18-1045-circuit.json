@@ -1,0 +1,147 @@
+{
+  "v": 1,
+  "id": "2026-11-18-1045-circuit",
+  "kind": "circuit",
+  "activity": "Circuit",
+  "start": "2026-11-18T10:45:45+02:00",
+  "end": "2026-11-18T10:47:27+02:00",
+  "feel": 50,
+  "rpe": 8,
+  "notes": "",
+  "title": "",
+  "template": "Hyrox circuit",
+  "circuit": {
+    "stations": [
+      {
+        "name": "Treadmill run",
+        "cat": "RUN_INDOOR",
+        "gname": "TREADMILL",
+        "unit": "m",
+        "n": 1000,
+        "kg": null
+      },
+      {
+        "name": "Sled pull",
+        "cat": "SLED",
+        "gname": "BACKWARD_DRAG",
+        "unit": "m",
+        "n": 40,
+        "kg": null
+      },
+      {
+        "name": "Burpee broad jumps",
+        "cat": "TOTAL_BODY",
+        "gname": "BURPEE_BROAD_JUMP",
+        "unit": "reps",
+        "n": 20,
+        "kg": null
+      },
+      {
+        "name": "SkiErg",
+        "cat": "CARDIO",
+        "gname": "CROSS_COUNTRY_SKI_MACHINE",
+        "unit": "m",
+        "n": 500,
+        "kg": null
+      },
+      {
+        "name": "Farmers carry",
+        "cat": "CARRY",
+        "gname": "FARMERS_CARRY",
+        "unit": "m",
+        "n": 40,
+        "kg": null
+      }
+    ],
+    "rounds": [
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    ],
+    "total_sec": 2820
+  },
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "HIIT",
+      "description": "",
+      "distance": 0.0,
+      "duration": 86.098,
+      "rpe": null,
+      "feel": null,
+      "sets": [
+        {
+          "exercises": [
+            {
+              "category": "UNKNOWN",
+              "name": null,
+              "probability": 99.609375
+            },
+            {
+              "category": "CURL",
+              "name": null,
+              "probability": 0.0
+            },
+            {
+              "category": "BENCH_PRESS",
+              "name": null,
+              "probability": 0.0
+            }
+          ],
+          "duration": 86.098,
+          "repetitionCount": 5,
+          "weight": null,
+          "setType": "ACTIVE",
+          "startTime": "2026-11-18T08:27:06.0",
+          "wktStepIndex": null,
+          "messageIndex": 0,
+          "minimalViableThreshold": null,
+          "avgConcentricMeanVelocity": null,
+          "maxConcentricMeanVelocity": null,
+          "avgEccentricMeanVelocity": null,
+          "maxEccentricMeanVelocity": null,
+          "avgConcentricPeakVelocity": null,
+          "maxConcentricPeakVelocity": null,
+          "avgEccentricPeakVelocity": null,
+          "maxEccentricPeakVelocity": null,
+          "avgMeanPropulsiveVelocity": null,
+          "maxMeanPropulsiveVelocity": null,
+          "avgConcentricMeanPower": null,
+          "maxConcentricMeanPower": null,
+          "avgConcentricPeakPower": null,
+          "maxConcentricPeakPower": null,
+          "avgConcentricDuration": null,
+          "maxConcentricDuration": null,
+          "avgEccentricDuration": null,
+          "maxEccentricDuration": null,
+          "avgConcentricRom": null,
+          "maxConcentricRom": null
+        }
+      ]
+    },
+    "garmin_id": "25117015855",
+    "message": "ok",
+    "hash": "bd0d3becc208",
+    "applied_at": "2026-11-18T08:47:47+00:00"
+  },
+  "received": "2026-11-18T08:47:45+00:00"
+}
