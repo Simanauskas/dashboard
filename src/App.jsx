@@ -752,6 +752,23 @@ RPE 8
     photos:[],
     laps:[{i:1,t:86,avgHr:151,maxHr:170,role:"station"}],
   },
+"25116952561": {
+    date:"2026-11-18", name:"Hyrox circuit · 3 rounds · 47:00", type:null,
+    totalTime:2848, avgHR:146, maxHR:170,
+    description:`3 rounds:
+1km Treadmill run
+40m Sled pull
+20 Burpee broad jumps
+500m SkiErg
+40m Farmers carry
+Total 47:00
+Felt normal
+RPE 8
+
+#log v1 2026-11-18-1045-circuit`,
+    photos:[],
+    laps:[{i:1,t:2848,avgHr:146,maxHr:170,role:"station"}],
+  },
 };
 
 /* ── Official finish time for a raw Garmin activity row ───────────────────
@@ -831,8 +848,8 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Hiit","2026-11-18 10:27:06","false","Hyrox circuit · 3 rounds · 47:00","0,00","20","00:01:26","151","170","0,8","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:01:26","00:01:26","--","--"
-"Hiit","2026-11-18 09:32:09","false","Circuit · 1 rounds · 1:25","0,00","614","00:47:27","146","170","3,6","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:24:00","00:47:27","--","--"
+"Hiit","2026-11-18 10:27:06","false","Circuit · 1 rounds · 1:25","0,00","20","00:01:26","151","170","0,8","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:01:26","00:01:26","--","--"
+"Hiit","2026-11-18 09:32:09","false","Hyrox circuit · 3 rounds · 47:00","0,00","614","00:47:27","146","170","3,6","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:24:00","00:47:27","--","--"
 "Cycling","2026-11-17 20:41:08","false","Vilnius Cycling","1,78","43","00:07:17","89","110","0,1","--","--","4:05","--","--","--","15","28","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:06:19","00:07:17","--","--"
 "Strength Training","2026-11-17 19:49:20","false","Strength","0,00","102","00:21:08","85","120","0,3","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:21:08","00:21:32","--","--"
 "Indoor Cardio","2026-11-17 19:36:35","false","SkiErg 2304m 10:00 · 2:10/500m","2,30","135","00:10:10","134","152","2,1","--","--","4:25","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:10","00:10:10","--","--"
@@ -1236,11 +1253,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-18";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-18T08:50:00Z";
-const LAST_DATA = "2026-11-18T08:50:00Z";
+const LAST_RUN  = "2026-11-18T09:07:00Z";
+const LAST_DATA = "2026-11-18T09:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-18T08:50:00Z";
+const LAST_MFP  = "2026-11-18T09:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
