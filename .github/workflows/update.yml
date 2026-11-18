@@ -74,26 +74,22 @@ jobs:
 
       # Tennis fixtures are arranged with other people and confirmed only a
       # few days ahead, so they cannot be written into SCHEDULE by hand. This
-      # reads them from iCloud instead. Skipped on poll runs: the calendar
-      # does not change every ten minutes, and 144 CalDAV fetches a day is
+      # reads them from Google Calendar instead. Skipped on poll runs: the calendar
+      # does not change every ten minutes, and 144 feed fetches a day is
       # rude. Never allowed to fail the job — the Garmin half matters more,
       # and calendar_sync.py already swallows its own errors and exits 0.
-      - name: Sync tennis fixtures from iCloud Calendar
+      - name: Sync tennis fixtures from Google Calendar
         if: steps.mode.outputs.mode != 'poll'
         continue-on-error: true
         env:
-          ICLOUD_USER: ${{ secrets.ICLOUD_USER }}
-          ICLOUD_APP_PASSWORD: ${{ secrets.ICLOUD_APP_PASSWORD }}
-          # Comma-separated calendar names to read. The account shares three
-          # calendars and only his own belongs in his training plan. Unset
-          # means read everything, which the run warns about.
-          ICLOUD_CALENDARS: ${{ secrets.ICLOUD_CALENDARS }}
+          # "Secret address in iCal format" of his calendar(s), comma-separated.
+          GCAL_ICS_URL: ${{ secrets.GCAL_ICS_URL }}
         run: |
-          if [ -z "$ICLOUD_USER" ]; then
-            echo "ICLOUD_USER not set — calendar sync not configured yet, skipping"
+          if [ -z "$GCAL_ICS_URL" ]; then
+            echo "GCAL_ICS_URL not set — calendar sync not configured yet, skipping"
             exit 0
           fi
-          pip install --quiet caldav
+          pip install --quiet icalendar recurring-ical-events
           python calendar_sync.py
 
       # Nutrition from MyFitnessPal. MFP_TOKEN is a short-lived API token the

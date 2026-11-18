@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pull confirmed tennis fixtures from iCloud Calendar into SCHEDULE.
+"""Pull confirmed tennis fixtures from Google Calendar into SCHEDULE.
 
 Tennis cannot be planned in advance: tournaments and sparring are arranged
 with other people and usually confirmed only a few days ahead. So the plan no
@@ -8,8 +8,10 @@ half — once a fixture IS in his calendar, it belongs in the plan before it
 happens, not only after Garmin syncs it.
 
 Runs inside GitHub Actions, where the Garmin credentials already live and the
-network is open. It does not need, and must not be given, a chat-visible
-password: ICLOUD_USER and ICLOUD_APP_PASSWORD are repository secrets.
+network is open. The calendar is read through its "secret address in iCal
+format" (Google Calendar → Settings → the calendar → Integrate calendar),
+stored as the repository secret GCAL_ICS_URL. Several calendars: comma-separate
+the URLs. Treat the URL as a password — never paste it in chat or commit it.
 
     python3 calendar_sync.py                  # fetch + patch
     python3 calendar_sync.py --dry-run        # fetch + print, write nothing
@@ -24,10 +26,11 @@ SCHEDULE are never read, moved or removed — the whole point is that the two
 can coexist on the same day.
 """
 from __future__ import annotations
-import argparse, datetime, os, re, sys, pathlib
+import argparse, datetime, os, re, sys, pathlib, urllib.request
+from zoneinfo import ZoneInfo
 
 DASHBOARD = pathlib.Path("src/App.jsx")
-CALDAV_URL = "https://caldav.icloud.com"
+TZ = ZoneInfo("Europe/Vilnius")
 RACKET = "🎾"          # 🎾 — the marker he already types
 HORIZON_DAYS = 10
 
@@ -106,58 +109,42 @@ def classify(summary: str):
 
 
 # ── fetch ────────────────────────────────────────────────────────────────────
-def fetch_caldav(user, password, days, allow=None):
-    """[(date, summary, start)] for VEVENTs in the next `days`.
+def events_from_ics(text, cal, start, end):
+    """[(date, summary, hhmm, cal)] for every occurrence in [start, end).
 
-    `allow` is a set of lower-cased calendar names to read. This account
-    shares three calendars — his, his fiancee's, and a joint one — and the
-    first live run pulled a padel session off HER calendar into HIS training
-    plan. Reading her calendar at all is not something this should do, so the
-    allowlist exists; without it the run reads everything and says so loudly.
-    """
-    import caldav                                    # installed in the workflow
-    client = caldav.DAVClient(url=CALDAV_URL, username=user, password=password)
-    principal = client.principal()
-    start = datetime.datetime.now(datetime.timezone.utc)
-    end = start + datetime.timedelta(days=days)
+    Google's feed carries recurring events as a single VEVENT with an RRULE
+    (Edvinas is one) and times in UTC, so occurrences are expanded and
+    converted to Vilnius local time before the date is taken. A day that is
+    off by one near midnight would put a session on the wrong board day."""
+    import icalendar, recurring_ical_events
     out = []
-    names = []
-    for cal in principal.calendars():
-        name = str(getattr(cal, "name", "") or "")
-        names.append(name)
-        if allow is not None and not ({name.lower(), _norm_cal(name)} & allow):
-            print(f"  – skipping calendar {name!r} (not in ICLOUD_CALENDARS)")
-            continue
-        try:
-            found = cal.search(start=start, end=end, event=True, expand=True)
-        except Exception as e:                        # a shared or odd calendar
-            print(f"  ! skipped calendar {name!r}: {e}")
-            continue
-        for ev in found:
-            for iso, summary, hhmm in _from_ical(ev.data):
-                out.append((iso, summary, hhmm, name))
-    print("  calendars seen: " + ", ".join(repr(n) for n in names))
-    if allow is None:
-        print("  ::warning::ICLOUD_CALENDARS is not set — reading EVERY shared "
-              "calendar, including ones that are not his. Set it to his own.")
+    for ev in recurring_ical_events.of(icalendar.Calendar.from_ical(text)).between(start, end):
+        summary = str(ev.get("SUMMARY", "")).strip()
+        dt = ev.decoded("DTSTART")
+        if isinstance(dt, datetime.datetime):
+            dt = dt.astimezone(TZ) if dt.tzinfo else dt
+            out.append((dt.date().isoformat(), summary, dt.strftime("%H:%M"), cal))
+        else:                                         # all-day event
+            out.append((dt.isoformat(), summary, "", cal))
     return out
 
 
-def _from_ical(text, cal=""):
-    """Minimal VEVENT reader: SUMMARY + DTSTART. Avoids a second dependency
-    and copes with the folded lines iCloud emits."""
-    unfolded = re.sub(r"\r?\n[ \t]", "", text or "")
+def fetch_google(urls, days):
+    """Read each secret-address feed. A failing feed is reported and skipped
+    so one bad URL cannot blank the others."""
+    start = datetime.datetime.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + datetime.timedelta(days=days + 1)
     out = []
-    for block in re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", unfolded, re.S):
-        sm = re.search(r"^SUMMARY[^:]*:(.*)$", block, re.M)
-        dt = re.search(r"^DTSTART[^:]*:(\d{8})(?:T(\d{2})(\d{2}))?", block, re.M)
-        if not (sm and dt):
-            continue
-        d = dt.group(1)
-        iso = f"{d[:4]}-{d[4:6]}-{d[6:]}"
-        hhmm = f"{dt.group(2)}:{dt.group(3)}" if dt.group(2) else ""
-        out.append((iso, sm.group(1).strip(), hhmm) if not cal
-                   else (iso, sm.group(1).strip(), hhmm, cal))
+    for i, url in enumerate(urls, 1):
+        label = f"google#{i}"                         # never print the URL
+        try:
+            with urllib.request.urlopen(url, timeout=30) as r:
+                text = r.read().decode("utf-8", "replace")
+            got = events_from_ics(text, label, start, end)
+            print(f"  {label}: {len(got)} events")
+            out += got
+        except Exception as e:
+            print(f"::warning::{label} failed ({type(e).__name__}): feed skipped")
     return out
 
 
@@ -207,21 +194,17 @@ def main():
     a = ap.parse_args()
 
     if a.from_ics:
-        events = _from_ical(pathlib.Path(a.from_ics).read_text(encoding="utf-8"), "local.ics")
+        start = datetime.datetime.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + datetime.timedelta(days=a.days + 1)
+        events = events_from_ics(pathlib.Path(a.from_ics).read_text(encoding="utf-8"),
+                                 "local.ics", start, end)
     else:
-        user, pw = os.environ.get("ICLOUD_USER"), os.environ.get("ICLOUD_APP_PASSWORD")
-        if not (user and pw):
-            print("ICLOUD_USER / ICLOUD_APP_PASSWORD not set — skipping calendar sync")
+        urls = [u.strip() for u in os.environ.get("GCAL_ICS_URL", "").split(",") if u.strip()]
+        if not urls:
+            print("GCAL_ICS_URL not set — skipping calendar sync")
             return 0
-        raw = os.environ.get("ICLOUD_CALENDARS", "").strip()
-        allow = set()
-        for n in raw.split(","):
-            n = n.strip()
-            if n:
-                allow |= {n.lower(), _norm_cal(n)}
-        allow = allow or None
         try:
-            events = fetch_caldav(user, pw, a.days, allow)
+            events = fetch_google(urls, a.days)
         except Exception as e:
             # Never fail the sync over the calendar: the Garmin half matters more.
             print(f"::warning::calendar sync failed, plan left as-is: {e}")
