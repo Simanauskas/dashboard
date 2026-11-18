@@ -29,11 +29,69 @@
     "total_sec": 85
   },
   "status": {
-    "state": "undone",
+    "state": "applied",
     "errors": 0,
-    "message": "restored the original Garmin name/description/sets",
-    "hash": "3e21ce23e425",
-    "applied_at": "2026-11-18T08:48:56+00:00"
+    "message": "ok",
+    "hash": "dd5b5acab724",
+    "applied_at": "2026-11-18T08:52:34+00:00",
+    "before": {
+      "name": "HIIT",
+      "description": "",
+      "distance": 0.0,
+      "duration": 86.098,
+      "rpe": 80,
+      "feel": 50,
+      "sets": [
+        {
+          "exercises": [
+            {
+              "category": "UNKNOWN",
+              "name": null,
+              "probability": 99.609375
+            },
+            {
+              "category": "CURL",
+              "name": null,
+              "probability": 0.0
+            },
+            {
+              "category": "BENCH_PRESS",
+              "name": null,
+              "probability": 0.0
+            }
+          ],
+          "duration": 86.098,
+          "repetitionCount": 5,
+          "weight": null,
+          "setType": "ACTIVE",
+          "startTime": "2026-11-18T08:27:06.0",
+          "wktStepIndex": null,
+          "messageIndex": 0,
+          "minimalViableThreshold": null,
+          "avgConcentricMeanVelocity": null,
+          "maxConcentricMeanVelocity": null,
+          "avgEccentricMeanVelocity": null,
+          "maxEccentricMeanVelocity": null,
+          "avgConcentricPeakVelocity": null,
+          "maxConcentricPeakVelocity": null,
+          "avgEccentricPeakVelocity": null,
+          "maxEccentricPeakVelocity": null,
+          "avgMeanPropulsiveVelocity": null,
+          "maxMeanPropulsiveVelocity": null,
+          "avgConcentricMeanPower": null,
+          "maxConcentricMeanPower": null,
+          "avgConcentricPeakPower": null,
+          "maxConcentricPeakPower": null,
+          "avgConcentricDuration": null,
+          "maxConcentricDuration": null,
+          "avgEccentricDuration": null,
+          "maxEccentricDuration": null,
+          "avgConcentricRom": null,
+          "maxConcentricRom": null
+        }
+      ]
+    },
+    "garmin_id": "25117015855"
   },
   "received": "2026-11-18T08:48:54+00:00"
 }
