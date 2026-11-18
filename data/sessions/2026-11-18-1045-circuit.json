@@ -79,67 +79,9 @@
     "total_sec": 2820
   },
   "status": {
-    "state": "applied",
+    "state": "undone",
     "errors": 0,
-    "before": {
-      "name": "HIIT",
-      "description": "",
-      "distance": 0.0,
-      "duration": 86.098,
-      "rpe": null,
-      "feel": null,
-      "sets": [
-        {
-          "exercises": [
-            {
-              "category": "UNKNOWN",
-              "name": null,
-              "probability": 99.609375
-            },
-            {
-              "category": "CURL",
-              "name": null,
-              "probability": 0.0
-            },
-            {
-              "category": "BENCH_PRESS",
-              "name": null,
-              "probability": 0.0
-            }
-          ],
-          "duration": 86.098,
-          "repetitionCount": 5,
-          "weight": null,
-          "setType": "ACTIVE",
-          "startTime": "2026-11-18T08:27:06.0",
-          "wktStepIndex": null,
-          "messageIndex": 0,
-          "minimalViableThreshold": null,
-          "avgConcentricMeanVelocity": null,
-          "maxConcentricMeanVelocity": null,
-          "avgEccentricMeanVelocity": null,
-          "maxEccentricMeanVelocity": null,
-          "avgConcentricPeakVelocity": null,
-          "maxConcentricPeakVelocity": null,
-          "avgEccentricPeakVelocity": null,
-          "maxEccentricPeakVelocity": null,
-          "avgMeanPropulsiveVelocity": null,
-          "maxMeanPropulsiveVelocity": null,
-          "avgConcentricMeanPower": null,
-          "maxConcentricMeanPower": null,
-          "avgConcentricPeakPower": null,
-          "maxConcentricPeakPower": null,
-          "avgConcentricDuration": null,
-          "maxConcentricDuration": null,
-          "avgEccentricDuration": null,
-          "maxEccentricDuration": null,
-          "avgConcentricRom": null,
-          "maxConcentricRom": null
-        }
-      ]
-    },
-    "garmin_id": "25117015855",
-    "message": "ok",
+    "message": "restored the original Garmin name/description/sets",
     "hash": "bd0d3becc208",
     "applied_at": "2026-11-18T08:47:47+00:00"
   },
