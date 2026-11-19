@@ -1,10 +1,12 @@
-name: MFP food log (encrypted)
+name: MFP food log (private repo)
 
-# Pulls the per-entry MyFitnessPal diary for analysis. This repo is PUBLIC, so:
-#   * the plaintext only ever exists on the runner (data/private/ is gitignored),
-#   * mfp.py never prints food names to the log,
-#   * the file is encrypted to data/diary-cert.pem (a PUBLIC certificate) before
-#     upload, so the artifact is ciphertext; only the private key holder can read it.
+# Pulls the per-entry MyFitnessPal diary for analysis and stores it in the
+# PRIVATE repo Simanauskas/diary-private. This repo is PUBLIC, so:
+#   * the plaintext only ever exists on the runner and in the private repo,
+#   * mfp.py never prints food names to the log (counts only),
+#   * nothing is uploaded as an artifact and nothing is committed here.
+# Needs the DIARY_PAT secret: a fine-grained token with Contents read/write on
+# diary-private only.
 on:
   workflow_dispatch:
     inputs:
@@ -32,16 +34,25 @@ jobs:
           DAYS: ${{ inputs.days || '30' }}
         run: python mfp.py --diary --days "$(( DAYS - 1 ))"
 
-      - name: Encrypt to the public certificate
+      - name: Check out the private repo
+        uses: actions/checkout@v4
+        with:
+          repository: Simanauskas/diary-private
+          token: ${{ secrets.DIARY_PAT }}
+          path: diary-private
+
+      - name: Save to the private repo
         run: |
           test -s data/private/mfp-diary.json || { echo "::error::no diary written (token expired / MFP not connected?)"; exit 1; }
-          openssl smime -encrypt -aes256 -binary -outform DER \
-            -in data/private/mfp-diary.json -out mfp-diary.enc data/diary-cert.pem
+          cp data/private/mfp-diary.json diary-private/mfp-diary.json
           shred -u data/private/mfp-diary.json || rm -f data/private/mfp-diary.json
-          ls -l mfp-diary.enc
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mfp-diary-encrypted
-          path: mfp-diary.enc
-          retention-days: 2
+          cd diary-private
+          git config user.name  "garmin-bot"
+          git config user.email "bot@simanauskas.github.io"
+          git add mfp-diary.json
+          if git diff --staged --quiet; then
+            echo "diary unchanged — nothing to commit"
+            exit 0
+          fi
+          git commit -q -m "diary $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
