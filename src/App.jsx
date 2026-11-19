@@ -2905,7 +2905,9 @@ const FUEL = {
   glycoBase: 0.3, glycoHr0: 110, glycoSlope: 0.033, glycoMin: 0.5, glycoMax: 3.0,
   fatGkg: 1.0,            // g/kg baseline fat
   fatFloorGkg: 0.8,       // never below — hormones, not a lever past here
-  carryDays: 3,           // how far back the carb balance looks
+  historyDays: 3,         // days shown in the carbs-vs-burn chart
+  carryDays: 1,           // days the carry-over looks back: muscle glycogen turns over in ~24–48 h,
+                          // so a shortfall older than yesterday has already been refilled (or isn't coming back)
   carryShare: 0.5,        // share of a past gap paid back today
   carryUpMax: 0.75,       // g/kg: most a shortfall can add
   carryDownMax: 0.5,      // g/kg: most a surplus can take away
@@ -2973,7 +2975,7 @@ function fuelPlan({ ana, plan, health, date }) {
   // Only days with a diary count. An unlogged day is unknown, not zero —
   // counting it as zero would read every forgotten log as a huge shortfall.
   const history = [];
-  for (let i = FUEL.carryDays; i >= 1; i--) {
+  for (let i = FUEL.historyDays; i >= 1; i--) {
     const d = shift(date, -i);
     const t = doneTrimp(d);
     // Owed = the rest-day floor plus the carbohydrate that day's work actually
@@ -2985,7 +2987,8 @@ function fuelPlan({ ana, plan, health, date }) {
     const row = eatenOn(d);
     history.push({ date: d, trimp: Math.round(t), need, ate: row ? row.carbs : null, kcal: row ? row.kcal : null });
   }
-  const logged = history.filter(h => h.ate != null);
+  // The chart shows historyDays; only the most recent carryDays feed the carry-over.
+  const logged = history.slice(-FUEL.carryDays).filter(h => h.ate != null);
   const gap = logged.reduce((s, h) => s + (h.ate - h.need), 0);       // + over, − under
   const carry = gap < 0
     ? Math.min(FUEL.carryUpMax * kg, -gap * FUEL.carryShare)
@@ -3028,7 +3031,7 @@ function fuelPlan({ ana, plan, health, date }) {
   }
   // The bodybuilding habit shows up as fat and protein standing in for carbs.
   // When that is the pattern, say so: the fix is a swap, not eating more.
-  const fatLogged = logged.map(h => eatenOn(h.date).fat).filter(v => v != null);
+  const fatLogged = history.filter(h => h.ate != null).map(h => eatenOn(h.date).fat).filter(v => v != null);
   const fatAvg = fatLogged.length ? fatLogged.reduce((a, b) => a + b, 0) / fatLogged.length : null;
   if (gap < 0 && fatAvg != null && fatAvg > fat + 15) {
     why.push(`Fat has averaged ${Math.round(fatAvg)} g against ${fat} g — every 10 g of fat swapped out makes room for ~22 g of carbs at the same calories.`);
@@ -3146,7 +3149,7 @@ function FuelCard({ ana, plan, health }) {
             );
           })}
           <div style={{ fontSize:10, color:T.ink3, marginTop:6, lineHeight:1.5 }}>
-            Tick = carbs that day's measured TRIMP called for. Green within 15%.
+            Tick = carbs that day's work burned (HR × duration) plus the 3.0 g/kg rest floor. Green within 15%. Only yesterday feeds today's catch-up.
           </div>
         </div>
       </div>
