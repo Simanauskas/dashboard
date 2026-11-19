@@ -26,3 +26,7 @@
 
 /sw.js
   Cache-Control: no-cache, must-revalidate
+
+# Which build is live — compared by the installed app (src/refresh.js); never cache it.
+/version.json
+  Cache-Control: no-store

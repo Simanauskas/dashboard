@@ -23,6 +23,21 @@ dashboard. A plan line's **Log** button opens `/log/?new=<tile key>` and goes
 straight into that form. A session saved today ticks its plan line on the
 dashboard immediately (the dashboard reads the logger's `localStorage`).
 
+## Keeping the app current (`src/refresh.js`, both pages)
+
+The data is baked into each build and the site redeploys after every sync, but
+iOS freezes a home-screen app instead of closing it, so it kept showing old data.
+
+- **Pull down from the top** of any screen (not on an input): asks the Worker for
+  a fresh Garmin sync (same call as the Sync tab's Refresh; at most once per
+  3 min), reloads, then reloads again by itself when the synced build lands.
+- **`/version.json`** (written by `vite.config.js`, `no-store` in `_headers`)
+  names the live build. Checked when the app returns to the front and every
+  2 min. Back from the background → reloads by itself; in use → a
+  "New data · tap to update" pill. The logger never auto-reloads on a
+  `#edit/…` screen (a half-typed time is only saved on blur).
+- The dashboard keeps its tab across a reload (`sessionStorage`).
+
 ## What goes where in Garmin
 
 | Logged as | Garmin type matched | Written |

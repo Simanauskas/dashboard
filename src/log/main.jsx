@@ -2,6 +2,7 @@ import React from "react"
 import { createRoot } from "react-dom/client"
 import LogApp from "./LogApp.jsx"
 import "./log.css"
+import { installRefresh } from "../refresh.js"
 
 // Viewport numbers for the Settings diagnostics line only — nothing is moved.
 // (Moving the bars by a measured gap made iOS resize in a loop; the fix is CSS:
@@ -14,6 +15,10 @@ readViewport()
 addEventListener("resize", readViewport, { passive: true })
 
 createRoot(document.getElementById("root")).render(<LogApp />)
+
+// Pull-to-refresh and live-data watcher (src/refresh.js). Not while a workout
+// is open: the saved log is safe across a reload, but a half-typed time is not.
+installRefresh({ canReload: () => !location.hash.startsWith("#edit") })
 
 // Offline shell: the gym often has no signal. Logs themselves live in
 // localStorage; the service worker only keeps the app itself loadable. It is

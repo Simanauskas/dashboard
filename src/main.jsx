@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
+import { installRefresh } from './refresh.js'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -13,3 +14,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {})
 }
+
+// Pull-to-refresh and live-data watcher (src/refresh.js).
+installRefresh()

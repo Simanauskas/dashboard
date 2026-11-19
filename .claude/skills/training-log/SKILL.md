@@ -232,6 +232,12 @@ number is minutes for erg/Hyrox and seconds for run reps. Decimal commas
 
 ## Gotchas
 
+- **Freshness lives in `src/refresh.js`** (pull-to-refresh, `/version.json`
+  watcher), installed by `src/main.jsx` and `src/log/main.jsx`. Keep
+  `__BUILD_ID__` / the `version-file` plugin in `vite.config.js` and the
+  `/version.json` no-store rule in `public/_headers`, or the app never learns a
+  newer build exists. The logger passes `canReload` so it never reloads under an
+  open workout.
 - **The editor's Save bar (`.bar`) is `position: sticky`, never `fixed`.** In
   the iOS home-screen app a fixed bar scrolled along with a long strength form
   and ended up under the status bar at the bottom of the page (13 Nov 2026).

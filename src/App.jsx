@@ -5407,8 +5407,13 @@ export default function Dashboard() {
   const [activities, setActivities] = useState([]);
   const [ana, setAna] = useState(null);
   const [plan, setPlan] = useState(null);
-  const [view, setView] = useState("today");
-  const [statsSub, setStatsSub] = useState("body");
+  // The tab survives a reload (pull-to-refresh, a new build arriving), so a
+  // refresh never drops him back on Today. sessionStorage: a cold start is Today.
+  const keep = (k, d) => { try { return sessionStorage.getItem(k) || d; } catch { return d; } };
+  const [view, setViewRaw] = useState(() => keep("dash.view", "today"));
+  const [statsSub, setStatsSubRaw] = useState(() => keep("dash.sub", "body"));
+  const setView = (v) => { setViewRaw(v); try { sessionStorage.setItem("dash.view", v); } catch {} };
+  const setStatsSub = (v) => { setStatsSubRaw(v); try { sessionStorage.setItem("dash.sub", v); } catch {} };
   const go = (v, sub) => { if (sub) setStatsSub(sub); setView(v); };
 
   useEffect(() => {
