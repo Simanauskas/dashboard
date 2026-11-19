@@ -1,0 +1,121 @@
+{
+  "v": 1,
+  "id": "2026-11-19-1156-strength",
+  "kind": "strength",
+  "activity": "Strength",
+  "start": "2026-11-19T11:56:28+02:00",
+  "end": "2026-11-19T13:08:28+02:00",
+  "feel": 50,
+  "rpe": 6,
+  "notes": "",
+  "title": "",
+  "template": "Lower body",
+  "exercises": [
+    {
+      "name": "Back squat",
+      "cat": "SQUAT",
+      "gname": "BARBELL_BACK_SQUAT",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 80,
+          "n": 5
+        },
+        {
+          "kg": 80,
+          "n": 5
+        },
+        {
+          "kg": 80,
+          "n": 6
+        }
+      ]
+    },
+    {
+      "name": "Romanian deadlift",
+      "cat": "DEADLIFT",
+      "gname": "ROMANIAN_DEADLIFT",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 90,
+          "n": 6
+        },
+        {
+          "kg": 80,
+          "n": 10
+        },
+        {
+          "kg": 80,
+          "n": 9
+        }
+      ]
+    },
+    {
+      "name": "Walking lunges",
+      "cat": "LUNGE",
+      "gname": "WALKING_LUNGE",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 40,
+          "n": 20
+        },
+        {
+          "kg": 40,
+          "n": 20
+        },
+        {
+          "kg": 40,
+          "n": 20
+        }
+      ]
+    },
+    {
+      "name": "Calf raises",
+      "cat": "CALF_RAISE",
+      "gname": "STANDING_CALF_RAISE",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 30,
+          "n": 15
+        },
+        {
+          "kg": 30,
+          "n": 16
+        },
+        {
+          "kg": 30,
+          "n": 16
+        }
+      ]
+    },
+    {
+      "name": "Wall drive",
+      "cat": null,
+      "gname": null,
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": null,
+          "n": 25
+        },
+        {
+          "kg": null,
+          "n": 30
+        },
+        {
+          "kg": null,
+          "n": 40
+        }
+      ]
+    }
+  ],
+  "status": {
+    "state": "pending",
+    "errors": 0,
+    "message": "waiting for the Garmin activity"
+  },
+  "received": "2026-11-19T11:08:38+00:00"
+}
