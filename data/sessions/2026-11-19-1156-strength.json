@@ -113,9 +113,59 @@
     }
   ],
   "status": {
-    "state": "pending",
+    "state": "applied",
     "errors": 0,
-    "message": "waiting for the Garmin activity"
+    "message": "ok",
+    "before": {
+      "name": "Strength",
+      "description": "",
+      "distance": 0.0,
+      "duration": 3291.57,
+      "rpe": null,
+      "feel": null,
+      "sets": [
+        {
+          "exercises": [
+            {
+              "category": "UNKNOWN",
+              "name": null,
+              "probability": 98.828125
+            }
+          ],
+          "duration": 3291.57,
+          "repetitionCount": null,
+          "weight": null,
+          "setType": "ACTIVE",
+          "startTime": "2026-11-19T10:13:28.0",
+          "wktStepIndex": null,
+          "messageIndex": 0,
+          "minimalViableThreshold": null,
+          "avgConcentricMeanVelocity": null,
+          "maxConcentricMeanVelocity": null,
+          "avgEccentricMeanVelocity": null,
+          "maxEccentricMeanVelocity": null,
+          "avgConcentricPeakVelocity": null,
+          "maxConcentricPeakVelocity": null,
+          "avgEccentricPeakVelocity": null,
+          "maxEccentricPeakVelocity": null,
+          "avgMeanPropulsiveVelocity": null,
+          "maxMeanPropulsiveVelocity": null,
+          "avgConcentricMeanPower": null,
+          "maxConcentricMeanPower": null,
+          "avgConcentricPeakPower": null,
+          "maxConcentricPeakPower": null,
+          "avgConcentricDuration": null,
+          "maxConcentricDuration": null,
+          "avgEccentricDuration": null,
+          "maxEccentricDuration": null,
+          "avgConcentricRom": null,
+          "maxConcentricRom": null
+        }
+      ]
+    },
+    "garmin_id": "25129345353",
+    "hash": "4100c06f9439",
+    "applied_at": "2026-11-19T11:10:23+00:00"
   },
   "received": "2026-11-19T11:08:38+00:00"
 }
