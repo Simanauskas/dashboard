@@ -6,11 +6,6 @@ name: MFP food log (encrypted)
 #   * the file is encrypted to data/diary-cert.pem (a PUBLIC certificate) before
 #     upload, so the artifact is ciphertext; only the private key holder can read it.
 on:
-  # push trigger: lets the run start from the dev branch, since workflow_dispatch
-  # only works for workflows already on the default branch.
-  push:
-    branches: [claude/serene-thompson-4jylxr]
-    paths: ['.github/workflows/mfp-diary.yml']
   workflow_dispatch:
     inputs:
       days:
