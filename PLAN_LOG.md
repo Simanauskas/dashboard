@@ -72,6 +72,264 @@ and never once done.
 
 ---
 
+## 2026-11-19
+- adherence: **no ACTION REQUIRED and no WATCH — the report closes with "Every prescribed session
+  type has been trained at least once."** Window 29 Oct–19 Nov: **ski 3/3 on track** · row 0/3 ·
+  **hyrox 1/2 on track** · strength 3/5 on track · cycle 0/7 · tennis 0/7 · **run 8/7, short by 1**.
+  Benchmarks already due: 29 Oct "type match — CHECK IT" · 5 Nov NOTHING LOGGED · 12 Nov NOTHING
+  LOGGED. Next 14d: **Fri 20 Nov** and **Fri 27 Nov**. `check_plan.py` exit 0.
+- readiness: **HRV 81 against a baseline of 70 — +11**, the fourth consecutive morning above
+  baseline, and the baseline itself is climbing: 63 → 66 → **70**, its first reading above 70 since
+  1 Nov. **RHR 41, inside 38–46** (36 · 40 · 38 · 39 · 41). **Resp 13.0 — the highest in 21 days**
+  (10 · 11 · 10 · 11 · **13**) and **SpO2 93, the lowest of the whole post-plateau series**
+  (95 · 95 · 94 · 96 · **93**). **Sleep 5h31 (331min)** against 460 · 498 · 495 · 472 the four
+  nights before, with **REM 36min** — a third of the previous two nights — deep 113, awake 12.
+  168 daily / 167 sleep rows, contiguous. LAST_RUN and LAST_DATA both 2026-11-19T07:07Z against
+  TODAY 2026-11-19 — **sync healthy**. Engine, read live off the committed file: readiness **7/10,
+  up from 6**, TSB **−16.29**, ATL **52.42**, CTL **36.13**, **ATL/CTL 1.451** (the block's highest,
+  past yesterday's 1.377), `consecutiveHard` **4**, `daysSinceRest` **6**, `forceRest` FALSE,
+  **`easeHard` TRUE — and the reason changed, from "3 hard days back to back" to "5h31m of sleep
+  last night"**, `scale` **0.838**, `unplanned7` **198**. Week 11, day four: done **212**, remaining
+  439, projectedRaw **651** eased to **582** (`trimmedBy` 69) against 440–580, **`over` TRUE**.
+- decision: **CHANGED — one line, week 12, Wed 25 Nov. `{type:"hyrox", text:"Hyrox group 45min ·
+  station circuit, go hard"}` becomes `{type:"hyrox", text:"Hyrox circuit 45min · time each 500m
+  erg rep", why:"Ski is your weakest station at top 29.8%, and these reps come off running legs."}`**
+  Nothing else moved: not today's rest, not Friday's benchmark, not Saturday's empty day, not
+  Sunday's long run, not the week-12 ski line written yesterday, not a band, not a note.
+- why: **yesterday's circuit contained 1500m of compromised SkiErg — 3×500m, each one straight off a
+  1000m treadmill run — and he recorded a time for none of them.** All fifteen round cells in
+  `data/sessions/2026-11-18-1045-circuit.json` are `null`. The session this block has been trying to
+  buy for the ski since Athens was already in his week, unmeasured, and the fix is a measurement
+  instruction that costs zero load: the line still prices at 162 HR / **107 TRIMP**, identical to
+  the text it replaces, so week 12 stays at **578**.
+- watching: **the resp/SpO2/REM cluster** — resp 13.0 with SpO2 93 and REM 36min is the front edge of
+  either one bad night or an infection, and HRV +11 with RHR 41 says it is the former; if resp stays
+  ≥13 for a second morning **or** RHR clears 46, Sunday's 1h15 becomes a walk and I will say so
+  (§4; re-check Fri 20 Nov); **Friday's benchmark**, attempt three of four and already capped to Z2
+  by the engine this morning — I am not touching it, and what would make me act is stated as a
+  trigger in §3; **Thursday's rest**, still only limb one of two (§3); **the `1h15` blind spot in
+  `scaleDuration`** (§6); **the `cal:true` tennis mispricing**, tenth-plus entry; and **weight
+  76.3kg / 15.1% body fat**, which finally landed (§5).
+
+### 1. Is this a passivity correction? No — but it is not a free pass either
+Zero consecutive NO CHANGE entries precede this run: **18 Nov CHANGED**, 17 Nov CHANGED, 16 Nov NO
+CHANGE. The "three in a row" rule does not apply. What does apply is the opposite risk — two
+consecutive CHANGED mornings can become a habit of editing for its own sake. So the test I held this
+change to was: *does it come from data that landed overnight, and does it change the load?* It does
+come from overnight data (the 18 Nov circuit log and the 18 Nov weigh-in both arrived after
+yesterday's run), and it changes the load by **zero TRIMP**. That is the shape of edit I am willing
+to make on a Thursday; a session swap is not.
+
+### 2. The circuit, and the correction it forces to yesterday's reasoning
+**What landed.** Wed 18 Nov 09:32, `Hiit / "Hyrox circuit · 3 rounds · 47:00"`, 47:27, avg HR 146,
+max 170, Aerobic TE 3.6, TRIMP **78**. `data/sessions/2026-11-18-1045-circuit.json`: template
+**"Hyrox circuit"**, RPE **8**, feel 50, `total_sec` 2820, and three rounds of:
+
+| station | amount |
+|---|---|
+| Treadmill run | 1000 m |
+| Sled pull | 40 m |
+| Burpee broad jumps | 20 reps |
+| **SkiErg** | **500 m** |
+| Farmers carry | 40 m |
+
+That is 3000m of running and **1500m of ski** in 47 minutes, each ski rep taken straight off a
+kilometre. It is three-eighths of a Hyrox.
+
+**Two things about that station list matter.** First, it is not the stock template. `src/log/catalog.js`
+ships `"Hyrox circuit"` as `["Treadmill run",1000], ["Sled pull",40], ["Burpee broad jumps",10],
+["Row (erg)",500], ["Farmers carry",50]` — **Row**, ten burpees, fifty metres of carry. What he
+logged was **SkiErg**, twenty burpees, forty metres. He edited every one of those three fields at
+logging time, which means the list is a record of what the session actually contained rather than a
+default he tapped through. Second, the erg is **not fixed**: the 29 Oct circle was
+`"Circle: {1km run, 40m sled pull, 10BBJ, 500m row, 50 FC}x2 + 1km run"` — **row**, not ski. So the
+written line has to ask for the erg rep whatever machine the circle puts in front of him, which is
+why it says `500m erg rep` and not `500m ski rep`.
+
+**The correction.** 18 Nov §2 rejected the Wednesday circuit as a home for compromised ski work on
+the grounds that *"group-session content is not his to control."* On the evidence that arrived six
+hours later that was wrong in the way that matters: he may not choose the circle's stations, but the
+circle has now twice supplied a 500m erg off a 1000m run, once as ski, and he is already logging it
+station by station in his own app. The compromised ski session this block has been trying to design
+has been happening on Wednesdays. What it has never done is produce a number.
+
+**Why a measurement instruction and not a session.** The skill is explicit that the 24 seconds
+between his fresh 1000m (3:54, 28 Jul) and his raced 1000m (4:18, Athens) is *"a
+pacing-and-fatigue-resistance problem, not a fitness one"*, and that the ski should be trained
+**compromised, off running legs, not fresh**. He has exactly **one** compromised erg data point in
+the whole record — 4:02 for a thousand on 5 Oct. Three timed 500m reps every Wednesday would, in a
+month, be twelve. Nothing is added to his week; a stopwatch is.
+
+**Why not week 11's Wednesday.** It is past and the line is already ticked `done`. Rewriting a
+satisfied line in a day that has gone is both forbidden and pointless.
+
+**Why the text changed "group" to "circuit".** `planIntensity` keys off the words. `/roxzone|circuit|
+compromised/i` → 162 fires on the old text's "station circuit" and on the new text's "Hyrox circuit"
+alike, so the price is **unchanged at 162 HR / 107 TRIMP** — verified against the edited file, week 12
+total **578** before and after. Dropping "circuit" would have fallen through to `/hyrox/i` → 156 and
+quietly repriced the week. "Circuit" is also what Garmin now calls the activity.
+
+### 3. The Friday benchmark: not touched, and the trigger written down
+Fri 20 Nov carries `{type:"tennis",cal:true,...}` at 09:00 and the `⏱ KEY RUN · 3×2km at 14.0kmh`.
+The engine is **already** showing that run capped: `{date:"2026-11-20", label:"Quality work eased to
+Z2", why:"5h31m of sleep last night"}`. That is the readiness gate reaching one day forward, it is
+adaptPlan's job, and it recomputes off tomorrow's sleep rather than tonight's — so if he sleeps, the
+cap lifts on its own. I am not duplicating it and I am not pre-empting it.
+
+**I did check whether the benchmark is "already deferred" in the sense adherence.py means.** It is
+not. Distinct training days by weekday over the last 84 days: **Mon 9 · Tue 10 · Wed 11 · Thu 8 ·
+Fri 9 · Sat 8 · Sun 9.** There is no weekday he reliably skips, and Friday is where the *one*
+successful attempt at this session landed — 6 Nov, `Treadmill Running / "Treshold 3x2km 14kmh 14kmh
+13.5kmh"`, 34:16, avg HR 147. Moving it off Friday would be chasing a pattern that is not there, and
+the instruction is explicit that the weekday on a line is a suggestion.
+
+**The honest record of this benchmark, which adherence.py's date-keyed view distorts.** It reports
+5 Nov as NOTHING LOGGED. Under the live-week checklist it was satisfied — week 9's Thursday line was
+ticked by the 6 Nov run while week 9 was still the live week. Note the cross-day pass in `adaptPlan`
+runs only for `wkIdx`, so once a week closes nothing re-ticks it and the date view is all that is
+left. The true record is:
+
+| week | written | outcome |
+|---|---|---|
+| 9 (Nov 2–8) | Thu 5 Nov | **landed Fri 6 Nov**, 3×2km, faded to 13.5 on rep 3 |
+| 10 (Nov 9–15) | Thu 12 Nov | **missed** — nothing threshold-shaped all week |
+| 11 (Nov 16–22) | Fri 20 Nov | attempt 3, tomorrow |
+| 12 (Nov 23–29) | Fri 27 Nov | attempt 4, written at the same 14.0 rung |
+
+**One for two, and the trigger for whoever reads this next.** If Fri 20 Nov produces no
+threshold-shaped run by the time the Sat 21 Nov run reads the file, the day stops being the variable
+and the shape becomes it: **3×2km at 14.0** has then been written four times for one completion, and
+the next move is to cut it to **2×2km at 14.0** on Fri 27 Nov rather than move it to a different
+weekday. A rung he clears twice is worth more than a rung he is asked for four times. Do not do both
+at once.
+
+### 4. The physiological signal — said out loud, acted on nowhere
+Three numbers moved the wrong way together last night and one moved the right way, and the
+disagreement is the whole finding.
+
+| | 15 Nov | 16 Nov | 17 Nov | 18 Nov | **19 Nov** |
+|---|---|---|---|---|---|
+| HRV | 85 | 108 | 80 | 73 | **81** |
+| baseline | – | – | 63 | 66 | **70** |
+| RHR | 36 | 40 | 38 | 39 | **41** |
+| SpO2 | 95 | 95 | 94 | 96 | **93** |
+| Resp | 10.0 | 11.0 | 10.0 | 11.0 | **13.0** |
+| Sleep (min) | 460 | 498 | 495 | 472 | **331** |
+| REM (min) | 58 | 93 | 94 | 105 | **36** |
+
+**Resp 13.0 is the highest in the 21-day window** and sits two to three breaths above his own recent
+floor. **SpO2 93 is the lowest reading of the post-plateau series** — and the plateau at 98 was
+itself disclosed as an artifact on 17 Nov, so 93 is being read against 94–96, not against 98.
+**Sleep 5h31 with 36 minutes of REM** is a fragmented short night, not merely a short one.
+
+Taken alone that cluster is how an infection announces itself, and he had one in mid-October. But the
+two signals the skill says to read for readiness both say otherwise: **HRV 81 is +11 on baseline**,
+the fourth straight morning above it, and **RHR 41 is mid-range**. An illness that suppresses REM and
+lifts respiration does not usually leave HRV eleven milliseconds high. The reading I am going with is
+a bad night on top of four consecutive hard days — `consecutiveHard` 4, ATL/CTL **1.451**, the
+block's highest — and the plan already has today written as rest, which is the correct response and
+needs no edit from me.
+
+**The sustained shift worth recording separately** is the baseline itself. It has run 99 → 88 → 79 →
+72 → 64 → 67 → 63 → 66 → **70**, bottoming on 17 Nov and climbing seven points in two days. A rising
+HRV baseline under an ATL of 52 is adaptation, not accumulation, and it is the best single piece of
+evidence that Base II's volume is the right volume.
+
+**The trigger.** If resp reads **≥13 again tomorrow**, or RHR clears **46**, the Sun 22 Nov `Long run
+1h15` becomes a walk and Friday's benchmark comes out of week 11 entirely. One morning of it is not
+enough; two is.
+
+### 5. The weigh-in, which is the other thing that landed overnight
+`HEALTH_DATA.body` gained `{date:"2026-11-18", kg:76.3, fat:15.1, bmi:24.6}`. 18 Nov §5 recorded the
+1 Nov reading as **seventeen days old** and "worth more than most of what is written above" — so:
+
+| date | kg | fat % | BMI |
+|---|---|---|---|
+| 12 Oct | 76.2 | 15.1 | 24.6 |
+| 14 Oct | 76.6 | 15.2 | 24.7 |
+| 1 Nov | **77.9** | **15.6** | 25.1 |
+| **18 Nov** | **76.3** | **15.1** | **24.6** |
+
+The 1 Nov high was the blip it looked like: **−1.6kg and −0.5pp in seventeen days**, and 15.1% ties
+the lowest body fat in the series. Against the ~75kg the profile records as his racing weight he is
+**1.3kg over**, trending down, with nutrition at 2410 kcal and **179g protein** on 18 Nov against a
+2099 goal. Nothing here asks for a plan change — it is the reassurance that the block's load is not
+being absorbed out of lean mass, and it closes a watch item that had been open for seventeen days.
+
+### 6. What I deliberately left alone
+- **Every line in week 11.** Half-run, and nothing physiological argues for re-cutting it (§4).
+  Today's rest is written. Friday is the engine's to cap and his to attempt (§3). Saturday stays
+  empty as the landing zone. Sunday's 1h15 stands unless §4's trigger fires.
+- **Week 12's Tue 24 Nov ski — `Ski 16min · 3×1000m at 2:05/500m · 90s gap`.** Written yesterday,
+  not yet attempted once. Rewriting it this morning because Wednesday also carries ski would be
+  exactly the error the ski line was created to fix: changing a rung before it has been tried. The
+  two are complementary, not duplicative — **Tuesday is the measured race-distance piece, Wednesday
+  is the compromised one**, and after this edit both produce a number. Total written ski in week 12 is
+  3000m fresh plus 1500m compromised, which for a top-29.8% element is not excessive.
+- **The phase.** Base II · Threshold, week 3 of 6, runs to 20 Dec. Still aimed at ski (29.8%) and
+  running (27.7%), the two weakest elements at Athens. Readiness 7/10 and a **rising** HRV baseline
+  argue the block is being absorbed. Nothing asks for different sessions at block level; this edit
+  changes what a session *records*, not what it is.
+- **The TAPER_PLAN bands, and I checked the arithmetic rather than asserting it.** 440–580, with the
+  Base II note at exactly two sentences. The 16 Nov §5 reopen condition is "two consecutive weeks
+  under 400 against a written plan of ≥440", and the second limb is what saves the band:
+
+  | week | written | actual | band |
+  |---|---|---|---|
+  | 9 (Nov 2–8) | **293** | 364 | 400–560 |
+  | 10 (Nov 9–15) | **286** | 378 | 440–580 |
+  | 11 (Nov 16–22) | 669 | 212 so far | 440–580 |
+  | 12 (Nov 23–29) | 578 | – | 440–580 |
+
+  Weeks 9 and 10 both came in under 400, but they were **written at 293 and 286** — the plan was
+  under-written, not the band mis-set, and the limb does not fire. Weeks 11 and 12 are the first
+  properly written weeks of this block. Week 11's 669 looks like it breaks its own ceiling, but
+  **202 of it is two `cal:true` tennis lines priced at 101 each**; net of them the week is 467, and
+  week 12 net of its one tennis line is 477. Both sit mid-band. The band is realistic.
+- **`RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`, `RACE_GAINS`.** Copenhagen is 128 days
+  out, no result known, no target moved.
+- **The `cal:true` tennis mispricing.** `isTennis` is still `=== "tennis"` against Garmin's
+  `Tennis V2`, so `model.tennis` reads **n=0** and the fallback prices a court session at HR 138 /
+  75min when his real median is nearer HR 109 / 89min. Tenth-plus entry; outside this Routine's
+  scope, and §6 above shows how to read around it.
+- **A new one, recorded so it is not rediscovered: `scaleDuration` cannot see `1h15`.** It matches
+  `\d+min` and `\d+–\d+min` only, so `Long run 1h15` is invisible to the volume governor — this
+  morning `scale` was **0.838** and **no session text was rewritten**. The `trimmedBy` 69 came
+  entirely from the Friday ease (that line prices 136 written, **67** at Z2 — exactly 69), not from
+  any trim. So the governor is currently unable to act on the one long session in the week. Simas's
+  own rule sanctions `1h10` as a duration spelling, so the fix belongs in `scaleDuration`, not in the
+  plan text, and I have not bent the line to work around it.
+- **`row` 0 prescribed, 3 done.** Top 11.4% at Athens — defend, do not chase. The 1000m row TT is
+  still owed and still does not earn a slot in a threshold week.
+- **`run` short by 1.** One run inside a 21-day window against his most-trained session type. Noise.
+- **The Hiit-typed circuit, which resolved itself.** 18 Nov §5 flagged that `Hiit` group work ticks
+  nothing. Yesterday's `Hiit / "Hyrox circuit · 3 rounds · 47:00"` **did** tick the Wednesday hyrox
+  line — `isHyrox` reads the title, and the title now contains "Hyrox". So the defect is narrower
+  than feared: it bites only when the title is bare (`"Circuit · 2 rounds · 30:00"`, 9 Nov), and
+  `match_sessions.py` writes the template name into the title, so a session logged from the
+  **"Hyrox circuit"** template titles itself out of the problem. Yesterday's edit is load-bearing and
+  worked. No action.
+
+### 7. Checks
+All four pre-push gates run against the edited file.
+
+- `python3 check_plan.py` → **exit 0**, "plan lines OK (text ≤ 60, why ≤ 120, from 2026-11-09)".
+  The new line measures **44** characters of `text` and **79** of `why`.
+- `npm run build` → **clean**, `✓ 41 modules transformed`, `✓ built in 1.06s`, `main-BCNw9atG.js`
+  339.07 kB.
+- **Patch anchors (gotcha 14)** → all eleven present: TODAY, LAST_RUN, LAST_DATA, hrvBaseline, daily,
+  sleep, weight, nutrition, body, CSV_DATA, HYROX_DATA.
+- **`update.patch()` round-trip** against a copy of the real `src/App.jsx` in the scratchpad, with the
+  module body above `# ── Main ──` imported and `patch("2026-11-19", wellness, [row], False, {})`
+  called on a synthetic 44-field activity row — **22 of 22 assertions pass**: the daily and sleep rows
+  are written and both keep their **4-space indent**, every other daily and sleep row keeps its
+  indent, no rows are lost, the weigh-in upserts **inside the weight array** with `vo2max` byte-identical,
+  the CSV row lands inside `CSV_DATA` and the array gains **exactly one** row, and `SCHEDULE` survives
+  with the new Wednesday line intact and week 12 whole.
+- Engine re-read off the edited file: the new line prices at **planIntensity 162 / estTrimp 107**,
+  identical to the text it replaces; **week 12 total 578**, unchanged.
+
+
 ## 2026-11-18
 - adherence: **no ACTION REQUIRED and no WATCH — the report closes with "Every prescribed session
   type has been trained at least once."** Window 28 Oct–18 Nov: **ski 3/3 on track** · row 0/3 ·
