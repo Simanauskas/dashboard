@@ -1,0 +1,47 @@
+name: MFP food log (encrypted)
+
+# Pulls the per-entry MyFitnessPal diary for analysis. This repo is PUBLIC, so:
+#   * the plaintext only ever exists on the runner (data/private/ is gitignored),
+#   * mfp.py never prints food names to the log,
+#   * the file is encrypted to data/diary-cert.pem (a PUBLIC certificate) before
+#     upload, so the artifact is ciphertext; only the private key holder can read it.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days back to fetch (30 = today + 29 back)'
+        required: false
+        default: '30'
+
+permissions:
+  contents: read
+
+jobs:
+  diary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Fetch diary (not printed)
+        env:
+          MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
+          DAYS: ${{ inputs.days || '30' }}
+        run: python mfp.py --diary --days "$(( DAYS - 1 ))"
+
+      - name: Encrypt to the public certificate
+        run: |
+          test -s data/private/mfp-diary.json || { echo "::error::no diary written (token expired / MFP not connected?)"; exit 1; }
+          openssl smime -encrypt -aes256 -binary -outform DER \
+            -in data/private/mfp-diary.json -out mfp-diary.enc data/diary-cert.pem
+          shred -u data/private/mfp-diary.json || rm -f data/private/mfp-diary.json
+          ls -l mfp-diary.enc
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mfp-diary-encrypted
+          path: mfp-diary.enc
+          retention-days: 2
