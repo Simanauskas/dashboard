@@ -2876,13 +2876,28 @@ function PlanAdjustments({ plan }) {
 const FUEL = {
   proteinG: 160,          // his target, g/day
   carbRest: 3.0,          // g/kg on a day with no training
-  // g/kg per TRIMP: 60 → 4.2, 130 (1h Hyrox) → 5.6, 200 (2h) → 7.0, 250 → 8.0.
-  // TRIMP weights intensity exponentially, so a steeper slope overprices short
-  // hard sessions — 0.03 put a 45-min erg benchmark at 8 g/kg.
-  carbPerTrimp: 0.02,
+  // g/kg per TRIMP, in two slopes. Easy volume (Z2, tennis, short ergs: 50–80
+  // TRIMP) barely dents glycogen, so it gets a shallow slope; above the knee
+  // the slope steepens to the old high-end pricing.
+  //   60 → 3.6, 80 → 3.8, 130 (1h Hyrox) → 5.1, 160 → 5.8, 200 → 6.8, 250 → 8.1.
+  // (A single 0.02 slope put easy days at 4.0–4.6 g/kg; a steeper one
+  // overpriced short hard sessions — 0.03 put a 45-min erg benchmark at 8.)
+  carbPerTrimpLow: 0.01,
+  carbKneeTrimp: 80,
+  carbPerTrimpHigh: 0.025,
   carbMax: 10,            // g/kg ceiling
   hardTrimp: 55,          // same line adaptPlan draws for a hard day
   preloadGkg: 0.5,        // extra g/kg the day before a hard session
+  // "Hard" for the preload is a genuine quality session — one that is long
+  // (single-session TRIMP) or run at threshold-ish HR — not hardTrimp (55),
+  // which an easy Z2 run or a normal tennis hit already clears.
+  preloadTrimp: 100,
+  preloadHr: 150,
+  // Carb burn (g/min) from average HR: a floor for easy/intermittent work,
+  // rising ~2 g/min per 60 bpm. Z2 (138) ≈ 74 g/h, 165 bpm ≈ 127 g/h.
+  // Calibrated so 45–60 min easy ≈ 3.7–4.0 g/kg and a 70-min quality
+  // session ≈ 4.9+ g/kg (before the extras that usually ride along).
+  glycoBase: 0.3, glycoHr0: 110, glycoSlope: 0.033, glycoMin: 0.5, glycoMax: 3.0,
   fatGkg: 1.0,            // g/kg baseline fat
   fatFloorGkg: 0.8,       // never below — hormones, not a lever past here
   carryDays: 3,           // how far back the carb balance looks
@@ -2891,9 +2906,19 @@ const FUEL = {
   carryDownMax: 0.5,      // g/kg: most a surplus can take away
 };
 
-const carbGkgFor = (trimp, nextTrimp) =>
-  Math.min(FUEL.carbMax, FUEL.carbRest + FUEL.carbPerTrimp * Math.max(0, trimp))
-  + (nextTrimp >= FUEL.hardTrimp ? FUEL.preloadGkg : 0);
+const carbGkgFor = (trimp, preload = false) => {
+  const t = Math.max(0, trimp), k = FUEL.carbKneeTrimp;
+  const perTrimp = FUEL.carbPerTrimpLow * Math.min(t, k) + FUEL.carbPerTrimpHigh * Math.max(0, t - k);
+  return Math.min(FUEL.carbMax, FUEL.carbRest + perTrimp) + (preload ? FUEL.preloadGkg : 0);
+};
+
+// Estimated muscle-carbohydrate burned by one recorded activity, grams.
+const glycogenUsed = (a) => {
+  if (!(a._avgHR > 0) || !(a._dur > 0)) return 0;
+  const rate = Math.min(FUEL.glycoMax, Math.max(FUEL.glycoMin,
+    FUEL.glycoBase + FUEL.glycoSlope * (a._avgHR - FUEL.glycoHr0)));
+  return rate * a._dur / 60;
+};
 
 // Least-squares slope of weigh-ins over the last `days`, in kg per week.
 function weightTrend(weights, date, days = 21) {
@@ -2934,6 +2959,9 @@ function fuelPlan({ ana, plan, health, date }) {
   const toCome = upcoming.reduce((s, sn) => s + priceOf(sn), 0);
   const load = done + toCome;
   const tomorrow = plannedTrimp(shift(date, 1));
+  const isQuality = (sn) => priceOf(sn) >= FUEL.preloadTrimp || planIntensity(sn, plan.model) >= FUEL.preloadHr;
+  const tomorrowHard = (planDay(shift(date, 1))?.sessions || [])
+    .some(sn => sn._adj?.kind !== "drop" && !isRestSession(sn) && !isInfoLine(sn) && isQuality(sn));
   const asPlanned = plannedTrimp(date);
 
   // ── the last few days: did he eat the carbs those days' work needed? ─────
@@ -2943,7 +2971,12 @@ function fuelPlan({ ana, plan, health, date }) {
   for (let i = FUEL.carryDays; i >= 1; i--) {
     const d = shift(date, -i);
     const t = doneTrimp(d);
-    const need = Math.round(carbGkgFor(t, doneTrimp(shift(d, 1)) || plannedTrimp(shift(d, 1))) * kg);
+    // Owed = the rest-day floor plus the carbohydrate that day's work actually
+    // burned. No preload (that is a plan for tomorrow, not a debt) and no
+    // comparison against an earlier target, so an inflated target can't make
+    // a permanent "undereating" signal.
+    const used = acts(d).reduce((sum, a) => sum + glycogenUsed(a), 0);
+    const need = Math.round(FUEL.carbRest * kg + used);
     const row = eatenOn(d);
     history.push({ date: d, trimp: Math.round(t), need, ate: row ? row.carbs : null, kcal: row ? row.kcal : null });
   }
@@ -2953,7 +2986,7 @@ function fuelPlan({ ana, plan, health, date }) {
     ? Math.min(FUEL.carryUpMax * kg, -gap * FUEL.carryShare)
     : -Math.min(FUEL.carryDownMax * kg, gap * FUEL.carryShare);
 
-  const baseGkg = carbGkgFor(load, tomorrow);
+  const baseGkg = carbGkgFor(load, tomorrowHard);
   const carbs = Math.max(Math.round(FUEL.carbRest * kg), Math.round(baseGkg * kg + carry));
 
   // ── leanness: steer fat by the weight trend ──────────────────────────────
@@ -2975,15 +3008,15 @@ function fuelPlan({ ana, plan, health, date }) {
     : `Today's load ${Math.round(load)} TRIMP` +
       (done > 5 ? ` (${Math.round(done)} done${doneNames.length ? `: ${doneNames.join(", ")}` : ""}` +
         (toCome > 5 ? `, ${Math.round(toCome)} still to come)` : ")") : "") +
-      ` → ${carbGkgFor(load, 0).toFixed(1)} g/kg.`);
+      ` → ${carbGkgFor(load).toFixed(1)} g/kg.`);
   if (Math.abs(load - asPlanned) >= 15 && done > 5) {
-    const dg = Math.round((carbGkgFor(load, 0) - carbGkgFor(asPlanned, 0)) * kg);
+    const dg = Math.round((carbGkgFor(load) - carbGkgFor(asPlanned)) * kg);
     why.push(`${dg > 0 ? "More" : "Less"} than the plan's ${Math.round(asPlanned)} TRIMP → ${dg > 0 ? "+" : "−"}${Math.abs(dg)} g carbs vs the planned day.`);
   }
-  if (tomorrow >= FUEL.hardTrimp) why.push(`Tomorrow is a hard day (~${Math.round(tomorrow)} TRIMP) → +${FUEL.preloadGkg} g/kg to go in stocked.`);
+  if (tomorrowHard) why.push(`Tomorrow has a quality session (~${Math.round(tomorrow)} TRIMP) → +${FUEL.preloadGkg} g/kg to go in stocked.`);
   if (logged.length && Math.abs(carry) >= 10) {
     why.push(gap < 0
-      ? `Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} ${Math.round(-gap)} g carbs short of what the training needed → +${Math.round(carry)} g today to catch up.`
+      ? `Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} ${Math.round(-gap)} g carbs short of what the work actually burned → +${Math.round(carry)} g today to catch up.`
       : `Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} ${Math.round(gap)} g carbs over → −${Math.round(-carry)} g today.`);
   } else if (logged.length) {
     why.push(`Last ${logged.length} logged day${logged.length > 1 ? "s" : ""} fuelled about right (${gap >= 0 ? "+" : "−"}${Math.abs(Math.round(gap))} g carbs) — no carry-over.`);
