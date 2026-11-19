@@ -23,6 +23,12 @@ Then Connect needs doing again.
     python3 mfp.py --days 30       # wider window (backfill)
     python3 mfp.py --dry-run       # fetch + print, write nothing
     python3 mfp.py --poll          # today only; writes nothing unless it changed
+    python3 mfp.py --diary         # per-entry food log, last 30 days -> data/private/ (gitignored)
+
+--diary is for analysis, not the dashboard. The repo is PUBLIC, so the food log
+is written to a gitignored path, never committed, and never printed (the log
+shows counts and totals only). The mfp-diary workflow encrypts it with a public
+key before uploading it, so only ciphertext leaves the runner.
 
 Never fails the job: an MFP outage must not cost the Garmin sync its commit.
 Every failure path prints why and exits 0.
@@ -33,6 +39,7 @@ import argparse, datetime, json, os, pathlib, re, sys
 import requests
 
 DASHBOARD = pathlib.Path("src/App.jsx")
+DIARY_OUT = pathlib.Path("data/private/mfp-diary.json")   # gitignored — see .gitignore
 API = "https://api.myfitnesspal.com"
 REFRESH_DAYS = 4          # same window update.py re-checks; entries get edited late
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
@@ -107,23 +114,30 @@ def _num(v):
     return None
 
 
-def fetch_day(s, date_str):
-    """Summed nutrition for one day, or None if nothing was logged."""
+def diary_items(s, date_str):
+    """Raw food entries for one day."""
     data = _get(s, "/v2/diary", [
         ("entry_date", date_str),
         ("types", "food_entry"),
         ("fields[]", "nutritional_contents"),
     ])
-    items = [i for i in data.get("items", []) if i.get("type", "food_entry") == "food_entry"]
+    return [i for i in data.get("items", []) if i.get("type", "food_entry") == "food_entry"]
+
+
+NUTRIENT_KEYS = {"energy": "kcal", "protein": "protein", "carbohydrates": "carbs",
+                 "fat": "fat", "fiber": "fiber"}
+
+
+def fetch_day(s, date_str):
+    """Summed nutrition for one day, or None if nothing was logged."""
+    items = diary_items(s, date_str)
     if not items:
         return None
 
     tot = {"kcal": 0.0, "protein": 0.0, "carbs": 0.0, "fat": 0.0, "fiber": 0.0}
-    keys = {"energy": "kcal", "protein": "protein", "carbohydrates": "carbs",
-            "fat": "fat", "fiber": "fiber"}
     for it in items:
         nc = it.get("nutritional_contents") or {}
-        for src, dst in keys.items():
+        for src, dst in NUTRIENT_KEYS.items():
             v = _num(nc.get(src))
             if v:
                 tot[dst] += v
@@ -134,6 +148,68 @@ def fetch_day(s, date_str):
         print("   ", json.dumps(items[0])[:600])
         return None
     return {k: round(v) for k, v in tot.items()}
+
+
+def _first(*vals):
+    for v in vals:
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return None
+
+
+def entry_row(it):
+    """One diary entry as {meal, food, brand, amount, kcal, protein, carbs, fat}.
+
+    MFP's v2 item shape is not documented, so every lookup has fallbacks and a
+    missing piece becomes None rather than an exception. The response is only
+    ever described by its key names (see schema_hint), never by its values."""
+    food = it.get("food") if isinstance(it.get("food"), dict) else {}
+    nc = it.get("nutritional_contents") or {}
+    ss = it.get("serving_size") if isinstance(it.get("serving_size"), dict) else {}
+    servings = it.get("servings")
+    unit = _first(ss.get("unit"), ss.get("description"), it.get("serving_unit"))
+    size = ss.get("value")
+    if isinstance(servings, (int, float)) and isinstance(size, (int, float)):
+        amount = f"{round(servings * size, 1):g} {unit or ''}".strip()
+    elif servings is not None:
+        amount = f"{servings:g} × {unit or 'serving'}" if isinstance(servings, (int, float)) else str(servings)
+    else:
+        amount = None
+    row = {
+        "meal": _first(it.get("meal_name"), it.get("meal")),
+        "food": _first(food.get("description"), food.get("name"), it.get("food_name"),
+                       it.get("description"), it.get("name")),
+        "brand": _first(food.get("brand_name"), it.get("brand_name")),
+        "amount": amount,
+    }
+    for src, dst in NUTRIENT_KEYS.items():
+        if dst == "fiber":
+            continue
+        v = _num(nc.get(src))
+        row[dst] = None if v is None else round(v, 1)
+    return row
+
+
+def schema_hint(it):
+    """Key names only (two levels) — safe to print, says nothing about what was eaten."""
+    return {k: (sorted(v) if isinstance(v, dict) else type(v).__name__) for k, v in it.items()}
+
+
+def fetch_diary(tok, dates):
+    """Per-entry log for `dates`: {date: [entry_row, ...]}. Prints counts only."""
+    s = _session(tok)
+    out, hinted = {}, False
+    for d in dates:
+        items = diary_items(s, d)
+        rows = [entry_row(i) for i in items]
+        if items and not hinted and any(r["food"] is None or r["meal"] is None for r in rows):
+            print("  ⚠ some entries have no food/meal name — item keys are:",
+                  json.dumps(schema_hint(items[0])))
+            hinted = True
+        if rows:
+            out[d] = rows
+        print(f"  · {d}: {len(rows)} entr{'y' if len(rows) == 1 else 'ies'}")
+    return out
 
 
 def fetch_goal(s, date_str):
@@ -213,9 +289,14 @@ def main():
     # Like update.py's poll mode, a poll that finds nothing new writes nothing —
     # not even LAST_MFP — so it cannot turn into a commit every ten minutes.
     p.add_argument("--poll", action="store_true")
+    p.add_argument("--diary", action="store_true",
+                   help="save the per-entry food log to data/private/ (gitignored); "
+                        "does not touch App.jsx")
     a = p.parse_args()
     if a.poll:
         a.days = 0
+    if a.diary and not any(x.startswith("--days") for x in sys.argv[1:]):
+        a.days = 29                     # today + 29 back = 30 days
 
     try:
         tok = load_token()
@@ -229,6 +310,21 @@ def main():
     today = datetime.date.today()
     dates = [(today - datetime.timedelta(days=i)).isoformat() for i in range(a.days, -1, -1)]
     print(f"MyFitnessPal: {dates[0]} → {dates[-1]}")
+    if a.diary:
+        try:
+            diary = fetch_diary(tok, dates)
+        except AuthError as e:
+            print(f"::warning::MyFitnessPal rejected the token ({e})")
+            return 0
+        except Exception as e:
+            print(f"::warning::MyFitnessPal diary fetch failed: {type(e).__name__}: {e}")
+            return 0
+        DIARY_OUT.parent.mkdir(parents=True, exist_ok=True)
+        DIARY_OUT.write_text(json.dumps({"fetched": datetime.datetime.utcnow().isoformat() + "Z",
+                                         "days": diary}, ensure_ascii=False, indent=1), encoding="utf-8")
+        n = sum(len(v) for v in diary.values())
+        print(f"✓ Saved {n} entries over {len(diary)} day(s) to {DIARY_OUT} (gitignored, not printed)")
+        return 0
     try:
         rows = fetch(tok, dates)
     except AuthError as e:

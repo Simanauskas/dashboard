@@ -3,3 +3,6 @@ dist
 .DS_Store
 *.log
 __pycache__/
+
+# Personal food log (mfp.py --diary). The repo is public: never commit this.
+data/private/
