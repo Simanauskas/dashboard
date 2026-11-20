@@ -1345,7 +1345,9 @@ const isHyrox = a => {
   return t.includes("hyrox") || t.includes("circle") || (ty === "indoor running" && parseNum(a.Distance) > 0);
 };
 const isRun = a => !!(a["Activity Type"] || "").toLowerCase().match(/running|trail/);
-const isTennis = a => (a["Activity Type"] || "").toLowerCase() === "tennis";
+// Garmin files it as "Tennis V2" (80 rows since Oct 2026) as well as plain "Tennis"; an exact
+// match meant played tennis never ticked off its planned line and counted as unplanned load.
+const isTennis = a => (a["Activity Type"] || "").toLowerCase().startsWith("tennis");
 const isStrength = a => (a["Activity Type"] || "").toLowerCase() === "strength training";
 const isRecovery = a => { const t = (a.Title || "").toLowerCase(); return t.includes("sauna") || t.includes("massage"); };
 
@@ -2972,7 +2974,10 @@ function fuelPlan({ ana, plan, health, date }) {
   const toCome = upcoming.reduce((s, sn) => s + priceOf(sn), 0);
   const load = done + toCome;
   const tomorrow = plannedTrimp(shift(date, 1));
-  const isQuality = (sn) => priceOf(sn) >= FUEL.preloadTrimp || planIntensity(sn, plan.model) >= FUEL.preloadHr;
+  // An eased session is priced at Z2 by the week governor — it is not a quality session any
+  // more, whatever its text says, so it must not trigger the preload either.
+  const isQuality = (sn) => priceOf(sn) >= FUEL.preloadTrimp ||
+    (sn._adj?.kind === "ease" ? Z2_HR : planIntensity(sn, plan.model)) >= FUEL.preloadHr;
   const tomorrowHard = (planDay(shift(date, 1))?.sessions || [])
     .some(sn => sn._adj?.kind !== "drop" && !isRestSession(sn) && !isInfoLine(sn) && isQuality(sn));
   const asPlanned = plannedTrimp(date);
