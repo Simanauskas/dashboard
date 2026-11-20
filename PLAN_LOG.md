@@ -72,6 +72,239 @@ and never once done.
 
 ---
 
+## 2026-11-20
+- adherence: **no ACTION REQUIRED and no WATCH — "Every prescribed session type has been trained at
+  least once."** Window 30 Oct–20 Nov: **ski 3/3 on track** · row 0 prescribed / 2 done ·
+  **hyrox 1/1 on track** · strength 3/6 on track · cycle 0/7 · tennis 1/7 · **run 8 prescribed /
+  6 done, short by 2**. Benchmarks already due: **5 Nov NOTHING LOGGED · 12 Nov NOTHING LOGGED ·
+  20 Nov TRAINED OTHER TYPE** (`Cycling Vilnius Cycling` — the 08:31 commute, 21min, TRIMP 10).
+  Next 14d: **Fri 27 Nov**. `check_plan.py` exit 0.
+- readiness: **HRV 57 against a baseline of 73 — −16, and a 24ms fall from yesterday's 81**, which
+  ends four consecutive mornings above baseline. The baseline itself kept climbing: 63 → 66 → 70 →
+  **73**. **RHR 41, mid-range inside 38–46.** **SpO2 97, up from 93**, and **resp 11.0, down from
+  13.0** — so neither limb of yesterday's §4 trigger fired. **Sleep 8h00 (480min: deep 200, REM 111,
+  light 169, awake 1)** — the second-deepest night of the 21-day window behind 11 Nov's 231, and the
+  HRV fell anyway, which is the whole finding. 169 daily / 168 sleep rows, contiguous. LAST_RUN and
+  LAST_DATA both 2026-11-20T07:07Z against TODAY 2026-11-20 — **sync healthy**. Engine, read live off
+  the committed file: readiness **4/10, down from 7**, TSB **−13.05**, ATL **48.30**, CTL **35.24**,
+  ATL/CTL **1.370**, `consecutiveHard` **0**, `daysSinceRest` **7**, `forceRest` FALSE, **`easeHard`
+  TRUE — "HRV 57ms is 16ms under the 73ms baseline"**, `scale` **0.786** ("week projects 674 TRIMP
+  against a 440–580 ceiling"), `unplanned7` **198**. Week 11, day five: done **235**, remaining
+  **439**, projectedRaw **674** eased to **605**, **`over` TRUE**.
+- decision: **CHANGED — one line, week 12, Thu 26 Nov. `{type:"rest",text:"Day off · nothing
+  structured",why:"Rest here so the threshold reps land tomorrow."}` becomes `{type:"rest",
+  text:"Day off · nothing heavy for the legs",why:"A heavy leg session here caps tomorrow's reps at
+  Z2 before you start."}`** Nothing else moved: not today's benchmark, not today's tennis, not a
+  single line in week 11, not week 12's Monday, Tuesday, Wednesday, Friday or Sunday, not a band,
+  not a note.
+- why: **Thursday 19 Nov was written as a day off to set up Friday's benchmark, he put 80kg squats,
+  90kg RDLs and sixty 40kg walking lunges into it, and HRV fell 81 → 57 on an eight-hour night —
+  which tripped the readiness gate and capped today's ⏱ KEY RUN at Z2 before he started.** That is
+  attempt three of four on a benchmark that is 1-for-3, and the one completion came the morning after
+  his only full rest day of that fortnight. The day before the benchmark is the variable, and it is
+  the only thing I changed. The edit costs **0 TRIMP** — week 12 stays at **578**.
+- watching: **today's attempt**, which is still live and which yesterday's §3 trigger resolves
+  tomorrow, not this morning (§3); **`daysSinceRest` 7** against a `forceRest` threshold of 9 with
+  TSB under −15, so if he trains Fri–Sun it fires Monday (§5); **the HRV itself** — 57 is one
+  morning, and if it stays ≥10ms under baseline through Sun 22 Nov the 1h15 long run becomes a walk
+  (§5); **that TRIMP cannot see resistance training at all** (§4, engine code, outside scope);
+  **the `scaleDuration` 1h15 blind spot** (second entry, §6); **the `cal:true` tennis mispricing**
+  (eleventh-plus entry); and **row 0 prescribed / 2 done** and **run short by 2**, both left alone.
+
+### 1. Is this a passivity correction? No
+**19 Nov CHANGED · 18 Nov CHANGED · 17 Nov CHANGED.** Zero consecutive NO CHANGE entries precede
+this run, so the three-in-a-row rule does not apply. The opposite risk does: four CHANGED mornings
+in a row can become editing as a habit. The test I held this to is the one 19 Nov set — *does it
+come from data that landed overnight, and does it change the load?* Both answers hold. The 19 Nov
+strength session and this morning's HRV both arrived after yesterday's run, and the edit changes the
+load by exactly **zero TRIMP**.
+
+### 2. The finding: the day before the benchmark is the variable
+**What was written.** Thu 19 Nov, week 11: `{type:"rest",text:"Day off · nothing structured",
+why:"Rest here so the threshold reps land tomorrow."}`
+
+**What was trained.** 19 Nov 11:56, `Strength Training / "Lower body — Squat 80 · RDL 90 · Lunges 40
+· Calf raises"`, 54:51, avg HR **81**, TRIMP **12**, plus a 17-minute sauna.
+`data/sessions/2026-11-19-1156-strength.json`, template **"Lower body"**, RPE 6, feel 50:
+
+| exercise | sets |
+|---|---|
+| Back squat | 80kg × 5, 5, **6** |
+| Romanian deadlift | **90kg × 6**, 80 × 10, 80 × 9 |
+| Walking lunges | 40kg × 20, 20, 20 |
+| Calf raises | 30kg × 15, 16, 16 |
+| Wall drive | 25, 30, 40 |
+
+**What happened overnight.** HRV **81 → 57**, a 24ms fall against a baseline that rose to 73, on
+**480 minutes of sleep with 200 of deep and one minute awake** — the second-deepest night in the
+window. Sleep did not cause this and illness is now the less likely reading, because the two numbers
+that looked ominous yesterday both reversed: SpO2 93 → **97**, resp 13.0 → **11.0**.
+
+**What that did to the benchmark.** `easeHard` fired on the HRV limb, so `adaptPlan` has already
+written `{date:"2026-11-20", label:"Quality work eased to Z2", why:"HRV 57ms is 16ms under the 73ms
+baseline"}` and today's ⏱ KEY RUN carries *"Hold it at Z2 — drop the intervals, the timing and the
+max efforts."* The benchmark was capped by the dashboard before he got to it, and the thing that
+capped it was Thursday.
+
+**The record of this benchmark, with the day before each attempt.**
+
+| week | written | day before | outcome |
+|---|---|---|---|
+| 9 (Nov 2–8) | Thu 5 Nov | **5 Nov: nothing logged at all** | **landed Fri 6 Nov**, 3×2km, faded to 13.5 on rep 3 |
+| 10 (Nov 9–15) | Thu 12 Nov | 11 Nov: `Z1 70min`, TRIMP 53 | **missed** — nothing threshold-shaped all week |
+| 11 (Nov 16–22) | Fri 20 Nov | 19 Nov: heavy lower lift | attempt 3, **capped to Z2 this morning** |
+| 12 (Nov 23–29) | Fri 27 Nov | 26 Nov: written as a day off | attempt 4 |
+
+**One for three, and the one completion is the only attempt preceded by a genuinely empty day.**
+5 Nov has zero logged activity — his only full rest day between 1 and 12 Nov — and the threshold run
+landed the next morning. Both failures have a trained day immediately before. That is three data
+points, not a law, but it is the first mechanism this benchmark's failures have had in common, and
+it is cheap to act on.
+
+### 3. What I did not do, and why today is not the morning for it
+**I did not touch today's line.** The day is live — only the 08:31 commute is logged — and the engine
+has already capped it. Rewriting a line the readiness gate is holding would be duplicating
+`adaptPlan`, which is explicitly not my job.
+
+**I did not cut the rep shape, and that is deliberate.** 19 Nov §3 pre-registered: *"If Fri 20 Nov
+produces no threshold-shaped run by the time the Sat 21 Nov run reads the file … the next move is to
+cut it to 2×2km at 14.0 on Fri 27 Nov."* That trigger resolves **tomorrow**, not this morning, and
+today's attempt has not yet failed. Whoever reads this next: **the trigger stands unchanged, and my
+edit does not consume it.** Yesterday's "do not do both at once" was about moving the weekday *and*
+cutting the shape; this morning's edit touches neither. It changes the benchmark's *surroundings*.
+If tomorrow finds no threshold run in week 11, cut Fri 27 Nov to **2×2km at 14.0** as planned — the
+two levers are independent and can both be in place for attempt four.
+
+**I did not move the benchmark off Friday.** 19 Nov §3 counted distinct training days by weekday over
+84 days — Mon 9 · Tue 10 · Wed 11 · Thu 8 · Fri 9 · Sat 8 · Sun 9 — and there is no weekday he
+reliably skips, so adherence.py's "already deferred" case does not apply and the weekday is a
+suggestion. Friday is also where the one success landed.
+
+### 4. Why a text edit and not a written home for the lower lift
+This was the obvious larger move and I priced it before rejecting it.
+
+**The gap is real.** The lower-body lift is prescribed **nowhere** — the only written strength line is
+`Gym 40min · upper lift + sled pull 8×25m` — and he does it anyway, roughly weekly: **25 Oct, 1 Nov,
+6 Nov, 19 Nov**. `strength` reads 3 prescribed / 6 done. An unwritten session lands on whatever day
+the plan leaves blank, and the blank days in this block are the "Day off" days. Which is exactly what
+happened.
+
+**And "Day off · nothing structured" is 0 for 2.** Fri 13 Nov (week 10) carried that same line and he
+trained `SkiErg 4×560m` plus a 58-minute upper lift. Thu 19 Nov carried it and he trained heavy legs.
+Both times he filled it from the gym. adherence.py cannot flag this because rest is not a counted
+session type — it is a blind spot in the report, and worth knowing about.
+
+**But writing the lift a slot costs the benchmark.** Priced against the live model, a realistic line
+— `Gym 35min · squat 3×5 at 82.5kg · 3×20 lunges` — comes out at **planIntensity 126 / estTrimp 34**,
+which takes week 12 from **578 to 612** against a **580** ceiling. The governor's trigger is
+`need / remainingPlanned < 0.95`: on Monday morning that is 580/612 = **0.948**, so it starts trimming
+on day one, and by Friday (done ≈ 374, remaining 237, need 206 → **0.869**) it would be cutting the
+benchmark's own "50min all in" to about 43 minutes. **Trimming the key run to make room for a lift is
+backwards.** His real lower-body sessions measure TRIMP 12, 18 and 20 — the model overprices them by
+roughly 15 because it reads "lunges" as station work — so the cost is largely an artifact, but the
+governor acts on the artifact.
+
+**And the checklist means a written slot would not protect Thursday anyway.** A session ticks on
+whichever day of the live week it lands, so a lift written on Monday or Saturday does not stop him
+lifting on Thursday. The only lever that protects Thursday is **the Thursday line**. Hence a
+constraint, not a relocation, at zero load.
+
+**One trap recorded so it is not rediscovered.** The first wording I tried,
+`Gym 35min · lower lift · squat 3×5 at 82.5kg`, matches **no** entry in `SESSION_MATCHERS` —
+`/strength|sled|lunge|pulldown|wall ball/i` contains neither "squat" nor "gym" nor "lift" — so
+`sessionSatisfiedBy` returns null and the line could never be ticked; it would read **missed** every
+day of the week while he was doing exactly it. Checked against all four of his logged lower-body
+sessions: with the word **"lunges"** in the text all four tick, without it none do. Any future
+lower-body line needs `lunge`, `sled` or `strength` in its 60 characters. (The existing Tuesday line
+survives on "sled pull".)
+
+### 5. The physiological signal — and the reason it arrived too late to help
+**The signal.** A 24ms HRV fall on the second-deepest night of the window, with RHR flat at 41 and
+both of yesterday's warning numbers reversing. That is not illness and it is not sleep. It is load:
+`daysSinceRest` **7** (last genuine rest day **12 Nov**), ATL **48.30** against CTL **35.24**, and a
+55-minute maximal-ish leg session 19 hours earlier.
+
+**The structural part, which is the more useful half.** Thursday priced at **TRIMP 12** because avg HR
+was **81**. The next morning `consecutiveHard` read **0**, because `HARD_TRIMP` is 55. So neither
+limb of the readiness gate nor the volume governor can see sixty 40kg lunges coming; the only way a
+resistance session reaches the engine is as the HRV it produces the following day, **by which point
+the benchmark it ruins is already capped**. The engine is behaving correctly on the inputs it has;
+TRIMP is a heart-rate integral and resistance training is invisible to it. That is engine code and
+outside what this Routine may edit, so it is recorded, not acted on — but it is the reason a plan-text
+constraint is the right instrument here. The plan can protect the day; the engine cannot.
+
+**The baseline, separately, is still the good news.** 99 → 88 → 79 → 72 → 64 → 67 → 63 → 66 → 70 →
+**73**: bottomed 17 Nov, up ten points in three days, under an ATL of 48. A rising baseline under
+that load is adaptation. One suppressed morning does not change that reading.
+
+**Yesterday's §4 trigger: resolved, did not fire.** It required resp ≥13 for a second morning **or**
+RHR above 46. Resp came in at **11.0** and RHR at **41**. So **Sun 22 Nov's `Long run 1h15` stands**
+and **Friday's benchmark stays in week 11**, as 19 Nov specified. The new trigger that replaces it is
+in `watching`: if HRV stays ≥10ms under baseline through Sunday the long run becomes a walk.
+
+### 6. What I deliberately left alone
+- **Every line in week 11.** He is five days into it. Today's benchmark is the engine's to cap and
+  his to attempt; Saturday stays empty as the landing zone — which matters more than usual, because
+  it is where a slipped key run can still tick the week; Sunday's 1h15 stands (§5).
+- **Week 12's Monday, Tuesday, Wednesday, Friday and Sunday.** The Tuesday ski
+  (`Ski 16min · 3×1000m at 2:05/500m · 90s gap`) and the Wednesday erg-timing line were written 18
+  and 19 Nov and have not been attempted once. Changing a rung before it has been tried is the error
+  both were created to fix.
+- **The phase.** Base II · Threshold, week 4 of 6, runs to 20 Dec. Still aimed at ski (top 29.8% at
+  Athens) and running (top 27.7%), the two weakest elements. Readiness 4/10 is one morning inside a
+  rising baseline; nothing argues for different *sessions* at block level, and this edit changes what
+  a day *forbids*, not what the block trains.
+- **The TAPER_PLAN bands, arithmetic re-checked rather than asserted.** 440–580, Base II note at
+  exactly two sentences, and the note's "everything else is yours" is where his own lifting correctly
+  lives.
+
+  | week | written | actual | band |
+  |---|---|---|---|
+  | 9 (Nov 2–8) | 293 | 364 | 400–560 |
+  | 10 (Nov 9–15) | 286 | 378 | 440–580 |
+  | 11 (Nov 16–22) | 669 | 235 so far | 440–580 |
+  | 12 (Nov 23–29) | **578, unchanged by this edit** | – | 440–580 |
+
+  Week 11's 669 breaks its own ceiling on paper, but **202 of it is two `cal:true` tennis lines
+  priced at 101 each**; net of them it is 467, and week 12 net of tennis is 477. Both mid-band. The
+  16 Nov reopen condition ("two consecutive weeks under 400 against a written plan of ≥440") still
+  does not fire: weeks 9 and 10 came in under 400 but were *written* at 293 and 286.
+- **The Base I phase note**, which runs well past two sentences. That phase ended 8 Nov and the rule
+  forbids rewriting what is over; I did not touch it, so the "cut it when you touch it" clause never
+  came up.
+- **`RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`, `RACE_GAINS`.** Copenhagen is 127 days
+  out, no result known, no target moved.
+- **`row` 0 prescribed / 2 done.** Top 11.4% at Athens — defend, do not chase. The 1000m row TT is
+  still owed and still does not earn a slot in a threshold week.
+- **`run` short by 2.** Two runs inside a 21-day window against his most-trained type, and one of the
+  two is today's uncompleted benchmark. Not a pattern.
+- **The `cal:true` tennis mispricing** (`isTennis` is `=== "tennis"` against Garmin's `Tennis V2`, so
+  `model.tennis` reads n=0 and the fallback prices a court session at HR 138 / 75min). Eleventh-plus
+  entry; outside scope; §6 shows how to read around it.
+- **`scaleDuration` cannot see `1h15`** — it matches `\d+min` and `\d+–\d+min` only, so the one long
+  session in the week is invisible to the volume governor. Second entry. The fix belongs in the
+  function, not in the plan text, so the line keeps its spelling.
+
+### 7. Checks
+All four pre-push gates run against the edited file.
+
+- `python3 check_plan.py` → **exit 0**, "plan lines OK (text ≤ 60, why ≤ 120, from 2026-11-09)".
+  The new line measures **36** characters of `text` and **69** of `why`.
+- `npm run build` → **clean**, `✓ built in 1.07s`, `main-B9LlpMBd.js` 340.53 kB.
+- **Patch anchors (gotcha 14)** → all eleven present: TODAY, LAST_RUN, LAST_DATA, hrvBaseline, daily,
+  sleep, weight, nutrition, body, CSV_DATA, HYROX_DATA.
+- **`update.patch()` round-trip** against a copy of the real `src/App.jsx` in the scratchpad, module
+  body above `# ── Main ──` imported, `patch("2026-11-20", wellness, [row], False, {})` called on a
+  synthetic 44-field activity row — **23 of 23 assertions pass**: the daily and sleep rows are written
+  and both keep their **4-space indent**, every other daily and sleep row keeps its indent, no rows
+  are lost, dates stay unique and sorted, the weigh-in upserts **inside the weight array** with
+  `vo2max` byte-identical and no stray tuple elsewhere in the file, the CSV row lands inside
+  `CSV_DATA` and the array gains **exactly one** row, and **`SCHEDULE` survives byte-identical** with
+  the new Thursday line intact, week 12 whole and `TAPER_PLAN` untouched.
+- Engine re-read off the edited file: the Thursday line still reads `isRestSession` **true** and
+  `estTrimp` **0**; **week 11 total 669 and week 12 total 578, both unchanged**; the only adjustment
+  the engine emits is still today's Z2 cap.
+
 ## 2026-11-19
 - adherence: **no ACTION REQUIRED and no WATCH — the report closes with "Every prescribed session
   type has been trained at least once."** Window 29 Oct–19 Nov: **ski 3/3 on track** · row 0/3 ·
