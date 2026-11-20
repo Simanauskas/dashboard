@@ -855,7 +855,7 @@ function parseSheetBf(csvText) {
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
 "Cycling","2026-11-20 11:04:03","false","Vilnius Cycling","4,95","100","00:15:44","96","121","0,3","--","--","3:10","--","--","--","23","86","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:33","00:16:12","--","--"
-"Tennis V2","2026-11-20 09:04:13","false","Vilius Sodeika🎾6:2 4:1","0,68","538","01:26:11","103","181","2,7","22","--","127:13","--","--","--","--","--","--","36,02","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:09:43","01:26:11","--","--"
+"Tennis V2","2026-11-20 09:04:13","false","Vilius Sodeika🎾sparring 6:2 4:1","0,68","538","01:26:11","103","181","2,7","22","--","127:13","--","--","--","--","--","--","36,02","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:09:43","01:26:11","--","--"
 "Cycling","2026-11-20 08:31:49","false","Vilnius Cycling","5,04","156","00:21:17","101","136","0,8","--","--","4:13","--","--","--","116","51","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:19:32","00:22:25","--","--"
 "Other","2026-11-19 13:17:01","false","Sauna","0,00","38","00:16:32","66","83","0,0","0","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:16:32","00:16:32","--","--"
 "Strength Training","2026-11-19 12:13:28","false","Lower body — Squat 80 · RDL 90 · Lunges 40 · Calf 30 · Wall drive","0,00","221","00:54:51","81","147","0,7","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:54:51","00:54:51","--","--"
@@ -1264,8 +1264,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-20";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-20T10:20:00Z";
-const LAST_DATA = "2026-11-20T10:20:00Z";
+const LAST_RUN  = "2026-11-20T10:40:00Z";
+const LAST_DATA = "2026-11-20T10:40:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
 const LAST_MFP  = "2026-11-20T10:07:00Z";
