@@ -1274,7 +1274,7 @@ const LAST_RUN  = "2026-11-21T15:36:00Z";
 const LAST_DATA = "2026-11-21T15:36:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-21T15:36:00Z";
+const LAST_MFP  = "2026-11-21T15:43:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
