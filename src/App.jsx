@@ -1427,7 +1427,9 @@ function analyze(raw) {
   // spike scored 175 (102 converted vs 43), a 2-h hit at 97 scored 15.
   const LOAD_CLAMP = 2;
   const enriched = base.map(a => {
-    if (!(a._load && loadK)) return { ...a, _trimp: a._trimpHr, _loadSource: "hr" };
+    // Sauna and massage keep the HR-based score: EPOC reads heat-raised HR as oxygen
+    // use and scored saunas at 4–7× it. Their recovery cost shows up in HRV instead.
+    if (!(a._load && loadK) || isRecovery(a)) return { ...a, _trimp: a._trimpHr, _loadSource: "hr" };
     const g = a._load * loadK, hr = a._trimpHr;
     const t = hr > 0 ? Math.min(hr * LOAD_CLAMP, Math.max(hr / LOAD_CLAMP, g)) : g;
     return { ...a, _trimp: t, _loadSource: t === g ? "garmin" : "garmin-clamped" };
