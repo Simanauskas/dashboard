@@ -2893,7 +2893,10 @@ function PlanAdjustments({ plan }) {
    about a particular day.
    ═══════════════════════════════════════════════════════════════════════════ */
 const FUEL = {
-  proteinG: 160,          // his target, g/day
+  // Protein for muscle gain flattens at ~1.6 g/kg on average (Morton 2018 meta-analysis,
+  // breakpoint 1.62, upper 95% CI 2.2). 1.8 sits above the average breakpoint with room for
+  // endurance volume, without crowding out carbs. 1.8 × 76 kg ≈ 137 g; was a flat 160.
+  proteinGkg: 1.8,
   carbRest: 3.0,          // g/kg on a day with no training
   // g/kg per TRIMP, in two slopes. Easy volume (Z2, tennis, short ergs: 50–80
   // TRIMP) barely dents glycogen, so it gets a shallow slope; above the knee
@@ -3021,7 +3024,7 @@ function fuelPlan({ ana, plan, health, date }) {
   else if (trend != null && trend < -0.5) { fat += 10; fatWhy = `weight falling ${Math.abs(trend).toFixed(2)} kg/week — faster than fuelling allows, fat +10 g`; }
   fat = Math.round(Math.max(FUEL.fatFloorGkg * kg, fat));
 
-  const protein = FUEL.proteinG;
+  const protein = Math.round(FUEL.proteinGkg * kg);
   const kcal = Math.round(carbs * 4 + protein * 4 + fat * 9);
   const eaten = eatenOn(date);
 
