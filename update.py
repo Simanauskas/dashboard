@@ -1053,7 +1053,7 @@ def stamp_run(got_fresh_data: bool):
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument('--mode',   default='full', choices=['full','activities','backfill','poll','load'])
+    p.add_argument('--mode',   default='full', choices=['full','activities','backfill','poll','load','sensors'])
     p.add_argument('--days',   type=int, default=14, help='For backfill mode: how many days back to fetch')
     p.add_argument('--date',   default=None)
     args = p.parse_args()
@@ -1163,6 +1163,23 @@ if __name__ == '__main__':
             if csv_rows:
                 got_fresh_data = True
                 patch(today, {}, csv_rows, advance_today=False)
+
+        elif args.mode == 'sensors':
+            # Read-only probe: which sensors Garmin recorded per activity (is the
+            # chest strap listed?). Writes nothing, LAST_RUN included. Prints
+            # sensor fields minus serial numbers — the repo and its logs are public.
+            import json as _json
+            for a in client.get_activities(0, min(args.days, 20)) or []:
+                d = client.connectapi(f"/activity-service/activity/{a['activityId']}") or {}
+                md = d.get('metadataDTO') or {}
+                sens = [{k: v for k, v in s_.items() if 'serial' not in k.lower()}
+                        for s_ in (md.get('sensors') or []) if isinstance(s_, dict)]
+                print((a.get('startTimeLocal') or '')[:16], (a.get('activityType') or {}).get('typeKey'),
+                      'avgHR', a.get('averageHR'), 'load', a.get('activityTrainingLoad'))
+                print('   sensors:', _json.dumps(sens)[:600] if sens else 'NONE')
+                if not sens:
+                    print('   metadataDTO keys:', sorted(md)[:60])
+            quiet_poll = True
 
         elif args.mode == 'backfill':
             # Backfill: fetch wellness + activities for last N days
