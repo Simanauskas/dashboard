@@ -1,0 +1,75 @@
+# The Inbox server: a private Matrix homeserver plus one bridge per chat app.
+# Run ./setup.sh once (it generates every config), then `docker compose up -d`.
+# Federation is off: nothing outside this machine can talk to it except your
+# app, through the Cloudflare tunnel (or any HTTPS reverse proxy you prefer).
+
+x-bridge: &bridge
+  restart: unless-stopped
+  depends_on:
+    synapse: { condition: service_healthy }
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: synapse
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run ./setup.sh first}
+      POSTGRES_DB: synapse
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-bridges.sh:ro
+    healthcheck:
+      test: [CMD, pg_isready, -U, synapse]
+      interval: 5s
+      retries: 20
+
+  synapse:
+    image: ${SYNAPSE_IMAGE:-matrixdotorg/synapse:latest}
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    volumes:
+      - ./data/synapse:/data
+    ports:
+      # only reachable from this machine; the tunnel (or a proxy) publishes it
+      - 127.0.0.1:8008:8008
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:8008/health]
+      interval: 10s
+      retries: 30
+
+  whatsapp:
+    <<: *bridge
+    image: ${WHATSAPP_IMAGE:-dock.mau.dev/mautrix/whatsapp:latest}
+    volumes: [./data/whatsapp:/data]
+    profiles: [whatsapp]
+
+  telegram:
+    <<: *bridge
+    image: ${TELEGRAM_IMAGE:-dock.mau.dev/mautrix/telegram:latest}
+    volumes: [./data/telegram:/data]
+    profiles: [telegram]
+
+  facebook:
+    <<: *bridge
+    image: ${META_IMAGE:-dock.mau.dev/mautrix/meta:latest}
+    volumes: [./data/facebook:/data]
+    profiles: [facebook]
+
+  instagram:
+    <<: *bridge
+    image: ${INSTAGRAM_IMAGE:-dock.mau.dev/mautrix/meta:ig-latest}
+    volumes: [./data/instagram:/data]
+    profiles: [instagram]
+
+  # Publishes Synapse at https://<MATRIX_HOST> without opening any ports.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on: [synapse]
+    profiles: [tunnel]
