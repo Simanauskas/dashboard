@@ -18,7 +18,7 @@ docker compose version >/dev/null 2>&1 || die "The Docker compose plugin isn't i
 
 set -a; . ./.env; set +a
 : "${SERVER_NAME:?set SERVER_NAME in .env}" "${MATRIX_HOST:?set MATRIX_HOST in .env}" "${ADMIN_USER:?set ADMIN_USER in .env}"
-BRIDGES=${BRIDGES-whatsapp telegram facebook instagram}
+BRIDGES=${BRIDGES-whatsapp telegram facebook instagram imessage}
 SYNAPSE_IMAGE=${SYNAPSE_IMAGE:-matrixdotorg/synapse:latest}
 
 rand() { openssl rand -hex 24 2>/dev/null || LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | head -c 48; }
@@ -31,6 +31,12 @@ if [[ " $BRIDGES " == *" telegram "* ]] && [ -z "${TELEGRAM_API_ID:-}" ]; then
   echo "TELEGRAM_API_ID is empty, so Telegram is skipped for now (get keys at https://my.telegram.org/apps)."
   BRIDGES=$(echo " $BRIDGES " | sed 's/ telegram / /' | xargs)
 fi
+if [[ " $BRIDGES " == *" imessage "* ]] && [ -z "${BLUEBUBBLES_PASSWORD:-}" ]; then
+  echo "BLUEBUBBLES_PASSWORD is empty, so iMessage is skipped for now (see README: iMessage)."
+  BRIDGES=$(echo " $BRIDGES " | sed 's/ imessage / /' | xargs)
+fi
+BLUEBUBBLES_URL=${BLUEBUBBLES_URL:-http://host.docker.internal:1234}
+export BLUEBUBBLES_URL
 profiles=$BRIDGES
 [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ] && profiles="$profiles tunnel"
 COMPOSE_PROFILES=$(echo $profiles | tr ' ' ',')
@@ -40,7 +46,7 @@ export COMPOSE_PROFILES POSTGRES_PASSWORD
 DATA="$PWD/data"
 mkdir -p "$DATA"/{synapse,postgres}
 # Helpers that run inside containers, so file ownership never gets in the way.
-yq() { docker run --rm -i --user root -v "$DATA:/data" -e SERVER_NAME -e MATRIX_HOST -e ADMIN_USER -e POSTGRES_PASSWORD -e DP_TOKEN -e TELEGRAM_API_ID -e TELEGRAM_API_HASH mikefarah/yq:4 "$@"; }
+yq() { docker run --rm -i --user root -v "$DATA:/data" -e SERVER_NAME -e MATRIX_HOST -e ADMIN_USER -e POSTGRES_PASSWORD -e DP_TOKEN -e TELEGRAM_API_ID -e TELEGRAM_API_HASH -e BLUEBUBBLES_URL -e BLUEBUBBLES_PASSWORD -e ADMIN_REGEX mikefarah/yq:4 "$@"; }
 inside() { docker run --rm -i -v "$DATA:/data" alpine:3 sh -c "$1"; }
 
 # --- Synapse ---------------------------------------------------------------
@@ -70,13 +76,14 @@ export DP_TOKEN
 
 # --- Bridges ---------------------------------------------------------------
 regs='"/data/doublepuppet.yaml"'
-port_of() { case $1 in whatsapp) echo 29318 ;; telegram) echo 29317 ;; facebook) echo 29319 ;; instagram) echo 29330 ;; esac; }
+port_of() { case $1 in whatsapp) echo 29318 ;; telegram) echo 29317 ;; facebook) echo 29319 ;; instagram) echo 29330 ;; imessage) echo 29331 ;; esac; }
 image_of() {
   case $1 in
     whatsapp) echo "${WHATSAPP_IMAGE:-dock.mau.dev/mautrix/whatsapp:latest}" ;;
     telegram) echo "${TELEGRAM_IMAGE:-dock.mau.dev/mautrix/telegram:latest}" ;;
     facebook) echo "${META_IMAGE:-dock.mau.dev/mautrix/meta:latest}" ;;
     instagram) echo "${INSTAGRAM_IMAGE:-dock.mau.dev/mautrix/meta:ig-latest}" ;;
+    imessage) echo "${IMESSAGE_IMAGE:-dock.mau.dev/mautrix/imessage:latest}" ;;
   esac
 }
 extra_of() {
@@ -88,18 +95,10 @@ extra_of() {
   esac
 }
 
-for b in $BRIDGES; do
-  port=$(port_of "$b") || true
-  [ -n "$port" ] || die "Unknown bridge '$b' in BRIDGES."
-  image=$(image_of "$b")
-  mkdir -p "$DATA/$b"
-  if [ ! -f "$DATA/$b/config.yaml" ]; then
-    say "Generating the $b bridge config"
-    docker run --rm -v "$DATA/$b:/data" "$image" || true
-    [ -f "$DATA/$b/config.yaml" ] || die "The $b bridge didn't create a config file."
-  fi
-  say "Configuring the $b bridge"
-  yq -i "
+# WhatsApp, Telegram, Messenger and Instagram share one config layout (mautrix "bridgev2").
+bridgev2_config() {
+  local b=$1 port=$2
+  echo "
     .homeserver.address = \"http://synapse:8008\" |
     .homeserver.domain = strenv(SERVER_NAME) |
     .appservice.address = \"http://$b:$port\" |
@@ -120,13 +119,61 @@ for b in $BRIDGES; do
     .encryption.allow = false |
     .backfill.enabled = true |
     .backfill.max_initial_messages = 1000
-    $(extra_of "$b")
-  " "/data/$b/config.yaml"
+    $(extra_of "$b")"
+}
+
+# iMessage uses the older mautrix layout and talks to the BlueBubbles server app on the Mac.
+imessage_config() {
+  echo '
+    .homeserver.address = "http://synapse:8008" |
+    .homeserver.websocket_proxy = null |
+    .homeserver.domain = strenv(SERVER_NAME) |
+    .appservice.address = "http://imessage:29331" |
+    .appservice.hostname = "0.0.0.0" |
+    .appservice.port = 29331 |
+    .appservice.id = "imessage" |
+    .appservice.bot.username = "imessagebot" |
+    .appservice.database.type = "postgres" |
+    .appservice.database.uri = "postgres://synapse:" + strenv(POSTGRES_PASSWORD) + "@postgres/imessage?sslmode=disable" |
+    .imessage.platform = "bluebubbles" |
+    .imessage.bluebubbles_url = strenv(BLUEBUBBLES_URL) |
+    .imessage.bluebubbles_password = strenv(BLUEBUBBLES_PASSWORD) |
+    .bridge.user = "@" + strenv(ADMIN_USER) + ":" + strenv(SERVER_NAME) |
+    .bridge.username_template = "imessage_{{.}}" |
+    .bridge.displayname_template = "{{.}}" |
+    .bridge.login_shared_secret = "appservice" |
+    .bridge.personal_filtering_spaces = false |
+    .bridge.encryption.allow = false |
+    .bridge.backfill.enable = true |
+    .bridge.backfill.initial_limit = 1000 |
+    .bridge.backfill.initial_sync_max_age = 90'
+}
+
+for b in $BRIDGES; do
+  port=$(port_of "$b") || true
+  [ -n "$port" ] || die "Unknown bridge '$b' in BRIDGES."
+  image=$(image_of "$b")
+  mkdir -p "$DATA/$b"
+  if [ ! -f "$DATA/$b/config.yaml" ]; then
+    say "Generating the $b bridge config"
+    docker run --rm -v "$DATA/$b:/data" "$image" || true
+    [ -f "$DATA/$b/config.yaml" ] || die "The $b bridge didn't create a config file."
+  fi
+  say "Configuring the $b bridge"
+  if [ "$b" = imessage ]; then yq -i "$(imessage_config)" /data/imessage/config.yaml
+  else yq -i "$(bridgev2_config "$b" "$port")" "/data/$b/config.yaml"; fi
   if [ ! -f "$DATA/$b/registration.yaml" ]; then
     docker run --rm -v "$DATA/$b:/data" "$image" || true
     [ -f "$DATA/$b/registration.yaml" ] || die "The $b bridge didn't create a registration file."
   fi
   inside "cp /data/$b/registration.yaml /data/synapse/$b-registration.yaml && chmod 644 /data/synapse/$b-registration.yaml"
+  if [ "$b" = imessage ]; then
+    # lets the iMessage bridge post the messages you send from your iPhone as you
+    export ADMIN_REGEX="^@$ADMIN_USER:$(printf '%s' "$SERVER_NAME" | sed 's/\./\\./g')\$"
+    yq -i \
+      '.namespaces.users += [{"regex": strenv(ADMIN_REGEX), "exclusive": false}] | .namespaces.users |= unique_by(.regex)' \
+      /data/synapse/imessage-registration.yaml
+  fi
   regs="$regs, \"/data/$b-registration.yaml\""
 done
 

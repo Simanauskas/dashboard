@@ -64,6 +64,14 @@ services:
     volumes: [./data/instagram:/data]
     profiles: [instagram]
 
+  # Talks to the BlueBubbles server app on the Mac (same machine by default).
+  imessage:
+    <<: *bridge
+    image: ${IMESSAGE_IMAGE:-dock.mau.dev/mautrix/imessage:latest}
+    volumes: [./data/imessage:/data]
+    extra_hosts: [host.docker.internal:host-gateway]
+    profiles: [imessage]
+
   # Publishes Synapse at https://<MATRIX_HOST> without opening any ports.
   cloudflared:
     image: cloudflare/cloudflared:latest

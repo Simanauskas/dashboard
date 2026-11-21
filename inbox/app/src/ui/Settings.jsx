@@ -10,7 +10,7 @@ const BRIDGES = [
   { net: 'telegram', bot: 'telegrambot', how: 'Send "login" and follow the steps (phone number, then the code Telegram sends you).' },
   { net: 'facebook', bot: 'facebookbot', how: 'Send "login", then pick a method. Username and password is easiest; the setup guide covers the cookie method.' },
   { net: 'instagram', bot: 'instagrambot', how: 'Send "login" and follow the steps. It asks for cookies from instagram.com; the setup guide shows how.' },
-  { net: 'imessage', bot: 'imessagebot', how: 'Runs from your Mac. Once the Mac relay is set up it connects by itself.' },
+  { net: 'imessage', bot: 'imessagebot', how: 'Works through the BlueBubbles app on your Mac. Once that is set up it connects by itself; open this to check it is connected.' },
 ]
 const WINDOWS = [1, 3, 6, 12, 24, 48, 168]
 

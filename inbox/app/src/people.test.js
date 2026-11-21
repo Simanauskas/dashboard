@@ -105,3 +105,17 @@ test('bridgev2 room types: group DMs and spaces are not people', () => {
   assert.equal(m.connections.length, 0)
   assert.equal(m.info.fbgo.network, 'facebook')
 })
+
+test('iMessage: is_group flag and escaped phone numbers', async () => {
+  const { phoneFromUser } = await import('./networks.js')
+  assert.equal(phoneFromUser('@imessage_37061234567:x'), '37061234567')
+  assert.equal(phoneFromUser('@imessage_tel=3a=2b37061234567:x'), '37061234567')
+  assert.equal(phoneFromUser('@imessage_rokas=40gmail.com:x'), null)
+  const im = (id, isGroup) => ({ ...rooms.wa, id, heroes: ['@imessage_37061234567:x', '@imessagebot:x'],
+    bridge: { bridgebot: '@imessagebot:x', protocol: { id: 'imessage' }, channel: { 'fi.mau.imessage.is_group': isGroup } } })
+  const m = buildModel({ a: im('a', false), b: im('b', true) }, {}, ME, null)
+  assert.equal(m.info.a.kind, 'dm')
+  assert.equal(m.info.a.network, 'imessage')
+  assert.equal(m.info.a.phone, '37061234567')
+  assert.equal(m.info.b.kind, 'group')
+})

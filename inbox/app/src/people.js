@@ -48,6 +48,9 @@ export function classifyRoom(room, me, direct) {
     if (humans.length === 0 && room.joinedCount <= 1) return 'connection'
     return direct.has(room.id) && humans.length === 1 ? 'dm' : humans.length === 1 && room.joinedCount <= 2 ? 'dm' : 'other'
   }
+  // the iMessage bridge says directly whether a chat is a group
+  const imGroup = room.bridge?.channel?.['fi.mau.imessage.is_group']
+  if (imGroup !== undefined && !type) return imGroup ? 'group' : 'dm'
   if (type === 'dm') return 'dm'
   if (type === 'group' || type === 'space') return type === 'space' ? 'space' : 'group'
   if (direct.has(room.id) && humans.length <= 1) return 'dm'

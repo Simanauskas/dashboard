@@ -1,6 +1,6 @@
 # Inbox
 
-One app for WhatsApp, Telegram, Messenger, Instagram and (soon) iMessage,
+One app for WhatsApp, Telegram, Messenger, Instagram and iMessage,
 with **one thread per person** no matter which app they write from.
 
 - Each person can have several chats (e.g. WhatsApp + Telegram). Their messages
@@ -20,7 +20,7 @@ with **one thread per person** no matter which app they write from.
 │ home screen) │           │        │         ◀─▶ Messenger bridge ────┼─▶ Messenger
 └──────────────┘           │    Postgres      ◀─▶ Instagram bridge ────┼─▶ Instagram
                            └───────────────────────────────────────────┘
-                                         ▲ iMessage relay (on a Mac, later)
+          iMessage bridge ◀─▶ BlueBubbles app on the Mac ─▶ iMessage
 ```
 
 The bridges are the open-source [mautrix](https://docs.mau.fi/bridges/) bridges.
@@ -52,7 +52,7 @@ You need a machine that's always on and has Docker:
 Then:
 
 ```bash
-git clone <this repo> && cd <repo>/inbox/server
+git clone https://github.com/Simanauskas/inbox && cd inbox/server
 cp .env.example .env
 nano .env        # set SERVER_NAME, MATRIX_HOST, ADMIN_USER, Telegram keys, tunnel token
 ./setup.sh       # asks you to choose your password at the end
@@ -84,8 +84,8 @@ Check it: `https://matrix.simas.fit/_matrix/client/versions` should return JSON.
 
 Cloudflare Pages, same as your other sites:
 
-- **Create project** → connect this repo
-- **Root directory:** `inbox/app` · **Build command:** `npm run build` · **Output:** `dist`
+- **Create project** → connect `Simanauskas/inbox`, production branch `main`
+- **Root directory:** `app` · **Build command:** `npm run build` · **Output:** `dist`
 - **Environment variable:** `VITE_HOMESERVER=https://matrix.simas.fit` (pre-fills the login screen)
 - **Custom domain:** e.g. `inbox.simas.fit`
 
@@ -111,22 +111,40 @@ each person's default app.
 > The bridges act like a linked device or a browser login. Lots of people
 > use them, but expect an occasional "confirm it's you" prompt.
 
-## 4. iMessage (once the Mac is ready)
+## 4. iMessage
 
-iMessage only works through a Mac signed in to your Apple ID that stays on.
-The plan:
+iMessage only exists on Apple devices, so a Mac signed in to your Apple ID
+has to stay on. It runs the free **BlueBubbles Server** app, and the iMessage
+bridge on your server talks to it. When the server runs on that same Mac,
+nothing else is needed.
 
-1. Install the iMessage bridge ([mautrix-imessage](https://docs.mau.fi/bridges/go/imessage/mac/setup.html))
-   on the Mac. Alternatively, run the free BlueBubbles server app on the Mac
-   and point the bridge at it.
-2. Give it the Mac permissions it asks for (Full Disk Access, Contacts, Automation).
-3. It connects to the same Matrix server, and iMessage chats show up in the inbox
-   like the others (the app already knows the `imessage` network).
+1. On the Mac, open **Messages** and check you're signed in and can send and receive.
+2. Download **BlueBubbles Server** for macOS from <https://bluebubbles.app/downloads/>
+   and open it. Give it the permissions it asks for (Full Disk Access, Accessibility).
+3. In its setup, choose a **server password**. You don't need its proxy or
+   Cloudflare option if the Inbox server runs on the same Mac. Leave the port at `1234`.
+4. Put that password in `server/.env` as `BLUEBUBBLES_PASSWORD`, then run `./setup.sh` again.
+5. In the Inbox app, Settings → Connected apps → iMessage → **Open**: the bot
+   should say it's connected. Chats from the last 90 days come in with their history.
+
+Keep the Mac awake: System Preferences → Battery → Power Adapter → turn on
+"Prevent computer from sleeping automatically when the display is off", and
+keep the lid open.
+
+**Replies, reactions, read receipts and typing indicators** sent *from* Inbox
+need BlueBubbles' optional "Private API". That means switching off a macOS
+protection (SIP) on the Mac; BlueBubbles' docs walk through it. Without it,
+texts, photos and files work both ways, and you still *see* their reactions
+and replies.
+
+**If the server later moves off the Mac** (e.g. to a rented server), turn on
+BlueBubbles' Cloudflare option, copy its URL into `BLUEBUBBLES_URL` in `.env`,
+and run `./setup.sh` again.
 
 ## Updating
 
 ```bash
-cd inbox/server && docker compose pull && docker compose up -d
+cd server && docker compose pull && docker compose up -d
 ```
 
 Bridges need updating every few weeks, because the apps change their
@@ -159,4 +177,3 @@ python3 dev/mockbridge.py say whatsapp rokas "hello"   # fake an incoming messag
 - **Starting a brand-new chat** with someone you've never messaged on that
   app. For now you can do it from the bridge bot (`help` lists the commands).
 - **Voice message recording**. Playing voice messages works; recording them doesn't yet.
-- **iMessage** (needs the Mac).

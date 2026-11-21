@@ -46,8 +46,10 @@ export function isBotUser(uid) {
 
 // A phone number hidden in a ghost user id, e.g. @whatsapp_37061234567:server
 export function phoneFromUser(uid) {
-  const local = uid?.slice(1).split(':')[0] || ''
+  // undo Matrix localpart escaping (=2b is "+", =40 is "@")
+  const local = (uid?.slice(1).split(':')[0] || '').replace(/=([0-9a-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
   const net = guessFromUser(uid)
+  if (local.includes('@')) return null
   if (net !== 'whatsapp' && net !== 'imessage' && net !== 'signal') return null
   const digits = local.slice(local.indexOf('_') + 1).replace(/^(tel|sms)[_=]/, '').replace(/\D/g, '')
   return digits.length >= 8 ? digits : null
