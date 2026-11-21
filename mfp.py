@@ -292,7 +292,27 @@ def main():
     p.add_argument("--diary", action="store_true",
                    help="save the per-entry food log to data/private/ (gitignored); "
                         "does not touch App.jsx")
+    p.add_argument("--goals-probe", action="store_true",
+                   help="read-only: print the nutrient-goals structure for today and exit")
     a = p.parse_args()
+    if a.goals_probe:
+        tok = load_token()
+        if not tok:
+            print("MFP_TOKEN not set"); return 0
+        s = _session(tok)
+        today = datetime.date.today().isoformat()
+        data = _get(s, "/v2/nutrient-goals", [("date", today)])
+        items = data.get("items") or []
+        print(f"top-level keys: {sorted(data)} · {len(items)} item(s)")
+        for i, it in enumerate(items[:3]):
+            print(f"--- item {i} keys: {sorted(it)}")
+            for k in ("valid_from", "valid_to", "date", "default_group_id", "updated_at"):
+                if k in it: print(f"  {k}: {it[k]}")
+            dg = it.get("default_goal") or {}
+            print("  default_goal:", json.dumps(dg)[:1500])
+            for d in (it.get("daily_goals") or [])[:7]:
+                print("  daily_goal:", json.dumps(d)[:700])
+        return 0
     if a.poll:
         a.days = 0
     if a.diary and not any(x.startswith("--days") for x in sys.argv[1:]):

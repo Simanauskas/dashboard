@@ -1,0 +1,29 @@
+name: MFP goals
+
+# Reads (probe) and, once built, writes the day's macro goals in MyFitnessPal.
+# Dispatch-only. MFP_TOKEN is minted hourly by the auth.simas.fit Worker.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'probe (read-only)'
+        required: false
+        default: 'probe'
+
+permissions:
+  contents: read
+
+jobs:
+  goals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Probe goals (read-only)
+        if: inputs.action == 'probe'
+        env:
+          MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
+        run: python mfp.py --goals-probe
