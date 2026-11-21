@@ -1287,7 +1287,7 @@ const LAST_MFP  = "2026-11-21T15:30:00Z";
 const COLS_BOT = [
   "Activity Type","Date","Favorite","Title","Distance","Calories","Time",
   "Avg HR","Max HR","Aerobic TE","Avg Run Cadence","Max Run Cadence",
-  "Avg Speed","Max Speed","_spare14","_spare15","Total Ascent","Total Descent",
+  "Avg Speed","Max Speed","Exercise Load","_spare15","Total Ascent","Total Descent",
   "_spare18","Avg Stride Length","Avg Vertical Ratio","Avg Vertical Oscillation",
   "Avg Ground Contact Time","_spare23","_spare24","_spare25","_spare26",
   "_spare27","_spare28","_spare29","_spare30","Body Battery Drain",
@@ -1397,12 +1397,33 @@ function speedToPace(speedStr) {
   return `${mins}:${secs.toString().padStart(2, "0")}/km`;
 }
 
+/* Load per activity. Garmin's Exercise Load (EPOC-based, computed beat by beat
+   against his own physiology profile) where the row carries it; TRIMP from the
+   average HR otherwise — older rows, and anything Garmin scored nothing.
+
+   Garmin's units are not TRIMP's, and every threshold in this file (the week
+   governor's ceilings, HARD_TRIMP, the FUEL slopes) is in TRIMP. So Exercise
+   Load is converted with one factor: total TRIMP ÷ total Exercise Load over the
+   last 90 days of activities that have both. Weekly totals keep their meaning
+   on average; how load is shared between sessions becomes Garmin's — intervals
+   score their real cost, long easy hours score less. `_trimp` therefore means
+   "TRIMP-equivalent load" everywhere below, and `_trimpHr` keeps the old figure. */
+const LOAD_FIT_DAYS = 90, LOAD_FIT_MIN = 10;
+
 function analyze(raw) {
-  const enriched = [...raw].sort((a,b) => new Date(b.Date) - new Date(a.Date)).map(a => {
+  const base = [...raw].sort((a,b) => new Date(b.Date) - new Date(a.Date)).map(a => {
     const dur = parseDuration(a.Time), avgHR = parseNum(a["Avg HR"]), dist = parseNum(a.Distance);
-    const d = daysAgo(dateOf(a));
-    return { ...a, _dur:dur, _avgHR:avgHR, _dist:dist, _days:d, _date:dateOf(a), _trimp:calcTRIMP(avgHR, dur/60) };
+    const d = daysAgo(dateOf(a)), load = parseNum(a["Exercise Load"]);
+    return { ...a, _dur:dur, _avgHR:avgHR, _dist:dist, _days:d, _date:dateOf(a),
+             _load: load > 0 ? load : null, _trimpHr: calcTRIMP(avgHR, dur/60) };
   });
+  const pairs = base.filter(a => a._load && a._trimpHr > 5 && a._days >= 0 && a._days <= LOAD_FIT_DAYS);
+  const loadK = pairs.length >= LOAD_FIT_MIN
+    ? pairs.reduce((s, a) => s + a._trimpHr, 0) / pairs.reduce((s, a) => s + a._load, 0)
+    : null;
+  const enriched = base.map(a => ({ ...a,
+    _trimp: a._load && loadK ? a._load * loadK : a._trimpHr,
+    _loadSource: a._load && loadK ? "garmin" : "hr" }));
 
   // Proper exponential moving average ATL/CTL
   // ATL: 7-day time constant, CTL: 42-day time constant
@@ -1517,7 +1538,7 @@ function analyze(raw) {
     atlHistory[idx].ctl = ctlR;
   });
 
-  return { enriched, atl, ctl, tsb, yesterday, daysSinceHard, weeklyKm,
+  return { enriched, loadK, loadPairs: pairs.length, atl, ctl, tsb, yesterday, daysSinceHard, weeklyKm,
            weeklyTrimp, zoneMinutes, totalZoneMin, hyroxSims, paceTrend,
            readinessHistory, atlHistory };
 }

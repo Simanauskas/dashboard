@@ -331,7 +331,7 @@ def derive_avg_hr(client, activity_id):
     return None
 
 
-def fetch_activities(client, dates):
+def fetch_activities(client, dates, acts=None):
     """Return properly quoted CSV rows for the given date(s).
 
     `dates` is an ISO date string or an iterable of them. Passing a window
@@ -342,8 +342,8 @@ def fetch_activities(client, dates):
     """
     import time as _time
     dates = {dates} if isinstance(dates, str) else set(dates)
-    acts = None
-    for attempt in range(3):
+    # `acts` lets load-mode backfill hand in a longer, paged list; normally None.
+    for attempt in range(0 if acts else 3):
         try:
             result = client.get_activities(0, 30)
             if result:  # non-empty list
@@ -416,7 +416,11 @@ def fetch_activities(client, dates):
             _f(a.get('averageHR')), _f(a.get('maxHR')),
             _f(a.get('aerobicTrainingEffect'),1),
             _f(a.get('averageRunningCadenceInStepsPerMinute')), '--',
-            _pace(a.get('averageSpeed')), '--', '--', '--',
+            # Column 14 ("Exercise Load" in COLS_BOT) is Garmin's EPOC-based
+            # activityTrainingLoad — App.jsx prefers it over TRIMP from avg HR.
+            # Whole number: parseNum() strips dots as thousands separators.
+            _pace(a.get('averageSpeed')), '--',
+            _f(round(a['activityTrainingLoad'])) if a.get('activityTrainingLoad') else '--', '--',
             _f(a.get('elevationGain')), _f(a.get('elevationLoss')),
             '--',
             _f(a.get('avgStrideLength'),2) if a.get('avgStrideLength') else '--',
@@ -1049,7 +1053,7 @@ def stamp_run(got_fresh_data: bool):
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument('--mode',   default='full', choices=['full','activities','backfill','poll'])
+    p.add_argument('--mode',   default='full', choices=['full','activities','backfill','poll','load'])
     p.add_argument('--days',   type=int, default=14, help='For backfill mode: how many days back to fetch')
     p.add_argument('--date',   default=None)
     args = p.parse_args()
@@ -1138,6 +1142,27 @@ if __name__ == '__main__':
                       advance_today=advance,
                       hyrox_sessions=hyrox_sessions if first else {})
                 first = False
+
+        elif args.mode == 'load':
+            # One-off: re-write the activity rows of the last N days so they carry
+            # Garmin's Exercise Load. get_activities() pages 100 at a time — no
+            # per-activity calls — and patch() upserts rows in place. HYROX_DATA
+            # and wellness are not touched.
+            cutoff = (datetime.date.today() - datetime.timedelta(days=args.days)).isoformat()
+            acts, start = [], 0
+            while True:
+                page = client.get_activities(start, 100) or []
+                acts += [a for a in page if (a.get('startTimeLocal') or '')[:10] >= cutoff]
+                if len(page) < 100 or (page[-1].get('startTimeLocal') or '')[:10] < cutoff:
+                    break
+                start += 100
+            with_load = sum(1 for a in acts if a.get('activityTrainingLoad'))
+            print(f"load: {len(acts)} activities since {cutoff}, {with_load} carry Exercise Load")
+            dates = {(a.get('startTimeLocal') or '')[:10] for a in acts}
+            csv_rows, _, _ = fetch_activities(client, dates, acts=acts)
+            if csv_rows:
+                got_fresh_data = True
+                patch(today, {}, csv_rows, advance_today=False)
 
         elif args.mode == 'backfill':
             # Backfill: fetch wellness + activities for last N days
