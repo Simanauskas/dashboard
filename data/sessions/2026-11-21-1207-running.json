@@ -1,0 +1,38 @@
+{
+  "v": 1,
+  "id": "2026-11-21-1207-running",
+  "kind": "run",
+  "activity": "Run",
+  "start": "2026-11-21T12:07:49+02:00",
+  "end": "2026-11-21T12:09:03+02:00",
+  "feel": null,
+  "rpe": null,
+  "notes": "",
+  "title": "",
+  "template": "Speed session",
+  "run": {
+    "plan": "3x2km @ threshold (60s rest)",
+    "reps": [
+      506,
+      506,
+      508
+    ]
+  },
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Vilnius Running",
+      "description": "",
+      "distance": 8019.18,
+      "duration": 2276.596,
+      "rpe": 80,
+      "feel": 50
+    },
+    "garmin_id": "25148432922",
+    "message": "ok",
+    "hash": "dfeaf663b95e",
+    "applied_at": "2026-11-21T10:09:15+00:00"
+  },
+  "received": "2026-11-21T10:09:14+00:00"
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import RunsView from "./Runs.jsx";
 
 const HEALTH_DATA = {
   fitnessAge: { bio: 27.8, chrono: 35, bmi: 24.2, rhr: 38, vo2max: 52.9 },
@@ -184,6 +185,7 @@ const HEALTH_DATA = {
     {date:"2026-11-18",hrv:73,rhr:39,spo2:96,resp:11.0,sleep_score:88},
     {date:"2026-11-19",hrv:81,rhr:41,spo2:93,resp:13.0,sleep_score:null},
     {date:"2026-11-20",hrv:57,rhr:41,spo2:97,resp:11.0,sleep_score:88},
+    {date:"2026-11-21",hrv:84,rhr:37,spo2:97,resp:10.0,sleep_score:95},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -354,6 +356,7 @@ const HEALTH_DATA = {
     {date:"2026-11-18",deep:171,rem:105,light:196,awake:6},
     {date:"2026-11-19",deep:113,rem:36,light:182,awake:12},
     {date:"2026-11-20",deep:200,rem:111,light:169,awake:1},
+    {date:"2026-11-21",deep:85,rem:94,light:261,awake:0},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -388,7 +391,8 @@ const HEALTH_DATA = {
     {date:"2026-11-17",kcal:2495,protein:173,carbs:244,fat:95,fiber:28,goal:2099},
     {date:"2026-11-18",kcal:2410,protein:179,carbs:251,fat:80,fiber:23,goal:2099},
     {date:"2026-11-19",kcal:2301,protein:162,carbs:221,fat:86,fiber:21,goal:2099},
-    {date:"2026-11-20",kcal:1435,protein:67,carbs:160,fat:57,fiber:17,goal:2099},
+    {date:"2026-11-20",kcal:2532,protein:153,carbs:307,fat:75,fiber:30,goal:2099},
+    {date:"2026-11-21",kcal:1888,protein:120,carbs:182,fat:78,fiber:40,goal:2099},
   ],
   // Body composition from Garmin, written by body.py: the last reading of each
   // day that carries body fat. kg, fat %, BMI, water %, muscle and bone in kg;
@@ -854,6 +858,8 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Running","2026-11-21 09:38:01","false","3x2km @ threshold (60s rest) / wind SW","8,02","565","00:37:56","152","172","3,8","174","--","4:43","--","--","--","56","39","--","120,89","6,5","8,0","250","--","--","--","--","--","--","--","--","--","No","--","9","--","--","--","--","--","00:37:54","00:37:56","--","--"
+"Walking","2026-11-20 22:16:39","false","Walking","0,00","104","01:28:04","49","67","0,0","1","--","--","--","--","--","--","--","--","2,25","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:00:05","01:28:04","--","--"
 "Cycling","2026-11-20 11:04:03","false","Vilnius Cycling","4,95","100","00:15:44","96","121","0,3","--","--","3:10","--","--","--","23","86","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:15:33","00:16:12","--","--"
 "Tennis V2","2026-11-20 09:04:13","false","Vilius Sodeika🎾sparring 6:2 4:1","0,68","538","01:26:11","103","181","2,7","22","--","127:13","--","--","--","--","--","--","36,02","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:09:43","01:26:11","--","--"
 "Cycling","2026-11-20 08:31:49","false","Vilnius Cycling","5,04","156","00:21:17","101","136","0,8","--","--","4:13","--","--","--","116","51","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:19:32","00:22:25","--","--"
@@ -1262,13 +1268,13 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 "Inline Skating","2026-05-06 12:49:35","false","Palanga Inline Skating","4,80","201","00:33:49","94","139","1,0","--","--","8,5","23,6","10","11","--","--","--","--","--","--","--","0,0","--","--","1.160","-2","--","No","00:00:00,2","5","--","--","--","--","00:27:51","01:48:19","2","9"
 "Tennis","2026-05-06 07:58:40","false","Tennis","0,25","476","01:02:29","111","158","2,1","15","222","0,2","12,2","--","--","0,26","--","--","--","--","--","--","0,0","--","--","3.152","-11","--","No","01:02:29","1","--","--","--","--","00:03:52","01:02:29","--","--"`;
 
-const TODAY = "2026-11-20";
+const TODAY = "2026-11-21";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-20T10:42:00Z";
-const LAST_DATA = "2026-11-20T10:42:00Z";
+const LAST_RUN  = "2026-11-21T15:07:00Z";
+const LAST_DATA = "2026-11-21T15:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-20T10:42:00Z";
+const LAST_MFP  = "2026-11-21T15:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1741,7 +1747,7 @@ const SCHEDULE = [
     { date:"2026-11-17", dow:"TUE", label:"Nov 17", sessions:[{type:"plan",text:"Ski 10min · one piece, before the lift · beat 2380m",why:"Every erg you have logged was bolted to a lift, so it rides on the gym trip."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
     { date:"2026-11-18", dow:"WED", label:"Nov 18", sessions:[{type:"hyrox",text:"Hyrox group 45min · station circuit, go hard",why:"Stations were top 9.6% at Athens; the group circuit is what built them."}] },
     { date:"2026-11-19", dow:"THU", label:"Nov 19", sessions:[{type:"rest",text:"Day off · nothing structured",why:"Rest here so the threshold reps land tomorrow."}] },
-    { date:"2026-11-20", dow:"FRI", label:"Nov 20", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Mantas Mikočiūnas · 7/13 · 09:00"}] },
+    { date:"2026-11-20", dow:"FRI", label:"Nov 20", sessions:[] },
     { date:"2026-11-21", dow:"SAT", label:"Nov 21", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.0kmh · 50min all in",why:"Moved from Fri (tennis that morning, HRV 57 vs 66). 14.5 only after 14.0 holds on all three reps."}] },
     { date:"2026-11-22", dow:"SUN", label:"Nov 22", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Andrius Ladauskas · court 2 · 15:00"},{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Two conversational runs over 70min landed in the last four days."}] },
   ]},
@@ -2607,7 +2613,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 73; // updated 2026-11-20
+const hrvBaseline = 80; // updated 2026-11-21
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
@@ -5399,8 +5405,9 @@ function SyncPanel() {
 function StatsView({ ana, sub, setSub }) {
   return (
     <div className="fade">
-      <SubNav items={[["body","BODY"],["race","RACE"],["sync","SYNC"]]} value={sub} onChange={setSub} />
+      <SubNav items={[["body","BODY"],["runs","RUNS"],["race","RACE"],["sync","SYNC"]]} value={sub} onChange={setSub} />
       {sub === "body" && <BodyView ana={ana} />}
+      {sub === "runs" && <RunsView ui={{ Card, Sec, Chip, Stat, Empty, Tag, SubNav, T }} />}
       {sub === "race" && <RaceView ana={ana} />}
       {sub === "sync" && <div className="narrow"><SyncPanel /></div>}
     </div>
