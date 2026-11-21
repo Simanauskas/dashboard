@@ -114,6 +114,28 @@ jobs:
             python mfp.py
           fi
 
+      # Push the dashboard's Fuel targets (today + next 6 days) into MyFitnessPal's
+      # weekday goals — mfp_goals.py, computed by scripts/fuel_target.mjs from the
+      # same fuelPlan() the dashboard renders, after this run's fresh data landed.
+      # Hourly runs only (not polls); writes nothing when MFP already matches.
+      # Never allowed to fail the job.
+      - uses: actions/setup-node@v4
+        if: steps.mode.outputs.mode == 'full' || steps.mode.outputs.mode == 'activities'
+        continue-on-error: true
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Push Fuel targets into MyFitnessPal goals
+        if: steps.mode.outputs.mode == 'full' || steps.mode.outputs.mode == 'activities'
+        continue-on-error: true
+        env:
+          MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
+          TZ: Europe/Vilnius
+        run: |
+          npm ci --silent
+          node scripts/fuel_target.mjs 7 > /tmp/targets.json
+          python mfp_goals.py --apply /tmp/targets.json
+
       # Body composition (Renpho → Garmin, see body.py). Re-reads what Garmin
       # holds and upserts HEALTH_DATA.body — the backstop for an upload run
       # whose commit was dropped, and how a backfill reaches the dashboard.
