@@ -5458,6 +5458,16 @@ const TABS = [
   ["stats", "Stats",  "♡"],
 ];
 
+/* The Fuel card's target for a date, computed exactly as the card computes it —
+   for scripts/fuel_target.mjs, which pushes it into MyFitnessPal as the day's goal.
+   Same three steps as Dashboard below: analyze → adaptPlan → fuelPlan. */
+export function fuelTargetFor(date) {
+  const ana = analyze(parseCSV(CSV_DATA));
+  const plan = adaptPlan({ ana, health: HEALTH_DATA, hrvBaseline });
+  const f = fuelPlan({ ana, plan, health: HEALTH_DATA, date });
+  return { date, ...f.target, kg: f.kg, load: Math.round(f.load), why: f.why };
+}
+
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
   const [ana, setAna] = useState(null);

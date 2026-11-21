@@ -1,14 +1,19 @@
 name: MFP goals
 
-# Reads (probe) and, once built, writes the day's macro goals in MyFitnessPal.
-# Dispatch-only. MFP_TOKEN is minted hourly by the auth.simas.fit Worker.
+# Writes the dashboard's Fuel targets (today + next 6 days) into MyFitnessPal's
+# weekday goals — see mfp_goals.py. Dispatch-only; the hourly sync calls the same
+# steps from update.yml. MFP_TOKEN is minted hourly by the auth.simas.fit Worker.
+#   probe   — read-only: print the goal structure
+#   verify  — no-op write of today's goals, unchanged, read back; exercise-entry check
+#   dry-run — compute targets, print the diff, write nothing
+#   apply   — compute targets and write them
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'probe (read-only)'
+        description: 'probe | verify | dry-run | apply'
         required: false
-        default: 'probe'
+        default: 'dry-run'
 
 permissions:
   contents: read
@@ -16,6 +21,9 @@ permissions:
 jobs:
   goals:
     runs-on: ubuntu-latest
+    env:
+      MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
+      TZ: Europe/Vilnius
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,6 +32,20 @@ jobs:
       - run: pip install requests
       - name: Probe goals (read-only)
         if: inputs.action == 'probe'
-        env:
-          MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
         run: python mfp.py --goals-probe
+      - name: Verify the write path (no-op write)
+        if: inputs.action == 'verify'
+        run: python mfp_goals.py --verify
+      - uses: actions/setup-node@v4
+        if: inputs.action == 'dry-run' || inputs.action == 'apply'
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Compute targets and write
+        if: inputs.action == 'dry-run' || inputs.action == 'apply'
+        env:
+          DRY: ${{ inputs.action == 'dry-run' && '--dry-run' || '' }}
+        run: |
+          npm ci --silent
+          node scripts/fuel_target.mjs 7 > targets.json
+          python mfp_goals.py --apply targets.json $DRY
