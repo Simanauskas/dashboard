@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import RunsView from "./Runs.jsx";
 
 const HEALTH_DATA = {
   fitnessAge: { bio: 27.8, chrono: 35, bmi: 24.2, rhr: 38, vo2max: 52.9 },
@@ -5404,8 +5405,9 @@ function SyncPanel() {
 function StatsView({ ana, sub, setSub }) {
   return (
     <div className="fade">
-      <SubNav items={[["body","BODY"],["race","RACE"],["sync","SYNC"]]} value={sub} onChange={setSub} />
+      <SubNav items={[["body","BODY"],["runs","RUNS"],["race","RACE"],["sync","SYNC"]]} value={sub} onChange={setSub} />
       {sub === "body" && <BodyView ana={ana} />}
+      {sub === "runs" && <RunsView ui={{ Card, Sec, Chip, Stat, Empty, Tag, SubNav, T }} />}
       {sub === "race" && <RaceView ana={ana} />}
       {sub === "sync" && <div className="narrow"><SyncPanel /></div>}
     </div>
