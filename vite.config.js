@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import logData from './log-data.plugin.js'
+import runsData from './runs-data.plugin.js'
 
 // Which build is live. The installed app compares this with /version.json (see
 // src/refresh.js) to know when newer data has been deployed. Unique per build.
@@ -12,7 +13,7 @@ const versionFile = () => ({
 })
 
 export default defineConfig({
-  plugins: [react(), logData(), versionFile()],
+  plugins: [react(), logData(), runsData(), versionFile()],
   base: '/',
   build: {
     outDir: 'dist',

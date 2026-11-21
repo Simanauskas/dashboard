@@ -148,6 +148,20 @@ jobs:
         continue-on-error: true
         run: python match_sessions.py --pending --apply
 
+      # Second-by-second analysis of new runs (run_analysis.py → data/runs/, shown
+      # on the Runs screen). Skips runs already analysed, so it is one request
+      # when nothing is new. Skipped on polls. Never allowed to fail the job.
+      - name: Analyse new runs (per-second FIT data)
+        if: steps.mode.outputs.mode != 'poll'
+        continue-on-error: true
+        run: |
+          pip install --quiet fitparse pandas
+          if [ "${{ steps.mode.outputs.mode }}" = "backfill" ]; then
+            python runs_sync.py --days "${{ steps.mode.outputs.days }}"
+          else
+            python runs_sync.py --days 3
+          fi
+
       - name: Commit and push if changed
         run: |
           # poll mode leaves the file untouched when nothing new arrived, so the
@@ -157,6 +171,7 @@ jobs:
           git add src/App.jsx
           if [ -d data/sessions ]; then git add data/sessions; fi
           if [ -f src/log/garmin-exercises.json ]; then git add src/log/garmin-exercises.json; fi
+          if [ -d data/runs ]; then git add data/runs; fi
 
           if git diff --staged --quiet; then
             echo "nothing to commit"
