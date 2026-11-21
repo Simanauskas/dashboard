@@ -1287,7 +1287,7 @@ const LAST_MFP  = "2026-11-21T15:43:00Z";
 const COLS_BOT = [
   "Activity Type","Date","Favorite","Title","Distance","Calories","Time",
   "Avg HR","Max HR","Aerobic TE","Avg Run Cadence","Max Run Cadence",
-  "Avg Speed","Max Speed","Exercise Load","_spare15","Total Ascent","Total Descent",
+  "Avg Speed","Max Speed","Exercise Load","HR Source","Total Ascent","Total Descent",
   "_spare18","Avg Stride Length","Avg Vertical Ratio","Avg Vertical Oscillation",
   "Avg Ground Contact Time","_spare23","_spare24","_spare25","_spare26",
   "_spare27","_spare28","_spare29","_spare30","Body Battery Drain",
@@ -1430,8 +1430,11 @@ function analyze(raw) {
     // Sauna and massage keep the HR-based score: EPOC reads heat-raised HR as oxygen
     // use and scored saunas at 4–7× it. Their recovery cost shows up in HRV instead.
     if (!(a._load && loadK) || isRecovery(a)) return { ...a, _trimp: a._trimpHr, _loadSource: "hr" };
+    // With the chest strap on (HR Source "strap", recorded by Garmin per activity)
+    // Garmin's load is trusted outright; the clamp is for wrist-HR sessions.
     const g = a._load * loadK, hr = a._trimpHr;
-    const t = hr > 0 ? Math.min(hr * LOAD_CLAMP, Math.max(hr / LOAD_CLAMP, g)) : g;
+    const t = a["HR Source"] === "strap" || !(hr > 0) ? g
+      : Math.min(hr * LOAD_CLAMP, Math.max(hr / LOAD_CLAMP, g));
     return { ...a, _trimp: t, _loadSource: t === g ? "garmin" : "garmin-clamped" };
   });
 

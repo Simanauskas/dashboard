@@ -331,6 +331,38 @@ def derive_avg_hr(client, activity_id):
     return None
 
 
+def _known_hr_sources():
+    """{startTimeLocal: "strap"|"wrist"} already stored in CSV_DATA column 15, so a
+    row the sync rewrites keeps its value without another Garmin call."""
+    try:
+        code = DASHBOARD.read_text(encoding='utf-8')
+        body = re.search(r'const CSV_DATA = `(.*?)`;', code, re.DOTALL).group(1)
+    except Exception:
+        return {}
+    out = {}
+    for r in csv.reader(io.StringIO(body)):
+        if len(r) == 44 and r[15] in ('strap', 'wrist'):
+            out[r[1]] = r[15]
+    return out
+
+
+def hr_source(client, activity_id):
+    """'strap' when Garmin recorded any external heart-rate sensor for the
+    activity (his HRM-Pro Plus shows as product 4130, over ANT+ and/or Bluetooth;
+    a second unnamed ANT+ HR entry is the same strap on another protocol),
+    'wrist' when it recorded none, None when the lookup failed (retried next
+    sync). One /activity-service/activity/{id} call."""
+    try:
+        d = client.connectapi(f"/activity-service/activity/{activity_id}") or {}
+    except Exception as e:
+        print(f"  HR-source lookup failed for {activity_id}: {e}")
+        return None
+    for s_ in (d.get('metadataDTO') or {}).get('sensors') or []:
+        if isinstance(s_, dict) and 'HEART_RATE' in (s_.get('antplusDeviceType'), s_.get('bleDeviceType')):
+            return 'strap'
+    return 'wrist'
+
+
 def fetch_activities(client, dates, acts=None):
     """Return properly quoted CSV rows for the given date(s).
 
@@ -404,6 +436,22 @@ def fetch_activities(client, dates, acts=None):
                   f"but no average HR, and none could be derived. It will count as "
                   f"ZERO training load until Garmin returns one.")
 
+    # HR source (strap vs wrist) decides whether App.jsx trusts Garmin's load
+    # outright or clamps it. Looked up once per activity, then carried in the row.
+    known = _known_hr_sources()
+    lookups = 0
+    for a in acts:
+        if (a.get('startTimeLocal') or '')[:10] not in dates or not a.get('averageHR'):
+            continue
+        a['_hr_source'] = known.get(a.get('startTimeLocal') or '')
+        if not a['_hr_source']:
+            a['_hr_source'] = hr_source(client, a.get('activityId'))
+            lookups += 1
+            if lookups > 20:
+                _time.sleep(0.2)   # backfill: be gentle with Garmin
+    if lookups:
+        print(f"  HR source looked up for {lookups} activit{'y' if lookups == 1 else 'ies'}")
+
     rows = []
     for a in acts:
         if (a.get('startTimeLocal') or '')[:10] not in dates: continue
@@ -420,7 +468,8 @@ def fetch_activities(client, dates, acts=None):
             # activityTrainingLoad — App.jsx prefers it over TRIMP from avg HR.
             # Whole number: parseNum() strips dots as thousands separators.
             _pace(a.get('averageSpeed')), '--',
-            _f(round(a['activityTrainingLoad'])) if a.get('activityTrainingLoad') else '--', '--',
+            _f(round(a['activityTrainingLoad'])) if a.get('activityTrainingLoad') else '--',
+            a.get('_hr_source') or '--',   # column 15, "HR Source" in COLS_BOT
             _f(a.get('elevationGain')), _f(a.get('elevationLoss')),
             '--',
             _f(a.get('avgStrideLength'),2) if a.get('avgStrideLength') else '--',
