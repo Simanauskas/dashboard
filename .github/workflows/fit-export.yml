@@ -1,0 +1,61 @@
+name: Export Garmin FIT (second-by-second)
+
+# Read-only. Downloads original FIT files for running activities and flattens
+# them to per-second CSVs (HR, pace, cadence, stride length, vertical
+# oscillation/ratio, GCT + balance, power). Output is a short-lived workflow
+# artifact, never committed — the repo is public. Dispatch only.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Running activities of the last N days'
+        required: false
+        default: '1'
+      activity_ids:
+        description: 'Optional: space-separated Garmin activity ids (overrides days)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install "garth==0.4.47" fitparse
+
+      - name: Restore Garmin tokens
+        run: |
+          mkdir -p ~/.garth
+          echo '${{ secrets.GARTH_OAUTH1 }}' > ~/.garth/oauth1_token.json
+          echo '${{ secrets.GARTH_OAUTH2 }}' > ~/.garth/oauth2_token.json
+
+      - name: Export
+        env:
+          DAYS: ${{ inputs.days }}
+          IDS: ${{ inputs.activity_ids }}
+        run: |
+          if [ -n "$IDS" ]; then
+            read -ra ids <<< "$IDS"
+            python fit_export.py "${ids[@]}"
+          else
+            python fit_export.py --days "${DAYS:-1}"
+          fi
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: fit-export-${{ github.run_id }}
+          path: fit_export/
+          retention-days: 3
+          if-no-files-found: error
