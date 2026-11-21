@@ -1421,9 +1421,17 @@ function analyze(raw) {
   const loadK = pairs.length >= LOAD_FIT_MIN
     ? pairs.reduce((s, a) => s + a._trimpHr, 0) / pairs.reduce((s, a) => s + a._load, 0)
     : null;
-  const enriched = base.map(a => ({ ...a,
-    _trimp: a._load && loadK ? a._load * loadK : a._trimpHr,
-    _loadSource: a._load && loadK ? "garmin" : "hr" }));
+  // Sanity clamp: Garmin's converted load may sit at most 2× above or 2× below
+  // the average-HR estimate for the same session. Real interval effects (+30–60%)
+  // pass; wrist-HR artefacts do not — an 86-min tennis at avg HR 103 with a 181
+  // spike scored 175 (102 converted vs 43), a 2-h hit at 97 scored 15.
+  const LOAD_CLAMP = 2;
+  const enriched = base.map(a => {
+    if (!(a._load && loadK)) return { ...a, _trimp: a._trimpHr, _loadSource: "hr" };
+    const g = a._load * loadK, hr = a._trimpHr;
+    const t = hr > 0 ? Math.min(hr * LOAD_CLAMP, Math.max(hr / LOAD_CLAMP, g)) : g;
+    return { ...a, _trimp: t, _loadSource: t === g ? "garmin" : "garmin-clamped" };
+  });
 
   // Proper exponential moving average ATL/CTL
   // ATL: 7-day time constant, CTL: 42-day time constant
