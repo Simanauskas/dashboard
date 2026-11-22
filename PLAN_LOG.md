@@ -72,6 +72,255 @@ and never once done.
 
 ---
 
+## 2026-11-22
+- adherence: **no ACTION REQUIRED and no WATCH — "Every prescribed session type has been trained at
+  least once."** Window 1–22 Nov: **ski 3/3 on track** · row 0 prescribed / 2 done · **hyrox 1/1 on
+  track** · strength 3/6 · cycle 0/6 · **tennis 1/7** · **run 8 prescribed / 6 done, short by 2**
+  (was short by 3 yesterday — the benchmark landed). Benchmarks already due: 5 Nov NOTHING LOGGED ·
+  12 Nov NOTHING LOGGED · **21 Nov type match — `Running 3x2km @ threshold (60s rest) / wind SW`,
+  and it is the real thing**. Next 14d: **Fri 27 Nov**. `check_plan.py` exit 0.
+- readiness: **HRV 39 against a baseline of 71 — −32ms, the largest negative delta in the window,
+  and a 45ms collapse from yesterday's 84.** The baseline itself fell 80 → **71** (63 · 66 · 70 ·
+  73 · 80 · **71**). Sleep 417min and strangely shaped: deep **223**, REM **9**, light 185, awake 5
+  — 223 minutes of deep is the most in the window and 9 minutes of REM the least, which is the
+  signature of a body paying a bill rather than one that slept badly. **RHR 40 — inside the 38–46
+  range** (41 · 37 · **40**), SpO2 95, resp 12.0. 171 daily / 170 sleep rows, contiguous. LAST_RUN
+  and LAST_DATA both **2026-11-22T07:07Z** against TODAY 2026-11-22 — **sync healthy**. Engine, read
+  live off the committed file: readiness **3/10** (from 6), TSB **−23.50**, ATL **58.92**, CTL
+  **35.42**, **ATL/CTL 1.663**, `consecutiveHard` 2, `daysSinceRest` **9**, **`forceRest` TRUE**,
+  **`easeHard` TRUE** (`readiness 3/10`), `scale` 1.0, `unplanned7` 139. Week 11, day seven:
+  done **408**, remaining 155, projectedRaw **562** against 440–580.
+- decision: **CHANGED — the Fri 27 Nov benchmark moves up to 14.5kmh, with its `why` and the first
+  sentence of the Base II phase note.** Three strings. `text` → `⏱ KEY RUN · 3×2km at 14.5kmh /
+  4:08 · 50min all in` (50 chars), `why` → `All three reps held 4:13/km on 21 Nov — the rung moves,
+  as promised.` (68), phase note sentence 1 → `Threshold reps are 3×2km at 14.5kmh held to the end,
+  moved up after all three held 14.2kmh on 21 Nov.` Nothing else in week 12 moved, week 11 was not
+  touched, the 440–580 band is unchanged, and `RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`
+  and `RACE_GAINS` are untouched.
+- why: **the rung was cleared, and cleared outdoors into a headwind. The logger recorded reps of
+  506 / 506 / 508 seconds — 14.23 / 14.23 / 14.17 kmh — so all three held above 14.0 with 2 seconds
+  of spread.** That satisfies a condition registered on 10 Nov when 14.5 was pulled back to 14.0
+  (*"14.5 across the board comes only after 14.0 lands"*), restated in the line's own `why` on
+  20 Nov, and pre-registered as branch 1 by yesterday's §2. It is a commitment coming due, not a
+  judgement call.
+- watching: **the 45ms HRV collapse and ATL/CTL 1.663** — the engine already owns today (§2), but if
+  HRV is still under 55 tomorrow morning with Monday's Z2 run converted, that is no longer one
+  night's bill and the week-12 Wednesday circuit is the line to cut (§2); **whether 14.5 is reached
+  outdoors or indoors** — three of four attempts at this benchmark now live outside, which is why
+  the line carries the pace (§1); **the governor's stale `over` flag** and **`forceRest` bleeding
+  into past weeks**, both engine code and both outside scope (§5); **row 0 prescribed / 2 done**
+  and **run short by 2**, left alone (§6).
+
+### 1. Branch 1 fired — the evidence, and why it is not close
+Yesterday's §2 pre-registered three branches and asked today to resolve one. The data resolves it
+without ambiguity.
+
+`data/sessions/2026-11-21-1207-running.json`, written by the phone logger and applied to Garmin
+activity `25148432922`:
+
+```
+"run": { "plan": "3x2km @ threshold (60s rest)", "reps": [506, 506, 508] }
+```
+
+| rep | time | pace | speed |
+|---|---|---|---|
+| 1 | 8:26 | 4:13/km | **14.23 kmh** |
+| 2 | 8:26 | 4:13/km | **14.23 kmh** |
+| 3 | 8:28 | 4:14/km | **14.17 kmh** |
+
+**All three are above 14.0, and the third is 2 seconds off the first.** The thing this benchmark
+existed to measure was the third rep — 6 Nov went 14.0 / 14.0 / **13.5** and that fade is the entire
+reason 10 Nov pulled the rung from 14.5 down to 14.0. There is no fade here. Branch 2 (lands but
+fades) does not apply; branch 3 (nothing threshold-shaped) is dead.
+
+**And it was harder than the number suggests.** The Garmin row is `Running`, not `Treadmill
+Running`, titled `3x2km @ threshold (60s rest) / wind SW` — 8.02km in 37:56, avg HR **152**, max 172.
+Compare the one previous completion, 6 Nov: `Treadmill Running`, 6.85km in 34:16, avg HR **147**,
+max 171. He ran it outdoors in wind, five beats higher, and still held a pace a treadmill at 14.0
+would not have asked for.
+
+**So the new rung is 14.5kmh = 4:08/km = 8:17 per rep**, nine seconds a rep faster than what he just
+held. That is the step the line has promised since 20 Nov.
+
+**The line now carries both units, and that is deliberate.** `14.5kmh` is treadmill vocabulary and
+it came from his own 6 Nov activity title. But of the three attempts that produced anything, 6 Nov
+was indoors and 21 Nov was outdoors, and on a road "14.5kmh" has to be converted in his head
+mid-rep. `/ 4:08` is the same target in the unit he was actually working in yesterday. One number,
+two units, 50 of 60 characters.
+
+### 2. The HRV collapse: the engine owns it, and the engine is right
+This is the one place today where a cold session might reach for the schedule. It should not.
+
+**HRV 39 against a baseline of 71 is −32ms, and yesterday read 84.** 81 → 57 → 84 → **39**. Readiness
+fell 6 → **3/10**. TSB went **−12.66 → −23.50** (yesterday's simulation predicted −18.96 for this
+morning; the real figure is 4.5 points worse, because the run measured heavier than modelled — §4).
+ATL **58.92** against CTL **35.42** is a ratio of **1.663**, the highest in this block.
+
+**`forceRest` is TRUE, exactly as yesterday's §6 predicted it would be.** `daysSinceRest` hit 9 and
+TSB went past −15, both limbs satisfied. Read live, `adaptPlan` has converted today's two lines —
+the `cal:true` tennis at 15:00 and the `Long run 1h15` — into a recovery day, and it has also
+converted Mon 23 and Tue 24 (the gate reaches today plus two days). `easeHard` is TRUE on top of
+that, on `readiness 3/10`.
+
+**So the dashboard he opens this morning already says rest, and it will keep saying it until he
+rests.** Writing a rest line into Sunday would duplicate `adaptPlan` for zero effect, and rewriting
+the long run on the day it is scheduled is rewriting a week he is seven-sevenths through. Nothing to
+do. The honest read of the physiology: 223 minutes of deep sleep with 9 minutes of REM, an RHR still
+inside range at 40, resp 12.0 and SpO2 95 is a hard session being absorbed, not illness and not
+overreaching. The same shape appeared on 11 Nov (HRV 130 → 51) and reversed inside two days.
+
+**What is NOT a signal: RHR.** 40 is inside his 38–46 band. Yesterday's 37 was the excursion worth
+naming and it was on the good side.
+
+**The baseline falling 80 → 71 is not a trend, it is this morning's reading entering the window.**
+63 (17 Nov) → 80 (21 Nov) → 71 (22 Nov) in five days is the baseline tracking a volatile fortnight,
+not a sustained shift in either direction. The seven-day mean of the raw readings is 74.6. The
+genuine finding from 16–21 Nov — a baseline climbing 17 points under rising load — survives one
+hard day's −32.
+
+**Pre-registered, so tomorrow does not have to invent it:** if HRV tomorrow (23 Nov) is **still
+under 55** with Monday's Z2 run already converted to recovery by `forceRest`, that is a second
+consecutive suppressed morning after a rest day and no longer one session's bill. The cut in that
+case is **Wed 25 Nov's `Hyrox circuit 45min`**, not Friday's benchmark — the circuit is the week's
+most expensive optional line at 107 and Friday is the thing the week exists for. If HRV is back
+above 60, week 12 runs as written.
+
+### 3. Week 11 closed 5-for-5, and the band is finally doing its job
+**Every written session in week 11 was trained**: Mon Z2 run ✓, Tue ski ✓, Tue gym ✓, Wed Hyrox
+group ✓, Sat ⏱ KEY RUN ✓. Thursday's rest was taken. The only line not done is today's long run,
+which the engine itself has just withdrawn.
+
+| week | written sessions | done |
+|---|---|---|
+| 10 (Nov 9–15) | 4 | **0** |
+| 11 (Nov 16–22) | 5 | **5** |
+
+That is the answer to "is the phase still right". **Base II · Threshold, week 4 of 6, to 20 Dec** —
+aimed at ski (top 29.8% at Athens) and running (top 27.7%), the two weakest elements against the
+field. Week 11 trained both, and the running half just moved a rung. The phase stays, the content
+stays, and the sessions need to be *the same* next week rather than different.
+
+**The band, re-measured under the load model that landed yesterday** (§4), Monday-anchored weeks:
+
+| week of | measured load | band | inside? |
+|---|---|---|---|
+| 19 Oct | 354 | 400–560 | under |
+| 26 Oct | 525 | 400–560 | **yes** |
+| 2 Nov | 332 | 400–560 | under |
+| 9 Nov | **458** | 440–580 | **yes** |
+| 16 Nov | **408** through Saturday, ~460 with today's tennis | 440–580 | **yes** |
+
+**Weeks 10 and 11 are the first two consecutive weeks in this block to land inside their band.** The
+16 Nov reopen condition — *"two consecutive weeks under 400 against a written plan of ≥440"* — not
+only did not fire, it has moved further from firing. Moving the band now would be moving it away
+from the only two weeks that have hit it. **The condition stands unchanged.**
+
+### 4. The load model changed out of band yesterday, and it retires §5 of the last entry
+Yesterday's §2 left a process instruction: diff non-`chore: sync` commits before trusting anything
+this file says. Doing that found **nine** commits from interactive sessions after yesterday's
+Routine wrote its entry, four of which changed how load is computed:
+
+| commit | what |
+|---|---|
+| `6421fef` | `load: use Garmin Exercise Load, TRIMP as fallback` |
+| `dbeb4bc` | `load: sanity clamp on Garmin load; read-only sensor probe` |
+| `f7724d9` | `load: sauna and massage keep the HR-based score` |
+| `413046b` | `load: trust Garmin load outright when the chest strap was on` |
+| `9cba889`, `52f4386` | new Runs screen + fit-export workflow |
+| `2d7f9eb`, `dd08cd2`, `fd0af93`, `2f6685d` | Fuel/MFP goal push |
+
+**`_trimp` now means Garmin's EPOC-based Exercise Load, rescaled by total TRIMP ÷ total Exercise Load
+over 90 days.** The scale factor is the point: weekly totals keep their meaning, but load moves
+*between* sessions — intervals score their real cost and long easy hours score less.
+
+**This retires the central finding of yesterday's §5.** That section measured the KEY RUN line at
+2.4× over-priced (136 written against 57 measured) and concluded the pricing was broken rather than
+the band. Re-measured on yesterday's own run under the new model:
+
+| | priced | measured |
+|---|---|---|
+| ⏱ KEY RUN, 6 Nov | 136 | 57 (`_trimpHr`) |
+| ⏱ KEY RUN, 21 Nov | 136 | **104** (`_load` 179, `_loadSource: garmin`) |
+
+**The gap closed from 2.4× to 1.3×**, which is roughly the "50min all in" door-to-door overstatement
+and nothing more sinister. The written plan and the measured week are now on the same scale, which
+is also why §3's table shows two weeks inside the band where the old model showed none. Nobody needs
+to act on this; it needs to stop being carried forward as an open defect.
+
+### 5. Two engine observations, recorded not acted on
+Both are in `adaptPlan`, which this Routine may not edit.
+
+**The governor's `over` flag is computed before the adapted re-projection.** `over` is set on
+`projected` at line ~2050 and `projected` is then overwritten at ~2221 with the adapted figure.
+Today that reads `projectedRaw` 562, `projected` **629**, `over` **false** — a week displayed as
+projecting 49 TRIMP past its ceiling while the flag that would trim it says no. `trimmedBy` is
+**−67**, i.e. negative, because the forced-recovery conversion priced *higher* than the lines it
+replaced. Harmless today (nothing needs trimming on a rest day) but it means the volume governor's
+ceiling limb cannot fire on a day `forceRest` is active.
+
+**`forceRest` bleeds into past weeks.** The gate is `isToday || daysAgo(day.date) >= -2`, and
+`daysAgo` is large and positive for past dates, so every unfinished historical session in the whole
+SCHEDULE is relabelled "Converted to a recovery day · 9 days without a rest day". The adjustments
+list today contains dates back to 6 Sep. Cosmetic in the archive, but it makes the adjustments feed
+useless as a record of what was actually adapted.
+
+### 6. What I deliberately left alone
+- **Today, 22 Nov.** Live, last day of the week, `forceRest` already owns it. The long run's `why`
+  ("Two conversational runs over 70min landed in the last four days") is now eleven and fourteen
+  days stale, flagged yesterday as needing a fix by the next run to touch the line — and I am not
+  touching the line, because it is a live day the engine has withdrawn anyway. It leaves the week
+  with the schedule tonight.
+- **All of week 11.** Closed 5-for-5. Nothing to learn from editing a week that worked.
+- **Mon 23, Tue 24, Wed 25, Thu 26, Sat 28, Sun 29 Nov.** The Tuesday ski (`Ski 16min · 3×1000m at
+  2:05/500m · 90s gap`) still has not been attempted once — he has logged 2:09, 2:14 and 2:10 per
+  500m for continuous pieces and missed 2380m with 2304m on 17 Nov, so the interval rung is the
+  right next ask and changing it before a single attempt is the error it was created to fix.
+  Thursday stays protected (`nothing heavy for the legs`, 20 Nov) and **Sat 28 stays `sessions:[]`**
+  — this benchmark has landed one day later than written both times it landed, so the empty Saturday
+  behind Friday is load-bearing.
+- **The 440–580 band.** §3. Two consecutive weeks inside it; its reopen condition is further from
+  firing than it was.
+- **Friday 27 Nov as the day.** Friday hosts real work — 6 Nov the threshold run itself, 13 Nov
+  SkiErg plus a 58-minute upper lift — and adherence does not flag it. The day is fine; only the
+  number moved.
+- **`row` 0 prescribed / 2 done.** Top 11.4% at Athens: defend, don't chase. The 1000m row TT is
+  still owed and still does not earn a slot in a threshold week.
+- **`run` short by 2.** Both are the 12 Nov miss and today's withdrawn long run. Not a pattern.
+- **`tennis` 1 prescribed / 7 done** and **`cycle` 0 / 6**. Tennis is his sport and his social life
+  and the `cal:true` lines belong to `calendar_sync.py`; commutes are noise.
+- **`RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`, `RACE_GAINS`.** Copenhagen 125 days out,
+  no result known, no target moved.
+- **The Base I phase note**, which runs long. That phase ended 8 Nov and the rule forbids rewriting
+  what is over.
+
+### 7. Checks
+- `python3 check_plan.py` → **exit 0**, "plan lines OK (text ≤ 60, why ≤ 120, from 2026-11-09)".
+- `npm run build` → **clean**, `✓ built in 1.35s` (`npm ci` first; `vite` was not installed in this
+  container).
+- **Patch anchors (gotcha 14)** → all eleven present: TODAY, LAST_RUN, LAST_DATA, hrvBaseline, daily,
+  sleep, weight, nutrition, body, CSV_DATA, HYROX_DATA.
+- **`update.patch()` round trip** against a copy of the real `src/App.jsx`, module body imported
+  above `# ── Main ──` → **PASS** on all thirteen assertions: daily row refreshed, sleep row
+  refreshed, every daily and sleep row keeps its 4-space indent, no row lost in either array
+  (gotcha 2), weight upserted inside its own span, `vo2max` byte-identical (gotcha 4), CSV row
+  upserted, SCHEDULE byte-identical, TAPER_PLAN byte-identical, HYROX_DATA intact, and the new
+  14.5 line survives the sync verbatim. Two assertions failed on the first attempt and both were
+  the fixture, not the code: `wellness["weight"]` is a `(date, kg)` tuple, and the sleep stages live
+  under `wellness["sleep"]`, not at the top level. Worth knowing for the next run that writes this
+  test — a flat `deep`/`rem` key leaves `has_real_sleep` false and the sleep block is skipped
+  silently.
+- **Engine re-run against the edited file**: the new line prices identically to the old one
+  (`planDurationMin` 50, `planIntensity` 168, `estTrimp` 136 — week 12's arithmetic is unchanged),
+  is neither an info nor an optional line, `scaleDuration` still finds its duration
+  (`→ 40min all in` at ×0.8, so the governor can still trim it), and `sessionSatisfiedBy` /
+  `runFits` both match it against yesterday's activity, so it will still tick when it is run.
+
+### 8. Consecutive no-change runs before this one
+**One** — 21 Nov. Before that: 20, 19, 18, 17 Nov all CHANGED. The three-in-a-row passivity rule is
+nowhere near firing, and yesterday's hold was the correct call for a reason that resolved this
+morning in its favour: the benchmark it declined to cut was run, and cleared, four hours later.
+
+
 ## 2026-11-21
 - adherence: **no ACTION REQUIRED and no WATCH — "Every prescribed session type has been trained at
   least once."** Window 31 Oct–21 Nov: **ski 3/3 on track** · row 0 prescribed / 2 done ·
