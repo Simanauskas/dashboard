@@ -1275,11 +1275,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-22";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-22T21:07:00Z";
-const LAST_DATA = "2026-11-22T21:07:00Z";
+const LAST_RUN  = "2026-11-22T22:07:00Z";
+const LAST_DATA = "2026-11-22T22:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-22T21:07:00Z";
+const LAST_MFP  = "2026-11-22T22:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1788,7 +1788,7 @@ const SCHEDULE = [
     { date:"2026-11-19", dow:"THU", label:"Nov 19", sessions:[{type:"rest",text:"Day off · nothing structured",why:"Rest here so the threshold reps land tomorrow."}] },
     { date:"2026-11-20", dow:"FRI", label:"Nov 20", sessions:[] },
     { date:"2026-11-21", dow:"SAT", label:"Nov 21", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.0kmh · 50min all in",why:"Moved from Fri (tennis that morning, HRV 57 vs 66). 14.5 only after 14.0 holds on all three reps."}] },
-    { date:"2026-11-22", dow:"SUN", label:"Nov 22", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Andrius Ladauskas · court 2 · 15:00"},{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Two conversational runs over 70min landed in the last four days."}] },
+    { date:"2026-11-22", dow:"SUN", label:"Nov 22", sessions:[{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Two conversational runs over 70min landed in the last four days."}] },
   ]},
   { week:12, label:"Nov 23–29", theme:"Base II · Threshold", days:[
     { date:"2026-11-23", dow:"MON", label:"Nov 23", sessions:[{type:"plan",text:"Z2 run 50min · conversational, nothing to hold",why:"Running is your weakest block against the field — top 27.7% at Athens."}] },
