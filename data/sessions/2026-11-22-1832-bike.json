@@ -1,0 +1,40 @@
+{
+  "v": 1,
+  "id": "2026-11-22-1832-bike",
+  "kind": "erg",
+  "activity": "Indoor bike",
+  "start": "2026-11-22T18:32:46+02:00",
+  "end": "2026-11-22T18:33:13+02:00",
+  "feel": 75,
+  "rpe": 2,
+  "notes": "",
+  "title": "",
+  "erg": {
+    "machine": "Bike",
+    "rest_sec": null,
+    "pieces": [
+      {
+        "m": 33100,
+        "sec": 4200,
+        "spm": null
+      }
+    ]
+  },
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Indoor Cycling",
+      "description": "",
+      "distance": 0.0,
+      "duration": 4201.478,
+      "rpe": null,
+      "feel": null
+    },
+    "garmin_id": "25165023437",
+    "message": "ok",
+    "hash": "724dc2792d0a",
+    "applied_at": "2026-11-22T16:33:22+00:00"
+  },
+  "received": "2026-11-22T16:33:21+00:00"
+}
