@@ -1,0 +1,40 @@
+{
+  "v": 1,
+  "id": "2026-11-22-1649-tennis",
+  "kind": "tennis",
+  "activity": "Tennis",
+  "start": "2026-11-22T16:49:19+02:00",
+  "end": "2026-11-22T16:51:16+02:00",
+  "feel": 75,
+  "rpe": 5,
+  "notes": "",
+  "title": "",
+  "tennis": {
+    "opponent": "Andrius Ladauskas",
+    "mode": "sparring",
+    "score": "3:6 3:3",
+    "plus": [
+      "Forehand was pretty reliable specially on longer and shorter ball. I also improved on the return that was going deeper at what point I was really locked in on watching the ball so my game really improved."
+    ],
+    "minus": [
+      "Backhand is terrible. Cannot do anything back no power back hand. Also some of the forehand crosses where out to decide space issue. Also the ball toss was terrible."
+    ]
+  },
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Tennis",
+      "description": "",
+      "distance": 446.02,
+      "duration": 4948.986,
+      "rpe": null,
+      "feel": null
+    },
+    "garmin_id": "25163619219",
+    "message": "ok",
+    "hash": "bff7f713a2c9",
+    "applied_at": "2026-11-22T14:51:26+00:00"
+  },
+  "received": "2026-11-22T14:51:26+00:00"
+}
