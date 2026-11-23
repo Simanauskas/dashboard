@@ -1279,11 +1279,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-23";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-23T12:07:00Z";
-const LAST_DATA = "2026-11-23T12:07:00Z";
+const LAST_RUN  = "2026-11-23T13:08:00Z";
+const LAST_DATA = "2026-11-23T13:08:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-23T12:07:00Z";
+const LAST_MFP  = "2026-11-23T13:08:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -1801,7 +1801,7 @@ const SCHEDULE = [
     { date:"2026-11-26", dow:"THU", label:"Nov 26", sessions:[{type:"rest",text:"Day off · nothing heavy for the legs",why:"A heavy leg session here caps tomorrow's reps at Z2 before you start."}] },
     { date:"2026-11-27", dow:"FRI", label:"Nov 27", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.5kmh / 4:08 · 50min all in",why:"All three reps held 4:13/km on 21 Nov — the rung moves, as promised."}] },
     { date:"2026-11-28", dow:"SAT", label:"Nov 28", sessions:[] },
-    { date:"2026-11-29", dow:"SUN", label:"Nov 29", sessions:[{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Repeat the rung until it lands — 1:12:53 is still the longest run of this block."}] },
+    { date:"2026-11-29", dow:"SUN", label:"Nov 29", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Ina Lukošienė · court 10 · 11:30"},{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Repeat the rung until it lands — 1:12:53 is still the longest run of this block."}] },
   ]},
 ];
 
