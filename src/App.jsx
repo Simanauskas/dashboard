@@ -187,6 +187,7 @@ const HEALTH_DATA = {
     {date:"2026-11-20",hrv:57,rhr:41,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-11-21",hrv:84,rhr:37,spo2:97,resp:10.0,sleep_score:95},
     {date:"2026-11-22",hrv:39,rhr:40,spo2:95,resp:12.0,sleep_score:null},
+    {date:"2026-11-23",hrv:82,rhr:41,spo2:97,resp:11.0,sleep_score:88},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -359,6 +360,7 @@ const HEALTH_DATA = {
     {date:"2026-11-20",deep:200,rem:111,light:169,awake:1},
     {date:"2026-11-21",deep:85,rem:94,light:261,awake:0},
     {date:"2026-11-22",deep:223,rem:9,light:185,awake:5},
+    {date:"2026-11-23",deep:188,rem:99,light:242,awake:8},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1276,11 +1278,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-23";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-23T06:58:00Z";
-const LAST_DATA = "2026-11-23T06:58:00Z";
+const LAST_RUN  = "2026-11-23T07:07:00Z";
+const LAST_DATA = "2026-11-23T07:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-23T06:58:00Z";
+const LAST_MFP  = "2026-11-23T07:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2653,7 +2655,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 71; // updated 2026-11-22
+const hrvBaseline = 69; // updated 2026-11-23
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
