@@ -72,6 +72,258 @@ and never once done.
 
 ---
 
+## 2026-11-23
+- adherence: **no ACTION REQUIRED and no WATCH — "Every prescribed session type has been trained at
+  least once."** Window 2–23 Nov: **ski 3/3 on track** · row 0 prescribed / 1 done · **hyrox 1/1 on
+  track** · strength 3/5 · cycle 0/6 · tennis 0/7 · **run 9 prescribed / 6 done, short by 3** (8/6
+  after today's edit). Benchmarks already due: 5 Nov NOTHING LOGGED · 12 Nov NOTHING LOGGED · 21 Nov
+  type match, resolved yesterday as the real thing. Next 14d: **Fri 27 Nov**. `check_plan.py` exit 0.
+- readiness: **HRV 82 against a baseline of 69 — +13ms, and a full reversal of yesterday's 39.**
+  Baseline 71 → **69**. Sleep **529min** and normally shaped: deep 188, REM **99**, light 242,
+  awake 8 — against yesterday's 223/9/185, which was the bill being paid. **RHR 41, inside the
+  38–46 range** (37 · 40 · **41**), SpO2 97, resp 11.0. 172 daily / 171 sleep rows, contiguous.
+  LAST_RUN and LAST_DATA both **2026-11-23T07:07Z** against TODAY 2026-11-23 — **sync healthy**.
+  Engine, read live off the committed file: readiness **7/10** (from 3), TSB **−22.30**, ATL
+  **58.12**, CTL **35.82**, **ATL/CTL 1.623**, `consecutiveHard` **0**, `daysSinceRest` **10**,
+  **`forceRest` TRUE** for a second morning, **`easeHard` FALSE** (it was TRUE yesterday on
+  readiness 3), `scale` 1.0, `unplanned7` **195**. Week 12, day one: projectedRaw **527** against
+  440–580, `projected` **606** — 26 past the ceiling.
+- decision: **CHANGED — Mon 23 Nov's `Z2 run 50min` becomes a written full-rest day.** One line.
+  `{type:"rest",text:"Full rest · zero logged, not even the bike",why:"Ten straight days of load and
+  form at -22; a commute is enough to stop this counting."}` (text 42, why 85). Nothing else moved:
+  Tue ski, Wed circuit, Thu rest, Fri benchmark, Sat empty and Sun long run all stand, week 11 was
+  not touched, the 440–580 band is unchanged, and `RACE`, `PREV_RACE`, `STATION_TARGETS`,
+  `RACE_BUDGET` and `RACE_GAINS` are untouched.
+- why: **nine rest days have been written since 26 Oct and not one has been taken (§1), the counter
+  is at 10 days, and the week as written projected 606 against a 580 ceiling with the governor
+  unable to trim it (§2).** Removing the week's least specific line — 67 TRIMP of generic Z2 —
+  lands the written week at **460** and the projection at **539**, both inside the band.
+- watching: **whether this rest day lands.** The base rate is nine failures, so if 23 Nov logs more
+  than 5 TRIMP, the wording is not the lever and the next step is structural, not another rest line
+  — pre-registered in §4; **Thu 26 Nov's rest line**, deliberately left alone (§5), with the
+  condition for acting on it in §4; **`forceRest` on a third consecutive morning**, which would mean
+  the engine is permanently in recovery mode and losing its authority (§3); **the stale `over` flag
+  and the historical `forceRest` bleed**, both confirmed still live, both engine code and out of
+  scope (§6); **row 0 prescribed / 1 done** and **run short by 2**, left alone (§5).
+
+### 1. The finding: nine written rest days since 26 Oct, zero taken
+This is what the two mandated inputs are for, and `adherence.py` cannot see it — it tracks session
+*types*, and rest is not one of them. It only exists in the pattern across days.
+
+Every written rest line in the last 28 days, against the load actually logged that day (reset
+threshold is ≤5 TRIMP):
+
+| date | week | logged TRIMP | reset? |
+|---|---|---|---|
+| Mon 26 Oct | 8 | 22 | no |
+| Fri 30 Oct | 8 | 72 | no |
+| Sun 1 Nov | 8 | 110 | no |
+| Mon 2 Nov | 9 | 56 | no |
+| Wed 4 Nov | 9 | 87 | no |
+| Fri 6 Nov | 9 | 120 | no |
+| Sun 8 Nov | 9 | 37 | no |
+| Fri 13 Nov | 10 | 22 | no |
+| Thu 19 Nov | 11 | **9** | **no** |
+
+**Nine for nine.** And the four days that *did* reset the counter were not rest days at all: 5 Nov
+and 12 Nov were missed KEY RUN benchmarks (adherence still reports both as NOTHING LOGGED), 7 Nov
+logged 4, and 10 Nov was an empty day. **He has not taken a prescribed rest day in this block. The
+only days he rests are days something went wrong.**
+
+Two things make this worse than a simple adherence miss:
+
+**It is a known, twice-failed problem.** The 2 Nov entry wrote, in the line itself, *"written rest
+has gone two for nine over the last three weeks"* — and spent about 400 words of `text` on it. That
+verbose approach is part of why Simas imposed the 60-character cap on 11 Nov. Since the cap, the
+line has read `Day off · nothing structured` and `Day off · nothing heavy for the legs`. **Both
+wordings failed, the long one and the short one.** So I am not claiming new wording is the fix; see
+§4, where the failure of today's wording is pre-registered as the trigger for a structural change.
+
+**19 Nov is the instructive one.** It logged **9** TRIMP — four over the reset threshold. He very
+nearly rested, and a bike commute was the difference between a rest day and a tenth consecutive
+training day. That is why today's line names the bike specifically rather than saying "nothing
+structured", which reads as a licence for exactly that. Both failing wordings were permissive
+("nothing structured", "nothing heavy") and he took the permission nine times out of nine.
+
+### 2. The arithmetic, which is what makes this actionable today rather than noteworthy
+`daysSinceRest` **10**, TSB **−22.30**, ATL **58.12** against CTL **35.82** for a ratio of
+**1.623**. Ten consecutive days carrying load — 13 Nov through 22 Nov:
+
+```
+13 Nov 22 · 14 Nov 11 · 15 Nov 169 · 16 Nov 39 · 17 Nov 34
+18 Nov 113 · 19 Nov 9 · 20 Nov 114 · 21 Nov 106 · 22 Nov 54
+```
+
+Week 12 priced line by line against the live load model:
+
+| day | line | est |
+|---|---|---|
+| Mon | Z2 run 50min | **67** |
+| Tue | Tennis (`cal:true`) | 51 |
+| Tue | Ski 16min · 3×1000m | 26 |
+| Tue | Gym 40min | 39 |
+| Wed | Hyrox circuit 45min | 107 |
+| Fri | ⏱ KEY RUN | 136 |
+| Sun | Long run 1h15 | 101 |
+| | **total** | **527** |
+
+**527 written, band 440–580, and the governor projects 606 — 26 past the ceiling.** It cannot act
+on that: `over` reads **false** because of the stale-flag ordering bug yesterday's §5 documented
+(still live, §6), and `forceRest` being active blocks the ceiling limb anyway. So the week overshoots
+and the deterministic engine has no way to pull it back. That is squarely my job.
+
+Taking Monday's 67 out: **written 460, projected 539.** Inside 440–580 with room at both ends.
+
+### 3. Why Monday, and why this is not duplicating `adaptPlan`
+The objection to touching today is real and worth answering: `adaptPlan` has *already* converted
+Monday to a recovery day, so what does writing it buy?
+
+**It buys the rest of the week.** The engine's conversion is transient — it exists only while
+`daysSinceRest >= 9 && tsb < -15`, and its gate reaches today plus two days. Read live before the
+edit, it had withdrawn **Monday and Tuesday**, and Tuesday carries `Ski 16min · 3×1000m at
+2:05/500m` — the ski-interval rung, the #1 priority (ski erg top **29.8%** at Athens, the weakest
+element against the field), and a line that has not been attempted once. Tomorrow the gate moves to
+Tue/Wed and takes the Hyrox circuit too. **On the current trajectory the engine withdraws three of
+week 12's five sessions one morning at a time, and the week collapses to Friday's benchmark and
+Sunday's long run.** The engine can only subtract; it cannot decide where the week's rest sits.
+That decision is the thing I exist to make.
+
+Verified after the edit: the Monday line reads `_status: "planned"`, `_adj: null` — the engine stops
+withdrawing it, because a rest day already *is* a rest day. Tuesday is still converted this morning,
+correctly: the engine cannot know he will rest. If he does, `daysSinceRest` resets to 0 overnight,
+`forceRest` goes false, and Tuesday's ski is live tomorrow. That is the entire mechanism of this
+change.
+
+**Why Monday rather than waiting for a worse morning.** Rest is cheapest on the day whose session is
+worth least, and Monday's Z2 run is week 12's least specific line — 67 TRIMP of generic aerobic
+volume in a week that already carries a threshold run, a long run, a ski-interval set, a Hyrox
+circuit and tennis. Taking it on a readiness-7 morning spends the least session value. Waiting for a
+low-readiness morning means the rest lands on a day that matters — which is exactly how 20 Nov's
+benchmark got pushed to the 21st.
+
+**And cutting a run is not cutting at the running weakness.** Running is his weakest block (top
+27.7%), and the instinct is to protect every run. But he has logged seven running activities in 21
+days and ran 3×2km outdoors into a headwind on Saturday. The constraint on his running is not
+sessions per week — it is that at TSB −22.30 he never arrives fresh enough to run them fast. Week 12
+goes from three running lines to two, and the two that remain are the specific ones: Friday's
+14.5kmh threshold attempt and Sunday's long run. Cutting the easy run to protect Friday's 4:08/km
+**is** training the weakness.
+
+### 4. Pre-registered, so tomorrow does not have to re-derive it
+- **If 23 Nov logs ≤5 TRIMP**, the counter resets, `forceRest` clears, and week 12 runs as written
+  from Tuesday. Nothing to do.
+- **If 23 Nov logs >5 TRIMP**, that is **ten written rest days and ten failures**, across a 400-word
+  line, two terse permissive lines and one explicit prohibition. At that point the wording is
+  conclusively not the lever and the next run should stop writing rest days. The structural options,
+  in the order I would take them: (a) write the light day as a capped session he will actually do
+  rather than a zero he will not — something like `Easy spin 20min · HR under 115, nothing else` —
+  accepting that it may not reset the engine's counter; (b) raise the band's floor to match a seven-
+  day-a-week athlete and stop pretending a rest day is in the plan. Do **not** simply rewrite the
+  rest line again.
+- **If `forceRest` is TRUE on a third consecutive morning (24 Nov)** with the ski still withdrawn,
+  the week has lost its priority session to a counter rather than to physiology, and Tuesday's ski
+  should be written into Wednesday or Friday's slot to get it in front of him on a day the gate does
+  not reach.
+- **Thu 26 Nov's rest line** stays this week (§5). Act on it only if Monday's rest lands and Thursday
+  then logs >5 anyway — that would isolate the wording as the variable, since the same athlete in the
+  same week took one rest day and not the other.
+
+### 5. What I deliberately left alone
+- **Thu 26 Nov, `Day off · nothing heavy for the legs`.** Its job is not recovery, it is protecting
+  Friday's benchmark, and "nothing heavy for the legs" is honest about permitting light work. If
+  Monday's rest lands the counter is at 2–3 by Thursday and `forceRest` cannot fire, so Thursday
+  carries no counter weight this week. Changing two days of a week he is one day into, when one day
+  resolves the physiological case, is more than the evidence supports — and leaving Thursday alone
+  makes Monday a clean test of the wording (§4).
+- **Tue 24 Nov's `Ski 16min · 3×1000m at 2:05/500m · 90s gap`.** Still not attempted once. The
+  evidence behind the rung is unchanged: self-paced continuous pieces settle at 2:09–2:14/500m, the
+  fresh 1000m TT on 28 Jul was 3:54 (1:57/500m), and Athens raced 4:18 (2:09/500m), so three reps at
+  4:10 with 90s rest is the right next ask. Changing it before a single attempt is the error it was
+  created to fix. Protecting it is most of the reason for today's change (§3).
+- **Fri 27 Nov as the day, and Sat 28 as `sessions:[]`.** Friday hosts real work — the 6 Nov
+  threshold run itself, and on 13 Nov a SkiErg plus a 58-minute lift — and adherence does not flag
+  it. The empty Saturday behind it is the slip buffer and stays empty.
+- **All of week 11.** Closed with every written session trained except Sunday's long run, which the
+  engine withdrew under `forceRest`. Nothing to learn from editing it, and the rule forbids
+  rewriting a week that is over.
+- **The phase: Base II · Threshold, week 4 of 6, to 20 Dec.** Correct and unchanged. It aims at ski
+  (29.8%) and running (27.7%), the two weakest elements against the field, and week 11 trained both
+  while the running rung moved from 14.0 to 14.5kmh. The next two weeks need the *same* sessions,
+  not different ones.
+- **The 440–580 band.** Weeks 10 (458) and 11 (~462 with Sunday's tennis) both landed inside it —
+  two consecutive weeks, so the 16 Nov reopen condition ("two consecutive weeks under 400 against a
+  written plan of ≥440") is further from firing than it was. Week 12 now prices at 460, in the same
+  place. The band is realistic; what was unrealistic was 527 of written load on top of `unplanned7`
+  of 195.
+- **`row` 0 prescribed / 1 done.** Top 11.4% at Athens: defend, don't chase. The 1000m row TT is
+  still owed and still does not earn a slot in a threshold week.
+- **`tennis` 0 prescribed / 7 done** and **`cycle` 0 / 6.** Tennis is his sport and the `cal:true`
+  lines belong to `calendar_sync.py`; commutes are noise — except as the 9 TRIMP that cost him
+  19 Nov's rest day (§1), which is why the new line names the bike.
+- **`RACE`, `PREV_RACE`, `STATION_TARGETS`, `RACE_BUDGET`, `RACE_GAINS`.** Copenhagen 124 days out,
+  no result known, no target moved.
+- **The Base I phase note**, which runs long. That phase ended 8 Nov and the rule forbids rewriting
+  what is over. The Base II note is two sentences and was already correct.
+
+### 6. Physiology, stated
+**The HRV collapse was one night's bill and it is paid.** 84 → 39 → **82**, against a baseline of
+69, so +13 today. Readiness 3 → **7/10**. Sleep went from 223 deep / 9 REM to **188 deep / 99 REM**
+over 529 minutes — the architecture normalised, which is what distinguishes a hard session being
+absorbed from the start of something. Yesterday's §2 called this and was right.
+
+**The baseline falling 71 → 69 is not a trend.** Raw readings 108 · 80 · 73 · 81 · 57 · 84 · 39 · 82
+give a seven-day mean of 70.9, so the baseline is tracking a volatile fortnight, not shifting. The
+genuine 16–21 Nov finding — a baseline climbing 17 points under rising load — survives.
+
+**RHR is the quiet good news and it is worth naming.** 41 today, and the window has 36 (15 Nov),
+37 (14 Nov) and 37 (21 Nov) — three readings at or below the bottom of his stated 38–46 range, all
+excursions on the *good* side, while CTL climbed to 35.82. Low-end RHR plus a rising baseline plus a
+threshold rung cleared outdoors is aerobic adaptation, not strain. **TSB −22.30 and ATL/CTL 1.623
+are the real cost**, and they are what today's rest day is for. Nothing here reads as illness or
+overreaching.
+
+**Two engine observations, confirmed still live, recorded not acted on** (both in `adaptPlan`, which
+this Routine may not edit):
+- **The governor's `over` flag is still computed before the adapted re-projection.** Today, before
+  the edit: `projectedRaw` 527, `projected` **606**, `over` **false**, `trimmedBy` **−79**. A week
+  displayed as projecting 26 past its ceiling with the flag that would trim it reading no. §2 is the
+  first time this has actually cost something.
+- **`forceRest` still bleeds into past weeks.** The adjustments list holds **44** entries with the
+  earliest at **6 Sep**, every unfinished historical session relabelled "Converted to a recovery
+  day · 10 days without a rest day". Cosmetic in the archive, but it makes the adjustments feed
+  useless as a record of what was actually adapted.
+
+### 7. Checks
+- `python3 check_plan.py` → **exit 0**, "plan lines OK (text ≤ 60, why ≤ 120, from 2026-11-09)".
+- `npm run build` → **clean**, `✓ built in 1.05s` (`npm ci` first; vite is not installed in this
+  container by default).
+- **Patch anchors (gotcha 14)** → all eleven present: TODAY, LAST_RUN, LAST_DATA, hrvBaseline, daily,
+  sleep, weight, nutrition, body, CSV_DATA, HYROX_DATA.
+- **`update.patch()` round trip** against a copy of the real `src/App.jsx`, module body imported
+  above `# ── Main ──`, run with `python3 -I` → **PASS on all 15 assertions**: daily row written with
+  `hrv:82`, sleep row refreshed to `deep:188`, all 172 daily and 171 sleep rows keep their 4-space
+  indent and no row lost in either array (gotcha 2), no stray unindented row, weight upserted inside
+  its own span, `vo2max` byte-identical (gotcha 4), CSV row upserted, SCHEDULE / TAPER_PLAN /
+  HYROX_DATA byte-identical, the new Monday rest line survives the sync verbatim, and week 11's
+  identically-worded Z2 run line is untouched (that last one matters — the string
+  `Z2 run 50min · conversational, nothing to hold` appeared on both 16 and 23 Nov, so the edit was
+  anchored on the date, not the text).
+- **Engine re-run against the edited file**: Monday's line is `isRestSession` true, `isOptionalLine`
+  **false** (no "or" in it — `\bOR\b` with the `i` flag would catch one), `estTrimp` **0**, and it
+  reads `_status: "planned"` with `_adj: null` instead of being withdrawn. Week 12 written load
+  **460**, `projectedRaw` **460**, `projected` **539**, band 440–580, `over` false, `under` false.
+- `python3 adherence.py --days 21` re-run after the edit → run **8 prescribed / 6 done** (from 9/6),
+  no ACTION REQUIRED, no WATCH.
+
+### 8. Consecutive no-change runs before this one
+**Zero.** 22 Nov CHANGED (the 14.5kmh rung), 21 Nov NO CHANGE, and 20, 19, 18, 17 Nov all CHANGED.
+The three-in-a-row passivity rule is not in play. What is worth noting instead is the opposite
+failure mode: the rest-day problem has been visible since at least 2 Nov, was written about at
+length that day, and has been carried as "watching" in entry after entry while the count went from
+two-for-nine to zero-for-nine. Today it cost a session the engine was about to withdraw. **That is
+the pattern-across-days failure this Routine was built to catch, and it took three weeks to act on
+it.**
+
 ## 2026-11-22
 - adherence: **no ACTION REQUIRED and no WATCH — "Every prescribed session type has been trained at
   least once."** Window 1–22 Nov: **ski 3/3 on track** · row 0 prescribed / 2 done · **hyrox 1/1 on
