@@ -5,51 +5,56 @@ description: Log Simas Simanauskas's meals into his MyFitnessPal food diary from
 
 # Log meals into MyFitnessPal
 
-He types what he ate; you resolve each food to an MFP food, dry-run it, write
-it, and confirm it read back. Just do it — no need to ask first unless a food
-or amount is genuinely ambiguous. Built 24 Nov 2026.
+He types what he ate; you write it to his MFP diary **in one workflow run**
+and report. Speed matters — he waits in chat. Target: under a minute from his
+message to the reply. Built 24 Nov 2026; reworked the same day after a
+2-item meal took 4 minutes (three runs + long fixed waits).
 
 ## How it works
 
-The MFP token (MFP_TOKEN, minted hourly by the auth.simas.fit Worker — see
-mfp.py) only exists inside GitHub Actions, so every call runs there:
+The MFP token only exists inside GitHub Actions (MFP_TOKEN, minted hourly by
+the auth.simas.fit Worker — see mfp.py), so every call runs there:
 
 - Repo `Simanauskas/dashboard`, workflow **`mfp-log.yml`** (ref `main`),
-  script `mfp_log.py`. Dispatch with the GitHub MCP `actions_run_trigger`
-  (`method: run_workflow`), then `actions_list` → `list_workflow_runs`
-  (resource_id `mfp-log.yml`, perPage 1) → `list_workflow_jobs` →
-  `get_job_logs` (`return_content: true`, `tail_lines` ~80). A run takes
-  ~20–30 s (it reads 45 days of diary history); wait ~45 s before looking
-  (a Bash `until` loop on the clock — plain `sleep` is blocked).
-- Inputs: `action` (`find | dry-run | apply | show | undo | probe`), `spec`
+  script `mfp_log.py`. A run takes ~12 s end to end (~3 s of script).
+- Inputs: `action` (`apply | dry-run | find | show | undo | probe`), `spec`
   (meal JSON), `query` (find: `"chicken breast; rice"`, undo: `"id1,id2"`),
   `date` (YYYY-MM-DD, blank = today in Vilnius).
 - No GitHub tool in the session → say so and give him the inputs to paste
   into Actions → MFP log meal → Run workflow.
 
-## Steps
+## The fast path (default — one run)
 
-1. **Find** (skip when every food is obviously in his history or trivially
-   generic): `action: find`, `query: "food a; food b; …"`. For each query it
-   lists up to 5 candidates — `[history]` (foods he has logged in the last 45
-   days, most-logged first) then `[search]` (MFP search, verified first) —
-   with id and every serving size's macros.
-2. **Pick** one id per food. Prefer, in order: his own history food (he chose
-   it before, often a Lithuanian/local product), a ✓verified search result
-   whose macros look right, a generic. Check raw vs cooked matches what he
-   said (rice/pasta/meat weights are usually cooked unless he says raw).
-   Avoid foods marked `⚠old copy` (stale version; MFP may reject the write).
-3. **Dry run**: `action: dry-run` with the spec. It prints each line as
-   `meal  amount → food [source id] servings × serving size = kcal · P C F`
-   and a total. Sanity-check the kcal (200 g chicken breast ≈ 300–330, not
-   3000; 1 tbsp oil ≈ 120).
-4. **Apply**: identical spec, `action: apply`. Success is
+1. Build the spec straight from his message, using `q` with the food's
+   distinguishing words (`"quinoa cooked"`, `"tuna canned water"`,
+   `"chicken breast"`). `q` auto-picks: the food he has logged most in the
+   last 45 days whose name contains all the words, else the first verified
+   MFP search hit. His repeat foods resolve to exactly what he used before.
+2. Dispatch **`action: apply`** directly — no find, no dry run.
+   `actions_run_trigger` (`method: run_workflow`, ref `main`).
+3. Wait **15 s** (Bash `until` loop on the clock; plain `sleep` is blocked),
+   then `actions_list` → `list_workflow_runs` (resource_id `mfp-log.yml`,
+   perPage 1) — if not `completed`, wait 5 s and re-check — then
+   `list_workflow_jobs` → `get_job_logs` (`return_content: true`,
+   `tail_lines: 20`). Make the three calls back to back, no commentary between.
+4. Check the printed lines (`meal amount → food [history|search id=…]
+   servings × serving = kcal · P C F`) and the final
    `✓ N entries written and read back (… kcal; DATE now … kcal) · ids: …`.
-   Anything else → report the log line, don't retry blindly (a failed run
-   stops at the first rejected item and prints which were already written).
-5. **Report** a short table: food | amount | kcal | P/C/F, the meal total, and
-   the day's new total. Keep the entry ids (in the apply log) in case he
-   wants one undone.
+   Sanity-check each kcal (200 g chicken breast ≈ 300–330; 1 tbsp oil ≈ 120;
+   250 g cooked quinoa ≈ 300). If a pick is wrong (wrong food, raw vs
+   cooked, absurd kcal), `undo` that id and `apply` a corrected item with an
+   `id` from `find` — a fix costs one or two more runs, rarer than paying a
+   find + dry-run on every meal.
+5. Report a short table: food | amount | kcal | P/C/F, meal total, day total.
+
+## When to use find / dry-run instead
+
+Only when a food is genuinely new and ambiguous (a branded/local product he
+hasn't logged, "a sandwich from Caffeine"), or he asks to see options first.
+Then: `find` (one run, all queries at once: `"a; b; c"`) → pick ids → `apply`.
+Skip the dry run unless he asked for a preview. In `find` output prefer
+`[history]` foods, then ✓verified search results with sane macros; avoid
+`⚠old copy` (stale version, MFP may reject it).
 
 ## The spec
 
@@ -63,8 +68,9 @@ mfp.py) only exists inside GitHub Actions, so every call runs there:
 ]}
 ```
 
-- `id` (from find) or `q` (auto-pick: best history match, else first
-  verified search hit — fine for unambiguous foods, check the dry run).
+- `q` (auto-pick, see the fast path) or `id` (from find, or a previous run's
+  `[history id=…]` line). Ids he has used: cooked quinoa 63657357528429,
+  canned tuna in water 194215936902901 (1 can = serving 0, "1 can (6.5 oz), drained").
 - `amount` + `unit`: g, kg, oz, lb, ml, l, tbsp, tsp, cup, or a count unit
   matched against the food's serving names (`egg`, `slice`, `large`, `scoop`).
   No unit / `serving` = that many of the food's first serving size.
