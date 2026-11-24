@@ -20,8 +20,9 @@ jobs:
           python-version: '3.11'
       - run: pip install requests
       - run: |
-          python - <<'PY' > args.txt
-          import json; d = json.load(open('.mfp-dev.json'))
-          print("\0".join(d["args"]), end="")
+          python - <<'PY'
+          import json, subprocess, sys
+          for args in json.load(open('.mfp-dev.json'))["runs"]:
+              print("\n$ mfp_log.py", " ".join(args), flush=True)
+              subprocess.run([sys.executable, "mfp_log.py", *args])
           PY
-          xargs -0 -a args.txt python mfp_log.py

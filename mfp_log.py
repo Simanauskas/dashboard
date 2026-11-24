@@ -110,7 +110,8 @@ def search(s, q):
             continue
         if foods:
             _search_ok = label
-            return foods
+            # Keep MFP's relevance order, but verified entries first.
+            return sorted(foods, key=lambda f: not f.get("verified"))
     return []
 
 
@@ -179,12 +180,17 @@ def match_history(hist, q):
 
 def _unit_key(u):
     u = (u or "").strip().lower().rstrip(".")
-    return u
+    return re.sub(r"\(s\)$", "", u).strip()        # "oz(s)" -> "oz"
 
 
 def per_unit(ss):
-    """(kind, amount) one serving-size unit stands for: ('g', 28.0), ('ml', 240) or None."""
+    """(kind, amount) one serving-size unit stands for: ('g', 28.0), ('ml', 240) or None.
+    MFP gives gram_weight on most serving sizes; the parsing below is the fallback."""
     unit = _unit_key(ss.get("unit"))
+    if unit in VOLUME:
+        return "ml", VOLUME[unit] * float(ss.get("value") or 1)
+    if ss.get("gram_weight"):
+        return "g", float(ss["gram_weight"])
     val = float(ss.get("value") or 1)
     if unit in MASS:
         return "g", MASS[unit] * val
@@ -216,10 +222,12 @@ def choose_serving(f, amount, unit, force=None):
         return sizes[0], float(amount)
     want = ("g", MASS[u] * amount) if u in MASS else ("ml", VOLUME[u] * amount) if u in VOLUME else None
     if want:
-        # Exact unit first (keeps his number), then any convertible serving.
-        for ss in sizes:
-            if _unit_key(ss.get("unit")) == u:
-                return ss, round(float(amount) / float(ss.get("value") or 1), 3)
+        # Exact unit first, "1 g" style preferred (keeps his number), then any
+        # serving convertible through its gram weight.
+        same = [ss for ss in sizes if _unit_key(ss.get("unit")) == u]
+        same.sort(key=lambda ss: float(ss.get("value") or 1) != 1.0)
+        for ss in same:
+            return ss, round(float(amount) / float(ss.get("value") or 1), 3)
         for ss in sizes:
             pu = per_unit(ss)
             if pu and pu[0] == want[0] and pu[1]:
@@ -345,6 +353,7 @@ def cmd_find(s, queries):
                 print(f"  [{src}] id={fid} {food_label(h['food'])} — ✗ {e}")
                 continue
             used = f" · logged {h['count']}×" if src == "history" else ""
+            used += " · ✓verified" if f.get("verified") else ""
             print(f"  [{src}] id={fid} {food_label(f)}{used}")
             for i, ss in enumerate((f.get("serving_sizes") or [])[:8]):
                 print(f"      serving {i}: {sz_label(ss)} = {fmt_n(nutrition(f, ss, 1))}")
