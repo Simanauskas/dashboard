@@ -1,0 +1,68 @@
+name: MFP log meal
+
+# Writes food entries into the MyFitnessPal diary — see mfp_log.py.
+# Dispatch only. Nothing is written unless action = apply.
+#   find    — `query`: "chicken breast; rice" → candidate foods + serving sizes
+#   dry-run — `spec`: JSON meal → resolved foods, servings, macros; writes nothing
+#   apply   — same `spec` → writes, then reads the diary back
+#   show    — the day's entries with their ids (`date`, blank = today)
+#   undo    — `query`: comma-separated entry ids to delete
+#   probe   — read-only: API shapes and which food-search endpoint answers
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'find | dry-run | apply | show | undo | probe'
+        required: false
+        default: 'dry-run'
+      spec:
+        description: 'Meal JSON for dry-run/apply (see mfp_log.py)'
+        required: false
+        default: ''
+      query:
+        description: 'find: "food a; food b" · undo: "id1,id2"'
+        required: false
+        default: ''
+      date:
+        description: 'YYYY-MM-DD (blank = today, Vilnius)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mfp-log
+  cancel-in-progress: false
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    env:
+      MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
+      TZ: Europe/Vilnius
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      # Inputs via env, never interpolated into the shell.
+      - name: Run
+        env:
+          ACTION: ${{ inputs.action }}
+          SPEC: ${{ inputs.spec }}
+          QUERY: ${{ inputs.query }}
+          DATE: ${{ inputs.date }}
+        run: |
+          args=()
+          if [ -n "$DATE" ]; then args+=(--date "$DATE"); fi
+          case "$ACTION" in
+            probe)   python mfp_log.py --probe ;;
+            find)    python mfp_log.py --find "$QUERY" ;;
+            show)    python mfp_log.py --show "${args[@]}" ;;
+            undo)    python mfp_log.py --undo "$QUERY" ;;
+            dry-run) python mfp_log.py --spec "$SPEC" "${args[@]}" ;;
+            apply)   python mfp_log.py --spec "$SPEC" "${args[@]}" --apply ;;
+            *) echo "::error::unknown action '$ACTION'"; exit 1 ;;
+          esac
