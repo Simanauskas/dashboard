@@ -1807,6 +1807,15 @@ const SCHEDULE = [
     { date:"2026-11-28", dow:"SAT", label:"Nov 28", sessions:[] },
     { date:"2026-11-29", dow:"SUN", label:"Nov 29", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · Ina Lukošienė · court 10 · 11:30"},{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"Repeat the rung until it lands — 1:12:53 is still the longest run of this block."}] },
   ]},
+  { week:13, label:"Nov 30–Dec 6", theme:"Base II · Threshold", days:[
+    { date:"2026-11-30", dow:"MON", label:"Nov 30", sessions:[{type:"rest",text:"Full rest · zero logged, not even the commute",why:"Six days of load by Sunday; a commute is enough to stop this counting as rest."}] },
+    { date:"2026-12-01", dow:"TUE", label:"Dec 1", sessions:[{type:"plan",text:"Ski 16min · 3×1000m at 2:05/500m · 90s gap",why:"Three 10-min pieces have sat at 2:10/500m; a given split cannot be settled under."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
+    { date:"2026-12-02", dow:"WED", label:"Dec 2", sessions:[{type:"hyrox",text:"Hyrox circuit 45min · time each 500m erg rep",why:"Ski is your weakest station at top 29.8%, and these reps come off running legs."}] },
+    { date:"2026-12-03", dow:"THU", label:"Dec 3", sessions:[{type:"rest",text:"Day off · nothing heavy for the legs",why:"A heavy leg session here caps tomorrow's reps at Z2 before you start."}] },
+    { date:"2026-12-04", dow:"FRI", label:"Dec 4", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.5kmh / 4:08 · 50min all in",why:"Hold 14.5 on all three reps before the count goes up to four."}] },
+    { date:"2026-12-05", dow:"SAT", label:"Dec 5", sessions:[] },
+    { date:"2026-12-06", dow:"SUN", label:"Dec 6", sessions:[{type:"plan",text:"Long run 1h15 · conversational, indoors is fine",why:"1:12:53 on 8 Nov is still the longest run of this block; this rung has not landed."}] },
+  ]},
 ];
 
 
