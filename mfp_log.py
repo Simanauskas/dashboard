@@ -26,7 +26,10 @@ forces a serving size; otherwise one is chosen from `unit`.
 """
 from __future__ import annotations
 import argparse, datetime, json, os, pathlib, re, sys
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
+
+import requests
 
 import mfp
 
@@ -139,16 +142,23 @@ def delete_entry(s, uuid):
 
 def history(s, today, days=HISTORY_DAYS):
     """Foods he has logged recently: {id: {food, count, meals, last_serving}}."""
-    seen = {}
-    for i in range(days):
+    # One request per day; run them in parallel (~1 s instead of ~10 s).
+    # Each worker gets its own Session — requests' Session is not thread-safe.
+    def day(i):
         d = (today - datetime.timedelta(days=i)).isoformat()
+        ws = requests.Session()
+        ws.headers.update(s.headers)
         try:
-            items = diary(s, d)
+            return diary(ws, d)
         except mfp.AuthError:
             raise
         except Exception as e:
             print(f"  · history {d}: {e}")
-            continue
+            return []
+    with ThreadPoolExecutor(max_workers=12) as ex:
+        days_items = list(ex.map(day, range(days)))
+    seen = {}
+    for items in days_items:
         for it in items:
             f = it.get("food") if isinstance(it.get("food"), dict) else {}
             fid = f.get("id")
@@ -175,9 +185,9 @@ def match_history(hist, q):
         f = h["food"]
         text = " ".join(_words(f.get("description")) + _words(f.get("brand_name")))
         if all(w in text for w in qw):
-            out.append((h["count"], fid, h))
-    out.sort(key=lambda x: -x[0])
-    return [(fid, h) for _, fid, h in out]
+            out.append((-h["count"], len(text), fid, h))
+    out.sort(key=lambda x: x[:2])
+    return [(fid, h) for _, _, fid, h in out]
 
 
 # ── servings and nutrition ───────────────────────────────────────────────────
@@ -392,7 +402,8 @@ def cmd_spec(s, spec, apply):
     items = spec.get("items") or []
     if not items:
         sys.exit("spec has no items")
-    hist = history(s, today_local())
+    need = any(not it.get("id") for it in items)
+    hist = history(s, today_local()) if need else {}
     known = {m for h in hist.values() for m in h["meals"]}
 
     plan, total = [], {"kcal": 0, "P": 0, "C": 0, "F": 0}

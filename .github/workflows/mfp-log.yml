@@ -42,11 +42,15 @@ jobs:
       MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
       TZ: Europe/Vilnius
     steps:
+      # Speed matters here (he waits on it in chat): only the two scripts are
+      # checked out, and the runner's own python3 is used — no setup-python.
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - run: pip install requests
+          sparse-checkout: |
+            mfp.py
+            mfp_log.py
+          sparse-checkout-cone-mode: false
+      - run: python3 -c "import requests" 2>/dev/null || pip install -q requests
       # Inputs via env, never interpolated into the shell.
       - name: Run
         env:
@@ -58,11 +62,11 @@ jobs:
           args=()
           if [ -n "$DATE" ]; then args+=(--date "$DATE"); fi
           case "$ACTION" in
-            probe)   python mfp_log.py --probe ;;
-            find)    python mfp_log.py --find "$QUERY" ;;
-            show)    python mfp_log.py --show "${args[@]}" ;;
-            undo)    python mfp_log.py --undo "$QUERY" ;;
-            dry-run) python mfp_log.py --spec "$SPEC" "${args[@]}" ;;
-            apply)   python mfp_log.py --spec "$SPEC" "${args[@]}" --apply ;;
+            probe)   python3 mfp_log.py --probe ;;
+            find)    python3 mfp_log.py --find "$QUERY" ;;
+            show)    python3 mfp_log.py --show "${args[@]}" ;;
+            undo)    python3 mfp_log.py --undo "$QUERY" ;;
+            dry-run) python3 mfp_log.py --spec "$SPEC" "${args[@]}" ;;
+            apply)   python3 mfp_log.py --spec "$SPEC" "${args[@]}" --apply ;;
             *) echo "::error::unknown action '$ACTION'"; exit 1 ;;
           esac
