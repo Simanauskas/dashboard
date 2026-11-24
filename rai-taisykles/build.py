@@ -2,16 +2,24 @@
 """Generuoja RAI Academy taisyklių A3 PDF. Paleidimas: python3 build.py"""
 import html
 from playwright.sync_api import sync_playwright
-from data import POLE, AIR, GENERAL
+import sys
+LANG = sys.argv[1] if len(sys.argv) > 1 else "lt"
+if LANG == "en": from data_en import POLE, AIR, GENERAL, UI
+else:
+    from data import POLE, AIR, GENERAL
+    UI = dict(tag="PATALPŲ TAISYKLĖS", general="BENDROSIOS PATALPŲ NAUDOJIMO TAISYKLĖS", exit_title="🔒 PRIEŠ IŠEIDAMI – PASKUTINIS IŠEINANTIS PATIKRINA:", exit=None, warn=None)
 
-EXIT = [("💡","Išjunkite visas šviesas","įskaitant LED"),
+EXIT_LT = [("💡","Išjunkite visas šviesas","įskaitant LED"),
  ("🎵","Išjunkite muziką","ir aparatūrą"),
  ("❄️","Išjunkite oro kondicionierių","ir kitus klimato įrenginius"),
  ("🧹","Palikite patalpas tvarkingas","inventorius vietoje, šiukšlės išmestos"),
  ("👀","Patikrinkite, ar nieko neliko","sales, koridorių, tualetus"),
  ("🚪","Užrakinkite duris","pagal prie išėjimo pateiktas instrukcijas")]
-WARN = ("INVENTORIAUS PAŽEIDIMAI","SUDĖTINGI ELEMENTAI","ČIUŽINIAI","NUSILEIDIMAS","INVENTORIUS")
+WARN_LT = ("INVENTORIAUS PAŽEIDIMAI","SUDĖTINGI ELEMENTAI","ČIUŽINIAI","NUSILEIDIMAS","INVENTORIUS")
 E = html.escape
+EXIT = UI['exit'] or EXIT_LT
+WARN = UI['warn'] or WARN_LT
+HTML_LANG = 'en' if LANG=='en' else 'lt'
 
 def rule(e,t,b):
     w = " warn" if t in WARN else ""
@@ -24,7 +32,7 @@ def page(d, fs):
     L = "".join(group(*g) for g in d["left"]); R = "".join(group(*g) for g in d["right"])
     gen = "".join(rule(*r) for r in GENERAL)
     ex = "".join(f'<div class="ex"><div class="eic">{e}</div><b>{E(a)}</b><span>{E(b)}</span></div>' for e,a,b in EXIT)
-    return f'''<!doctype html><html lang="lt"><meta charset="utf-8"><style>
+    return f'''<!doctype html><html lang="{HTML_LANG}"><meta charset="utf-8"><style>
 @page{{size:420mm 297mm;margin:0}}
 *{{box-sizing:border-box;margin:0}}
 html,body{{width:420mm;height:297mm}}
@@ -57,10 +65,10 @@ footer h2{{background:none;border:0;padding:0;color:#F4A261;font-size:16pt;lette
 .ex b{{font-size:10pt;font-weight:800;color:#F4A261;line-height:1.2}}
 .ex span{{font-size:8.5pt;opacity:.92;line-height:1.25}}
 </style><body>
-<header><div class="brand">RAI ACADEMY</div><h1><small>PATALPŲ TAISYKLĖS</small>{E(d["sub"])}</h1></header>
+<header><div class="brand">RAI ACADEMY</div><h1><small>{UI['tag']}</small>{E(d["sub"])}</h1></header>
 <main><div class="col">{L}</div><div class="col">{R}</div></main>
-<section class="gen"><h2><i>4</i>BENDROSIOS PATALPŲ NAUDOJIMO TAISYKLĖS</h2><div class="row">{gen}</div></section>
-<footer><h2>🔒 PRIEŠ IŠEIDAMI – PASKUTINIS IŠEINANTIS PATIKRINA:</h2><div class="exs">{ex}</div></footer>
+<section class="gen"><h2><i>4</i>{UI['general']}</h2><div class="row">{gen}</div></section>
+<footer><h2>{UI['exit_title']}</h2><div class="exs">{ex}</div></footer>
 </body></html>'''
 
 with sync_playwright() as p:

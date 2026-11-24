@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """RAI Academy – durų užrakinimo instrukcija, A4 portretas. python3 build_a4.py"""
-import qrcode, qrcode.image.svg, io, base64
+import sys, qrcode, qrcode.image.svg, io, base64
+EN = len(sys.argv) > 1 and sys.argv[1] == "en"
+OUT = "RAI_Academy_Door_Locking_Instructions_A4_EN.pdf" if EN else "RAI_Academy_Duru_uzrakinimo_instrukcija_A4.pdf"
 from playwright.sync_api import sync_playwright
 
 URL = "https://www.youtube.com/shorts/rZugShEJiJ0"
@@ -31,9 +33,29 @@ steps = [
  ("🚪", "<b>Patraukite rankeną ir patikrinkite, ar durys užsirakino.</b>"),
  ("🔄", "<i>Jei nespėjote/nepavyko - <b class='r'>pakartokite procedūrą.</b></i>"),
 ]
+if EN:
+    steps = [
+     ("🪪", "On the inside of the door hangs the lock activation card on a retractable holder. <b>Open the door and, after stepping out, bring the card to the outer side of the lock cylinder on the outside of the door.</b>"),
+     ("🟢", '<b class="g">The card will activate the lock and a green signal will light up.</b> <u>The lock will stay active for 30 seconds</u>'),
+     ("🔑", "Within that time you must <b>return the card to the holder and leave it hanging on the inside of the door, close the door and turn the cylinder</b> (as if turning a key in a lock) <b>until you hear the lock engage.</b>"),
+     ("🚪", "<b>Pull the handle and check that the door has locked.</b>"),
+     ("🔄", "<i>If you did not make it in time or it did not work - <b class='r'>repeat the procedure.</b></i>"),
+    ]
 cards = "".join(f'<div class="step"><div class="n">{i}</div><div class="ic">{e}</div><p>{t}</p><div class="il">{ill[i]}</div></div>' for i,(e,t) in enumerate(steps,1))
 
-HTML = f'''<!doctype html><html lang="lt"><meta charset="utf-8"><style>
+LANG = "en" if EN else "lt"
+T = dict(tag="ROOM RULES", h1="DOOR LOCKING INSTRUCTIONS",
+ last_u="The last person leaving the premises must make sure the rooms are left tidy and locked.", last_r="Also check that all lights and other electrical appliances are switched off.",
+ h2="SMART LOCK USER INSTRUCTIONS",
+ note="If the premises are left unlocked and a robbery occurs, the person who was the last to use the premises will be held responsible. Please note that video surveillance cameras are installed in the premises, so at any time we can check who is visiting the premises and whether any prohibited activity is taking place",
+ call="If you have difficulties or questions about using the lock, or cannot lock up, <b>do not leave the premises unlocked</b> - call", **{"or":"or"},
+ thx="Thank you!", admin="RAI Academy Administration", video="DEMO VIDEO:") if EN else dict(tag="PATALPŲ TAISYKLĖS", h1="DURŲ UŽRAKINIMO INSTRUKCIJA",
+ last_u="Paskutinis asmuo, išeinantis iš patalpų turi įsitikinti, kad patalpas palieka tvarkingas ir užrakintas.", last_r="Taip pat patikrinus, ar visur išjungtos šviesos ir kiti elektros prietaisai.",
+ h2="IŠMANIOSIOS SPYNOS NAUDOJIMOSI INSTRUKCIJA",
+ note="Palikus patalpas atrakintas ir įvykus apiplėšimui, atsakingas bus laikomas asmuo, kuris paskutinis naudojosi patalpomis. Įspėjame, kad patalpose yra įrengtos vaizdo stebėjimo kameros, todėl bet kuriuo metu galime patikrinti, kas lankosi patalpose ir ar nėra užsiimama jokia draudžiama veikla",
+ call="Jei kyla sunkumų ar neaiškumų dėl spynos naudojimo ar nepavyksta užrakinti, <b>nepalikite patalpų atrakintų</b> - skambinkite", **{"or":"arba"},
+ thx="Dėkojame!", admin="RAI Academy Administracija", video="DEMONSTRACINIS VIDEO:")
+HTML = f'''<!doctype html><html lang="{LANG}"><meta charset="utf-8"><style>
 @page{{size:A4;margin:0}} *{{box-sizing:border-box;margin:0}}
 html,body{{width:210mm;height:297mm}}
 body{{font-family:'Inter';color:{N};background:#fff;display:flex;flex-direction:column;overflow:hidden;font-size:10.5pt}}
@@ -65,20 +87,20 @@ h2{{background:{N};color:#fff;font-size:12pt;font-weight:800;letter-spacing:.06e
 .vid h3{{font-size:15pt;font-weight:800;color:{O};line-height:1.15;max-width:48mm}} .vid .emo{{font-family:'Noto Color Emoji';font-size:24pt;display:block;margin-bottom:1mm}}
 .vid img{{width:34mm;height:34mm;background:#fff;padding:2.2mm;border-radius:2mm;image-rendering:pixelated}}
 </style><body>
-<header><div class="brand">RAI ACADEMY</div><small>PATALPŲ TAISYKLĖS</small></header>
+<header><div class="brand">RAI ACADEMY</div><small>{T['tag']}</small></header>
 <div class="wrap">
-<h1>DURŲ UŽRAKINIMO INSTRUKCIJA</h1>
-<div class="last"><div class="ic">🔒</div><p><u>Paskutinis asmuo, išeinantis iš patalpų turi įsitikinti, kad patalpas palieka tvarkingas ir užrakintas.</u> Taip pat patikrinus, ar visur išjungtos šviesos ir kiti elektros prietaisai.</p></div>
-<h2>IŠMANIOSIOS SPYNOS NAUDOJIMOSI INSTRUKCIJA</h2>
+<h1>{T['h1']}</h1>
+<div class="last"><div class="ic">🔒</div><p><u>{T['last_u']}</u> {T['last_r']}</p></div>
+<h2>{T['h2']}</h2>
 <div class="steps">{cards}</div>
-<div class="note"><div class="ic">⚠️</div><p>Palikus patalpas atrakintas ir įvykus apiplėšimui, atsakingas bus laikomas asmuo, kuris paskutinis naudojosi patalpomis. Įspėjame, kad patalpose yra įrengtos vaizdo stebėjimo kameros, todėl bet kuriuo metu galime patikrinti, kas lankosi patalpose ir ar nėra užsiimama jokia draudžiama veikla</p></div>
-<div class="call"><div class="ic">📞</div><p>Jei kyla sunkumų ar neaiškumų dėl spynos naudojimo ar nepavyksta užrakinti, <b>nepalikite patalpų atrakintų</b> - skambinkite <span class="tel">+37068307066</span> arba <span class="tel">+37064149556</span></p></div>
-<div class="bottom"><div class="thx"><b>Dėkojame!</b><span>RAI Academy Administracija</span></div>
-<div class="vid"><h3><span class="emo">🎬</span>DEMONSTRACINIS VIDEO:</h3><img src="{QR}"></div></div>
+<div class="note"><div class="ic">⚠️</div><p>{T['note']}</p></div>
+<div class="call"><div class="ic">📞</div><p>{T['call']} <span class="tel">+37068307066</span> {T['or']} <span class="tel">+37064149556</span></p></div>
+<div class="bottom"><div class="thx"><b>{T['thx']}</b><span>{T['admin']}</span></div>
+<div class="vid"><h3><span class="emo">🎬</span>{T['video']}</h3><img src="{QR}"></div></div>
 </div></body></html>'''
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path='/opt/pw-browsers/chromium')
     pg = b.new_page(viewport={'width':794,'height':1123}); pg.set_content(HTML); pg.wait_for_timeout(400)
     print("overflow px:", pg.evaluate("document.querySelector('.wrap').scrollHeight-document.querySelector('.wrap').clientHeight"))
-    pg.pdf(path="RAI_Academy_Duru_uzrakinimo_instrukcija_A4.pdf", format="A4", print_background=True, prefer_css_page_size=True)
+    pg.pdf(path=OUT, format="A4", print_background=True, prefer_css_page_size=True)
