@@ -1,5 +1,5 @@
 {"runs": [
-  ["--find", "chicken breast; rice; olive oil; skyr"],
-  ["--spec", "{\"meal\":\"Lunch\",\"items\":[{\"q\":\"chicken breast\",\"amount\":200,\"unit\":\"g\"},{\"q\":\"rice\",\"amount\":150,\"unit\":\"g\"},{\"q\":\"olive oil\",\"amount\":1,\"unit\":\"tbsp\"}]}"],
+  ["--spec", "{\"meal\":\"Lunch\",\"items\":[{\"q\":\"chicken breast\",\"amount\":200,\"unit\":\"g\"},{\"id\":\"235164391106421\",\"amount\":150,\"unit\":\"g\"},{\"q\":\"olive oil\",\"amount\":1,\"unit\":\"tbsp\"}]}"],
+  ["--spec", "{\"meal\":\"Snacks\",\"items\":[{\"id\":\"17890343226797\",\"amount\":1,\"unit\":\"g\"}]}", "--apply"],
   ["--show"]
 ]}

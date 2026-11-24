@@ -58,13 +58,17 @@ def diary(s, date_str):
     return [i for i in data.get("items", []) if i.get("type", "food_entry") == "food_entry"]
 
 
-def food(s, fid):
-    """Fresh food record — the diary rejects an entry whose version is stale."""
+def food(s, fid, fallback=None):
+    """Fresh food record — the diary rejects an entry whose version is stale.
+    Some foods he logged long ago no longer resolve by id; then the copy carried
+    in his diary entry (`fallback`) is used as is."""
     data = mfp._get(s, "/v2/foods", [("ids", str(fid))])
     items = data.get("items") or []
-    if not items:
-        raise RuntimeError(f"food {fid} not found")
-    return items[0]
+    if items:
+        return items[0]
+    if fallback and fallback.get("version") and fallback.get("serving_sizes"):
+        return fallback
+    raise RuntimeError(f"food {fid} not found")
 
 
 SEARCHES = [
@@ -178,9 +182,18 @@ def match_history(hist, q):
 
 # ── servings and nutrition ───────────────────────────────────────────────────
 
+CANON = {"gram": "g", "grams": "g", "gr": "g", "kilogram": "kg", "kilograms": "kg",
+         "milligram": "mg", "milligrams": "mg", "ounce": "oz", "ounces": "oz", "wt. oz": "oz",
+         "pound": "lb", "pounds": "lb", "lbs": "lb", "milliliter": "ml", "millilitre": "ml",
+         "milliliters": "ml", "millilitres": "ml", "liter": "l", "litre": "l",
+         "tablespoon": "tbsp", "tablespoons": "tbsp", "tbs": "tbsp", "teaspoon": "tsp",
+         "teaspoons": "tsp", "cups": "cup"}
+
+
 def _unit_key(u):
     u = (u or "").strip().lower().rstrip(".")
-    return re.sub(r"\(s\)$", "", u).strip()        # "oz(s)" -> "oz"
+    u = re.sub(r"\(s\)$", "", u).strip()             # "oz(s)" -> "oz"
+    return CANON.get(u, u)
 
 
 def per_unit(ss):
@@ -348,7 +361,7 @@ def cmd_find(s, queries):
             print("  nothing found")
         for src, fid, h in cs:
             try:
-                f = food(s, fid)
+                f = food(s, fid, h["food"])
             except Exception as e:
                 print(f"  [{src}] id={fid} {food_label(h['food'])} — ✗ {e}")
                 continue
@@ -383,7 +396,7 @@ def cmd_spec(s, spec, apply):
     items = spec.get("items") or []
     if not items:
         sys.exit("spec has no items")
-    hist = history(s, today_local()) if any("q" in it and "id" not in it for it in items) else {}
+    hist = history(s, today_local())
     known = {m for h in hist.values() for m in h["meals"]}
 
     plan, total = [], {"kcal": 0, "P": 0, "C": 0, "F": 0}
@@ -391,12 +404,14 @@ def cmd_spec(s, spec, apply):
         meal = norm_meal(it.get("meal") or spec.get("meal"), known)
         if it.get("id"):
             fid, src = str(it["id"]), "id"
+            fb = (hist.get(fid) or {}).get("food")
         else:
             cs = candidates(s, hist, it["q"], n=1)
             if not cs:
                 raise RuntimeError(f"nothing found for '{it['q']}' — try --find with other words")
-            src, fid, _ = cs[0]
-        f = food(s, fid)
+            src, fid, h = cs[0]
+            fb = h["food"]
+        f = food(s, fid, fb)
         ss, servings = choose_serving(f, float(it.get("amount", 1)), it.get("unit", "serving"),
                                       it.get("serving"))
         n = nutrition(f, ss, servings)
