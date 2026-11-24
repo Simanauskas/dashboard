@@ -1,0 +1,93 @@
+{
+  "v": 1,
+  "id": "2026-11-24-2024-strength",
+  "kind": "strength",
+  "activity": "Strength",
+  "start": "2026-11-24T20:24:45+02:00",
+  "end": "2026-11-24T21:09:49+02:00",
+  "feel": 50,
+  "rpe": 6,
+  "notes": "",
+  "title": "",
+  "template": "Upper body",
+  "exercises": [
+    {
+      "name": "Barbell overhead press",
+      "cat": "SHOULDER_PRESS",
+      "gname": "OVERHEAD_BARBELL_PRESS",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 55,
+          "n": 3
+        },
+        {
+          "kg": 45,
+          "n": 7
+        },
+        {
+          "kg": 45,
+          "n": 6
+        },
+        {
+          "kg": 45,
+          "n": 6
+        }
+      ]
+    },
+    {
+      "name": "Sled pull",
+      "cat": "SLED",
+      "gname": "BACKWARD_DRAG",
+      "unit": "m",
+      "sets": [
+        {
+          "kg": 100,
+          "n": 30
+        },
+        {
+          "kg": 120,
+          "n": 40
+        },
+        {
+          "kg": 120,
+          "n": 40
+        },
+        {
+          "kg": 120,
+          "n": 40
+        },
+        {
+          "kg": 120,
+          "n": 50
+        }
+      ]
+    },
+    {
+      "name": "Wall balls",
+      "cat": "SQUAT",
+      "gname": "WALL_BALL",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 6,
+          "n": 50
+        },
+        {
+          "kg": 6,
+          "n": 30
+        },
+        {
+          "kg": 6,
+          "n": 20
+        }
+      ]
+    }
+  ],
+  "status": {
+    "state": "pending",
+    "errors": 0,
+    "message": "waiting for the Garmin activity"
+  },
+  "received": "2026-11-24T19:10:01+00:00"
+}
