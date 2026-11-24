@@ -1,5 +1,5 @@
 {"runs": [
-  ["--spec", "{\"meal\":\"Lunch\",\"items\":[{\"q\":\"chicken breast\",\"amount\":200,\"unit\":\"g\"},{\"id\":\"235164391106421\",\"amount\":150,\"unit\":\"g\"},{\"q\":\"olive oil\",\"amount\":1,\"unit\":\"tbsp\"}]}"],
-  ["--spec", "{\"meal\":\"Snacks\",\"items\":[{\"id\":\"17890343226797\",\"amount\":1,\"unit\":\"g\"}]}", "--apply"],
+  ["--undo", "9a048bd7-b4f9-4873-8eaa-35e3fea0ba3c"],
+  ["--spec", "{\"meal\":\"Lunch\",\"items\":[{\"q\":\"chicken breast\",\"amount\":200,\"unit\":\"g\"},{\"id\":\"235164391106421\",\"amount\":150,\"unit\":\"g\"},{\"q\":\"olive oil\",\"amount\":1,\"unit\":\"tbsp\"},{\"q\":\"banana\",\"amount\":1}]}"],
   ["--show"]
 ]}

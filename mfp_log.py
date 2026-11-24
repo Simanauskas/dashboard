@@ -196,29 +196,24 @@ def _unit_key(u):
     return CANON.get(u, u)
 
 
-def per_unit(ss):
-    """(kind, amount) one serving-size unit stands for: ('g', 28.0), ('ml', 240) or None.
-    MFP gives gram_weight on most serving sizes; the parsing below is the fallback."""
+def amount_of(ss, kind):
+    """Grams (kind 'g') or millilitres (kind 'ml') one unit of serving size ss
+    stands for, or None. MFP gives gram_weight on most serving sizes; parsing
+    the unit text ("1 slice (28g)") is the fallback."""
     unit = _unit_key(ss.get("unit"))
-    if unit in VOLUME:
-        return "ml", VOLUME[unit] * float(ss.get("value") or 1)
-    if ss.get("gram_weight"):
-        return "g", float(ss["gram_weight"])
     val = float(ss.get("value") or 1)
-    if unit in MASS:
-        return "g", MASS[unit] * val
-    if unit in VOLUME:
-        return "ml", VOLUME[unit] * val
-    # "100 g", "1 slice (28g)", "1 cup (240 ml)"
+    if kind == "g":
+        if ss.get("gram_weight"):
+            return float(ss["gram_weight"])
+        if unit in MASS:
+            return MASS[unit] * val
+    if kind == "ml" and unit in VOLUME:
+        return VOLUME[unit] * val
     m = re.search(r"([\d.]+)\s*(g|gram|grams|ml|oz)\b", unit)
-    if m:
-        n = float(m.group(1))
-        k = m.group(2)
+    if m and (m.group(2) == "ml") == (kind == "ml"):
         lead = re.match(r"\s*([\d.]+)\s+[a-z]", unit)
         base = float(lead.group(1)) if lead and "(" in unit else 1.0
-        if k in ("ml",):
-            return "ml", n * val / base
-        return "g", n * MASS.get(k, 1.0) * val / base
+        return float(m.group(1)) * MASS.get(m.group(2), 1.0) * val / base
     return None
 
 
@@ -242,14 +237,14 @@ def choose_serving(f, amount, unit, force=None):
         for ss in same:
             return ss, round(float(amount) / float(ss.get("value") or 1), 3)
         for ss in sizes:
-            pu = per_unit(ss)
-            if pu and pu[0] == want[0] and pu[1]:
-                return ss, round(want[1] / pu[1], 3)
+            per = amount_of(ss, want[0])
+            if per:
+                return ss, round(want[1] / per, 3)
         if want[0] == "ml":                               # 1 ml ≈ 1 g for drinks
             for ss in sizes:
-                pu = per_unit(ss)
-                if pu and pu[1]:
-                    return ss, round(want[1] / pu[1], 3)
+                per = amount_of(ss, "g")
+                if per:
+                    return ss, round(want[1] / per, 3)
         raise RuntimeError(f"no serving size convertible from {unit} — "
                            f"sizes: {[sz_label(x) for x in sizes]}")
     # A count unit ("egg", "slice", "large", "scoop"): match by name.
