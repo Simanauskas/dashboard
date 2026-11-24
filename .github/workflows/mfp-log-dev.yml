@@ -1,0 +1,27 @@
+name: MFP log meal (dev — temporary)
+# Temporary: lets mfp_log.py be tested from the feature branch before the
+# dispatch workflow exists on main. Deleted before merge.
+on:
+  push:
+    branches: [claude/adoring-archimedes-d2ca1q]
+    paths: ['.mfp-dev.json']
+permissions:
+  contents: read
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    env:
+      MFP_TOKEN: ${{ secrets.MFP_TOKEN }}
+      TZ: Europe/Vilnius
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: |
+          python - <<'PY' > args.txt
+          import json; d = json.load(open('.mfp-dev.json'))
+          print("\0".join(d["args"]), end="")
+          PY
+          xargs -0 -a args.txt python mfp_log.py
