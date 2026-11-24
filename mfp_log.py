@@ -67,7 +67,7 @@ def food(s, fid, fallback=None):
     if items:
         return items[0]
     if fallback and fallback.get("version") and fallback.get("serving_sizes"):
-        return fallback
+        return dict(fallback, _stale=True)
     raise RuntimeError(f"food {fid} not found")
 
 
@@ -275,7 +275,8 @@ def fmt_n(n):
 
 def food_label(f):
     b = f.get("brand_name")
-    return f"{f.get('description') or f.get('name')}" + (f" ({b})" if b else "")
+    return (f"{f.get('description') or f.get('name')}" + (f" ({b})" if b else "")
+            + (" ⚠old copy — MFP may reject it" if f.get("_stale") else ""))
 
 
 # ── commands ─────────────────────────────────────────────────────────────────
