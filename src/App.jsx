@@ -871,7 +871,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
-"Hiit","2026-11-25 19:59:19","false","HIIT","0,00","540","00:47:40","149","170","3,6","--","--","--","--","230","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:31:12","00:47:40","--","--"
+"Hiit","2026-11-25 19:59:19","false","Circuit · 4 rounds","0,00","540","00:47:40","149","170","3,6","--","--","--","--","230","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:31:12","00:47:40","--","--"
 "Strength Training","2026-11-24 20:27:35","false","Upper body — OHP 55 · Sled pull 120 · Wall balls 6","0,00","414","00:41:13","122","167","2,5","--","--","--","--","89","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:40:26","00:41:13","--","--"
 "Indoor Cardio","2026-11-24 20:08:07","false","SkiErg 3×1000m · 2:04/500m","3,00","176","00:16:01","126","165","2,3","--","--","5:20","--","54","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","6","--","--","--","--","--","00:16:01","00:16:01","--","--"
 "Tennis V2","2026-11-24 10:09:44","false","Tennis","0,27","494","01:45:46","91","138","0,4","13","--","387:35","--","16","strap","--","--","--","20,03","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:04:38","01:45:46","--","--"
@@ -1290,11 +1290,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-25";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-25T18:50:00Z";
-const LAST_DATA = "2026-11-25T18:50:00Z";
+const LAST_RUN  = "2026-11-25T19:07:00Z";
+const LAST_DATA = "2026-11-25T19:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-25T18:07:00Z";
+const LAST_MFP  = "2026-11-25T19:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
