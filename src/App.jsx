@@ -1807,7 +1807,7 @@ const SCHEDULE = [
   { week:12, label:"Nov 23–29", theme:"Base II · Threshold", days:[
     { date:"2026-11-23", dow:"MON", label:"Nov 23", sessions:[{type:"rest",text:"Full rest · zero logged, not even the bike",why:"Ten straight days of load and form at -22; a commute is enough to stop this counting."}] },
     { date:"2026-11-24", dow:"TUE", label:"Nov 24", sessions:[{type:"plan",text:"Ski 16min · 3×1000m at 2:05/500m · 90s gap",why:"Self-paced it settles at 2:10/500m and RPE 6; a given split cannot be settled under."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
-    { date:"2026-11-25", dow:"WED", label:"Nov 25", sessions:[{type:"hyrox",text:"Hyrox circuit 45min · time each 500m erg rep",why:"Ski is your weakest station at top 29.8%, and these reps come off running legs."}] },
+    { date:"2026-11-25", dow:"WED", label:"Nov 25", sessions:[{type:"plan",text:"Run+ski brick 40min · 10min jog, 4× (1km @ 4:40–4:50 → 500m ski @ 2:00–2:03, 2min easy), 5min cool",why:"Replaces the Hyrox circuit. Ski off running legs is the Athens gap (3:54 fresh, 4:18 raced). Lats heavy from Tue → 3 rounds at 2:05; sore → row instead. No heavy legs before Friday."}] },
     { date:"2026-11-26", dow:"THU", label:"Nov 26", sessions:[{type:"rest",text:"Day off · nothing heavy for the legs",why:"A heavy leg session here caps tomorrow's reps at Z2 before you start."}] },
     { date:"2026-11-27", dow:"FRI", label:"Nov 27", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.5kmh / 4:08 · 50min all in",why:"All three reps held 4:13/km on 21 Nov — the rung moves, as promised."}] },
     { date:"2026-11-28", dow:"SAT", label:"Nov 28", sessions:[] },
