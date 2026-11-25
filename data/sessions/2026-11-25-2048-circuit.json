@@ -4,9 +4,9 @@
   "kind": "circuit",
   "activity": "Circuit",
   "start": "2026-11-25T20:48:23+02:00",
-  "end": "2026-11-25T20:51:22+02:00",
+  "end": "2026-11-25T21:07:19+02:00",
   "feel": null,
-  "rpe": null,
+  "rpe": 9,
   "notes": "Warmp up 10 cool down 5",
   "title": "",
   "template": "Circuit",
@@ -509,8 +509,8 @@
     },
     "garmin_id": "25198284947",
     "message": "ok",
-    "hash": "ae38913ff4e9",
-    "applied_at": "2026-11-25T18:51:32+00:00"
+    "hash": "f4a2c8b2b15d",
+    "applied_at": "2026-11-25T19:07:33+00:00"
   },
-  "received": "2026-11-25T18:51:31+00:00"
+  "received": "2026-11-25T19:07:32+00:00"
 }
