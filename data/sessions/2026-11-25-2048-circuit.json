@@ -4,7 +4,7 @@
   "kind": "circuit",
   "activity": "Circuit",
   "start": "2026-11-25T20:48:23+02:00",
-  "end": "2026-11-25T20:50:30+02:00",
+  "end": "2026-11-25T20:51:22+02:00",
   "feel": null,
   "rpe": null,
   "notes": "Warmp up 10 cool down 5",
@@ -41,6 +41,10 @@
       [
         290,
         124
+      ],
+      [
+        null,
+        null
       ]
     ],
     "total_sec": null
@@ -504,9 +508,9 @@
       ]
     },
     "garmin_id": "25198284947",
-    "message": "watch had 1 more sets than logged; left them as recorded",
-    "hash": "b655e08e9122",
-    "applied_at": "2026-11-25T18:50:52+00:00"
+    "message": "ok",
+    "hash": "ae38913ff4e9",
+    "applied_at": "2026-11-25T18:51:32+00:00"
   },
-  "received": "2026-11-25T18:50:50+00:00"
+  "received": "2026-11-25T18:51:31+00:00"
 }
