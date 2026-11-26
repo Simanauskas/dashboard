@@ -1628,7 +1628,7 @@ const TAPER_PLAN = [
   { start:"2026-09-14", end:"2026-09-27", theme:"Aerobic Reset", lo:280, hi:400, note:"Rebuild base · Z2 volume · strength back in, specificity later" },
   // ── Copenhagen block · sub-65 ──
   { start:"2026-09-28", end:"2026-11-08", theme:"Base I · Aerobic",    lo:400, hi:560, note:"Six weeks of aerobic base, 400–560 a week. The band is TOTAL load and court time is most of it: week 7 closed at 407 measured against 403 written, with tennis supplying 244 of it and running 49 minutes. The week asks for three sessions and nothing else — Tuesday’s erg behind the court with the lifting in the same trip, Thursday’s hard run in whatever shape you like, Saturday’s long run — and everything else in the week is yours."},
-  { start:"2026-11-09", end:"2026-12-20", theme:"Base II · Threshold", lo:440, hi:580, note:"Threshold reps are 3×2km at 14.5kmh held to the end, moved up after all three held 14.2kmh on 21 Nov. The week asks for five sessions — the Hyrox group, a split-paced ski inside the gym trip, an easy Z2 run, the threshold run and the long run — and everything else is yours." },
+  { start:"2026-11-09", end:"2026-12-20", theme:"Base II · Threshold", lo:440, hi:580, note:"Threshold reps are 3×2km at 14.5kmh held to the end, moved up after all three held 14.2kmh on 21 Nov. The week’s two targets are the threshold run and a ski held to its split off running legs — everything else is yours." },
   { start:"2026-12-21", end:"2027-01-03", theme:"Holiday Deload",      lo:200, hi:300, note:"Planned, not accidental · absorb the base" },
   { start:"2027-01-04", end:"2027-02-14", theme:"Specificity Build",   lo:440, hi:520, note:"Compromised running · Full Sim #1 on Sat 30 Jan" },
   { start:"2027-02-15", end:"2027-02-21", theme:"Specificity",         lo:400, hi:460, note:"Race block wk −6 · reset erg benchmarks" },
@@ -1810,7 +1810,7 @@ const SCHEDULE = [
   { week:12, label:"Nov 23–29", theme:"Base II · Threshold", days:[
     { date:"2026-11-23", dow:"MON", label:"Nov 23", sessions:[{type:"rest",text:"Full rest · zero logged, not even the bike",why:"Ten straight days of load and form at -22; a commute is enough to stop this counting."}] },
     { date:"2026-11-24", dow:"TUE", label:"Nov 24", sessions:[{type:"plan",text:"Ski 16min · 3×1000m at 2:05/500m · 90s gap",why:"Self-paced it settles at 2:10/500m and RPE 6; a given split cannot be settled under."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
-    { date:"2026-11-25", dow:"WED", label:"Nov 25", sessions:[{type:"plan",text:"Run+ski brick 40min · 10min jog, 4× (1km @ 4:40–4:50 → 500m ski @ 2:00–2:03, 2min easy), 5min cool",why:"Replaces the Hyrox circuit. Ski off running legs is the Athens gap (3:54 fresh, 4:18 raced). Lats heavy from Tue → 3 rounds at 2:05; sore → row instead. No heavy legs before Friday."}] },
+    { date:"2026-11-25", dow:"WED", label:"Nov 25", sessions:[{type:"plan",text:"Run+ski brick 40min · 4× (1km 4:45 → 500m ski 2:02)",why:"Ski off running legs is the Athens gap — 3:54 fresh, 4:18 raced."}] },
     { date:"2026-11-26", dow:"THU", label:"Nov 26", sessions:[{type:"rest",text:"Day off · nothing heavy for the legs",why:"A heavy leg session here caps tomorrow's reps at Z2 before you start."}] },
     { date:"2026-11-27", dow:"FRI", label:"Nov 27", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.5kmh / 4:08 · 50min all in",why:"All three reps held 4:13/km on 21 Nov — the rung moves, as promised."}] },
     { date:"2026-11-28", dow:"SAT", label:"Nov 28", sessions:[] },
@@ -1819,7 +1819,7 @@ const SCHEDULE = [
   { week:13, label:"Nov 30–Dec 6", theme:"Base II · Threshold", days:[
     { date:"2026-11-30", dow:"MON", label:"Nov 30", sessions:[{type:"rest",text:"Full rest · zero logged, not even the commute",why:"Six days of load by Sunday; a commute is enough to stop this counting as rest."}] },
     { date:"2026-12-01", dow:"TUE", label:"Dec 1", sessions:[{type:"tennis",cal:true,text:"Tennis 🎾 · session with Edvinas · 10:00"},{type:"plan",text:"Ski 21min · 4×1000m at 2:05/500m · 90s gap",why:"All three reps held 2:04/500m on 24 Nov, so the rep count goes up, not the split."},{type:"plan",text:"Gym 40min · upper lift + sled pull 8×25m",why:"If the trip slides to another day, take the ski and the sled with it."}] },
-    { date:"2026-12-02", dow:"WED", label:"Dec 2", sessions:[{type:"hyrox",text:"Hyrox circuit 45min · time each 500m erg rep",why:"Ski is your weakest station at top 29.8%, and these reps come off running legs."}] },
+    { date:"2026-12-02", dow:"WED", label:"Dec 2", sessions:[{type:"plan",text:"Compromised brick 50min · 4× (1km 4:45 → 500m ski 2:02)",why:"Ski 2:02/500m off running legs on 25 Nov, three rounds — add the fourth, hold the split."}] },
     { date:"2026-12-03", dow:"THU", label:"Dec 3", sessions:[{type:"rest",text:"Day off · nothing heavy for the legs",why:"A heavy leg session here caps tomorrow's reps at Z2 before you start."}] },
     { date:"2026-12-04", dow:"FRI", label:"Dec 4", sessions:[{type:"plan",text:"⏱ KEY RUN · 3×2km at 14.5kmh / 4:08 · 50min all in",why:"Hold 14.5 on all three reps before the count goes up to four."}] },
     { date:"2026-12-05", dow:"SAT", label:"Dec 5", sessions:[] },
