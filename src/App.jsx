@@ -190,6 +190,7 @@ const HEALTH_DATA = {
     {date:"2026-11-23",hrv:82,rhr:41,spo2:97,resp:11.0,sleep_score:88},
     {date:"2026-11-24",hrv:43,rhr:39,spo2:96,resp:11.0,sleep_score:null},
     {date:"2026-11-25",hrv:66,rhr:41,spo2:94,resp:11.0,sleep_score:null},
+    {date:"2026-11-26",hrv:42,rhr:42,spo2:95,resp:11.0,sleep_score:null},
   ],
   sleep: [
     {date:"2026-04-14",deep:111,rem:94,light:259,awake:0},
@@ -365,6 +366,7 @@ const HEALTH_DATA = {
     {date:"2026-11-23",deep:188,rem:99,light:242,awake:8},
     {date:"2026-11-24",deep:201,rem:43,light:196,awake:18},
     {date:"2026-11-25",deep:113,rem:48,light:304,awake:26},
+    {date:"2026-11-26",deep:178,rem:94,light:172,awake:6},
   ],
   // MyFitnessPal daily totals, written by mfp.py: kcal, grams of protein/carbs/
   // fat/fiber, and the calorie goal MFP had set for that day. One row per line,
@@ -1290,11 +1292,11 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-26";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-26T05:07:00Z";
-const LAST_DATA = "2026-11-26T05:07:00Z";
+const LAST_RUN  = "2026-11-26T06:07:00Z";
+const LAST_DATA = "2026-11-26T06:07:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
-const LAST_MFP  = "2026-11-26T05:07:00Z";
+const LAST_MFP  = "2026-11-26T06:07:00Z";
 
 // Column layout that update.py's fetch_activities() actually writes: 44 fields.
 // The header row embedded in CSV_DATA is the older 42-column Garmin export
@@ -2676,7 +2678,7 @@ function Empty({ children }) {
 
 // HRV baseline (rolling weekly average). Rewritten by update.py — keep this
 // declaration on one line and in this exact shape.
-const hrvBaseline = 62; // updated 2026-11-25
+const hrvBaseline = 56; // updated 2026-11-26
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SESSION ANALYSIS — derived, never hardcoded.
