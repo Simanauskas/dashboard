@@ -4,7 +4,7 @@
   "kind": "run",
   "activity": "Run",
   "start": "2026-11-27T13:29:12+02:00",
-  "end": "2026-11-27T13:30:23+02:00",
+  "end": null,
   "feel": 25,
   "rpe": 10,
   "notes": "",
@@ -13,9 +13,9 @@
   "run": {
     "plan": "3x2km @ threshold (90s rest)",
     "reps": [
-      null,
-      null,
-      null
+      504,
+      504,
+      503
     ]
   },
   "status": {
@@ -31,8 +31,8 @@
       "feel": null
     },
     "garmin_id": "25214471363",
-    "hash": "5376430402d3",
-    "applied_at": "2026-11-27T11:40:25+00:00"
+    "hash": "9b7b09149394",
+    "applied_at": "2026-11-27T16:47:09+00:00"
   },
-  "received": "2026-11-27T11:30:35+00:00"
+  "received": "2026-11-27T16:47:08+00:00"
 }
