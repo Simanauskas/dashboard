@@ -19,9 +19,20 @@
     ]
   },
   "status": {
-    "state": "pending",
+    "state": "applied",
     "errors": 0,
-    "message": "waiting for the Garmin activity"
+    "message": "ok",
+    "before": {
+      "name": "3x2km tempo 14.5/14.3/14.3 km/h",
+      "description": "",
+      "distance": 8373.83,
+      "duration": 2665.443,
+      "rpe": null,
+      "feel": null
+    },
+    "garmin_id": "25214471363",
+    "hash": "5376430402d3",
+    "applied_at": "2026-11-27T11:40:25+00:00"
   },
   "received": "2026-11-27T11:30:35+00:00"
 }
