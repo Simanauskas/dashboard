@@ -1,0 +1,46 @@
+{
+  "v": 1,
+  "id": "2026-11-28-1628-row",
+  "kind": "erg",
+  "activity": "RowErg",
+  "start": "2026-11-28T16:28:21+02:00",
+  "end": "2026-11-28T16:28:35+02:00",
+  "feel": 75,
+  "rpe": 6,
+  "notes": "",
+  "title": "",
+  "erg": {
+    "machine": "Row",
+    "rest_sec": null,
+    "pieces": [
+      {
+        "m": 2500,
+        "sec": 600,
+        "spm": null
+      },
+      {
+        "m": null,
+        "sec": null,
+        "spm": null
+      }
+    ],
+    "damper": null
+  },
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Indoor Rowing",
+      "description": "",
+      "distance": 0.0,
+      "duration": 644.955,
+      "rpe": null,
+      "feel": null
+    },
+    "garmin_id": "25226026060",
+    "message": "ok",
+    "hash": "d93988312783",
+    "applied_at": "2026-11-28T14:28:45+00:00"
+  },
+  "received": "2026-11-28T14:28:44+00:00"
+}
