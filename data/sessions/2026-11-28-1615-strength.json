@@ -1,0 +1,175 @@
+{
+  "v": 1,
+  "id": "2026-11-28-1615-strength",
+  "kind": "strength",
+  "activity": "Strength",
+  "start": "2026-11-28T16:15:53+02:00",
+  "end": "2026-11-28T17:35:45+02:00",
+  "feel": 75,
+  "rpe": 4,
+  "notes": "",
+  "title": "",
+  "template": "Upper body",
+  "exercises": [
+    {
+      "name": "Barbell overhead press",
+      "cat": "SHOULDER_PRESS",
+      "gname": "OVERHEAD_BARBELL_PRESS",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 45,
+          "n": 8
+        },
+        {
+          "kg": 45,
+          "n": 8
+        },
+        {
+          "kg": 45,
+          "n": 8
+        },
+        {
+          "kg": 45,
+          "n": 8
+        }
+      ]
+    },
+    {
+      "name": "Pull-ups",
+      "cat": "PULL_UP",
+      "gname": "PULL_UP",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": null,
+          "n": 14
+        },
+        {
+          "kg": null,
+          "n": 10
+        },
+        {
+          "kg": null,
+          "n": 10
+        }
+      ]
+    },
+    {
+      "name": "Bench press",
+      "cat": "BENCH_PRESS",
+      "gname": "BARBELL_BENCH_PRESS",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 80,
+          "n": 5
+        },
+        {
+          "kg": 70,
+          "n": 10
+        },
+        {
+          "kg": 70,
+          "n": 8
+        }
+      ]
+    },
+    {
+      "name": "Barbell row",
+      "cat": "ROW",
+      "gname": "BARBELL_ROW",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 50,
+          "n": 12
+        },
+        {
+          "kg": 50,
+          "n": 12
+        },
+        {
+          "kg": 50,
+          "n": 12
+        }
+      ]
+    },
+    {
+      "name": "Wall balls",
+      "cat": "SQUAT",
+      "gname": "WALL_BALL",
+      "unit": "reps",
+      "sets": [
+        {
+          "kg": 6,
+          "n": 100
+        },
+        {
+          "kg": null,
+          "n": null
+        },
+        {
+          "kg": null,
+          "n": null
+        }
+      ]
+    }
+  ],
+  "status": {
+    "state": "applied",
+    "errors": 0,
+    "before": {
+      "name": "Strength",
+      "description": "",
+      "distance": 0.0,
+      "duration": 3858.116,
+      "rpe": null,
+      "feel": null,
+      "sets": [
+        {
+          "exercises": [
+            {
+              "category": "UNKNOWN",
+              "name": null,
+              "probability": 98.828125
+            }
+          ],
+          "duration": 3858.116,
+          "repetitionCount": null,
+          "weight": null,
+          "setType": "ACTIVE",
+          "startTime": "2026-11-28T14:30:33.0",
+          "wktStepIndex": null,
+          "messageIndex": 0,
+          "minimalViableThreshold": null,
+          "avgConcentricMeanVelocity": null,
+          "maxConcentricMeanVelocity": null,
+          "avgEccentricMeanVelocity": null,
+          "maxEccentricMeanVelocity": null,
+          "avgConcentricPeakVelocity": null,
+          "maxConcentricPeakVelocity": null,
+          "avgEccentricPeakVelocity": null,
+          "maxEccentricPeakVelocity": null,
+          "avgMeanPropulsiveVelocity": null,
+          "maxMeanPropulsiveVelocity": null,
+          "avgConcentricMeanPower": null,
+          "maxConcentricMeanPower": null,
+          "avgConcentricPeakPower": null,
+          "maxConcentricPeakPower": null,
+          "avgConcentricDuration": null,
+          "maxConcentricDuration": null,
+          "avgEccentricDuration": null,
+          "maxEccentricDuration": null,
+          "avgConcentricRom": null,
+          "maxConcentricRom": null
+        }
+      ]
+    },
+    "garmin_id": "25226794507",
+    "message": "ok",
+    "hash": "e6badb2e2ce2",
+    "applied_at": "2026-11-28T15:35:56+00:00"
+  },
+  "received": "2026-11-28T15:35:54+00:00"
+}
