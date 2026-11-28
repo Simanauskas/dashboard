@@ -880,6 +880,7 @@ function parseSheetBf(csvText) {
 }
 
 const CSV_DATA = `Activity Type,Date,Favorite,Title,Distance,Calories,Time,Avg HR,Max HR,Aerobic TE,Avg Bike Cadence,Max Bike Cadence,Avg Speed,Max Speed,Total Ascent,Total Descent,Avg Stride Length,Avg Vertical Ratio,Avg Vertical Oscillation,Avg Ground Contact Time,Avg GCT Balance,Avg GAP,Normalized Power® (NP®),Training Stress Score®,Avg Power,Max Power,Steps,Total Reps,Total Sets,Body Battery Drain,Decompression,Best Lap Time,Number of Laps,Avg Resp,Min Resp,Max Resp,Avg Stress,Max Stress,Moving Time,Elapsed Time,Min Elevation,Max Elevation
+"Strength Training","2026-11-28 16:30:33","false","Upper body — OHP 45 · Pull-ups · Bench press 80 · Barbell row 50 · Wall balls 6","0,00","337","01:04:18","87","165","1,8","--","--","--","--","30","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","01:04:18","01:04:18","--","--"
 "Indoor Rowing","2026-11-28 16:17:02","false","Row 2500m 10:00 · 2:00/500m","2,50","130","00:10:44","128","156","2,1","--","--","4:17","--","33","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:10:44","00:10:44","--","--"
 "Treadmill Running","2026-11-27 12:44:22","false","3x2km @ threshold (90s rest)","8,37","583","00:44:25","148","176","3,9","166","--","5:18","--","204","strap","--","--","--","111,27","7,1","7,8","284","--","--","--","--","--","--","--","--","--","No","--","7","--","--","--","--","--","00:43:43","00:44:25","--","--"
 "Hiit","2026-11-25 19:59:19","false","Run+ski · 4 rounds","0,00","540","00:47:40","149","170","3,6","--","--","--","--","230","strap","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","--","No","--","1","--","--","--","--","--","00:31:12","00:47:40","--","--"
@@ -1301,8 +1302,8 @@ Cycling,2026-04-18 12:38:04,false,"VLN - 100km","36,61","1.339","03:41:36","104"
 
 const TODAY = "2026-11-28";
 // LAST_RUN: when update.py last attempted a sync (any outcome). LAST_DATA: when fresh Garmin data was last ingested. Both ISO UTC, written by update.py.
-const LAST_RUN  = "2026-11-28T15:07:00Z";
-const LAST_DATA = "2026-11-28T15:07:00Z";
+const LAST_RUN  = "2026-11-28T15:40:00Z";
+const LAST_DATA = "2026-11-28T15:40:00Z";
 
 // LAST_MFP: when mfp.py last fetched MyFitnessPal successfully ("" = never connected).
 const LAST_MFP  = "2026-11-28T15:07:00Z";
